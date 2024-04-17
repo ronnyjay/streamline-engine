@@ -1,0 +1,2 @@
+add_library(shader_program SHARED)
+target_sources(shader_program PRIVATE shader_program.cpp)

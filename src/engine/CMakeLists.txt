@@ -1,0 +1,15 @@
+
+add_subdirectory(world)
+add_subdirectory(camera)
+add_subdirectory(mesh)
+add_subdirectory(shader)
+add_subdirectory(shader_program)
+add_subdirectory(texture)
+add_subdirectory(stb)
+add_subdirectory(VAO)
+add_subdirectory(VBO)
+add_subdirectory(EBO)
+
+
+add_library(engine INTERFACE)
+target_link_libraries(engine INTERFACE world camera mesh shader shader_program texture stb VAO VBO EBO)
