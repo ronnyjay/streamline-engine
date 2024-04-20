@@ -21,7 +21,7 @@ enum special_character_e
 class text
 {
   public:
-    text(const std::basic_string<char> &text, float x, float y, float scale, glm::vec3 color)
+    text(const std::basic_string<char> &text, float x, float y, float scale, glm::vec3 color, float max_x)
         : m_character_texture("resources/textures/characters16x16.bmp"), m_text(text), m_pos(x, y), m_scale(scale), m_color(color)
     {
         // clang-format off
@@ -60,6 +60,7 @@ class text
     glm::vec2 m_pos;
     float m_scale;
     glm::vec3 m_color;
+    float m_max_x;
 
     VBO m_vbo;
     VAO m_vao;

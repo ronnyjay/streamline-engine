@@ -1,4 +1,5 @@
 #include "engine/text/text.hpp"
+#include "ik_ISoundEngine.h"
 #include <string>
 #define GLFW_INCLUDE_NONE
 
@@ -18,6 +19,8 @@
 
 #include <logger/logger.hpp>
 
+#include <irrklang/irrKlang.h>
+
 void window_resize_callback(GLFWwindow *, int, int);
 void window_minimized_callback(GLFWwindow *, int);
 void window_maximized_callback(GLFWwindow *, int);
@@ -29,6 +32,8 @@ int window_width = 1920;
 int window_height = 1080;
 
 const char *window_title = "streamline-engine";
+
+irrklang::ISoundEngine *SoundEngine = irrklang::createIrrKlangDevice();
 
 engine::camera::orthographic_camera global_camera;
 
@@ -95,10 +100,6 @@ int main(int argc, const char *argv[])
 
         sp.link();
 
-        std::string health("79/100 ");
-        health.push_back(engine::special_character_e::HEART);
-
-        engine::text health_text(health, -0.5, -0.5, 1, glm::vec3(209.0f / 256.0f, 64.0f / 256.0f, 98.0f / 256.0f));
         engine::world world;
         global_camera.set_position(glm::vec3(0.0f, 0.0f, 0.0f));
         global_camera.set_rotation(engine::camera::rotation_axis::x, 90.0f);
@@ -124,9 +125,51 @@ int main(int argc, const char *argv[])
         double dt;
 
         last_time = current_time = glfwGetTime();
+        double last_char = current_time;
+
+        std::string health("this is text. $1,000 to see how longer text works... (and parenthisis & ampersand and asterisk *)");
+
+        // std::string health(text);
+        auto it = health.begin();
+        std::string health_out;
+
+        glm::vec3 c1(100.0f / 256.0f, 120.0f / 256.0f, 170.0f / 256.0f);
+        glm::vec3 c2(100.0f / 256.0f, 200.0f / 256.0f, 0.0f);
+
+        glm::vec3 *cc = &c1;
+
+        int col = 1;
+
+        SoundEngine->play2D("resources/audio/breakout.mp3", true);
 
         while (!glfwWindowShouldClose(window))
         {
+            if (current_time - last_char > 0.05)
+            {
+                health_out.push_back(*it);
+                it++;
+                if (it == health.end())
+                {
+                    it = health.begin();
+                    health_out.clear();
+
+                    if (col == 1)
+                    {
+                        cc = &c2;
+                        col = 2;
+                    }
+                    else
+                    {
+                        cc = &c1;
+                        col = 1;
+                    }
+                }
+
+                last_char = current_time;
+            }
+
+            engine::text health_text(health_out, -0.95, +0.88, 0.45f, *cc, 0.9f);
+
             dt = (current_time = glfwGetTime()) - last_time;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -142,6 +185,7 @@ int main(int argc, const char *argv[])
             glfwPollEvents();
 
             last_time = current_time;
+
         }
     }
 

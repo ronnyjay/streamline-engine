@@ -7,6 +7,7 @@ void text::draw(engine::shader_program &s)
 {
     const float x_scale = 0.03f;
     const float y_scale = 0.1f;
+    const float padding = 0.05f;
 
     const float char_width_pixels = (float)m_character_texture.m_width / 32; // image width / characters per line
     const float char_height_pixels = char_width_pixels;
@@ -27,6 +28,14 @@ void text::draw(engine::shader_program &s)
     for (const char c : m_text)
     {
         float x2 = x1 + x_scale * m_scale;
+        if (c == '\n' || (x2 > m_max_x && c == ' '))
+        {
+            x1 = m_pos.x;
+            y1 = y1 - y_scale * m_scale - padding;
+            y2 = y1 + y_scale * m_scale;
+            x2 = x1 + x_scale * m_scale;
+            continue;
+        }
 
         int texture_x = c % 32;
         int texture_y = c / 32;
@@ -51,6 +60,7 @@ void text::draw(engine::shader_program &s)
         //     { +0.3f, +0.3f, 1, 1},
         // };
         // clang-format on
+
 
         m_vbo.init(data, sizeof(data), GL_STATIC_DRAW);
 

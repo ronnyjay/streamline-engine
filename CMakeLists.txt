@@ -24,6 +24,8 @@ if(IS_DIRECTORY ${GLM_OSX_INCLUDE_DIR})
   include_directories(${GLM_OSX_INCLUDE_DIR})
 endif()
 
+link_directories(src/irrklang)
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
 )

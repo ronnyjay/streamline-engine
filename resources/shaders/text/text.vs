@@ -8,7 +8,7 @@ out vec3 Color;
 
 void main()
 {
-    gl_Position = vec4(vertex, 0, 1);
+    gl_Position = vec4(vertex, -1, 1);
     TexCoords = uv;
     Color = color;
 }

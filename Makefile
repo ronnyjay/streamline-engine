@@ -1,7 +1,7 @@
 default: streamline-engine
 
 streamline-engine: build
-	cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make
+	cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j `nproc`
 
 build:
 	mkdir -p build
