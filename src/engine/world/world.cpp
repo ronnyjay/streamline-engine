@@ -5,11 +5,13 @@ using namespace engine;
 extern int window_width;
 extern int window_height;
 
-world::world()
+extern engine::camera::orthographic_camera perspective_camera;
+
+engine::world::world()
 {
 }
 
-void world::update(double dt)
+void engine::world::update(double dt)
 {
     for (auto obj : m_meshes)
     {
@@ -17,16 +19,16 @@ void world::update(double dt)
     }
 }
 
-void world::draw()
+void engine::world::draw()
 {
     for (auto obj : m_meshes)
     {
 
-        obj->draw(m_camera.projection(), m_camera.view());
+        obj->draw(perspective_camera.projection(), perspective_camera.view());
     }
 }
 
-void world::add_mesh(engine::mesh::mesh_t *const obj)
+void engine::world::add_mesh(engine::mesh::mesh_t *const obj)
 {
     m_meshes.push_back(obj);
 }

@@ -18,6 +18,12 @@ add_compile_options(
   -Wpedantic
 )
 
+set(GLM_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/glm/1.0.1/include")
+
+if(IS_DIRECTORY ${GLM_OSX_INCLUDE_DIR})
+  include_directories(${GLM_OSX_INCLUDE_DIR})
+endif()
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
 )

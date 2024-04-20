@@ -1,9 +1,8 @@
 #pragma once
 
-#include <engine/camera/camera.hpp>
+#include <engine/camera/orthographic/orthographic.hpp>
+#include <engine/camera/perspective/perspective.hpp>
 #include <engine/mesh/mesh.hpp>
-
-#include <glm/glm.hpp>
 
 #include <list>
 
@@ -20,7 +19,6 @@ class world
     void add_mesh(engine::mesh::mesh_t *const);
 
   private:
-    camera m_camera;
     std::list<engine::mesh::mesh_t *> m_meshes;
 };
 

@@ -1,27 +1,35 @@
-
 #define GLFW_INCLUDE_NONE
 
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+
+#include <engine/world/world.hpp>
+
+#include <engine/camera/orthographic/orthographic.hpp>
+#include <engine/camera/perspective/perspective.hpp>
 
 #include <engine/mesh/circle/circle.hpp>
 #include <engine/mesh/pyramid/pyramid.hpp>
 #include <engine/mesh/rectangle/rectangle.hpp>
 
 #include <engine/stb/stb_image.hpp>
-#include <engine/world/world.hpp>
 
 #include <logger/logger.hpp>
+
+void window_resize_callback(GLFWwindow *, int, int);
+void window_minimized_callback(GLFWwindow *, int);
+void window_maximized_callback(GLFWwindow *, int);
+void window_mouse_callback(GLFWwindow *, double, double);
+void window_scroll_callback(GLFWwindow *, double, double);
+
+void process_input(GLFWwindow *);
 
 int window_width = 1920;
 int window_height = 1080;
 
 const char *window_title = "streamline-engine";
 
-void window_resize_callback(GLFWwindow *, int, int);
-void window_minimized_callback(GLFWwindow *, int);
-void window_maximized_callback(GLFWwindow *, int);
-void window_key_callback(GLFWwindow *, int, int, int, int);
+engine::camera::orthographic_camera perspective_camera;
 
 int main(int argc, const char *argv[])
 {
@@ -52,7 +60,7 @@ int main(int argc, const char *argv[])
     glfwSetWindowSizeCallback(window, window_resize_callback);
     glfwSetWindowIconifyCallback(window, window_minimized_callback);
     glfwSetWindowMaximizeCallback(window, window_maximized_callback);
-    glfwSetKeyCallback(window, window_key_callback);
+
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
@@ -65,6 +73,7 @@ int main(int argc, const char *argv[])
     stbi_set_flip_vertically_on_load(true);
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
 
     {
@@ -84,6 +93,8 @@ int main(int argc, const char *argv[])
             dt = (current_time = glfwGetTime()) - last_time;
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            process_input(window);
 
             world.update(dt);
             world.draw();
@@ -123,13 +134,34 @@ void window_maximized_callback(GLFWwindow *window, int maximized)
     maximized ? glfwMaximizeWindow(window) : glfwRestoreWindow(window);
 }
 
-void window_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void window_mouse_callback(GLFWwindow *window, double xpos_in, double ypos_in)
 {
-    switch (key)
+}
+
+void window_scroll_callback(GLFWwindow *, double x_offset, double y_offset)
+{
+}
+
+void process_input(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-    case GLFW_KEY_ESCAPE:
-        if (action == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        break;
+        perspective_camera.move(engine::camera::forward);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        perspective_camera.move(engine::camera::backward);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        perspective_camera.move(engine::camera::left);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        perspective_camera.move(engine::camera::right);
+    }
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }
