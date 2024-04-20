@@ -78,9 +78,20 @@ int main(int argc, const char *argv[])
 
     {
         engine::world world;
+
         engine::mesh::pyramid pyramid_mesh;
+        engine::mesh::pyramid pyramid_mesh_copy;
+        engine::mesh::pyramid pyramid_mesh_copy_2;
+        engine::mesh::pyramid pyramid_mesh_copy_3;
+
+        pyramid_mesh_copy.set_position(10.0f, 0.0f, 15.0f);
+        pyramid_mesh_copy_2.set_position(-10.0f, 0.0f, 9.0f);
+        pyramid_mesh_copy_3.set_position(0.0f, 5.0f, 25.0f);
 
         world.add_mesh(&pyramid_mesh);
+        world.add_mesh(&pyramid_mesh_copy);
+        world.add_mesh(&pyramid_mesh_copy_2);
+        world.add_mesh(&pyramid_mesh_copy_3);
 
         double current_time;
         double last_time;

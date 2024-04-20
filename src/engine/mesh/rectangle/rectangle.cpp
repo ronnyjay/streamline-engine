@@ -33,9 +33,7 @@ rectangle::rectangle()
 
 void rectangle::update(double dt)
 {
-    // new position for testing
-    glm::vec3 new_position(10.0f, 5.0f, 15.0f);
-    m_matrix_model = glm::translate(glm::mat4(1.0f), new_position);
+    m_matrix_model = glm::translate(glm::mat4(1.0f), get_position());
 }
 
 void rectangle::draw(glm::mat4 projection, glm::mat4 view)
