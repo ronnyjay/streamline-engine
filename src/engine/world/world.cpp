@@ -5,7 +5,7 @@ using namespace engine;
 extern int window_width;
 extern int window_height;
 
-extern engine::camera::perspective_camera global_camera;
+extern engine::camera::orthographic_camera global_camera;
 
 engine::world::world()
 {

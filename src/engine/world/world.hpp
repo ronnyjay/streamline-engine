@@ -2,7 +2,7 @@
 
 #define GLFW_INCLUDE_NONE
 
-#include <engine/camera/perspective/perspective.hpp>
+#include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/mesh/mesh.hpp>
 
 #include <list>

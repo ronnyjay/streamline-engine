@@ -1,3 +1,5 @@
+#include "engine/text/text.hpp"
+#include <string>
 #define GLFW_INCLUDE_NONE
 
 #include <GLFW/glfw3.h>
@@ -28,7 +30,7 @@ int window_height = 1080;
 
 const char *window_title = "streamline-engine";
 
-engine::camera::perspective_camera global_camera;
+engine::camera::orthographic_camera global_camera;
 
 float last_x = window_width / 2.0f;
 float last_y = window_height / 2.0f;
@@ -84,6 +86,19 @@ int main(int argc, const char *argv[])
     glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
 
     {
+        engine::shader_program sp;
+        engine::shader vertex_shader("resources/shaders/text/text.vs", GL_VERTEX_SHADER);
+        engine::shader fragment_shader("resources/shaders/text/text.fs", GL_FRAGMENT_SHADER);
+
+        sp.add_shader(vertex_shader.id());
+        sp.add_shader(fragment_shader.id());
+
+        sp.link();
+
+        std::string health("79/100 ");
+        health.push_back(engine::special_character_e::HEART);
+
+        engine::text health_text(health, -0.5, -0.5, 1, glm::vec3(209.0f / 256.0f, 64.0f / 256.0f, 98.0f / 256.0f));
         engine::world world;
         global_camera.set_position(glm::vec3(0.0f, 0.0f, 0.0f));
         global_camera.set_rotation(engine::camera::rotation_axis::x, 90.0f);
@@ -120,6 +135,8 @@ int main(int argc, const char *argv[])
 
             world.update(dt);
             world.draw();
+
+            health_text.draw(sp);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
