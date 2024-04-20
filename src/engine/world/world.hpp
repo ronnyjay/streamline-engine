@@ -1,6 +1,7 @@
 #pragma once
 
-#include <engine/camera/orthographic/orthographic.hpp>
+#define GLFW_INCLUDE_NONE
+
 #include <engine/camera/perspective/perspective.hpp>
 #include <engine/mesh/mesh.hpp>
 

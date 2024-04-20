@@ -1,4 +1,3 @@
-#include "engine/camera/orthographic/orthographic.hpp"
 #include <engine/world/world.hpp>
 
 using namespace engine;
@@ -6,7 +5,7 @@ using namespace engine;
 extern int window_width;
 extern int window_height;
 
-extern engine::camera::orthographic_camera perspective_camera;
+extern engine::camera::perspective_camera global_camera;
 
 engine::world::world()
 {
@@ -25,7 +24,7 @@ void engine::world::draw()
     for (auto obj : m_meshes)
     {
 
-        obj->draw(perspective_camera.projection(), perspective_camera.view());
+        obj->draw(global_camera.projection_matrix(), global_camera.view_projection_matrix());
     }
 }
 

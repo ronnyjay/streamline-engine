@@ -1,8 +1,4 @@
-#include "engine/camera/camera.hpp"
 #include <engine/camera/orthographic/orthographic.hpp>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/fwd.hpp>
 
 extern int window_width;
 extern int window_height;
@@ -10,44 +6,56 @@ extern int window_height;
 using namespace engine::camera;
 
 orthographic_camera::orthographic_camera()
-    : m_position(0.0f, 15.0f, 100.0f), m_direction(0.0f, 0.0f, 20.0f), m_up(0.0f, 1.0f, 0.0f), m_speed(0.5f)
 {
-    m_scale = 20.0f;
 }
 
-glm::mat4 const orthographic_camera::projection() const
+void orthographic_camera::update()
 {
-    float width = m_scale * ((float)window_width / (float)window_height);
-    float height = m_scale;
-
-    return glm::ortho(-width, width, -height, height, 0.1f, 2000.0f);
+    m_view_matrix = (glm::mat4(1.0f));
+    m_view_matrix = (glm::translate(view_matrix(), position()));
+    m_view_matrix = (glm::rotate(view_matrix(), glm::radians(rotation(rotation_axis::x)), glm::vec3(1.0f, 0.0f, 0.0f)));
+    m_view_matrix = (glm::inverse(view_matrix()));
 }
 
-glm::mat4 const orthographic_camera::view() const
+glm::mat4 const orthographic_camera::projection_matrix() const
 {
-    return glm::lookAt(m_position, m_direction, m_up);
+
+    auto width = (float)16;
+    auto height = (float)9;
+
+    return glm::ortho((float)(-width), (float)width, (float)(-height), (float)(height), -1.0f, 1000.0f);
+}
+
+glm::mat4 const orthographic_camera::view_projection_matrix() const
+{
+    return projection_matrix() * view_matrix();
 }
 
 void orthographic_camera::move(movement_direction direction)
 {
-    glm::vec3 right_direction = glm::normalize(glm::cross(m_direction, m_up));
-    glm::vec3 normalized_direction = glm::normalize(m_direction);
-
     switch (direction)
     {
     case forward:
-        m_position -= m_speed * normalized_direction;
+        set_position(glm::vec3(position().x, position().y, position().z + speed()));
         break;
     case backward:
-        m_position += m_speed * normalized_direction;
+        set_position(glm::vec3(position().x, position().y, position().z - speed()));
         break;
     case right:
-        m_position -= m_speed * right_direction;
+        set_position(glm::vec3(position().x + speed(), position().y, position().z));
         break;
     case left:
-        m_position += m_speed * right_direction;
+        set_position(glm::vec3(position().x - speed(), position().y, position().z));
         break;
     default:
         break;
     }
+}
+
+void orthographic_camera::move(float xoffset, float yoffset)
+{
+}
+
+void orthographic_camera::move(float yoffset)
+{
 }

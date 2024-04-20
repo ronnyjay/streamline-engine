@@ -21,7 +21,6 @@ void window_minimized_callback(GLFWwindow *, int);
 void window_maximized_callback(GLFWwindow *, int);
 void window_mouse_callback(GLFWwindow *, double, double);
 void window_scroll_callback(GLFWwindow *, double, double);
-
 void process_input(GLFWwindow *);
 
 int window_width = 1920;
@@ -29,7 +28,11 @@ int window_height = 1080;
 
 const char *window_title = "streamline-engine";
 
-engine::camera::orthographic_camera perspective_camera;
+engine::camera::perspective_camera global_camera;
+
+float last_x = window_width / 2.0f;
+float last_y = window_height / 2.0f;
+bool first_mouse = true;
 
 int main(int argc, const char *argv[])
 {
@@ -60,6 +63,10 @@ int main(int argc, const char *argv[])
     glfwSetWindowSizeCallback(window, window_resize_callback);
     glfwSetWindowIconifyCallback(window, window_minimized_callback);
     glfwSetWindowMaximizeCallback(window, window_maximized_callback);
+    glfwSetCursorPosCallback(window, window_mouse_callback);
+    glfwSetScrollCallback(window, window_scroll_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwMakeContextCurrent(window);
 
@@ -78,6 +85,8 @@ int main(int argc, const char *argv[])
 
     {
         engine::world world;
+        global_camera.set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+        global_camera.set_rotation(engine::camera::rotation_axis::x, 90.0f);
 
         engine::mesh::pyramid pyramid_mesh;
         engine::mesh::pyramid pyramid_mesh_copy;
@@ -86,14 +95,14 @@ int main(int argc, const char *argv[])
 
         pyramid_mesh_copy.set_position(10.0f, 0.0f, 15.0f);
         pyramid_mesh_copy_2.set_position(-10.0f, 0.0f, 9.0f);
-        pyramid_mesh_copy_3.set_position(0.0f, 5.0f, 25.0f);
+        pyramid_mesh_copy_3.set_position(0.0f, 15.0f, 25.0f);
 
         world.add_mesh(&pyramid_mesh);
         world.add_mesh(&pyramid_mesh_copy);
         world.add_mesh(&pyramid_mesh_copy_2);
         world.add_mesh(&pyramid_mesh_copy_3);
 
-        world.show_wireframes(true);
+        world.show_wireframes(false);
 
         double current_time;
         double last_time;
@@ -149,30 +158,59 @@ void window_maximized_callback(GLFWwindow *window, int maximized)
 
 void window_mouse_callback(GLFWwindow *window, double xpos_in, double ypos_in)
 {
+    float xpos = static_cast<float>(xpos_in);
+    float ypos = static_cast<float>(ypos_in);
+
+    if (first_mouse)
+    {
+        last_x = xpos;
+        last_y = ypos;
+        first_mouse = false;
+    }
+
+    float xoffset = xpos - last_x;
+    float yoffset = last_y - ypos;
+
+    last_x = xpos;
+    last_y = ypos;
+
+    global_camera.move(xoffset, yoffset);
 }
 
-void window_scroll_callback(GLFWwindow *, double x_offset, double y_offset)
+void window_scroll_callback(GLFWwindow *, double xoffset, double yoffset)
 {
+    global_camera.move(static_cast<float>(yoffset));
 }
 
 void process_input(GLFWwindow *window)
 {
+    // movement
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        perspective_camera.move(engine::camera::forward);
+        global_camera.move(engine::camera::forward);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        perspective_camera.move(engine::camera::backward);
+        global_camera.move(engine::camera::backward);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        perspective_camera.move(engine::camera::left);
+        global_camera.move(engine::camera::left);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        perspective_camera.move(engine::camera::right);
+        global_camera.move(engine::camera::right);
     }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        global_camera.move(engine::camera::up);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        global_camera.move(engine::camera::down);
+    }
+
+    // exit
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, GL_TRUE);
