@@ -1,3 +1,4 @@
+#include "engine/camera/orthographic/orthographic.hpp"
 #include <engine/world/world.hpp>
 
 using namespace engine;
@@ -31,4 +32,9 @@ void engine::world::draw()
 void engine::world::add_mesh(engine::mesh::mesh_t *const obj)
 {
     m_meshes.push_back(obj);
+}
+
+void world::show_wireframes(bool val)
+{
+    val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }

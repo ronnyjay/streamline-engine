@@ -66,7 +66,8 @@ void pyramid::update(double dt)
     if (angle >= 360.0f)
         angle -= 360.0f;
 
-    m_matrix_model = glm::translate(glm::mat4(1.0f), get_position());
+    m_matrix_model = glm::mat4(1.0f);
+    m_matrix_model = glm::translate(m_matrix_model, get_position());
     m_matrix_model = glm::translate(m_matrix_model, glm::vec3(0.0f, 1.0f, 10.0f));
     m_matrix_model = glm::rotate(m_matrix_model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
     m_matrix_model = glm::translate(m_matrix_model, glm::vec3(0.0f, -1.0f, -10.0f));

@@ -10,17 +10,17 @@ extern int window_height;
 using namespace engine::camera;
 
 orthographic_camera::orthographic_camera()
-    : m_position(0.0f, 15.0f, 50.0f), m_direction(0.0f, 0.0f, 1.0f), m_up(0.0f, 1.0f, 0.0f), m_speed(0.5f)
+    : m_position(0.0f, 15.0f, 100.0f), m_direction(0.0f, 0.0f, 20.0f), m_up(0.0f, 1.0f, 0.0f), m_speed(0.5f)
 {
-    m_scale = 50.0f;
+    m_scale = 20.0f;
 }
 
 glm::mat4 const orthographic_camera::projection() const
 {
-    float width = m_scale * ((float)window_width / (float)window_height) / 2;
-    float height = m_scale / 2;
+    float width = m_scale * ((float)window_width / (float)window_height);
+    float height = m_scale;
 
-    return glm::ortho(-width, width, -height, height, 0.1f, 100.0f);
+    return glm::ortho(-width, width, -height, height, 0.1f, 2000.0f);
 }
 
 glm::mat4 const orthographic_camera::view() const

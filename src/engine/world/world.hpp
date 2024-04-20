@@ -18,6 +18,8 @@ class world
     void draw();
     void add_mesh(engine::mesh::mesh_t *const);
 
+    void show_wireframes(bool);
+
   private:
     std::list<engine::mesh::mesh_t *> m_meshes;
 };

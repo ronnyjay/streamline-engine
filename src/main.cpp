@@ -93,6 +93,8 @@ int main(int argc, const char *argv[])
         world.add_mesh(&pyramid_mesh_copy_2);
         world.add_mesh(&pyramid_mesh_copy_3);
 
+        world.show_wireframes(true);
+
         double current_time;
         double last_time;
         double dt;
