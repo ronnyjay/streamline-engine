@@ -1,7 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -17,136 +15,76 @@ namespace camera
 
 typedef enum
 {
-    up,
-    down,
-    forward,
-    backward,
-    left,
-    right
-} movement_direction;
-
-typedef enum
-{
-    x,
-    y,
-    z
-} rotation_axis;
+    UP,
+    DOWN,
+    FORWARD,
+    BACKWARD,
+    LEFT,
+    RIGHT
+} direction;
 
 class camera_t
 {
   public:
-    camera_t() : m_view_matrix(1.0f), m_speed(0.05f), m_sensitivity(0.1f), m_zoom(45.0f)
+    camera_t()
     {
     }
-
-    virtual glm::mat4 const projection_matrix() const = 0;
-    virtual glm::mat4 const view_projection_matrix() const = 0;
 
     virtual void update() = 0;
-    virtual void move(movement_direction) = 0;          // keyboard movement
-    virtual void move(float offset, float yoffset) = 0; // mouse movement
-    virtual void move(float yoffset) = 0;               // mouse scroll
 
-    glm::mat4 const &view_matrix() const
-    {
-        return m_view_matrix;
-    }
+    virtual glm::mat4 const projection_matrix() const = 0;
+    virtual glm::mat4 const view_matrix() const = 0;
 
-    void set_view_matrix(const glm::mat4 &view_matrix)
-    {
-        m_view_matrix = view_matrix;
-    }
+    virtual void move(direction) = 0;                    // keyboard input
+    virtual void move(float xoffset, float yoffset) = 0; // mouse movement
+    virtual void move(float yoffset) = 0;                // mouse scroll
 
-    const glm::vec3 &position() const
-    {
-        return m_position;
-    }
-
-    void set_position(const glm::vec3 &position)
+    void set_position(glm::vec3 position)
     {
         m_position = position;
-
         update();
     }
 
-    float rotation(rotation_axis axis) const
+    void set_yaw(float yaw)
     {
-        switch (axis)
-        {
-        case x:
-            return m_rotation_x;
-        case y:
-            return m_rotation_y;
-        case z:
-            return m_rotation_z;
-        }
-
-        return 0.0f;
-    }
-
-    void set_rotation(rotation_axis axis, float rotation)
-    {
-        switch (axis)
-        {
-        case x:
-            m_rotation_x = rotation;
-            break;
-        case y:
-            m_rotation_y = rotation;
-            break;
-        case z:
-            m_rotation_z = rotation;
-            break;
-        }
-
+        m_yaw = yaw;
         update();
     }
 
-    float speed() const
+    void set_pitch(float pitch)
     {
-        return m_speed;
-    }
-
-    void set_speed(float speed)
-    {
-        m_speed = speed;
-    }
-
-    float sensitivity() const
-    {
-        return m_sensitivity;
-    }
-
-    void set_sensitivity(float sensitivity)
-    {
-        m_sensitivity = sensitivity;
-    }
-
-    float zoom() const
-    {
-        return m_zoom;
+        m_pitch = pitch;
+        update();
     }
 
     void set_zoom(float zoom)
     {
         m_zoom = zoom;
+        update();
     }
 
-    ~camera_t() = default;
+    void set_movement_speed(float speed)
+    {
+        m_movement_speed = speed;
+        update();
+    }
 
-  protected:
-    glm::mat4 m_view_matrix;
+    void set_mouse_sensitivity(float sensitivity)
+    {
+        m_mouse_sensitivity = sensitivity;
+        update();
+    }
 
-  private:
+  public:
     glm::vec3 m_position;
 
-    float m_rotation_x;
-    float m_rotation_y;
-    float m_rotation_z;
+    float m_yaw;
+    float m_pitch;
 
-    float m_speed;
-    float m_sensitivity;
     float m_zoom;
+
+    float m_movement_speed;
+    float m_mouse_sensitivity;
 };
 
 } // namespace camera
