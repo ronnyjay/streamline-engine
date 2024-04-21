@@ -8,7 +8,7 @@ set(PROJECT_NAME "streamline-engine")
 project(${PROJECT_NAME})
 
 find_package(glfw3 3.3 REQUIRED)
-find_package(glm)
+find_package(glm REQUIRED)
 
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
@@ -27,7 +27,21 @@ endif()
 link_directories(src/irrklang)
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/src
+  src
+  imgui
+  imgui/backends
 )
+
+add_library(imgui SHARED
+    imgui/imgui.cpp
+    imgui/imgui_widgets.cpp
+    imgui/imgui_draw.cpp
+    imgui/imgui_demo.cpp
+    imgui/imgui_tables.cpp
+    imgui/backends/imgui_impl_opengl3.cpp
+    imgui/backends/imgui_impl_glfw.cpp
+)
+
+target_include_directories(imgui PRIVATE backends)
 
 add_subdirectory(src)

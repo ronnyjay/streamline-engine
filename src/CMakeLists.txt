@@ -6,4 +6,4 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 include_directories(irrklang)
 
-target_link_libraries(${PROJECT_NAME} engine logger glfw glm::glm glad IrrKlang)
+target_link_libraries(${PROJECT_NAME} engine logger glfw glm::glm glad IrrKlang imgui)

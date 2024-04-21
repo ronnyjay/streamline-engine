@@ -21,6 +21,10 @@
 
 #include <irrklang/irrKlang.h>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 void window_resize_callback(GLFWwindow *, int, int);
 void window_minimized_callback(GLFWwindow *, int);
 void window_maximized_callback(GLFWwindow *, int);
@@ -43,6 +47,7 @@ bool first_mouse = true;
 
 int main(int argc, const char *argv[])
 {
+
     GLFWwindow *window;
 
     if (!glfwInit())
@@ -73,7 +78,7 @@ int main(int argc, const char *argv[])
     glfwSetCursorPosCallback(window, window_mouse_callback);
     glfwSetScrollCallback(window, window_scroll_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwMakeContextCurrent(window);
 
@@ -91,6 +96,19 @@ int main(int argc, const char *argv[])
     glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
 
     {
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGlfw_InitForOpenGL(window, true); // Second param install_callback=true will install GLFW
+        // callbacks and chain to existing ones.
+
+        ImGui_ImplOpenGL3_Init();
+
         engine::shader_program sp;
         engine::shader vertex_shader("resources/shaders/text/text.vs", GL_VERTEX_SHADER);
         engine::shader fragment_shader("resources/shaders/text/text.fs", GL_FRAGMENT_SHADER);
@@ -127,7 +145,8 @@ int main(int argc, const char *argv[])
         last_time = current_time = glfwGetTime();
         double last_char = current_time;
 
-        std::string health("this is text. $1,000 to see how longer text works... (and parenthisis & ampersand and asterisk *)");
+        std::string health(
+            "this is text. $1,000 to see how longer text works... (and parenthisis & ampersand and asterisk *)");
 
         // std::string health(text);
         auto it = health.begin();
@@ -140,10 +159,15 @@ int main(int argc, const char *argv[])
 
         int col = 1;
 
-        SoundEngine->play2D("resources/audio/breakout.mp3", true);
+        // SoundEngine->play2D("resources/audio/breakout.mp3", true);
 
         while (!glfwWindowShouldClose(window))
         {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::ShowDemoWindow(); // Show demo window! :)
+
             if (current_time - last_char > 0.05)
             {
                 health_out.push_back(*it);
@@ -168,11 +192,11 @@ int main(int argc, const char *argv[])
                 last_char = current_time;
             }
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             engine::text health_text(health_out, -0.95, +0.88, 0.45f, *cc, 0.9f);
 
             dt = (current_time = glfwGetTime()) - last_time;
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             process_input(window);
 
@@ -181,13 +205,20 @@ int main(int argc, const char *argv[])
 
             health_text.draw(sp);
 
+            last_time = current_time;
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             glfwSwapBuffers(window);
             glfwPollEvents();
 
-            last_time = current_time;
-
         }
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
 endwin:
     glfwDestroyWindow(window);
