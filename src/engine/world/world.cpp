@@ -1,5 +1,7 @@
 #include <engine/world/world.hpp>
 
+#include <imgui.h>
+
 using namespace engine;
 
 extern int window_width;
@@ -23,8 +25,17 @@ void engine::world::draw()
 {
     for (auto obj : m_meshes)
     {
+        obj->draw(glm::mat4(0), global_camera.projection_matrix(), global_camera.view_projection_matrix());
+    }
 
-        obj->draw(global_camera.projection_matrix(), global_camera.view_projection_matrix());
+    if (ImGui::TreeNode("Objects"))
+    {
+        for (auto obj : m_meshes)
+        {
+            obj->draw_imgui();
+        }
+
+        ImGui::TreePop();
     }
 }
 

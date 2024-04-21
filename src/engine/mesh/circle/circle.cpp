@@ -1,8 +1,9 @@
 #include <engine/mesh/circle/circle.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 using namespace engine;
 
-mesh::circle::circle()
+mesh::circle::circle(const std::basic_string<char> &name) : mesh_t(name)
 {
     const int vertices = 36;
 
@@ -47,20 +48,23 @@ mesh::circle::circle()
 
 void mesh::circle::update(double dt)
 {
+    m_model = glm::translate(glm::mat4(1), m_pos);
 }
 
-void mesh::circle::draw(glm::mat4 projection, glm::mat4 view)
+void mesh::circle::draw(const glm::mat4 &model, const glm::mat4 &projection, const glm::mat4 &view)
 {
     m_shader_program.bind();
 
     m_vbo.bind();
     m_vao.bind();
 
-    m_shader_program.set_mat4("model", m_matrix_model);
+    m_shader_program.set_mat4("model", model + m_model);
     m_shader_program.set_mat4("view", view);
     m_shader_program.set_mat4("projection", projection);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, m_data.size() / 6);
 
     m_vao.unbind();
+
+    mesh_t::draw(model, view, projection);
 }

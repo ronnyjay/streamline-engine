@@ -39,7 +39,7 @@ const GLfloat pyramid::m_data[][5] = {
 };
 // clang-format on
 
-pyramid::pyramid()
+pyramid::pyramid(const std::basic_string<char> &name) : mesh_t(name)
 {
     shader vertex_shader("resources/shaders/debug/debug.vs", GL_VERTEX_SHADER);
     shader fragment_shader("resources/shaders/debug/debug.fs", GL_FRAGMENT_SHADER);
@@ -66,20 +66,21 @@ void pyramid::update(double dt)
     if (angle >= 360.0f)
         angle -= 360.0f;
 
-    m_matrix_model = glm::mat4(1.0f);
-    m_matrix_model = glm::translate(m_matrix_model, get_position());
-    m_matrix_model = glm::translate(m_matrix_model, glm::vec3(0.0f, 1.0f, 10.0f));
-    m_matrix_model = glm::rotate(m_matrix_model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-    m_matrix_model = glm::translate(m_matrix_model, glm::vec3(0.0f, -1.0f, -10.0f));
+    m_model = glm::translate(glm::mat4(1.0f), m_pos);
+    m_model = glm::translate(m_model, glm::vec3(0.0f, 1.0f, 10.0f));
+    m_model = glm::rotate(m_model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_model = glm::translate(m_model, glm::vec3(0.0f, -1.0f, -10.0f));
+
+    mesh_t::update(dt);
 }
 
-void pyramid::draw(glm::mat4 projection, glm::mat4 view)
+void pyramid::draw(const glm::mat4 &model, const glm::mat4 &projection, const glm::mat4 &view)
 {
     m_shader_program.bind();
     m_vbo.bind();
     m_vao.bind();
 
-    m_shader_program.set_mat4("model", m_matrix_model);
+    m_shader_program.set_mat4("model", model + m_model);
     m_shader_program.set_mat4("view", view);
     m_shader_program.set_mat4("projection", projection);
 
@@ -87,4 +88,6 @@ void pyramid::draw(glm::mat4 projection, glm::mat4 view)
 
     m_vao.unbind();
     m_vbo.unbind();
+
+    mesh_t::draw(model, projection, view);
 }

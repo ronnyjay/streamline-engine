@@ -13,9 +13,9 @@ find_package(glm REQUIRED)
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 add_compile_options(
-  -Werror
-  -Wall
-  -Wpedantic
+    -Werror
+    -Wall
+    -Wpedantic
 )
 
 set(GLM_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/glm/1.0.1/include")

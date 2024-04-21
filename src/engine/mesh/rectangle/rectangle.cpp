@@ -1,3 +1,4 @@
+#include "engine/mesh/mesh.hpp"
 #include <engine/mesh/rectangle/rectangle.hpp>
 #include <glm/fwd.hpp>
 
@@ -12,7 +13,7 @@ const GLfloat rectangle::m_data[4][5] = {
 };
 // clang-format on
 
-rectangle::rectangle()
+rectangle::rectangle(const std::basic_string<char> &name) : mesh_t(name)
 {
 
     shader vertex_shader("resources/shaders/debug/debug.vs", GL_VERTEX_SHADER);
@@ -33,16 +34,16 @@ rectangle::rectangle()
 
 void rectangle::update(double dt)
 {
-    m_matrix_model = glm::translate(glm::mat4(1.0f), get_position());
+    m_model = glm::translate(glm::mat4(1.0f), m_pos);
 }
 
-void rectangle::draw(glm::mat4 projection, glm::mat4 view)
+void rectangle::draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection)
 {
     m_shader_program.bind();
     m_vbo.bind();
     m_vao.bind();
 
-    m_shader_program.set_mat4("model", m_matrix_model);
+    m_shader_program.set_mat4("model", model + m_model);
     m_shader_program.set_mat4("view", view);
     m_shader_program.set_mat4("projection", projection);
 
@@ -50,4 +51,6 @@ void rectangle::draw(glm::mat4 projection, glm::mat4 view)
 
     m_vao.unbind();
     m_vbo.unbind();
+
+    mesh_t::draw(model, view, projection);
 }

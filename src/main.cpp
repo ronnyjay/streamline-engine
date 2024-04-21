@@ -75,7 +75,7 @@ int main(int argc, const char *argv[])
     glfwSetWindowSizeCallback(window, window_resize_callback);
     glfwSetWindowIconifyCallback(window, window_minimized_callback);
     glfwSetWindowMaximizeCallback(window, window_maximized_callback);
-    glfwSetCursorPosCallback(window, window_mouse_callback);
+    // glfwSetCursorPosCallback(window, window_mouse_callback);
     glfwSetScrollCallback(window, window_scroll_callback);
 
     // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -120,21 +120,21 @@ int main(int argc, const char *argv[])
 
         engine::world world;
         global_camera.set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-        global_camera.set_rotation(engine::camera::rotation_axis::x, 90.0f);
+        global_camera.set_rotation(engine::camera::rotation_axis::x, 36.0f);
 
-        engine::mesh::pyramid pyramid_mesh;
-        engine::mesh::pyramid pyramid_mesh_copy;
-        engine::mesh::pyramid pyramid_mesh_copy_2;
-        engine::mesh::pyramid pyramid_mesh_copy_3;
+        engine::mesh::pyramid pyramid_mesh("Pyramid 0");
+        engine::mesh::pyramid pyramid_mesh_copy("Pyramid 1");
+        engine::mesh::pyramid pyramid_mesh_copy_2("Pyramid 2");
+        engine::mesh::pyramid pyramid_mesh_copy_3("Pyramid 3");
 
         pyramid_mesh_copy.set_position(10.0f, 0.0f, 15.0f);
         pyramid_mesh_copy_2.set_position(-10.0f, 0.0f, 9.0f);
         pyramid_mesh_copy_3.set_position(0.0f, 15.0f, 25.0f);
 
         world.add_mesh(&pyramid_mesh);
-        world.add_mesh(&pyramid_mesh_copy);
-        world.add_mesh(&pyramid_mesh_copy_2);
-        world.add_mesh(&pyramid_mesh_copy_3);
+        pyramid_mesh.add_mesh(&pyramid_mesh_copy);
+        pyramid_mesh.add_mesh(&pyramid_mesh_copy_2);
+        pyramid_mesh_copy_2.add_mesh(&pyramid_mesh_copy_3);
 
         world.show_wireframes(false);
 
@@ -161,12 +161,22 @@ int main(int argc, const char *argv[])
 
         // SoundEngine->play2D("resources/audio/breakout.mp3", true);
 
+        bool show_metrics = false;
+
         while (!glfwWindowShouldClose(window))
         {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
-            ImGui::ShowDemoWindow(); // Show demo window! :)
+            ImGui::Begin("Streamline Engine");
+
+            if (ImGui::Button("Show Metrics"))
+            {
+                show_metrics = !show_metrics;
+            }
+
+            if (show_metrics)
+                ImGui::ShowMetricsWindow();
 
             if (current_time - last_char > 0.05)
             {
@@ -207,12 +217,13 @@ int main(int argc, const char *argv[])
 
             last_time = current_time;
 
+            ImGui::End();
+
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glfwSwapBuffers(window);
             glfwPollEvents();
-
         }
     }
 
