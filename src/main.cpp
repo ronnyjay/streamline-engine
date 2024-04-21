@@ -40,7 +40,9 @@ const char *window_title = "streamline-engine";
 
 irrklang::ISoundEngine *SoundEngine = irrklang::createIrrKlangDevice();
 
-engine::camera::perspective_camera global_camera;
+engine::camera::perspective_camera perspective_camera;
+engine::camera::orthographic_camera orthographic_camera;
+engine::camera::camera_t *global_camera = &perspective_camera;
 
 float last_x = window_width / 2.0f;
 float last_y = window_height / 2.0f;
@@ -103,6 +105,7 @@ int main(int argc, const char *argv[])
         ImGuiIO &io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true); // Second param install_callback=true will install GLFW
@@ -120,7 +123,7 @@ int main(int argc, const char *argv[])
         sp.link();
 
         engine::world world;
-        global_camera.set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+        global_camera->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
         // global_camera.set_pitch(36.0f);
 
         engine::mesh::pyramid pyramid_mesh("Pyramid 0");
@@ -163,6 +166,7 @@ int main(int argc, const char *argv[])
         // SoundEngine->play2D("resources/audio/breakout.mp3", true);
 
         bool show_metrics = false;
+        bool camera_toggle = false;
 
         while (!glfwWindowShouldClose(window))
         {
@@ -174,6 +178,27 @@ int main(int argc, const char *argv[])
             if (ImGui::Button("Show Metrics"))
             {
                 show_metrics = !show_metrics;
+            }
+
+            if (ImGui::TreeNode("Debug"))
+            {
+                ImGui::Text("Camera: ");
+                ImGui::SameLine();
+                if (ImGui::Button(camera_toggle ? "Orthographic" : "Perspective"))
+                {
+                    camera_toggle = !camera_toggle;
+
+                    if (camera_toggle)
+                    {
+                        global_camera = &orthographic_camera;
+                    }
+                    else
+                    {
+                        global_camera = &perspective_camera;
+                    }
+                }
+
+                ImGui::TreePop();
             }
 
             if (show_metrics)
@@ -278,12 +303,12 @@ void window_mouse_callback(GLFWwindow *window, double xpos_in, double ypos_in)
     last_x = xpos;
     last_y = ypos;
 
-    global_camera.move(xoffset, yoffset);
+    global_camera->move(xoffset, yoffset);
 }
 
 void window_scroll_callback(GLFWwindow *, double xoffset, double yoffset)
 {
-    global_camera.move(static_cast<float>(yoffset));
+    global_camera->move(static_cast<float>(yoffset));
 }
 
 void process_input(GLFWwindow *window)
@@ -291,27 +316,27 @@ void process_input(GLFWwindow *window)
     // movement
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::UP);
+        global_camera->move(engine::camera::UP);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::DOWN);
+        global_camera->move(engine::camera::DOWN);
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::FORWARD);
+        global_camera->move(engine::camera::FORWARD);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::BACKWARD);
+        global_camera->move(engine::camera::BACKWARD);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::RIGHT);
+        global_camera->move(engine::camera::RIGHT);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::LEFT);
+        global_camera->move(engine::camera::LEFT);
     }
 
     // exit

@@ -12,7 +12,6 @@
 
 #include <imgui.h>
 
-#include <iostream>
 #include <list>
 #include <string>
 
