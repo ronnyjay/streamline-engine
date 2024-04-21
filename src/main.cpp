@@ -171,6 +171,7 @@ int main(int argc, const char *argv[])
 
         bool show_metrics = false;
         bool camera_toggle = false;
+        bool wireframes_toggle = false;
 
         while (!glfwWindowShouldClose(window))
         {
@@ -203,6 +204,14 @@ int main(int argc, const char *argv[])
                         {
                             global_camera = &perspective_camera;
                         }
+                    }
+
+                    ImGui::Text("Show Wireframes: ");
+                    ImGui::SameLine();
+                    if (ImGui::Button(wireframes_toggle ? "True" : "False"))
+                    {
+                        wireframes_toggle = !wireframes_toggle;
+                        world.show_wireframes(wireframes_toggle);
                     }
 
                     ImGui::TreePop();
