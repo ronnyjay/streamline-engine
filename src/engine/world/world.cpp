@@ -7,7 +7,7 @@ using namespace engine;
 extern int window_width;
 extern int window_height;
 
-extern engine::camera::orthographic_camera global_camera;
+extern engine::camera::perspective_camera global_camera;
 
 engine::world::world()
 {
@@ -25,7 +25,7 @@ void engine::world::draw()
 {
     for (auto obj : m_meshes)
     {
-        obj->draw(glm::mat4(0), global_camera.projection_matrix(), global_camera.view_projection_matrix());
+        obj->draw(glm::mat4(0), global_camera.projection_matrix(), global_camera.view_matrix());
     }
 
     if (ImGui::TreeNode("Objects"))

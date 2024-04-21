@@ -1,3 +1,4 @@
+#include "engine/camera/camera.hpp"
 #include "engine/text/text.hpp"
 #include "ik_ISoundEngine.h"
 #include <string>
@@ -39,7 +40,7 @@ const char *window_title = "streamline-engine";
 
 irrklang::ISoundEngine *SoundEngine = irrklang::createIrrKlangDevice();
 
-engine::camera::orthographic_camera global_camera;
+engine::camera::perspective_camera global_camera;
 
 float last_x = window_width / 2.0f;
 float last_y = window_height / 2.0f;
@@ -120,7 +121,7 @@ int main(int argc, const char *argv[])
 
         engine::world world;
         global_camera.set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-        global_camera.set_rotation(engine::camera::rotation_axis::x, 36.0f);
+        // global_camera.set_pitch(36.0f);
 
         engine::mesh::pyramid pyramid_mesh("Pyramid 0");
         engine::mesh::pyramid pyramid_mesh_copy("Pyramid 1");
@@ -288,29 +289,29 @@ void window_scroll_callback(GLFWwindow *, double xoffset, double yoffset)
 void process_input(GLFWwindow *window)
 {
     // movement
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        global_camera.move(engine::camera::forward);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        global_camera.move(engine::camera::backward);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        global_camera.move(engine::camera::left);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        global_camera.move(engine::camera::right);
-    }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::up);
+        global_camera.move(engine::camera::UP);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
-        global_camera.move(engine::camera::down);
+        global_camera.move(engine::camera::DOWN);
+    }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        global_camera.move(engine::camera::FORWARD);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        global_camera.move(engine::camera::BACKWARD);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        global_camera.move(engine::camera::RIGHT);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        global_camera.move(engine::camera::LEFT);
     }
 
     // exit
