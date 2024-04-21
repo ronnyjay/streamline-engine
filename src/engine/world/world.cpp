@@ -9,6 +9,8 @@ extern int window_height;
 
 extern engine::camera::camera_t *global_camera;
 
+extern bool imGui_toggle;
+
 engine::world::world()
 {
 }
@@ -28,14 +30,17 @@ void engine::world::draw()
         obj->draw(glm::mat4(0), global_camera->projection_matrix(), global_camera->view_matrix());
     }
 
-    if (ImGui::TreeNode("Objects"))
+    if (imGui_toggle)
     {
-        for (auto obj : m_meshes)
+        if (ImGui::TreeNode("Objects"))
         {
-            obj->draw_imgui();
-        }
+            for (auto obj : m_meshes)
+            {
+                obj->draw_imgui();
+            }
 
-        ImGui::TreePop();
+            ImGui::TreePop();
+        }
     }
 }
 

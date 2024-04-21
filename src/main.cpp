@@ -31,6 +31,7 @@ void window_minimized_callback(GLFWwindow *, int);
 void window_maximized_callback(GLFWwindow *, int);
 void window_mouse_callback(GLFWwindow *, double, double);
 void window_scroll_callback(GLFWwindow *, double, double);
+void window_key_callback(GLFWwindow *, int, int, int, int);
 void process_input(GLFWwindow *);
 
 int window_width = 1920;
@@ -47,6 +48,8 @@ engine::camera::camera_t *global_camera = &perspective_camera;
 float last_x = window_width / 2.0f;
 float last_y = window_height / 2.0f;
 bool first_mouse = true;
+
+bool imGui_toggle = false;
 
 int main(int argc, const char *argv[])
 {
@@ -80,6 +83,7 @@ int main(int argc, const char *argv[])
     glfwSetWindowMaximizeCallback(window, window_maximized_callback);
     // glfwSetCursorPosCallback(window, window_mouse_callback);
     glfwSetScrollCallback(window, window_scroll_callback);
+    glfwSetKeyCallback(window, window_key_callback);
 
     // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -173,36 +177,42 @@ int main(int argc, const char *argv[])
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
-            ImGui::Begin("Streamline Engine");
 
-            if (ImGui::Button("Show Metrics"))
+            if (imGui_toggle)
             {
-                show_metrics = !show_metrics;
-            }
+                ImGui::Begin("Streamline Engine");
 
-            if (ImGui::TreeNode("Debug"))
-            {
-                ImGui::Text("Camera: ");
-                ImGui::SameLine();
-                if (ImGui::Button(camera_toggle ? "Orthographic" : "Perspective"))
+                if (ImGui::Button("Show Metrics"))
                 {
-                    camera_toggle = !camera_toggle;
-
-                    if (camera_toggle)
-                    {
-                        global_camera = &orthographic_camera;
-                    }
-                    else
-                    {
-                        global_camera = &perspective_camera;
-                    }
+                    show_metrics = !show_metrics;
                 }
 
-                ImGui::TreePop();
-            }
+                if (ImGui::TreeNode("Debug"))
+                {
+                    ImGui::Text("Camera: ");
+                    ImGui::SameLine();
+                    if (ImGui::Button(camera_toggle ? "Orthographic" : "Perspective"))
+                    {
+                        camera_toggle = !camera_toggle;
 
-            if (show_metrics)
-                ImGui::ShowMetricsWindow();
+                        if (camera_toggle)
+                        {
+                            global_camera = &orthographic_camera;
+                        }
+                        else
+                        {
+                            global_camera = &perspective_camera;
+                        }
+                    }
+
+                    ImGui::TreePop();
+                }
+
+                if (show_metrics)
+                    ImGui::ShowMetricsWindow();
+
+                ImGui::End();
+            }
 
             if (current_time - last_char > 0.05)
             {
@@ -242,8 +252,6 @@ int main(int argc, const char *argv[])
             health_text.draw(sp);
 
             last_time = current_time;
-
-            ImGui::End();
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -309,6 +317,14 @@ void window_mouse_callback(GLFWwindow *window, double xpos_in, double ypos_in)
 void window_scroll_callback(GLFWwindow *, double xoffset, double yoffset)
 {
     global_camera->move(static_cast<float>(yoffset));
+}
+
+void window_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
+    {
+        imGui_toggle = !imGui_toggle;
+    }
 }
 
 void process_input(GLFWwindow *window)
