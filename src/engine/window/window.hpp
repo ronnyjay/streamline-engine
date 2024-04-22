@@ -7,6 +7,7 @@
 
 #include <engine/camera/camera.hpp>
 #include <engine/config/config.hpp>
+#include <engine/debugger/debugger.hpp>
 #include <engine/stb/stb_image.hpp>
 
 #include <irrklang/ik_ISoundEngine.h>
@@ -35,6 +36,11 @@ class window
     GLFWwindow *const as_glfw_window() const
     {
         return m_window;
+    }
+
+    debugger &debug_window()
+    {
+        return m_debugger;
     }
 
     int width()
@@ -72,6 +78,7 @@ class window
 
   private:
     GLFWwindow *m_window;
+    debugger m_debugger;
 
     int m_window_width;
     int m_window_height;

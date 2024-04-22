@@ -17,7 +17,7 @@ glm::mat4 const orthographic_camera::projection_matrix() const
 {
     float width = (float)application.width() / 200.0f;
     float height = (float)application.height() / 200.0f;
-    return glm::ortho(-width, width, -height, height, 0.1f, 1000.0f);
+    return glm::ortho(-width, width, -height, height, -1.0f, 1000.0f);
 }
 
 glm::mat4 const orthographic_camera::view_matrix() const

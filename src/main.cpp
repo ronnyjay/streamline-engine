@@ -89,6 +89,8 @@ int main(int argc, const char *argv[])
         world.update(dt);
         world.draw();
 
+        application.debug_window().render();
+
         glfwSwapBuffers(application.as_glfw_window());
         glfwPollEvents();
 

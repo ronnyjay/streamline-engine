@@ -70,6 +70,19 @@ void window::initialize()
     {
         throw std::runtime_error("Failed to initialize GLAD");
     }
+
+    m_debugger.add_node("Debug");
+
+    m_debugger.add_option("Debug", "Show Wireframes", false,
+                          [](bool wireframes)
+                          {
+                              if (wireframes)
+                                  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                              else
+                                  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                          });
+
+    m_debugger.initialize(m_window);
 }
 
 void window::add_camera(int key, camera::camera_t *camera)
