@@ -31,6 +31,11 @@ class debugger
         m_enabled = enabled;
     }
 
+    void toggle()
+    {
+        m_enabled = !m_enabled;
+    }
+
     ~debugger();
 
   private: // default options

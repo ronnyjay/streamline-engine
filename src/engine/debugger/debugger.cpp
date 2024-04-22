@@ -7,7 +7,7 @@
 
 using namespace engine;
 
-debugger::debugger() : m_enabled(true)
+debugger::debugger() : m_metrics(false), m_enabled(false)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

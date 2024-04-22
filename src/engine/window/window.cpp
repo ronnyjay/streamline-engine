@@ -71,17 +71,6 @@ void window::initialize()
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    m_debugger.add_node("Debug");
-
-    m_debugger.add_option("Debug", "Show Wireframes", false,
-                          [](bool wireframes)
-                          {
-                              if (wireframes)
-                                  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                              else
-                                  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                          });
-
     m_debugger.initialize(m_window);
 }
 
@@ -203,6 +192,12 @@ void window::maximized_callback(GLFWwindow *window, int maximized)
 
 void window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    auto instance = static_cast<class window *>(glfwGetWindowUserPointer(window));
+
+    if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
+    {
+        instance->m_debugger.toggle();
+    }
 }
 
 void window::cursor_callback(GLFWwindow *window, double xpos_in, double ypos_in)

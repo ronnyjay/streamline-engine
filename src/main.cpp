@@ -1,15 +1,16 @@
+
 #define GLFW_INCLUDE_NONE
 
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+#include "engine/debugger/debugger.hpp"
 #include <engine/config/config.hpp>
 #include <engine/window/window.hpp>
 
-#include <engine/world/world.hpp>
-
 #include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/camera/perspective/perspective.hpp>
+#include <engine/world/world.hpp>
 
 #include <engine/mesh/circle/circle.hpp>
 #include <engine/mesh/pyramid/pyramid.hpp>
@@ -77,6 +78,11 @@ int main(int argc, const char *argv[])
     double dt;
 
     last_time = current_time = glfwGetTime();
+
+    application.debug_window().add_node("Debug Options");
+    application.debug_window().add_option(
+        "Debug Options", "Show Wireframes", false,
+        [](bool val) { val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
 
     while (application.running())
     {
