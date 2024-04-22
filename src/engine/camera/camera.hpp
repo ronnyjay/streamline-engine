@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 
+#include <string>
+
 namespace engine
 {
 
@@ -27,6 +29,8 @@ class camera_t
 {
   public:
     camera_t()
+        : m_position(0.0f, 0.0f, 0.0f), m_yaw(0.0f), m_pitch(0.0f), m_zoom(1.0f), m_movement_speed(0.1f),
+          m_mouse_sensitivity(0.025f), m_title("Camera")
     {
     }
 
@@ -85,6 +89,8 @@ class camera_t
 
     float m_movement_speed;
     float m_mouse_sensitivity;
+
+    std::basic_string<char> m_title;
 };
 
 } // namespace camera

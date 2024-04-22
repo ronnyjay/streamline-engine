@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/camera/camera.hpp>
+#include <engine/window/window.hpp>
 
 namespace engine
 {
@@ -22,8 +23,19 @@ class orthographic_camera : public camera_t
     virtual void move(float xoffset, float yoffset) override; // mouse movement
     virtual void move(float yoffset) override;                // mouse scroll
 
+    void invert_controls(bool);
+
   private:
     glm::mat4 m_view_model;
+
+    float m_left;
+    float m_right;
+    float m_bottom;
+    float m_top;
+    float m_near;
+    float m_far;
+
+    bool m_inverted;
 };
 
 }; // namespace camera

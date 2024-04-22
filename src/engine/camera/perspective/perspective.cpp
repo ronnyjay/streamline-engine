@@ -3,19 +3,16 @@
 extern int window_width;
 extern int window_height;
 
+extern engine::window application;
+
 using namespace engine::camera;
 
 perspective_camera::perspective_camera() : m_front(0.0f, 0.0f, 1.0f), m_up(0.0f, 1.0f, 0.0f), m_world_up(m_up)
 {
     m_position = glm::vec3(0.0f, 1.0f, 0.0f);
-
     m_yaw = 90.0f;
-    m_pitch = 0.0f;
-
     m_zoom = 45.0f;
-
-    m_movement_speed = 0.10;
-    m_mouse_sensitivity = 0.025f;
+    m_title = "Perspective Camera";
 
     update();
 }
@@ -40,7 +37,8 @@ void perspective_camera::update()
 
 glm::mat4 const perspective_camera::projection_matrix() const
 {
-    return glm::perspective(glm::radians(m_zoom), (float)window_width / (float)window_height, 0.1f, 100.0f);
+    return glm::perspective(glm::radians(m_zoom), (float)application.width() / (float)application.height(), 0.1f,
+                            1000.0f);
 }
 
 glm::mat4 const perspective_camera::view_matrix() const
@@ -50,7 +48,6 @@ glm::mat4 const perspective_camera::view_matrix() const
 
 void perspective_camera::move(camera::direction direction)
 {
-
     switch (direction)
     {
     case UP:
@@ -76,7 +73,6 @@ void perspective_camera::move(camera::direction direction)
 
 void perspective_camera::move(float xoffset, float yoffset)
 {
-
     xoffset *= m_mouse_sensitivity;
     yoffset *= m_mouse_sensitivity;
 

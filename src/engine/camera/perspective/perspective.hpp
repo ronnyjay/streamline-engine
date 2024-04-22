@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/camera/camera.hpp>
+#include <engine/window/window.hpp>
 
 namespace engine
 {

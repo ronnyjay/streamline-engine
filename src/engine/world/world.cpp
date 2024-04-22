@@ -1,13 +1,11 @@
 #include <engine/world/world.hpp>
 
-#include <imgui.h>
-
-using namespace engine;
-
 extern int window_width;
 extern int window_height;
 
-extern engine::camera::camera_t *global_camera;
+extern engine::window application;
+
+using namespace engine;
 
 extern bool imGui_toggle;
 
@@ -23,11 +21,12 @@ void engine::world::update(double dt)
     }
 }
 
-void engine::world::draw()
+void world::draw()
 {
+
     for (auto obj : m_meshes)
     {
-        obj->draw(glm::mat4(0), global_camera->projection_matrix(), global_camera->view_matrix());
+        obj->draw(glm::mat4(0), application.camera()->projection_matrix(), application.camera()->view_matrix());
     }
 
     if (imGui_toggle)
