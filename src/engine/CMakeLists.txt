@@ -9,7 +9,10 @@ add_subdirectory(VAO)
 add_subdirectory(VBO)
 add_subdirectory(EBO)
 add_subdirectory(text)
+add_subdirectory(window)
+add_subdirectory(config)
+add_subdirectory(debugger)
 
 
 add_library(engine INTERFACE)
-target_link_libraries(engine INTERFACE world camera mesh shader shader_program texture stb VAO VBO EBO text)
+target_link_libraries(engine INTERFACE world camera mesh shader shader_program texture stb VAO VBO EBO text window config debugger)
