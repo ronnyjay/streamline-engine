@@ -1,5 +1,7 @@
 #pragma once
 
+#include <engine/window/window.hpp>
+
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -8,6 +10,8 @@
 #include <glm/trigonometric.hpp>
 
 #include <string>
+
+extern engine::window application;
 
 namespace engine
 {
@@ -79,7 +83,17 @@ class camera_t
         update();
     }
 
-  public:
+    glm::vec3 &position()
+    {
+        return m_position;
+    }
+
+    std::string const &title() const
+    {
+        return m_title;
+    }
+
+  protected:
     glm::vec3 m_position;
 
     float m_yaw;
@@ -90,7 +104,7 @@ class camera_t
     float m_movement_speed;
     float m_mouse_sensitivity;
 
-    std::basic_string<char> m_title;
+    std::string m_title;
 };
 
 } // namespace camera

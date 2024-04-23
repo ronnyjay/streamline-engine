@@ -46,6 +46,10 @@ class mesh_t
 
     virtual void draw_imgui()
     {
+        // add node to debugger
+        // add drags
+        // remove nodes
+
         if (ImGui::TreeNode(m_name.c_str()))
         {
             ImGui::DragFloat("x", &m_pos.x);

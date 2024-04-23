@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
-#include <engine/camera/camera.hpp>
+// #include <engine/camera/camera.hpp>
 #include <engine/config/config.hpp>
 #include <engine/debugger/debugger.hpp>
 #include <engine/stb/stb_image.hpp>
@@ -17,6 +17,11 @@
 
 namespace engine
 {
+
+namespace camera
+{
+class camera_t;
+};
 
 class window
 {
@@ -88,9 +93,10 @@ class window
     float m_cursor_y;
 
     camera::camera_t *m_camera;
-    std::unordered_map<int, camera::camera_t *> m_cameras;
+    std::string m_camera_title;
 
     irrklang::ISoundEngine *m_sound_engine;
+    std::unordered_map<int, camera::camera_t *> m_cameras;
 };
 
 }; // namespace engine

@@ -1,5 +1,4 @@
 #include <engine/debugger/debugger.hpp>
-#include <stdexcept>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -7,7 +6,7 @@
 
 using namespace engine;
 
-debugger::debugger() : m_metrics(false), m_enabled(false)
+debugger::debugger() : m_metrics(false), m_enabled(true)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -44,15 +43,28 @@ void debugger::render()
         {
             if (ImGui::TreeNode(node_it->first.c_str()))
             {
-                for (auto opt_it = node_it->second.begin()->begin(); opt_it != node_it->second.begin()->end(); ++opt_it)
+                for (auto it = node_it->second.toggles().begin(); it != node_it->second.toggles().end(); ++it)
                 {
-                    ImGui::TextUnformatted(opt_it->first.c_str());
-                    ImGui::SameLine();
-
-                    if (ImGui::Checkbox(" ", &opt_it->second.first))
+                    if (ImGui::Checkbox(it->first.c_str(), &it->second.first))
                     {
-                        opt_it->second.second(opt_it->second.first);
+                        it->second.second(it->second.first);
                     }
+                }
+
+                for (auto it = node_it->second.buttons().begin(); it != node_it->second.buttons().end(); ++it)
+                {
+                    ImGui::TextUnformatted(it->first.c_str());
+                    ImGui::SameLine();
+                    if (ImGui::Button(it->second.first->c_str()))
+                    {
+                        it->second.second();
+                    }
+                }
+
+                for (auto it = node_it->second.sliders().begin(); it != node_it->second.sliders().end(); ++it)
+                {
+                    ImGui::DragFloat(it->first.c_str(), it->second.first);
+                    it->second.second();
                 }
 
                 ImGui::TreePop();
@@ -71,39 +83,18 @@ void debugger::render()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void debugger::add_node(std::string node)
-{
-    m_nodes.emplace(node, std::vector<debug_option>{});
-}
+// void debugger::add_node(std::string node)
+// {
+//     m_nodes.emplace(node, debug_button{});
+// }
 
-void debugger::remove_node(std::string node)
-{
-    if (m_nodes.find(node) == m_nodes.end())
-    {
-        return;
-    }
-
-    m_nodes.erase(node);
-}
-
-void debugger::add_option(std::string node, std::string option, bool value, std::function<void(bool)> callback)
-{
-    auto node_iterator = m_nodes.find(node);
-
-    if (node_iterator == m_nodes.end())
-    {
-        throw std::runtime_error("Unable to add Debug Option. Node does not exist");
-    }
-
-    debug_option opt;
-    opt.emplace(option, std::make_pair(value, callback));
-
-    node_iterator->second.emplace_back(opt);
-}
-
-void debugger::remove_option(std::string node, std::string option)
-{
-}
+// void debugger::pop_node(std::string node)
+// {
+//     if (m_nodes.contains(node))
+//     {
+//         m_nodes.erase(node);
+//     }
+// }
 
 debugger::~debugger()
 {

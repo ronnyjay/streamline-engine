@@ -1,3 +1,4 @@
+#include <engine/camera/camera.hpp>
 #include <engine/window/window.hpp>
 #include <stdexcept>
 
@@ -71,7 +72,20 @@ void window::initialize()
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
+    // intialize debugger
     m_debugger.initialize(m_window);
+
+    // camera options
+    m_debugger.add_node("Camera Options");
+    m_debugger.add_button("Camera Options", "Camera:", &m_camera_title, [this]() { toggle_camera(); });
+
+    // debug options
+    m_debugger.add_node("Debug");
+    m_debugger.add_toggle("Debug", "Show Wireframes", false,
+                          [](bool show) {
+                              show ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+                                   : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                          });
 }
 
 void window::add_camera(int key, camera::camera_t *camera)
@@ -86,6 +100,9 @@ void window::add_camera(int key, camera::camera_t *camera)
     if (m_camera == nullptr)
     {
         m_camera = camera;
+        m_camera_title = m_camera->title();
+        m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x),
+                              [this]() { m_camera->update(); });
     }
 }
 
@@ -99,6 +116,15 @@ void window::set_camera(int key)
     }
 
     m_camera = entry->second;
+    m_camera_title = m_camera->title();
+
+    m_debugger.pop_slider("Camera Options", "Position X");
+    m_debugger.pop_slider("Camera Options", "Position Y");
+    m_debugger.pop_slider("Camera Options", "Position Z");
+
+    m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x), [this]() { m_camera->update(); });
+    m_debugger.add_slider("Camera Options", "Position Y", &(m_camera->position().y), [this]() { m_camera->update(); });
+    m_debugger.add_slider("Camera Options", "Position Z", &(m_camera->position().z), [this]() { m_camera->update(); });
 }
 
 void window::toggle_camera()
@@ -110,18 +136,17 @@ void window::toggle_camera()
 
     for (auto it = m_cameras.begin(); it != m_cameras.end(); ++it)
     {
-
         if (it->second == m_camera)
         {
             auto next = it;
 
             if (++next == m_cameras.end())
             {
-                m_camera = m_cameras.begin()->second;
+                set_camera(m_cameras.begin()->first);
             }
             else
             {
-                m_camera = next->second;
+                set_camera(next->first);
             }
 
             break;

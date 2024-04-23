@@ -1,3 +1,4 @@
+#include <engine/camera/camera.hpp>
 #include <engine/world/world.hpp>
 
 extern int window_width;

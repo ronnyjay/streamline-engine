@@ -51,7 +51,7 @@ int main(int argc, const char *argv[])
 
     application.add_camera(0, &perspective_camera);
     application.add_camera(1, &orthographic_camera);
-    application.set_camera(1);
+    application.set_camera(0);
 
     engine::world world;
 
@@ -79,10 +79,18 @@ int main(int argc, const char *argv[])
 
     last_time = current_time = glfwGetTime();
 
-    application.debug_window().add_node("Debug Options");
-    application.debug_window().add_option(
-        "Debug Options", "Show Wireframes", false,
+    std::string button_title = application.camera()->title();
+
+    application.debug_window().add_node("Debug");
+    application.debug_window().add_toggle(
+        "Debug", "Show Wireframes", false,
         [](bool val) { val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
+    // application.debug_window().add_button("Debug", "Toggle Camera", &button_title,
+    //                                       [&button_title]()
+    //                                       {
+    //                                           application.toggle_camera();
+    //                                           button_title = application.camera()->title();
+    //                                       });
 
     while (application.running())
     {
