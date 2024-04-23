@@ -49,7 +49,7 @@ class mesh_t
     {
         for (auto obj : m_meshes)
         {
-            obj->draw(model + m_model, view, projection);
+            obj->draw(m_model * model, view, projection);
         }
     }
 

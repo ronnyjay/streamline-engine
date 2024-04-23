@@ -67,9 +67,9 @@ void pyramid::update(double dt)
         angle -= 360.0f;
 
     m_model = glm::translate(glm::mat4(1.0f), m_pos);
-    m_model = glm::translate(m_model, glm::vec3(0.0f, 1.0f, 10.0f));
-    m_model = glm::rotate(m_model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-    m_model = glm::translate(m_model, glm::vec3(0.0f, -1.0f, -10.0f));
+    m_local_model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 10.0f));
+    m_local_model = glm::rotate(m_local_model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_local_model = glm::translate(m_local_model, glm::vec3(0.0f, -1.0f, -10.0f));
 
     mesh_t::update(dt);
 }
@@ -80,7 +80,7 @@ void pyramid::draw(const glm::mat4 &model, const glm::mat4 &projection, const gl
     m_vbo.bind();
     m_vao.bind();
 
-    m_shader_program.set_mat4("model", model + m_model);
+    m_shader_program.set_mat4("model", m_model * model * m_local_model);
     m_shader_program.set_mat4("view", view);
     m_shader_program.set_mat4("projection", projection);
 

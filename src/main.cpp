@@ -26,19 +26,22 @@ int main(int argc, const char *argv[])
 
     engine::world world;
 
-    engine::mesh::pyramid p0("Pyramid 0");
-    engine::mesh::pyramid p1("Pyramid 1");
-    engine::mesh::pyramid p2("Pyramid 2");
+    engine::mesh::pyramid p0("Left Pyramid");
+    engine::mesh::pyramid p1("Right Pyramid");
+    engine::mesh::pyramid p2("Top Pyramid");
+    engine::mesh::pyramid p3("Bottom Pyramid");
     engine::mesh::pyramid p4("Master Pyramid");
 
-    p0.set_position(0.0f, 5.0f, 10.0f);
-    p1.set_position(0.0f, -5.0, -10.0f);
-    p2.set_position(0.0f, 0.0f, 0.0f);
-    p4.set_position(0.0f, 0.0f, 5.0f);
+    p0.set_position(-10.0f, 0.0f, 0.0f);
+    p1.set_position(10.0f, 0.0f, 0.0f);
+    p2.set_position(0.0f, 0.0f, 10.0f);
+    p3.set_position(0.0f, 0.0f, -10.0f);
+    p4.set_position(0.0f, 0.0f, 0.0f);
 
     p4.add_mesh(&p0);
     p4.add_mesh(&p1);
     p4.add_mesh(&p2);
+    p4.add_mesh(&p3);
 
     world.add_mesh(&p4);
 

@@ -27,7 +27,7 @@ void world::draw()
 
     for (auto obj : m_meshes)
     {
-        obj->draw(glm::mat4(0), application.camera()->projection_matrix(), application.camera()->view_matrix());
+        obj->draw(glm::mat4(1.0f), application.camera()->projection_matrix(), application.camera()->view_matrix());
     }
 }
 
