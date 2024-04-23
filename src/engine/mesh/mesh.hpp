@@ -52,30 +52,6 @@ class mesh_t
         }
     }
 
-    virtual void draw_imgui()
-    {
-        // add node to debugger
-        // add drags
-        // remove nodes
-
-        if (ImGui::TreeNode(m_name.c_str()))
-        {
-            ImGui::DragFloat("x", &m_pos.x);
-            ImGui::DragFloat("y", &m_pos.y);
-            ImGui::DragFloat("z", &m_pos.z);
-
-            if (ImGui::TreeNode("Children"))
-            {
-                for (auto obj : m_meshes)
-                {
-                    obj->draw_imgui();
-                }
-                ImGui::TreePop();
-            }
-            ImGui::TreePop();
-        }
-    }
-
     void set_position(float x, float y, float z)
     {
         m_pos.x = x;

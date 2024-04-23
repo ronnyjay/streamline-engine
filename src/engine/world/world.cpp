@@ -29,19 +29,6 @@ void world::draw()
     {
         obj->draw(glm::mat4(0), application.camera()->projection_matrix(), application.camera()->view_matrix());
     }
-
-    if (imGui_toggle)
-    {
-        if (ImGui::TreeNode("Objects"))
-        {
-            for (auto obj : m_meshes)
-            {
-                obj->draw_imgui();
-            }
-
-            ImGui::TreePop();
-        }
-    }
 }
 
 void engine::world::add_mesh(engine::mesh::mesh_t *const obj)
