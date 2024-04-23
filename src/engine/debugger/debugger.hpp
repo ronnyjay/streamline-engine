@@ -10,9 +10,12 @@
 namespace engine
 {
 
+class debug_node;
+
 typedef std::unordered_map<std::string, std::pair<bool, std::function<void(bool)>>> debug_toggle_table;
 typedef std::unordered_map<std::string, std::pair<std::string *, std::function<void()>>> debug_button_table;
 typedef std::unordered_map<std::string, std::pair<float *, std::function<void()>>> debug_slider_table;
+typedef std::unordered_map<std::string, debug_node> debug_node_table;
 
 class debug_node
 {
@@ -34,6 +37,11 @@ class debug_node
     void add_slider(std::string slider, float *pointer, std::function<void()> callback)
     {
         m_sliders.emplace(slider, std::make_pair(pointer, callback));
+    }
+
+    void add_child(std::string child)
+    {
+        m_children.emplace(child, debug_node{});
     }
 
     void pop_toggle(std::string toggle)
@@ -75,10 +83,16 @@ class debug_node
         return m_sliders;
     }
 
+    debug_node_table &children()
+    {
+        return m_children;
+    }
+
   private:
     debug_toggle_table m_toggles;
     debug_button_table m_buttons;
     debug_slider_table m_sliders;
+    debug_node_table m_children;
 };
 
 class debugger
@@ -92,6 +106,14 @@ class debugger
     void add_node(std::string node)
     {
         m_nodes.emplace(node, debug_node{});
+    }
+
+    void add_child_node(std::string parent, std::string child)
+    {
+        if (m_nodes.contains(parent))
+        {
+            m_nodes.at(parent).add_child(child);
+        }
     }
 
     void pop_node(std::string node)
@@ -108,6 +130,14 @@ class debugger
         {
             m_nodes.at(node).toggles().emplace(toggle, std::make_pair(value, callback));
         }
+
+        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
+        {
+            if (node_it->second.children().contains(node))
+            {
+                node_it->second.children().at(node).add_toggle(toggle, value, callback);
+            }
+        }
     }
 
     void add_button(std::string node, std::string button, std::string *value, std::function<void()> callback)
@@ -116,13 +146,31 @@ class debugger
         {
             m_nodes.at(node).add_button(button, value, callback);
         }
+
+        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
+        {
+            if (node_it->second.children().contains(node))
+            {
+                node_it->second.children().at(node).add_button(button, value, callback);
+            }
+        }
     }
 
     void add_slider(std::string node, std::string slider, float *pointer, std::function<void()> callback)
     {
+        debug_node found_node;
+
         if (m_nodes.contains(node))
         {
             m_nodes.at(node).add_slider(slider, pointer, callback);
+        }
+
+        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
+        {
+            if (node_it->second.children().contains(node))
+            {
+                node_it->second.children().at(node).add_slider(slider, pointer, callback);
+            }
         }
     }
 
@@ -164,6 +212,9 @@ class debugger
 
   private: // default options
     bool m_metrics;
+
+  private:
+    void render_node_table(debug_node_table &);
 
   private:
     bool m_enabled;

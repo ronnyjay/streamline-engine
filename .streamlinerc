@@ -1,5 +1,3 @@
-Window-Width 1920
-Window-Height 1080
-Window-Title "Streamline Engine"
-AspectRatioA 16
-AspectRatioB 9
+window-width 1920
+window-height 1080
+window-title "streamline-engine"

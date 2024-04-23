@@ -79,19 +79,6 @@ int main(int argc, const char *argv[])
 
     last_time = current_time = glfwGetTime();
 
-    std::string button_title = application.camera()->title();
-
-    application.debug_window().add_node("Debug");
-    application.debug_window().add_toggle(
-        "Debug", "Show Wireframes", false,
-        [](bool val) { val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
-    // application.debug_window().add_button("Debug", "Toggle Camera", &button_title,
-    //                                       [&button_title]()
-    //                                       {
-    //                                           application.toggle_camera();
-    //                                           button_title = application.camera()->title();
-    //                                       });
-
     while (application.running())
     {
         dt = (current_time = glfwGetTime()) - last_time;

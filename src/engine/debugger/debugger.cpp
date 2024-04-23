@@ -39,37 +39,7 @@ void debugger::render()
             m_metrics = !m_metrics;
         }
 
-        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
-        {
-            if (ImGui::TreeNode(node_it->first.c_str()))
-            {
-                for (auto it = node_it->second.toggles().begin(); it != node_it->second.toggles().end(); ++it)
-                {
-                    if (ImGui::Checkbox(it->first.c_str(), &it->second.first))
-                    {
-                        it->second.second(it->second.first);
-                    }
-                }
-
-                for (auto it = node_it->second.buttons().begin(); it != node_it->second.buttons().end(); ++it)
-                {
-                    ImGui::TextUnformatted(it->first.c_str());
-                    ImGui::SameLine();
-                    if (ImGui::Button(it->second.first->c_str()))
-                    {
-                        it->second.second();
-                    }
-                }
-
-                for (auto it = node_it->second.sliders().begin(); it != node_it->second.sliders().end(); ++it)
-                {
-                    ImGui::DragFloat(it->first.c_str(), it->second.first);
-                    it->second.second();
-                }
-
-                ImGui::TreePop();
-            }
-        }
+        render_node_table(m_nodes);
 
         if (m_metrics)
         {
@@ -81,6 +51,43 @@ void debugger::render()
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void debugger::render_node_table(debug_node_table &table)
+{
+    for (auto node_it = table.begin(); node_it != table.end(); ++node_it)
+    {
+        if (ImGui::TreeNode(node_it->first.c_str()))
+        {
+            for (auto it = node_it->second.toggles().begin(); it != node_it->second.toggles().end(); ++it)
+            {
+                if (ImGui::Checkbox(it->first.c_str(), &it->second.first))
+                {
+                    it->second.second(it->second.first);
+                }
+            }
+
+            for (auto it = node_it->second.buttons().begin(); it != node_it->second.buttons().end(); ++it)
+            {
+                ImGui::TextUnformatted(it->first.c_str());
+                ImGui::SameLine();
+                if (ImGui::Button(it->second.first->c_str()))
+                {
+                    it->second.second();
+                }
+            }
+
+            for (auto it = node_it->second.sliders().begin(); it != node_it->second.sliders().end(); ++it)
+            {
+                ImGui::DragFloat(it->first.c_str(), it->second.first);
+                it->second.second();
+            }
+
+            render_node_table(node_it->second.children());
+
+            ImGui::TreePop();
+        }
+    }
 }
 
 // void debugger::add_node(std::string node)

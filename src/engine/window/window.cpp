@@ -75,17 +75,18 @@ void window::initialize()
     // intialize debugger
     m_debugger.initialize(m_window);
 
-    // camera options
+    // initial empty nodes
+    m_debugger.add_node("Meshes");
+
+    // initial camera options
     m_debugger.add_node("Camera Options");
     m_debugger.add_button("Camera Options", "Camera:", &m_camera_title, [this]() { toggle_camera(); });
 
-    // debug options
+    // initial debug options
     m_debugger.add_node("Debug");
-    m_debugger.add_toggle("Debug", "Show Wireframes", false,
-                          [](bool show) {
-                              show ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-                                   : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                          });
+    m_debugger.add_toggle(
+        "Debug", "Show Wireframes", false,
+        [](bool val) { val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
 }
 
 void window::add_camera(int key, camera::camera_t *camera)
@@ -118,13 +119,13 @@ void window::set_camera(int key)
     m_camera = entry->second;
     m_camera_title = m_camera->title();
 
-    m_debugger.pop_slider("Camera Options", "Position X");
-    m_debugger.pop_slider("Camera Options", "Position Y");
     m_debugger.pop_slider("Camera Options", "Position Z");
+    m_debugger.pop_slider("Camera Options", "Position Y");
+    m_debugger.pop_slider("Camera Options", "Position X");
 
-    m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x), [this]() { m_camera->update(); });
-    m_debugger.add_slider("Camera Options", "Position Y", &(m_camera->position().y), [this]() { m_camera->update(); });
     m_debugger.add_slider("Camera Options", "Position Z", &(m_camera->position().z), [this]() { m_camera->update(); });
+    m_debugger.add_slider("Camera Options", "Position Y", &(m_camera->position().y), [this]() { m_camera->update(); });
+    m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x), [this]() { m_camera->update(); });
 }
 
 void window::toggle_camera()

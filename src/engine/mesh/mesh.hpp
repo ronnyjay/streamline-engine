@@ -9,11 +9,14 @@
 
 #include <engine/shader/shader.hpp>
 #include <engine/shader_program/shader_program.hpp>
+#include <engine/window/window.hpp>
 
 #include <imgui.h>
 
 #include <list>
 #include <string>
+
+extern engine::window application;
 
 namespace engine
 {
@@ -26,6 +29,11 @@ class mesh_t
   public:
     mesh_t(const std::basic_string<char> &name) : m_pos(0.0f), m_model(1.0f), m_name(name)
     {
+        application.debug_window().add_node("Meshes");
+        application.debug_window().add_child_node("Meshes", name);
+        application.debug_window().add_slider(name, "Position Z", &m_pos.z, []() {});
+        application.debug_window().add_slider(name, "Position Y", &m_pos.y, []() {});
+        application.debug_window().add_slider(name, "Position X", &m_pos.x, []() {});
     }
 
     virtual void update(double dt)
