@@ -110,92 +110,42 @@ class debugger
 
     void add_child_node(std::string parent, std::string child)
     {
-        if (m_nodes.contains(parent))
-        {
-            m_nodes.at(parent).add_child(child);
-        }
-    }
-
-    void pop_node(std::string node)
-    {
-        if (m_nodes.contains(node))
-        {
-            m_nodes.erase(node);
-        }
+        add_child_node(parent, child, m_nodes);
     }
 
     void add_toggle(std::string node, std::string toggle, bool value, std::function<void(bool)> callback)
     {
-        if (m_nodes.contains(node))
-        {
-            m_nodes.at(node).toggles().emplace(toggle, std::make_pair(value, callback));
-        }
-
-        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
-        {
-            if (node_it->second.children().contains(node))
-            {
-                node_it->second.children().at(node).add_toggle(toggle, value, callback);
-            }
-        }
+        add_toggle(node, toggle, value, callback, m_nodes);
     }
 
     void add_button(std::string node, std::string button, std::string *value, std::function<void()> callback)
     {
-        if (m_nodes.contains(node))
-        {
-            m_nodes.at(node).add_button(button, value, callback);
-        }
-
-        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
-        {
-            if (node_it->second.children().contains(node))
-            {
-                node_it->second.children().at(node).add_button(button, value, callback);
-            }
-        }
+        add_button(node, button, value, callback, m_nodes);
     }
 
     void add_slider(std::string node, std::string slider, float *pointer, std::function<void()> callback)
     {
-        debug_node found_node;
+        add_slider(node, slider, pointer, callback, m_nodes);
+    }
 
-        if (m_nodes.contains(node))
-        {
-            m_nodes.at(node).add_slider(slider, pointer, callback);
-        }
-
-        for (auto node_it = m_nodes.begin(); node_it != m_nodes.end(); ++node_it)
-        {
-            if (node_it->second.children().contains(node))
-            {
-                node_it->second.children().at(node).add_slider(slider, pointer, callback);
-            }
-        }
+    void pop_node(std::string node)
+    {
+        pop_node(node, m_nodes);
     }
 
     void pop_toggle(std::string node, std::string toggle)
     {
-        if (m_nodes.contains(node))
-        {
-            m_nodes.at(node).pop_toggle(toggle);
-        }
+        pop_toggle(node, toggle, m_nodes);
     }
 
     void pop_button(std::string node, std::string button)
     {
-        if (m_nodes.contains(node))
-        {
-            m_nodes.at(node).pop_button(button);
-        }
+        pop_button(node, button, m_nodes);
     }
 
     void pop_slider(std::string node, std::string slider)
     {
-        if (m_nodes.contains(node))
-        {
-            m_nodes.at(node).pop_slider(slider);
-        }
+        pop_slider(node, slider, m_nodes);
     }
 
     void enable(bool enabled)
@@ -213,8 +163,17 @@ class debugger
   private: // default options
     bool m_metrics;
 
-  private:
-    void render_node_table(debug_node_table &);
+  private: // helper functions
+    void render(debug_node_table &);
+
+    void add_child_node(std::string parent, std::string child, debug_node_table &node_table);
+    void add_toggle(std::string node, std::string toggle, bool value, std::function<void(bool)> callback, debug_node_table &table);
+    void add_button(std::string node, std::string button, std::string *value, std::function<void()> callback, debug_node_table &table);
+    void add_slider(std::string node, std::string slider, float *pointer, std::function<void()> callback, debug_node_table &table);
+    void pop_node(std::string node, debug_node_table &table);
+    void pop_toggle(std::string node, std::string toggle, debug_node_table &table);
+    void pop_button(std::string node, std::string button, debug_node_table &table);
+    void pop_slider(std::string node, std::string slider, debug_node_table &table);
 
   private:
     bool m_enabled;

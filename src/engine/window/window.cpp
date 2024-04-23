@@ -119,10 +119,16 @@ void window::set_camera(int key)
     m_camera = entry->second;
     m_camera_title = m_camera->title();
 
+    m_debugger.pop_slider("Camera Options", "Zoom");
+    m_debugger.pop_slider("Camera Options", "Pitch");
+    m_debugger.pop_slider("Camera Options", "Yaw");
     m_debugger.pop_slider("Camera Options", "Position Z");
     m_debugger.pop_slider("Camera Options", "Position Y");
     m_debugger.pop_slider("Camera Options", "Position X");
 
+    m_debugger.add_slider("Camera Options", "Zoom", &(m_camera->zoom()), [this]() { m_camera->update(); });
+    m_debugger.add_slider("Camera Options", "Pitch", &(m_camera->pitch()), [this]() { m_camera->update(); });
+    m_debugger.add_slider("Camera Options", "Yaw", &(m_camera->yaw()), [this]() { m_camera->update(); });
     m_debugger.add_slider("Camera Options", "Position Z", &(m_camera->position().z), [this]() { m_camera->update(); });
     m_debugger.add_slider("Camera Options", "Position Y", &(m_camera->position().y), [this]() { m_camera->update(); });
     m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x), [this]() { m_camera->update(); });

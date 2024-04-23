@@ -88,6 +88,21 @@ class camera_t
         return m_position;
     }
 
+    float &yaw()
+    {
+        return m_yaw;
+    }
+
+    float &pitch()
+    {
+        return m_pitch;
+    }
+
+    float &zoom()
+    {
+        return m_zoom;
+    }
+
     std::string const &title() const
     {
         return m_title;
