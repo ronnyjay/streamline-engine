@@ -1,3 +1,4 @@
+#include "engine/mesh/obj/obj.hpp"
 #include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/camera/perspective/perspective.hpp>
 #include <engine/mesh/pyramid/pyramid.hpp>
@@ -26,24 +27,27 @@ int main(int argc, const char *argv[])
 
     engine::world world;
 
-    engine::mesh::pyramid p0("Left Pyramid");
-    engine::mesh::pyramid p1("Right Pyramid");
-    engine::mesh::pyramid p2("Top Pyramid");
-    engine::mesh::pyramid p3("Bottom Pyramid");
-    engine::mesh::pyramid p4("Master Pyramid");
+    // engine::mesh::pyramid p0("Left Pyramid");
+    // engine::mesh::pyramid p1("Right Pyramid");
+    // engine::mesh::pyramid p2("Top Pyramid");
+    // engine::mesh::pyramid p3("Bottom Pyramid");
+    // engine::mesh::pyramid p4("Master Pyramid");
+    engine::mesh::obj cube("Cube", "resources/objects/test.obj");
 
-    p0.set_position(-10.0f, 0.0f, 0.0f);
-    p1.set_position(10.0f, 0.0f, 0.0f);
-    p2.set_position(0.0f, 0.0f, 10.0f);
-    p3.set_position(0.0f, 0.0f, -10.0f);
-    p4.set_position(0.0f, 0.0f, 0.0f);
+    // p0.set_position(-10.0f, 0.0f, 0.0f);
+    // p1.set_position(10.0f, 0.0f, 0.0f);
+    // p2.set_position(0.0f, 0.0f, 10.0f);
+    // p3.set_position(0.0f, 0.0f, -10.0f);
+    // p4.set_position(0.0f, 0.0f, 0.0f);
 
-    p4.add_mesh(&p0);
-    p4.add_mesh(&p1);
-    p4.add_mesh(&p2);
-    p4.add_mesh(&p3);
+    // p4.add_mesh(&p0);
+    // p4.add_mesh(&p1);
+    // p4.add_mesh(&p2);
+    // p4.add_mesh(&p3);
 
-    world.add_mesh(&p4);
+    // world.add_mesh(&p4);
+
+    world.add_mesh(&cube);
 
     engine::shader_program sp;
     engine::shader vertex_shader("resources/shaders/text/text.vs", GL_VERTEX_SHADER);
@@ -94,7 +98,7 @@ int main(int argc, const char *argv[])
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        engine::text health_text(health_out, -0.95, +0.88, 0.45f, color, 0.9f);
+        engine::text health_text(health_out, -0.95, +0.70, 2.0f, color, 0.9f);
 
         world.update(dt);
         world.draw();

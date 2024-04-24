@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/EBO/EBO.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -87,6 +88,7 @@ class mesh_t
 
     VAO m_vao;
     VBO m_vbo;
+    EBO m_ebo;
 
     shader_program m_shader_program;
 
