@@ -24,6 +24,24 @@ class debug_node
     {
     }
 
+    debug_node &copy_from(const debug_node &node)
+    {
+        if (this != &node)
+        {
+            m_toggles = node.m_toggles;
+            m_buttons = node.m_buttons;
+            m_sliders = node.m_sliders;
+            m_children = node.m_children;
+        }
+
+        return *this;
+    }
+
+    debug_node &operator=(const debug_node &node)
+    {
+        return copy_from(node);
+    }
+
     void add_toggle(std::string toggle, bool value, std::function<void(bool)> callback)
     {
         m_toggles.emplace(toggle, std::make_pair(value, callback));
@@ -42,6 +60,11 @@ class debug_node
     void add_child(std::string child)
     {
         m_children.emplace(child, debug_node{});
+    }
+
+    void add_child(std::string child, debug_node &node)
+    {
+        m_children.emplace(child, node);
     }
 
     void pop_toggle(std::string toggle)
@@ -113,6 +136,11 @@ class debugger
         add_child_node(parent, child, m_nodes);
     }
 
+    void add_child_node(std::string parent, std::string child, debug_node &node)
+    {
+        add_child_node(parent, child, node, m_nodes);
+    }
+
     void add_toggle(std::string node, std::string toggle, bool value, std::function<void(bool)> callback)
     {
         add_toggle(node, toggle, value, callback, m_nodes);
@@ -148,6 +176,11 @@ class debugger
         pop_slider(node, slider, m_nodes);
     }
 
+    void move_node(std::string new_parent, std::string node)
+    {
+        move_node(new_parent, node, m_nodes);
+    }
+
     void enable(bool enabled)
     {
         m_enabled = enabled;
@@ -167,6 +200,7 @@ class debugger
     void render(debug_node_table &);
 
     void add_child_node(std::string parent, std::string child, debug_node_table &node_table);
+    void add_child_node(std::string parent, std::string child, debug_node &node, debug_node_table &node_table);
     void add_toggle(std::string node, std::string toggle, bool value, std::function<void(bool)> callback, debug_node_table &table);
     void add_button(std::string node, std::string button, std::string *value, std::function<void()> callback, debug_node_table &table);
     void add_slider(std::string node, std::string slider, float *pointer, std::function<void()> callback, debug_node_table &table);
@@ -174,11 +208,12 @@ class debugger
     void pop_toggle(std::string node, std::string toggle, debug_node_table &table);
     void pop_button(std::string node, std::string button, debug_node_table &table);
     void pop_slider(std::string node, std::string slider, debug_node_table &table);
+    void move_node(std::string new_parent, std::string node, debug_node_table &table);
 
   private:
     bool m_enabled;
 
-    std::unordered_map<std::string, debug_node> m_nodes;
+    debug_node_table m_nodes;
 };
 
 }; // namespace engine

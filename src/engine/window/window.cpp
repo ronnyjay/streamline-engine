@@ -75,7 +75,7 @@ void window::initialize()
     // intialize debugger
     m_debugger.initialize(m_window);
 
-    // initial empty nodes
+    // initial empty nodes that will be used by other objects
     m_debugger.add_node("Meshes");
 
     // initial camera options

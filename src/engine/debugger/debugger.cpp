@@ -34,17 +34,12 @@ void debugger::render()
     {
         ImGui::Begin("Streamline Engine Debugger");
 
-        if (ImGui::Button("Show Metrics"))
-        {
-            m_metrics = !m_metrics;
-        }
-
-        render(m_nodes);
-
-        if (m_metrics)
+        if (ImGui::Button("Show Metrics") && (m_metrics = !m_metrics))
         {
             ImGui::ShowMetricsWindow();
         }
+
+        render(m_nodes);
 
         ImGui::End();
     }
@@ -96,13 +91,29 @@ void debugger::add_child_node(std::string parent, std::string child, debug_node_
     if (table.contains(parent))
     {
         table.at(parent).add_child(child);
-        return;
     }
-
-    // recursively search through all node tables
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        add_child_node(parent, child, it->second.children());
+        // recursively search through all node tables
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            add_child_node(parent, child, it->second.children());
+        }
+    }
+}
+
+void debugger::add_child_node(std::string parent, std::string child, debug_node &node, debug_node_table &table)
+{
+    if (table.contains(parent))
+    {
+        table.at(parent).add_child(child, node);
+    }
+    else
+    {
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            add_child_node(parent, child, node, it->second.children());
+        }
     }
 }
 
@@ -112,10 +123,12 @@ void debugger::add_toggle(std::string node, std::string toggle, bool value, std:
     {
         table.at(node).add_toggle(toggle, value, callback);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        add_toggle(node, toggle, value, callback, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            add_toggle(node, toggle, value, callback, it->second.children());
+        }
     }
 }
 
@@ -125,10 +138,12 @@ void debugger::add_button(std::string node, std::string button, std::string *val
     {
         table.at(node).add_button(button, value, callback);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        add_button(node, button, value, callback, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            add_button(node, button, value, callback, it->second.children());
+        }
     }
 }
 
@@ -138,10 +153,12 @@ void debugger::add_slider(std::string node, std::string slider, float *pointer, 
     {
         table.at(node).add_slider(slider, pointer, callback);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        add_slider(node, slider, pointer, callback, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            add_slider(node, slider, pointer, callback, it->second.children());
+        }
     }
 }
 
@@ -151,10 +168,12 @@ void debugger::pop_node(std::string node, debug_node_table &table)
     {
         table.erase(node);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        pop_node(node, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            pop_node(node, it->second.children());
+        }
     }
 }
 
@@ -164,10 +183,12 @@ void debugger::pop_toggle(std::string node, std::string toggle, debug_node_table
     {
         table.at(node).pop_toggle(toggle);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        pop_toggle(node, toggle, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            pop_toggle(node, toggle, it->second.children());
+        }
     }
 }
 
@@ -177,10 +198,12 @@ void debugger::pop_button(std::string node, std::string button, debug_node_table
     {
         table.at(node).pop_button(button);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        pop_button(node, button, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            pop_button(node, button, it->second.children());
+        }
     }
 }
 
@@ -190,10 +213,31 @@ void debugger::pop_slider(std::string node, std::string slider, debug_node_table
     {
         table.at(node).pop_slider(slider);
     }
-
-    for (auto it = table.begin(); it != table.end(); ++it)
+    else
     {
-        pop_slider(node, slider, it->second.children());
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            pop_slider(node, slider, it->second.children());
+        }
+    }
+}
+
+void debugger::move_node(std::string new_parent, std::string node, debug_node_table &table)
+{
+    debug_node node_copy;
+
+    if (table.contains(node))
+    {
+        node_copy.copy_from(table.at(node));
+        table.erase(node);
+        add_child_node(new_parent, node, node_copy);
+    }
+    else
+    {
+        for (auto it = table.begin(); it != table.end(); ++it)
+        {
+            move_node(new_parent, node, it->second.children());
+        }
     }
 }
 

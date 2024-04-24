@@ -1,4 +1,3 @@
-#include "engine/mesh/obj/obj.hpp"
 #include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/camera/perspective/perspective.hpp>
 #include <engine/config/config.hpp>
@@ -32,22 +31,12 @@ int main(int argc, const char *argv[])
     engine::mesh::pyramid p1("Right Pyramid");
     engine::mesh::pyramid p2("Top Pyramid");
     engine::mesh::pyramid p3("Bottom Pyramid");
-    engine::mesh::pyramid p4("Holy Pyramid");
-    engine::mesh::obj planetary_monkey("Solar Monkey", "resources/objects/monkey.obj");
+    engine::mesh::pyramid p4("Center Pyramid");
 
-    p4.add_mesh(&planetary_monkey);
-    p4.set_position(0.0f, 0.0f, 0.0f);
-
-    // p0.set_position(-10.0f, 0.0f, 0.0f);
-    // p1.set_position(10.0f, 0.0f, 0.0f);
-    // p2.set_position(0.0f, 0.0f, 10.0f);
-    // p3.set_position(0.0f, 0.0f, -10.0f);
-    // p4.set_position(0.0f, 0.0f, 0.0f);
-
-    // p4.add_mesh(&p0);
-    // p4.add_mesh(&p1);
-    // p4.add_mesh(&p2);
-    // p4.add_mesh(&p3);
+    p0.add_mesh(&p1); // left owns right
+    p2.add_mesh(&p3); // top owns bottom
+    p4.add_mesh(&p0);
+    p4.add_mesh(&p2);
 
     world.add_mesh(&p4);
 
