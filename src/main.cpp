@@ -32,7 +32,7 @@ int main(int argc, const char *argv[])
     // engine::mesh::pyramid p2("Top Pyramid");
     // engine::mesh::pyramid p3("Bottom Pyramid");
     // engine::mesh::pyramid p4("Master Pyramid");
-    engine::mesh::obj cube("Cube", "resources/objects/test.obj");
+    engine::mesh::obj cube("Cube", "resources/objects/monkey.obj");
 
     // p0.set_position(-10.0f, 0.0f, 0.0f);
     // p1.set_position(10.0f, 0.0f, 0.0f);
