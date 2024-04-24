@@ -18,8 +18,6 @@ class pyramid : public mesh_t
     void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &);
 
   private:
-    glm::mat4 m_local_model;
-
     static const GLfloat m_data[][5];
 };
 

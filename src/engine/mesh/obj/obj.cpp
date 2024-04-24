@@ -91,9 +91,15 @@ void process_faces(std::vector<mesh::index> &indices, std::vector<mesh::point> &
 
     for (auto f_indices : faces)
     {
-        mesh::point p0{vertices[f_indices.v0.vertex_index].x, vertices[f_indices.v0.vertex_index].y, vertices[f_indices.v0.vertex_index].z, uvs[f_indices.v0.uv_index].x,  uvs[f_indices.v0.uv_index].y, normals[f_indices.v0.normal_index].x, normals[f_indices.v0.normal_index].y, normals[f_indices.v0.normal_index].z};
-        mesh::point p1{vertices[f_indices.v1.vertex_index].x, vertices[f_indices.v1.vertex_index].y, vertices[f_indices.v1.vertex_index].z, uvs[f_indices.v1.uv_index].x,  uvs[f_indices.v1.uv_index].y, normals[f_indices.v1.normal_index].x, normals[f_indices.v1.normal_index].y, normals[f_indices.v1.normal_index].z};
-        mesh::point p2{vertices[f_indices.v2.vertex_index].x, vertices[f_indices.v2.vertex_index].y, vertices[f_indices.v2.vertex_index].z, uvs[f_indices.v2.uv_index].x,  uvs[f_indices.v2.uv_index].y, normals[f_indices.v2.normal_index].x, normals[f_indices.v2.normal_index].y, normals[f_indices.v2.normal_index].z};
+        mesh::point p0{vertices[f_indices.v0.vertex_index].x, vertices[f_indices.v0.vertex_index].y, vertices[f_indices.v0.vertex_index].z,
+                       uvs[f_indices.v0.uv_index].x,          uvs[f_indices.v0.uv_index].y,          normals[f_indices.v0.normal_index].x,
+                       normals[f_indices.v0.normal_index].y,  normals[f_indices.v0.normal_index].z};
+        mesh::point p1{vertices[f_indices.v1.vertex_index].x, vertices[f_indices.v1.vertex_index].y, vertices[f_indices.v1.vertex_index].z,
+                       uvs[f_indices.v1.uv_index].x,          uvs[f_indices.v1.uv_index].y,          normals[f_indices.v1.normal_index].x,
+                       normals[f_indices.v1.normal_index].y,  normals[f_indices.v1.normal_index].z};
+        mesh::point p2{vertices[f_indices.v2.vertex_index].x, vertices[f_indices.v2.vertex_index].y, vertices[f_indices.v2.vertex_index].z,
+                       uvs[f_indices.v2.uv_index].x,          uvs[f_indices.v2.uv_index].y,          normals[f_indices.v2.normal_index].x,
+                       normals[f_indices.v2.normal_index].y,  normals[f_indices.v2.normal_index].z};
 
         auto it0 = temp_points.find({f_indices.v0.vertex_index, f_indices.v0.uv_index, f_indices.v0.normal_index});
         auto it1 = temp_points.find({f_indices.v1.vertex_index, f_indices.v1.uv_index, f_indices.v1.normal_index});
@@ -185,7 +191,7 @@ void mesh::obj::draw(const glm::mat4 &model, const glm::mat4 &projection, const 
     m_vao.bind();
     m_ebo.bind();
 
-    m_shader_program.set_mat4("model", model + m_model);
+    m_shader_program.set_mat4("model", model * m_model);
     m_shader_program.set_mat4("view", view);
     m_shader_program.set_mat4("projection", projection);
 

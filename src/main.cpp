@@ -28,12 +28,15 @@ int main(int argc, const char *argv[])
 
     engine::world world;
 
-    // engine::mesh::pyramid p0("Left Pyramid");
-    // engine::mesh::pyramid p1("Right Pyramid");
-    // engine::mesh::pyramid p2("Top Pyramid");
-    // engine::mesh::pyramid p3("Bottom Pyramid");
-    // engine::mesh::pyramid p4("Master Pyramid");
-    engine::mesh::obj cube("Cube", "resources/objects/monkey.obj");
+    engine::mesh::pyramid p0("Left Pyramid");
+    engine::mesh::pyramid p1("Right Pyramid");
+    engine::mesh::pyramid p2("Top Pyramid");
+    engine::mesh::pyramid p3("Bottom Pyramid");
+    engine::mesh::pyramid p4("Holy Pyramid");
+    engine::mesh::obj planetary_monkey("Solar Monkey", "resources/objects/monkey.obj");
+
+    p4.add_mesh(&planetary_monkey);
+    p4.set_position(0.0f, 0.0f, 0.0f);
 
     // p0.set_position(-10.0f, 0.0f, 0.0f);
     // p1.set_position(10.0f, 0.0f, 0.0f);
@@ -46,9 +49,7 @@ int main(int argc, const char *argv[])
     // p4.add_mesh(&p2);
     // p4.add_mesh(&p3);
 
-    // world.add_mesh(&p4);
-
-    world.add_mesh(&cube);
+    world.add_mesh(&p4);
 
     engine::shader_program sp;
     engine::shader vertex_shader("resources/shaders/text/text.vs", GL_VERTEX_SHADER);
