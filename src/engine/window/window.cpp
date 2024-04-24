@@ -5,7 +5,7 @@
 using namespace engine;
 
 window::window()
-    : m_window_width(800), m_window_height(600), m_window_title("Untitled Application"), m_cursor_x(0), m_cursor_y(0),
+    : m_window_width(800), m_window_height(600), m_window_title("Untitled Application"), m_cursor_x(0), m_cursor_y(0), m_capture_mouse(false),
       m_sound_engine(irrklang::createIrrKlangDevice())
 {
 }
@@ -84,9 +84,8 @@ void window::initialize()
 
     // initial debug options
     m_debugger.add_node("Debug");
-    m_debugger.add_toggle(
-        "Debug", "Show Wireframes", false,
-        [](bool val) { val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
+    m_debugger.add_toggle("Debug", "Show Wireframes", false,
+                          [](bool val) { val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
 }
 
 void window::add_camera(int key, camera::camera_t *camera)
@@ -102,8 +101,7 @@ void window::add_camera(int key, camera::camera_t *camera)
     {
         m_camera = camera;
         m_camera_title = m_camera->title();
-        m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x),
-                              [this]() { m_camera->update(); });
+        m_debugger.add_slider("Camera Options", "Position X", &(m_camera->position().x), [this]() { m_camera->update(); });
     }
 }
 
@@ -228,7 +226,16 @@ void window::key_callback(GLFWwindow *window, int key, int scancode, int action,
 
     if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
     {
-        instance->m_debugger.toggle();
+
+        if (mods == GLFW_MOD_SHIFT)
+        {
+            (instance->m_capture_mouse = !instance->m_capture_mouse) ? glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+                                                                     : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        else
+        {
+            instance->m_debugger.toggle();
+        }
     }
 }
 

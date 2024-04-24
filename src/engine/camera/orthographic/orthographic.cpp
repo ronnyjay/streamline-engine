@@ -10,13 +10,14 @@ using namespace engine::camera;
 orthographic_camera::orthographic_camera()
 {
     m_title = "Orthographic Camera";
+    m_zoom = 1.0f;
     update();
 }
 
 glm::mat4 const orthographic_camera::projection_matrix() const
 {
-    float width = (float)application.width() / 200.0f;
-    float height = (float)application.height() / 200.0f;
+    float width = (float)application.width() / 200.0f / m_zoom;
+    float height = (float)application.height() / 200.0f / m_zoom;
     return glm::ortho(-width, width, -height, height, -1.0f, 1000.0f);
 }
 

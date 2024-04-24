@@ -91,6 +91,7 @@ class window
 
     float m_cursor_x;
     float m_cursor_y;
+    bool m_capture_mouse;
 
     camera::camera_t *m_camera;
     std::string m_camera_title;

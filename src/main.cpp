@@ -1,6 +1,7 @@
 #include "engine/mesh/obj/obj.hpp"
 #include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/camera/perspective/perspective.hpp>
+#include <engine/config/config.hpp>
 #include <engine/mesh/pyramid/pyramid.hpp>
 #include <engine/text/text.hpp>
 #include <engine/window/window.hpp>
