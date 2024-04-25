@@ -16,7 +16,7 @@ class shader_program
     void add_shader(GLuint shader_id);
 
     void bind();
-    void unbind();
+    static void unbind();
 
     void link();
 

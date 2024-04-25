@@ -15,7 +15,7 @@ class texture
     texture(const std::basic_string<char>);
 
     void bind();
-    void unbind()
+    static void unbind()
     {
         glBindTexture(GL_TEXTURE_BINDING_2D, 0);
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/mesh/obj/material.hpp"
+#include "engine/texture/texture.hpp"
 #include <engine/mesh/mesh.hpp>
 
 #include <glm/ext/vector_float3.hpp>
@@ -11,6 +13,7 @@ namespace engine
 
 namespace mesh
 {
+
 typedef glm::vec3 vertex;
 typedef glm::vec2 uv;
 typedef glm::vec3 normal;
@@ -43,7 +46,6 @@ struct face_indices
     point_indices v2;
 };
 
-// typedef std::array<face_index, 9> face_indices;
 typedef std::array<float, 8> point;
 
 class obj : public mesh_t
@@ -55,8 +57,11 @@ class obj : public mesh_t
     void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &) override;
 
   private:
+    material m_material;
     std::vector<index> m_indices; // index into m_data to find vertex - EBO
     std::vector<point> m_points;  // vertex, uv, normal - VBO
+
+    shader_program m_texture_shader_program;
 };
 
 }; // namespace mesh

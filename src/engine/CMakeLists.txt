@@ -15,4 +15,4 @@ add_subdirectory(debugger)
 
 
 add_library(engine INTERFACE)
-target_link_libraries(engine INTERFACE world camera mesh shader shader_program texture stb VAO VBO EBO text window config debugger)
+target_link_libraries(engine INTERFACE world camera mesh shader shader_program texture stb VAO VBO EBO text window config debugger material)

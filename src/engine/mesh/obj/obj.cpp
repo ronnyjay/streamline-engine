@@ -1,20 +1,20 @@
+#include "engine/mesh/obj/material.hpp"
+#include "engine/shader_program/shader_program.hpp"
 #include <cstdio>
 #include <engine/mesh/obj/obj.hpp>
+#include <filesystem>
 #include <fstream>
 #include <glm/ext/matrix_transform.hpp>
+#include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 using namespace engine;
 
-enum obj_parse_state
-{
-    ROOT
-};
-
 bool load_obj(const std::basic_string<char> &obj_path, std::vector<mesh::vertex> &vertices, std::vector<mesh::uv> &uvs,
-              std::vector<mesh::normal> &normals, std::vector<mesh::face_indices> &faces)
+              std::vector<mesh::normal> &normals, std::vector<mesh::face_indices> &faces, mesh::material &material)
 {
     std::ifstream obj_file(obj_path);
     std::string line;
@@ -78,6 +78,21 @@ bool load_obj(const std::basic_string<char> &obj_path, std::vector<mesh::vertex>
             f.v2.normal_index--;
 
             faces.push_back(f);
+        }
+        else if (token == "mtllib")
+        {
+            std::string mtl_filename;
+            std::filesystem::path obj_parent_dir(obj_path);
+            obj_parent_dir = obj_parent_dir.parent_path();
+
+            ss >> mtl_filename;
+
+            std::filesystem::path mtl_path(obj_parent_dir.append(mtl_filename));
+
+            if (!material.load_mtl(mtl_path))
+            {
+                throw std::runtime_error("Error loading mtl file: " + obj_path);
+            }
         }
     }
 
@@ -155,12 +170,29 @@ mesh::obj::obj(const std::basic_string<char> &name, const std::basic_string<char
 
     engine::shader vertex_shader("resources/shaders/obj/obj.vs", GL_VERTEX_SHADER);
     engine::shader fragment_shader("resources/shaders/obj/obj.fs", GL_FRAGMENT_SHADER);
-    load_obj(obj_path, vertices, uvs, normals, faces);
+
+    engine::shader texture_vertex_shader("resources/shaders/obj/obj_texture.vs", GL_VERTEX_SHADER);
+    engine::shader texture_fragment_shader("resources/shaders/obj/obj_texture.fs", GL_FRAGMENT_SHADER);
+
+    if (!load_obj(obj_path, vertices, uvs, normals, faces, m_material))
+    {
+        throw std::runtime_error("Error opening obj file: " + obj_path);
+    }
+
     process_faces(m_indices, m_points, vertices, uvs, normals, faces);
+
+    for (auto &[mat_name, attributes] : m_material.m_materials)
+    {
+        std::cout << "OBJ file loaded material: " << mat_name << std::endl;
+    }
 
     m_shader_program.add_shader(vertex_shader.id());
     m_shader_program.add_shader(fragment_shader.id());
     m_shader_program.link();
+
+    m_texture_shader_program.add_shader(texture_vertex_shader.id());
+    m_texture_shader_program.add_shader(texture_fragment_shader.id());
+    m_texture_shader_program.link();
 
     m_vao.bind();
     m_vbo.bind();
@@ -185,15 +217,26 @@ void mesh::obj::update(double dt)
 
 void mesh::obj::draw(const glm::mat4 &model, const glm::mat4 &projection, const glm::mat4 &view)
 {
-    m_shader_program.bind();
 
     m_vbo.bind();
     m_vao.bind();
     m_ebo.bind();
 
-    m_shader_program.set_mat4("model", model * m_model);
-    m_shader_program.set_mat4("view", view);
-    m_shader_program.set_mat4("projection", projection);
+    assert(m_material.m_materials.begin() != m_material.m_materials.end());
+    auto &[material_name, material_attributes] = *m_material.m_materials.begin();
+
+    shader_program &shader_program = m_shader_program;
+
+    if (material_attributes.m_texture)
+    {
+        shader_program = m_texture_shader_program;
+        material_attributes.m_texture->bind();
+    }
+
+    shader_program.bind();
+    shader_program.set_mat4("model", model * m_model);
+    shader_program.set_mat4("view", view);
+    shader_program.set_mat4("projection", projection);
 
     glDrawElements(GL_TRIANGLES,     // mode
                    m_indices.size(), // count
@@ -201,9 +244,10 @@ void mesh::obj::draw(const glm::mat4 &model, const glm::mat4 &projection, const 
                    (void *)0         // element array buffer offset
     );
 
-    m_ebo.unbind();
-    m_vao.unbind();
-    m_vbo.unbind();
-
+    EBO::unbind();
+    VAO::unbind();
+    VBO::unbind();
+    texture::unbind();
+    shader_program::unbind();
     mesh_t::draw(model, view, projection);
 }

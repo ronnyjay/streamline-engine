@@ -1,3 +1,4 @@
+#include "engine/mesh/obj/obj.hpp"
 #include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/camera/perspective/perspective.hpp>
 #include <engine/config/config.hpp>
@@ -27,18 +28,25 @@ int main(int argc, const char *argv[])
 
     engine::world world;
 
-    engine::mesh::pyramid p0("Left Pyramid");
-    engine::mesh::pyramid p1("Right Pyramid");
-    engine::mesh::pyramid p2("Top Pyramid");
-    engine::mesh::pyramid p3("Bottom Pyramid");
-    engine::mesh::pyramid p4("Center Pyramid");
+    // engine::mesh::pyramid p0("Left Pyramid");
+    // engine::mesh::pyramid p1("Right Pyramid");
+    // engine::mesh::pyramid p2("Top Pyramid");
+    // engine::mesh::pyramid p3("Bottom Pyramid");
+    // engine::mesh::pyramid p0("Left Pyramid");
+    // engine::mesh::pyramid p1("Right Pyramid");
+    // engine::mesh::pyramid p2("Top Pyramid");
+    // engine::mesh::pyramid p3("Bottom Pyramid");
+    // engine::mesh::pyramid p4("Master Pyramid");
 
-    p0.add_mesh(&p1); // left owns right
-    p2.add_mesh(&p3); // top owns bottom
-    p4.add_mesh(&p0);
-    p4.add_mesh(&p2);
+    engine::mesh::obj cube("Cube", "resources/objects/crow.obj");
+    world.add_mesh(&cube);
 
-    world.add_mesh(&p4);
+    // p0.add_mesh(&p1); // left owns right
+    // p2.add_mesh(&p3); // top owns bottom
+    // p4.add_mesh(&p0);
+    // p4.add_mesh(&p2);
+
+    // world.add_mesh(&p4);
 
     engine::shader_program sp;
     engine::shader vertex_shader("resources/shaders/text/text.vs", GL_VERTEX_SHADER);

@@ -11,7 +11,7 @@ class VBO
     VBO();
 
     void bind();
-    void unbind();
+    static void unbind();
     void init(const void *data, unsigned int size, unsigned int usage);
 
     GLuint get_id() const;

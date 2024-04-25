@@ -14,7 +14,7 @@ class VAO
     VAO();
 
     void bind();
-    void unbind();
+    static void unbind();
 
     void set(unsigned int index, unsigned int size, unsigned int type, unsigned int stride, const void *pointer);
     void set_int(unsigned int index, unsigned int size, unsigned int type, unsigned int stride, const void *pointer);
