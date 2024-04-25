@@ -97,13 +97,13 @@ int main(int argc, const char *argv[])
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        engine::text health_text(health_out, -0.95, +0.70, 2.0f, color, 0.9f);
+        // engine::text health_text(health_out, -0.95, +0.70, 2.0f, color, 0.9f);
 
         world.update(dt);
         world.draw();
 
         application.debug_window().render();
-        health_text.draw(sp);
+        // health_text.draw(sp);
 
         glfwSwapBuffers(application.as_glfw_window());
         glfwPollEvents();

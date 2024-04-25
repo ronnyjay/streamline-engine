@@ -2,6 +2,7 @@
 
 #include <engine/stb/stb_image.hpp>
 
+#include <filesystem>
 #include <glad/gl.h>
 
 #include <string>
@@ -12,7 +13,7 @@ namespace engine
 class texture
 {
   public:
-    texture(const std::basic_string<char>);
+    texture(const std::filesystem::path &image_path);
 
     void bind();
     static void unbind()

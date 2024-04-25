@@ -46,6 +46,7 @@ GLuint shader::load_shader(const std::basic_string<char> &filepath, GLenum shade
     if (result != GL_TRUE)
     {
         std::string error = "Error compiling shader: ";
+        error += filepath + " - ";
         error += shaderCompileError;
 
         throw std::runtime_error(error + shaderCompileError);
