@@ -1,42 +1,40 @@
-#include <engine/camera/camera.hpp>
+#include <engine/application/application.hpp>
 #include <engine/world/world.hpp>
-
-extern int window_width;
-extern int window_height;
-
-extern engine::window application;
 
 using namespace engine;
 
-extern bool imGui_toggle;
+extern Application application;
 
-engine::world::world()
+void World::update(double dt)
 {
-}
-
-void engine::world::update(double dt)
-{
-    for (auto obj : m_meshes)
+    for (auto &mesh : m_meshes)
     {
-        obj->update(dt);
+        mesh->update(dt);
     }
 }
 
-void world::draw()
+void World::draw()
 {
-
-    for (auto obj : m_meshes)
+    for (auto &mesh : m_meshes)
     {
-        obj->draw(glm::mat4(1.0f), application.camera()->projection_matrix(), application.camera()->view_matrix());
+        mesh->draw(application.camera()->view_matrix(), glm::mat4(1.0f), application.camera()->projection_matrix());
     }
 }
 
-void engine::world::add_mesh(engine::mesh::mesh_t *const obj)
+void World::draw_debug_info()
 {
-    m_meshes.push_back(obj);
+    if (ImGui::TreeNode("Meshes"))
+    {
+        for (const auto &mesh : m_meshes)
+        {
+            mesh->draw_debug_info();
+        }
+
+        ImGui::TreePop();
+    }
 }
 
-void world::show_wireframes(bool val)
+void World::add_mesh(Mesh *const mesh)
 {
-    val ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    m_meshes.push_back(mesh);
 }

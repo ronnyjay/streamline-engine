@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/window/window.hpp>
+#include <engine/debug/debug.hpp>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
@@ -11,117 +11,77 @@
 
 #include <string>
 
-extern engine::window application;
-
 namespace engine
 {
 
-namespace camera
-{
+// default camera values
+const float YAW = 0.0f;
+const float PITCH = 0.0f;
+const float SPEED = 0.1f;
+const float SENSITIVITY = 0.05f;
+const float ZOOM = 1.0f;
 
 typedef enum
 {
-    UP,
-    DOWN,
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
-} direction;
+    Forward,
+    Backward,
+    Left,
+    Right,
+    Up,
+    Down
+} CameraDirection;
 
-class camera_t
+class Camera : public Debuggable
 {
   public:
-    camera_t()
-        : m_position(0.0f, 0.0f, 0.0f), m_yaw(0.0f), m_pitch(0.0f), m_zoom(1.0f), m_movement_speed(0.1f),
-          m_mouse_sensitivity(0.025f), m_title("Camera")
+    Camera(const std::string &identifier, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = YAW, float pitch = PITCH, float zoom = ZOOM)
+        : Debuggable(identifier), m_movement_speed(SPEED), m_mouse_sensitivity(SENSITIVITY)
     {
+        m_yaw = yaw;
+        m_pitch = pitch;
+        m_zoom = zoom;
+        m_position = position;
     }
 
-    virtual void update() = 0;
+    virtual void update_vectors() = 0;
 
     virtual glm::mat4 const projection_matrix() const = 0;
     virtual glm::mat4 const view_matrix() const = 0;
 
-    virtual void move(direction) = 0;                    // keyboard input
-    virtual void move(float xoffset, float yoffset) = 0; // mouse movement
-    virtual void move(float yoffset) = 0;                // mouse scroll
+    virtual void move(const CameraDirection) = 0; // keyboard input
+    virtual void move(const double, double) = 0;  // mouse movement
+    virtual void move(const double) = 0;          // mouse scroll
 
-    void set_position(glm::vec3 position)
-    {
-        m_position = position;
-        update();
-    }
+    virtual void draw_debug_info() override;
 
-    void set_yaw(float yaw)
-    {
-        m_yaw = yaw;
-        update();
-    }
+    const glm::vec3 &position() const;
+    void set_position(const glm::vec3 &);
 
-    void set_pitch(float pitch)
-    {
-        m_pitch = pitch;
-        update();
-    }
+    float yaw() const;
+    void set_yaw(const float);
 
-    void set_zoom(float zoom)
-    {
-        m_zoom = zoom;
-        update();
-    }
+    float pitch() const;
+    void set_pitch(const float);
 
-    void set_movement_speed(float speed)
-    {
-        m_movement_speed = speed;
-        update();
-    }
+    float zoom() const;
+    void set_zoom(const float);
 
-    void set_mouse_sensitivity(float sensitivity)
-    {
-        m_mouse_sensitivity = sensitivity;
-        update();
-    }
+    float movement_speed() const;
+    void set_movement_speed(const float);
 
-    glm::vec3 &position()
-    {
-        return m_position;
-    }
+    float mouse_sensitivity() const;
+    void set_mouse_sensitivity(const float);
 
-    float &yaw()
-    {
-        return m_yaw;
-    }
-
-    float &pitch()
-    {
-        return m_pitch;
-    }
-
-    float &zoom()
-    {
-        return m_zoom;
-    }
-
-    std::string const &title() const
-    {
-        return m_title;
-    }
-
-  protected:
-    glm::vec3 m_position;
-
+  private:
     float m_yaw;
     float m_pitch;
-
-    float m_zoom;
 
     float m_movement_speed;
     float m_mouse_sensitivity;
 
-    std::string m_title;
-};
+    float m_zoom;
 
-} // namespace camera
+    glm::vec3 m_position;
+};
 
 }; // namespace engine

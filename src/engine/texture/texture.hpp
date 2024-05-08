@@ -16,12 +16,9 @@ class texture
     texture(const std::filesystem::path &image_path);
 
     void bind();
-    static void unbind()
-    {
-        glBindTexture(GL_TEXTURE_BINDING_2D, 0);
-    }
+    static void unbind();
 
-    GLuint id() const;
+    GLuint get_id() const;
 
     ~texture();
 

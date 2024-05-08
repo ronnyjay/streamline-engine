@@ -1,43 +1,30 @@
 #pragma once
 
 #include <engine/camera/camera.hpp>
-#include <engine/window/window.hpp>
 
 namespace engine
 {
 
-namespace camera
-{
-
-class orthographic_camera : public camera_t
+class OrthographicCamera : public Camera
 {
   public:
-    orthographic_camera();
+    OrthographicCamera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = YAW, float pitch = PITCH, float zoom = ZOOM)
+        : Camera("Orthographic Camera", position, yaw, pitch, zoom)
+    {
+        update_vectors();
+    }
 
-    virtual void update() override;
+    virtual void update_vectors() override;
 
     virtual glm::mat4 const projection_matrix() const override;
     virtual glm::mat4 const view_matrix() const override;
 
-    virtual void move(direction) override;                    // keyboard input
-    virtual void move(float xoffset, float yoffset) override; // mouse movement
-    virtual void move(float yoffset) override;                // mouse scroll
-
-    void invert_controls(bool);
+    virtual void move(const CameraDirection) override; // keyboard input
+    virtual void move(const double, double) override;  // mouse movement
+    virtual void move(const double) override;          // mouse scroll
 
   private:
     glm::mat4 m_view_model;
-
-    float m_left;
-    float m_right;
-    float m_bottom;
-    float m_top;
-    float m_near;
-    float m_far;
-
-    bool m_inverted;
 };
-
-}; // namespace camera
 
 }; // namespace engine

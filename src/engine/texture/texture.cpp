@@ -13,7 +13,6 @@ std::vector<unsigned char> loadBMP(const std::filesystem::path &filepath, int &w
     if (!file.is_open())
     {
         throw std::runtime_error("Failed to load texture: " + filepath.string());
-        exit(1);
     }
 
     // Read BMP header
@@ -21,14 +20,14 @@ std::vector<unsigned char> loadBMP(const std::filesystem::path &filepath, int &w
     file.read(reinterpret_cast<char *>(&width), 4);
     file.read(reinterpret_cast<char *>(&height), 4);
 
-    int numPixels = width * height;
-    std::vector<unsigned char> data(numPixels * 3); // 3 channels for RGB
+    int num_pixels = width * height;
+    std::vector<unsigned char> data(num_pixels * 3); // 3 channels for RGB
 
     file.seekg(54); // Skip to pixel data
     file.read(reinterpret_cast<char *>(data.data()), data.size());
 
     // BMP uses BGR format, so swap red and blue channels
-    for (int i = 0; i < numPixels * 3; i += 3)
+    for (int i = 0; i < num_pixels * 3; i += 3)
     {
         unsigned char temp = data[i];
         data[i] = data[i + 2];
@@ -96,7 +95,12 @@ void texture::bind()
     glBindTexture(GL_TEXTURE_BINDING_2D, m_id);
 }
 
-GLuint texture::id() const
+void texture::unbind()
+{
+    glBindTexture(GL_TEXTURE_BINDING_2D, 0);
+}
+
+GLuint texture::get_id() const
 {
     return m_id;
 }

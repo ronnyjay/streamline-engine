@@ -1,28 +1,29 @@
 #pragma once
 
-#define GLFW_INCLUDE_NONE
-
+#include <engine/debug/debug.hpp>
 #include <engine/mesh/mesh.hpp>
-#include <engine/window/window.hpp>
 
 #include <list>
 
 namespace engine
 {
 
-class world
+class World : public Debuggable
 {
   public:
-    world();
+    World(const std::string &identifier) : Debuggable(identifier)
+    {
+    }
 
     void update(double);
     void draw();
-    void add_mesh(engine::mesh::mesh_t *const);
 
-    void show_wireframes(bool);
+    void add_mesh(Mesh *const);
+
+    virtual void draw_debug_info() override;
 
   private:
-    std::list<engine::mesh::mesh_t *> m_meshes;
+    std::list<Mesh *> m_meshes;
 };
 
 }; // namespace engine
