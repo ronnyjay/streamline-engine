@@ -28,18 +28,18 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 include_directories(
     src
-    external/imgui
-    external/imgui/backends
+    extern/imgui
+    extern/imgui/backends
 )
 
 add_library(imgui STATIC
-    external/imgui/imgui.cpp
-    external/imgui/imgui_widgets.cpp
-    external/imgui/imgui_draw.cpp
-    external/imgui/imgui_demo.cpp
-    external/imgui/imgui_tables.cpp
-    external/imgui/backends/imgui_impl_opengl3.cpp
-    external/imgui/backends/imgui_impl_glfw.cpp
+    extern/imgui/imgui.cpp
+    extern/imgui/imgui_widgets.cpp
+    extern/imgui/imgui_draw.cpp
+    extern/imgui/imgui_demo.cpp
+    extern/imgui/imgui_tables.cpp
+    extern/imgui/backends/imgui_impl_opengl3.cpp
+    extern/imgui/backends/imgui_impl_glfw.cpp
 )
 
 target_link_libraries(imgui PRIVATE glfw)
