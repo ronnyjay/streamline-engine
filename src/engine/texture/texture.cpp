@@ -37,7 +37,7 @@ std::vector<unsigned char> loadBMP(const std::filesystem::path &filepath, int &w
     return data;
 }
 
-texture::texture(const std::filesystem::path &image_path)
+Texture::Texture(const std::filesystem::path &image_path)
 {
     std::vector<unsigned char> data;
 
@@ -90,21 +90,21 @@ texture::texture(const std::filesystem::path &image_path)
     }
 }
 
-void texture::bind()
+void Texture::bind()
 {
     glBindTexture(GL_TEXTURE_BINDING_2D, m_id);
 }
 
-void texture::unbind()
+void Texture::unbind()
 {
     glBindTexture(GL_TEXTURE_BINDING_2D, 0);
 }
 
-GLuint texture::get_id() const
+GLuint Texture::get_id() const
 {
     return m_id;
 }
 
-texture::~texture()
+Texture::~Texture()
 {
 }

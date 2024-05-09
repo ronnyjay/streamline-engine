@@ -1,6 +1,7 @@
 #include <engine/application/application.hpp>
 #include <engine/camera/orthographic/orthographic.hpp>
 #include <engine/camera/perspective/perspective.hpp>
+#include <engine/mesh/object/object.hpp>
 #include <engine/mesh/pyramid/pyramid.hpp>
 #include <engine/world/world.hpp>
 
@@ -12,7 +13,7 @@ int main(int argc, char const *argv[])
     engine::PerspectiveCamera perspective_camera;
     engine::OrthographicCamera orthographic_camera;
     engine::World world("Overworld");
-    engine::PyramidMesh pyramid_mesh("Pyramid Mesh");
+    engine::Object cube("Cube", "resources/objects/crow.obj");
 
     application.set_window(&window);
 
@@ -32,7 +33,7 @@ int main(int argc, char const *argv[])
     orthographic_camera.set_yaw(-45.0f);
     orthographic_camera.set_pitch(36.0f);
 
-    world.add_mesh(&pyramid_mesh);
+    world.add_mesh(&cube);
 
     application.run();
 

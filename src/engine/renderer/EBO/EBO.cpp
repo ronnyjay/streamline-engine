@@ -17,7 +17,7 @@ void EBO::unbind()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void EBO::initialize(unsigned int size, const void *data, unsigned int usage)
+void EBO::initialize(const void *data, unsigned int size, unsigned int usage)
 {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage);
 }

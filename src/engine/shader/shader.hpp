@@ -48,7 +48,7 @@ class ShaderProgram
     void add_shader(GLuint);
 
     void bind();
-    void unbind();
+    static void unbind();
 
     void link();
 

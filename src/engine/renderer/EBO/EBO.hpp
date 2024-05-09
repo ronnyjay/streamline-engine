@@ -13,7 +13,7 @@ class EBO
     void bind();
     static void unbind();
 
-    void initialize(unsigned int, const void *, unsigned int);
+    void initialize(const void *, unsigned int, unsigned int);
 
     GLuint get_id() const;
 

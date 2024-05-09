@@ -10,17 +10,17 @@
 namespace engine
 {
 
-class texture
+class Texture
 {
   public:
-    texture(const std::filesystem::path &image_path);
+    Texture(const std::filesystem::path &image_path);
 
     void bind();
     static void unbind();
 
     GLuint get_id() const;
 
-    ~texture();
+    ~Texture();
 
     int m_width;
     int m_height;

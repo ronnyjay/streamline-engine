@@ -7,6 +7,8 @@ target_sources(engine PRIVATE
     camera/perspective/perspective.cpp
     mesh/mesh.cpp
     mesh/pyramid/pyramid.cpp
+    mesh/object/object.cpp
+    mesh/object/material/material.cpp
     renderer/VAO/VAO.cpp
     renderer/VBO/VBO.cpp
     renderer/EBO/EBO.cpp
