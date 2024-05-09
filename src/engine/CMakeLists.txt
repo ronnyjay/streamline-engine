@@ -14,6 +14,7 @@ target_sources(engine PRIVATE
     renderer/EBO/EBO.cpp
     shader/shader.cpp
     stb/stb_image.cpp
+    text/text.cpp
     texture/texture.cpp
     window/window.cpp
     world/world.cpp

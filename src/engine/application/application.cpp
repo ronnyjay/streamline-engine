@@ -1,5 +1,6 @@
 #include <engine/application/application.hpp>
 #include <engine/stb/stb_image.hpp>
+#include <engine/text/text.hpp>
 
 using namespace engine;
 
