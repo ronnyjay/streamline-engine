@@ -9,34 +9,34 @@ using namespace engine;
 
 const GLfloat PyramidMesh::m_vertices[][5] = {
 // front face               
-{-1.0f, 0.0f, 9.0f, 0.0f, 0.0f},
-{1.0f, 0.0f, 9.0f, 1.0f, 0.f},
-{0.0f, 2.0f, 10.0f, 0.5f, 1.0f},
+{-1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+{1.0f, 0.0f, 1.0f, 1.0f, 0.f},
+{0.0f, 2.0f, 0.0f, 0.5f, 1.0f},
 
 // back face
-{-1.0f, 0.0f, 11.0f, 0.0f, 0.0f},
-{1.0f, 0.0f, 11.0f, 1.0f, 0.0f},
-{0.0f, 2.0f, 10.0f, 0.5f, 1.0f},
+{-1.0f, 0.0f, -1.0f, 0.0f, 0.0f},
+{1.0f, 0.0f, -1.0f, 1.0f, 0.0f},
+{0.0f, 2.0f, 0.0f, 0.5f, 1.0f},
 
 // left face
-{-1.0f, 0.0f, 9.0f, 0.0f, 0.0f},
-{-1.0f, 0.0f, 11.0f, 1.0f, 0.0f},
-{0.0f, 2.0f, 10.0f, 0.5f, 1.0f},
+{-1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+{-1.0f, 0.0f, -1.0f, 1.0f, 0.0f},
+{0.0f, 2.0f, 0.0f, 0.5f, 1.0f},
 
 // right face
-{1.0f, 0.0f, 11.0f, 0.0f, 0.0f},
-{1.0f, 0.0f, 9.0f, 1.0f, 0.0f},
-{0.0f, 2.0f, 10.0f, 0.5f, 1.0f},
+{1.0f, 0.0f, -1.0f, 0.0f, 0.0f},
+{1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
+{0.0f, 2.0f, 0.0f, 0.5f, 1.0f},
 
 // bottom left face           
-{1.0f, 0.0f, 9.0f, 0.0f, 0.0f},
-{-1.0f, 0.0f, 9.0f, 1.0f, 0.0f},
-{-1.0f, 0.0f, 11.0f, 0.5f, 1.0f},
+{1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+{-1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
+{-1.0f, 0.0f, -1.0f, 0.5f, 1.0f},
 
 // bottom right face
-{-1.0f, 0.0f, 11.0f, 0.0f, 0.0f},
-{1.0f, 0.0f, 11.0f, 1.0f, 0.0f},
-{1.0f, 0.0f, 9.0f, 0.5f, 1.0f},
+{-1.0f, 0.0f, -1.0f, 0.0f, 0.0f},
+{1.0f, 0.0f, -1.0f, 1.0f, 0.0f},
+{1.0f, 0.0f, 1.0f, 0.5f, 1.0f},
 };
 
 // clang-format on
@@ -69,9 +69,8 @@ void PyramidMesh::update(double dt)
         angle -= 360.0f;
 
     set_model(glm::translate(glm::mat4(1.0f), position()));
-    set_model(glm::translate(model(), glm::vec3(0.0f, 1.0f, 10.0f)));
     set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)));
-    set_model(glm::translate(model(), glm::vec3(0.0f, -1.0f, -10.0f)));
+    set_model(glm::translate(model(), -position()));
 
     Mesh::update(dt);
 }

@@ -211,12 +211,22 @@ Object::Object(const std::basic_string<char> &name, const std::basic_string<char
 
 void Object::update(double dt)
 {
-    set_model(glm::translate(glm::mat4(1), position()));
+    static float angle = 0.0f;
+    float rotation_speed = 30.0f; // degrees per second
+
+    angle += rotation_speed * dt;
+    if (angle >= 360.0f)
+        angle -= 360.0f;
+
+    set_model(glm::translate(glm::mat4(1.0f), position()));
+    set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)));
+    set_model(glm::translate(model(), -position()));
+
+    Mesh::update(dt);
 }
 
-void Object::draw(const glm::mat4 &model, const glm::mat4 &projection, const glm::mat4 &view)
+void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)
 {
-
     m_vbo.bind();
     m_vao.bind();
     m_ebo.bind();
@@ -233,8 +243,8 @@ void Object::draw(const glm::mat4 &model, const glm::mat4 &projection, const glm
     }
 
     shader_program.bind();
-    shader_program.set_mat4("model", model * Mesh::model());
     shader_program.set_mat4("view", view);
+    shader_program.set_mat4("model", model * Mesh::model());
     shader_program.set_mat4("projection", projection);
 
     glDrawElements(GL_TRIANGLES,     // mode
@@ -246,7 +256,6 @@ void Object::draw(const glm::mat4 &model, const glm::mat4 &projection, const glm
     EBO::unbind();
     VAO::unbind();
     VBO::unbind();
-    Texture::unbind();
-    ShaderProgram::unbind();
+
     Mesh::draw(view, model, projection);
 }
