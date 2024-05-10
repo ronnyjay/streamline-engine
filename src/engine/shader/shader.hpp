@@ -8,37 +8,66 @@
 namespace engine
 {
 
-class shader
+class Shader
 {
   public:
-    shader(const std::basic_string<char> &filepath, GLenum shader_type);
+    Shader(const std::basic_string<char> &, GLenum);
 
     void use();
 
-    static GLuint load_shader(const std::basic_string<char> &filepath, GLenum shader_type);
+    // utility uniform functions
+    void set_bool(const std::string &, bool) const;
+    void set_int(const std::string &, int) const;
+    void set_unsigned_int(const std::string &, int) const;
+    void set_float(const std::string &, float) const;
+    void set_vec2(const std::string &, const glm::vec2 &) const;
+    void set_vec2(const std::string &, float, float) const;
+    void set_vec3(const std::string &, const glm::vec3 &) const;
+    void set_vec3(const std::string &, float, float, float) const;
+    void set_vec4(const std::string &, const glm::vec4 &) const;
+    void set_vec4(const std::string &, float, float, float, float);
+    void set_mat2(const std::string &, const glm::mat2 &) const;
+    void set_mat3(const std::string &, const glm::mat3 &) const;
+    void set_mat4(const std::string &, const glm::mat4 &) const;
+
+    GLuint get_id() const;
+
+    static GLuint load(const std::basic_string<char> &, GLenum);
+
+    ~Shader();
+
+  private:
+    GLuint m_id;
+};
+
+class ShaderProgram
+{
+  public:
+    ShaderProgram();
+
+    void add_shader(GLuint);
+
+    void bind();
+    static void unbind();
+
+    void link();
 
     // utility uniform functions
-    void set_bool(const std::string &name, bool value) const;
-    void set_int(const std::string &name, int value) const;
-    void set_uint(const std::string &name, int value) const;
-    void set_float(const std::string &name, float value) const;
+    void set_bool(const std::string &, bool) const;
+    void set_int(const std::string &, int) const;
+    void set_unsigned_int(const std::string &, int) const;
+    void set_float(const std::string &, float) const;
+    void set_vec2(const std::string &, const glm::vec2 &) const;
+    void set_vec2(const std::string &, float, float) const;
+    void set_vec3(const std::string &, const glm::vec3 &) const;
+    void set_vec3(const std::string &, float, float, float) const;
+    void set_vec4(const std::string &, const glm::vec4 &) const;
+    void set_vec4(const std::string &, float, float, float, float);
+    void set_mat2(const std::string &, const glm::mat2 &) const;
+    void set_mat3(const std::string &, const glm::mat3 &) const;
+    void set_mat4(const std::string &, const glm::mat4 &) const;
 
-    void set_vec2(const std::string &name, const glm::vec2 &value) const;
-    void set_vec2(const std::string &name, float x, float y) const;
-
-    void set_vec3(const std::string &name, const glm::vec3 &value) const;
-    void set_vec3(const std::string &name, float x, float y, float z) const;
-
-    void set_vec4(const std::string &name, const glm::vec4 &value) const;
-    void set_vec4(const std::string &name, float x, float y, float z, float w);
-
-    void set_mat2(const std::string &name, const glm::mat2 &mat) const;
-    void set_mat3(const std::string &name, const glm::mat3 &mat) const;
-    void set_mat4(const std::string &name, const glm::mat4 &mat) const;
-
-    GLuint id() const;
-
-    ~shader();
+    GLuint get_id() const;
 
   private:
     GLuint m_id;

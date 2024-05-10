@@ -1,107 +1,126 @@
+#include <engine/application/application.hpp>
 #include <engine/camera/perspective/perspective.hpp>
 
-extern int window_width;
-extern int window_height;
+using namespace engine;
 
-extern engine::window application;
+extern Application application;
 
-using namespace engine::camera;
-
-perspective_camera::perspective_camera() : m_front(0.0f, 0.0f, 1.0f), m_up(0.0f, 1.0f, 0.0f), m_world_up(m_up)
-{
-    m_position = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_yaw = 90.0f;
-    m_zoom = 45.0f;
-    m_title = "Perspective Camera";
-
-    update();
-}
-
-void perspective_camera::update()
+void PerspectiveCamera::update_vectors()
 {
     glm::vec3 front;
-    front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    front.y = sin(glm::radians(m_pitch));
-    front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    front.x = cos(glm::radians(yaw())) * cos(glm::radians(pitch()));
+    front.y = sin(glm::radians(pitch()));
+    front.z = sin(glm::radians(yaw())) * cos(glm::radians(pitch()));
     m_front = glm::normalize(front);
 
     glm::vec3 forward_horizontal;
-    forward_horizontal.x = cos(glm::radians(m_yaw));
+    forward_horizontal.x = cos(glm::radians(yaw()));
     forward_horizontal.y = 0;
-    forward_horizontal.z = sin(glm::radians(m_yaw));
+    forward_horizontal.z = sin(glm::radians(yaw()));
     m_forward_horizontal = glm::normalize(forward_horizontal);
 
     m_right = glm::normalize(glm::cross(m_front, m_world_up));
     m_up = glm::normalize(glm::cross(m_right, m_front));
 }
 
-glm::mat4 const perspective_camera::projection_matrix() const
+glm::mat4 const PerspectiveCamera::projection_matrix() const
 {
-    return glm::perspective(glm::radians(m_zoom), (float)application.width() / (float)application.height(), 0.1f,
-                            1000.0f);
+    auto width = static_cast<float>(application.window()->width());
+    auto height = static_cast<float>(application.window()->height());
+    return glm::perspective(glm::radians(zoom()), width / height, 0.1f, 1000.0f);
 }
 
-glm::mat4 const perspective_camera::view_matrix() const
+glm::mat4 const PerspectiveCamera::view_matrix() const
 {
-    return glm::lookAt(m_position, m_position + m_front, m_up);
+    return glm::lookAt(position(), position() + m_front, m_up);
 }
 
-void perspective_camera::move(camera::direction direction)
+void PerspectiveCamera::move(CameraDirection directon)
 {
-    switch (direction)
+    switch (directon)
     {
-    case UP:
-        m_position.y += m_movement_speed;
+    case Forward:
+        if (m_lock_horizontal_movement)
+        {
+            set_position(position() + (m_forward_horizontal * movement_speed()));
+        }
+        else
+        {
+            set_position(position() + (m_front * movement_speed()));
+        }
         break;
-    case DOWN:
-        m_position.y -= m_movement_speed;
+    case Backward:
+        if (m_lock_horizontal_movement)
+        {
+            set_position(position() - (m_forward_horizontal * movement_speed()));
+        }
+        else
+        {
+            set_position(position() - (m_front * movement_speed()));
+        }
         break;
-    case FORWARD:
-        m_position += m_forward_horizontal * m_movement_speed;
+    case Left:
+        set_position(position() - (glm::normalize(glm::cross(m_front, m_up)) * movement_speed()));
         break;
-    case BACKWARD:
-        m_position -= m_forward_horizontal * m_movement_speed;
+    case Right:
+        set_position(position() + (glm::normalize(glm::cross(m_front, m_up)) * movement_speed()));
         break;
-    case RIGHT:
-        m_position += glm::normalize(glm::cross(m_front, m_up)) * m_movement_speed;
+    case Up:
+        set_position(glm::vec3(position().x, position().y + movement_speed(), position().z));
         break;
-    case LEFT:
-        m_position -= glm::normalize(glm::cross(m_front, m_up)) * m_movement_speed;
+    case Down:
+        set_position(glm::vec3(position().x, position().y - movement_speed(), position().z));
         break;
+    }
+
+    update_vectors();
+}
+
+void PerspectiveCamera::move(double x_pos, double y_pos)
+{
+    x_pos *= mouse_sensitivity();
+    y_pos *= mouse_sensitivity();
+
+    set_yaw(yaw() + x_pos);
+    set_pitch(pitch() + y_pos);
+
+    if (pitch() > 89.0f)
+    {
+        set_pitch(89.0f);
+    }
+    if (pitch() < -89.0f)
+    {
+        set_pitch(-89.0f);
+    }
+
+    update_vectors();
+}
+
+void PerspectiveCamera::move(double y_offset)
+{
+    set_zoom(zoom() - y_offset);
+
+    if (zoom() < 1.0f)
+    {
+        set_zoom(1.0f);
+    }
+
+    if (zoom() > 45.0f)
+    {
+        set_zoom(45.0f);
     }
 }
 
-void perspective_camera::move(float xoffset, float yoffset)
+void PerspectiveCamera::draw_debug_info()
 {
-    xoffset *= m_mouse_sensitivity;
-    yoffset *= m_mouse_sensitivity;
+    Camera::draw_debug_info();
 
-    m_yaw += xoffset;
-    m_pitch += yoffset;
-
-    if (m_pitch > 89.0f)
-    {
-        m_pitch = 89.0f;
-    }
-    if (m_pitch < -89.0f)
-    {
-        m_pitch = -89.0f;
-    }
-
-    update();
+    ImGui::Text("Lock Horizontal Movement");
+    ImGui::SameLine();
+    ImGui::Checkbox("##lock_horizontal_movement", &m_lock_horizontal_movement);
 }
 
-void perspective_camera::move(float yoffset)
+void PerspectiveCamera::lock_horizontal_movement(bool lock)
 {
-    m_zoom -= yoffset;
-
-    if (m_zoom < 1.0f)
-    {
-        m_zoom = 1.0f;
-    }
-
-    if (m_zoom > 45.0f)
-    {
-        m_zoom = 45.0f;
-    }
+    m_lock_horizontal_movement = lock;
 }

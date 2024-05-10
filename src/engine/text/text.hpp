@@ -1,8 +1,9 @@
+
 #pragma once
 
-#include "engine/VAO/VAO.hpp"
-#include "engine/VBO/VBO.hpp"
-#include "engine/shader_program/shader_program.hpp"
+#include "engine/renderer/VAO/VAO.hpp"
+#include "engine/renderer/VBO/VBO.hpp"
+#include "engine/shader/shader.hpp"
 #include "engine/texture/texture.hpp"
 
 #include <glm/fwd.hpp>
@@ -12,16 +13,16 @@
 namespace engine
 {
 
-enum special_character_e
+enum SpecialCharacter
 {
-    NULL_CHAR = 0,
-    HEART,
+    NullChar = 0,
+    Heart,
 };
 
-class text
+class Text
 {
   public:
-    text(const std::basic_string<char> &text, float x, float y, float scale, glm::vec3 color, float max_x)
+    Text(const std::basic_string<char> &text, float x, float y, float scale, glm::vec3 color, float max_x)
         : m_character_texture("resources/textures/characters16x16.bmp"), m_text(text), m_pos(x, y), m_scale(scale), m_color(color)
     {
         // clang-format off
@@ -45,16 +46,16 @@ class text
         // color
         m_vao.set(2, 3, GL_FLOAT, 7 * sizeof(float), (void *)(4 * sizeof(float)));
 
-        m_vbo.init(data, sizeof(data), GL_STATIC_DRAW);
+        m_vbo.initialize(data, sizeof(data), GL_STATIC_DRAW);
 
         m_vao.unbind();
         m_vbo.unbind();
     }
 
-    void draw(shader_program &s);
+    void draw(ShaderProgram &s);
 
   private:
-    texture m_character_texture;
+    Texture m_character_texture;
 
     std::string m_text;
     glm::vec2 m_pos;

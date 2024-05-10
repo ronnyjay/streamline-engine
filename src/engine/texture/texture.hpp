@@ -2,6 +2,7 @@
 
 #include <engine/stb/stb_image.hpp>
 
+#include <filesystem>
 #include <glad/gl.h>
 
 #include <string>
@@ -9,20 +10,17 @@
 namespace engine
 {
 
-class texture
+class Texture
 {
   public:
-    texture(const std::basic_string<char>);
+    Texture(const std::filesystem::path &image_path);
 
     void bind();
-    void unbind()
-    {
-        glBindTexture(GL_TEXTURE_BINDING_2D, 0);
-    }
+    static void unbind();
 
-    GLuint id() const;
+    GLuint get_id() const;
 
-    ~texture();
+    ~Texture();
 
     int m_width;
     int m_height;

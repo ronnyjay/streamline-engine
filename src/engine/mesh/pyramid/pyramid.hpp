@@ -1,28 +1,26 @@
 #pragma once
 
 #include <engine/mesh/mesh.hpp>
-#include <string>
+#include <engine/renderer/VAO/VAO.hpp>
+#include <engine/renderer/VBO/VBO.hpp>
+#include <engine/shader/shader.hpp>
 
 namespace engine
 {
 
-namespace mesh
-{
-
-class pyramid : public mesh_t
+class PyramidMesh : public Mesh
 {
   public:
-    pyramid(const std::basic_string<char> &name);
+    PyramidMesh(const std::string &);
 
-    void update(double);
-    void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &);
+    virtual void update(double);
+    virtual void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &);
 
   private:
-    glm::mat4 m_local_model;
-
-    static const GLfloat m_data[][5];
+    VAO m_VAO;
+    VBO m_VBO;
+    ShaderProgram m_shader_program;
+    static const GLfloat m_vertices[][5];
 };
-
-}; // namespace mesh
 
 }; // namespace engine

@@ -5,98 +5,56 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
-// #include <engine/camera/camera.hpp>
-#include <engine/config/config.hpp>
-#include <engine/debugger/debugger.hpp>
-#include <engine/stb/stb_image.hpp>
-
-#include <irrklang/ik_ISoundEngine.h>
-#include <irrklang/irrKlang.h>
-
-#include <unordered_map>
-
 namespace engine
 {
 
-namespace camera
-{
-class camera_t;
-};
-
-class window
+class Window
 {
   public:
-    window();
-    window(int, int, const char *);
+    Window();
+    Window(const int, const int, const char *);
 
-    void configure(config);
-    void initialize();
+    void resize(const int, const int);
+    void minimize(const int);
+    void maximize(const int);
+    void close();
 
-    void add_camera(int, camera::camera_t *);
-    void set_camera(int);
-    void toggle_camera();
-
-    void process_input();
-
-    GLFWwindow *const as_glfw_window() const
-    {
-        return m_window;
-    }
-
-    debugger &debug_window()
-    {
-        return m_debugger;
-    }
-
-    int width()
-    {
-        return m_window_width;
-    }
-
-    int height()
-    {
-        return m_window_height;
-    }
-
-    camera::camera_t *const camera() const
-    {
-        return m_camera;
-    }
-
-    irrklang::ISoundEngine *const sound_engine() const
-    {
-        return m_sound_engine;
-    }
-
-    bool running()
+    bool running() const
     {
         return !glfwWindowShouldClose(m_window);
     }
 
-  private:
-    static void resize_callback(GLFWwindow *, int, int);
-    static void minimized_callback(GLFWwindow *, int);
-    static void maximized_callback(GLFWwindow *, int);
-    static void key_callback(GLFWwindow *, int, int, int, int);
-    static void cursor_callback(GLFWwindow *, double, double);
-    static void scroll_callback(GLFWwindow *, double, double);
+    GLFWwindow *const glfw_window_ptr() const
+    {
+        return m_window;
+    }
+
+    int width() const
+    {
+        return m_width;
+    }
+
+    int height() const
+    {
+        return m_height;
+    }
+
+    const char *const title() const
+    {
+        return m_title;
+    }
+
+    ~Window();
 
   private:
     GLFWwindow *m_window;
-    debugger m_debugger;
 
-    int m_window_width;
-    int m_window_height;
-    const char *m_window_title;
+    int m_width;
+    int m_height;
 
-    float m_cursor_x;
-    float m_cursor_y;
+    const char *m_title;
 
-    camera::camera_t *m_camera;
-    std::string m_camera_title;
-
-    irrklang::ISoundEngine *m_sound_engine;
-    std::unordered_map<int, camera::camera_t *> m_cameras;
+    void initialize();
 };
 
 }; // namespace engine

@@ -1,9 +1,9 @@
-#include "text.hpp"
-#include "engine/shader_program/shader_program.hpp"
+
+#include <engine/text/text.hpp>
 
 using namespace engine;
 
-void text::draw(engine::shader_program &s)
+void Text::draw(ShaderProgram &s)
 {
     const float x_scale = 0.03f;
     const float y_scale = 0.1f;
@@ -61,8 +61,7 @@ void text::draw(engine::shader_program &s)
         // };
         // clang-format on
 
-
-        m_vbo.init(data, sizeof(data), GL_STATIC_DRAW);
+        m_vbo.initialize(data, sizeof(data), GL_STATIC_DRAW);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
