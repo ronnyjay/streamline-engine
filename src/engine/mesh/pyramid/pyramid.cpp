@@ -69,8 +69,9 @@ void PyramidMesh::update(double dt)
         angle -= 360.0f;
 
     set_model(glm::translate(glm::mat4(1.0f), position()));
+    set_model(glm::translate(model(), glm::vec3(0.0f)));
     set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)));
-    set_model(glm::translate(model(), -position()));
+    set_model(glm::translate(model(), glm::vec3(0.0f)));
 
     Mesh::update(dt);
 }
