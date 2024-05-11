@@ -244,6 +244,8 @@ void Application::run()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+
+    glDepthFunc(GL_LESS);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     stbi_set_flip_vertically_on_load(true);
@@ -253,6 +255,8 @@ void Application::run()
     double dt;
 
     last_time = current_time = glfwGetTime();
+
+    Text text("Streamline Engine", -0.95f, +0.70f, 2.0f, glm::vec3(1.0f), 0.9f);
 
     while (m_window->running())
     {
@@ -265,6 +269,8 @@ void Application::run()
 
         m_world->update(dt);
         m_world->draw();
+
+        text.draw();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();

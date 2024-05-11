@@ -3,7 +3,7 @@
 
 using namespace engine;
 
-void Text::draw(ShaderProgram &s)
+void Text::draw()
 {
     const float x_scale = 0.03f;
     const float y_scale = 0.1f;
@@ -15,14 +15,15 @@ void Text::draw(ShaderProgram &s)
     const float char_width_uv = char_width_pixels / m_character_texture.m_width;
     const float char_height_uv = char_height_pixels / m_character_texture.m_height;
 
-    s.bind();
+    m_shader_program.bind();
 
     m_vbo.bind();
     m_vao.bind();
+
     m_character_texture.bind();
 
-    float x1 = m_pos.x;
-    float y1 = m_pos.y;
+    float x1 = m_position.x;
+    float y1 = m_position.y;
     float y2 = y1 + y_scale * m_scale;
 
     for (const char c : m_text)
@@ -30,7 +31,7 @@ void Text::draw(ShaderProgram &s)
         float x2 = x1 + x_scale * m_scale;
         if (c == '\n' || (x2 > m_max_x && c == ' '))
         {
-            x1 = m_pos.x;
+            x1 = m_position.x;
             y1 = y1 - y_scale * m_scale - padding;
             y2 = y1 + y_scale * m_scale;
             x2 = x1 + x_scale * m_scale;
@@ -53,17 +54,13 @@ void Text::draw(ShaderProgram &s)
             { x1, y2, u1, v2, m_color.r, m_color.g, m_color.b },
             { x2, y2, u2, v2, m_color.r, m_color.g, m_color.b },
         };
-        // const GLfloat data[4][4] = {
-        //     { -0.3f, -0.3f, 0, 0},
-        //     { +0.3f, -0.3f, 1, 0},
-        //     { -0.3f, +0.3f, 0, 1},
-        //     { +0.3f, +0.3f, 1, 1},
-        // };
-        // clang-format on
-
+     
         m_vbo.initialize(data, sizeof(data), GL_STATIC_DRAW);
 
+        
+        glDisable(GL_DEPTH_TEST); // render text in front
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glEnable(GL_DEPTH_TEST);
 
         x1 = x2;
     }

@@ -23,7 +23,7 @@ class Text
 {
   public:
     Text(const std::basic_string<char> &text, float x, float y, float scale, glm::vec3 color, float max_x)
-        : m_character_texture("resources/textures/characters16x16.bmp"), m_text(text), m_pos(x, y), m_scale(scale), m_color(color)
+        : m_text(text), m_position(x, y), m_color(color), m_scale(scale), m_character_texture("resources/textures/characters16x16.bmp")
     {
         // clang-format off
         const GLfloat data[4][4] = {
@@ -34,37 +34,39 @@ class Text
         };
         // clang-format on
 
+        Shader vertex_shader("resources/shaders/text/text.vs", GL_VERTEX_SHADER);
+        Shader fragment_shader("resources/shaders/text/text.fs", GL_FRAGMENT_SHADER);
+
+        m_shader_program.add_shader(vertex_shader.get_id());
+        m_shader_program.add_shader(fragment_shader.get_id());
+        m_shader_program.link();
+
         m_vao.bind();
         m_vbo.bind();
-
-        // position data for rectangle
-        m_vao.set(0, 2, GL_FLOAT, 7 * sizeof(float), (void *)0);
-
-        // uv coordinates
-        m_vao.set(1, 2, GL_FLOAT, 7 * sizeof(float), (void *)(2 * sizeof(float)));
-
-        // color
-        m_vao.set(2, 3, GL_FLOAT, 7 * sizeof(float), (void *)(4 * sizeof(float)));
-
+        m_vao.set(0, 2, GL_FLOAT, 7 * sizeof(float), (void *)0);                   // rectangle position
+        m_vao.set(1, 2, GL_FLOAT, 7 * sizeof(float), (void *)(2 * sizeof(float))); // uv coordinates
+        m_vao.set(2, 3, GL_FLOAT, 7 * sizeof(float), (void *)(4 * sizeof(float))); // color
         m_vbo.initialize(data, sizeof(data), GL_STATIC_DRAW);
-
         m_vao.unbind();
         m_vbo.unbind();
     }
 
-    void draw(ShaderProgram &s);
+    void draw();
 
   private:
-    Texture m_character_texture;
-
     std::string m_text;
-    glm::vec2 m_pos;
-    float m_scale;
+
+    glm::vec2 m_position;
     glm::vec3 m_color;
+
+    float m_scale;
     float m_max_x;
 
     VBO m_vbo;
     VAO m_vao;
+
+    ShaderProgram m_shader_program;
+    Texture m_character_texture;
 };
 
 }; // namespace engine
