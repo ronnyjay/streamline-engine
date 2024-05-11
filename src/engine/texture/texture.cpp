@@ -92,12 +92,12 @@ Texture::Texture(const std::filesystem::path &image_path)
 
 void Texture::bind()
 {
-    glBindTexture(GL_TEXTURE_BINDING_2D, m_id);
+    glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
 void Texture::unbind()
 {
-    glBindTexture(GL_TEXTURE_BINDING_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 GLuint Texture::get_id() const
