@@ -226,6 +226,8 @@ void Object::update(double dt)
     set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)));
     set_model(glm::translate(model(), glm::vec3(0.0f)));
 
+    m_AABB.update(m_points, model());
+
     Mesh::update(dt);
 }
 
@@ -261,6 +263,8 @@ void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4
     EBO::unbind();
     VAO::unbind();
     VBO::unbind();
+
+    m_AABB.draw(view, model, projection);
 
     Mesh::draw(view, model, projection);
 }

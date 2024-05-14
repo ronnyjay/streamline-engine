@@ -30,14 +30,14 @@ void AABB::initialize(const std::vector<Vertex> &vertices)
 
     // clang-format off
     std::vector<Vertex> box_vertices = {
-        { min.x, min.y, min.z },    // bottom back-left 0
-        { max.x, min.y, min.z },    // bottom back-right 1
-        { min.x, max.y, min.z },    // top back-left 2
-        { max.x, max.y, min.z },    // top back-right 3
-        { min.x, min.y, max.z },    // bottom front-left 4
-        { max.x, min.y, max.z },    // bottom front-right 5
-        { min.x, max.y, max.z },    // top front left 6
-        { max.x, max.y, max.z }     // top front right 7
+        { min.x, min.y, min.z },    // bottom back-left 
+        { max.x, min.y, min.z },    // bottom back-right 
+        { min.x, max.y, min.z },    // top back-left 
+        { max.x, max.y, min.z },    // top back-right 
+        { min.x, min.y, max.z },    // bottom front-left
+        { max.x, min.y, max.z },    // bottom front-right 
+        { min.x, max.y, max.z },    // top front left 
+        { max.x, max.y, max.z }     // top front right 
     };
 
     std::vector<Index> box_indices = {
@@ -62,6 +62,37 @@ void AABB::initialize(const std::vector<Vertex> &vertices)
     m_vao.unbind();
     m_vbo.unbind();
     m_ebo.unbind();
+}
+
+void AABB::update(const std::vector<Point> &points, const glm::mat4 &model)
+{
+    Vertex min(FLT_MAX);
+    Vertex max(-FLT_MAX);
+
+    for (const auto &point : points)
+    {
+        Vertex vertex(glm::vec4(point[0], point[1], point[2], 1.0f) * model);
+
+        min = glm::min(min, vertex);
+        max = glm::max(max, vertex);
+    }
+
+    // clang-format off
+    std::vector<Vertex> box_vertices = {
+        { min.x, min.y, min.z },    // bottom back-left 
+        { max.x, min.y, min.z },    // bottom back-right 
+        { min.x, max.y, min.z },    // top back-left 
+        { max.x, max.y, min.z },    // top back-right 
+        { min.x, min.y, max.z },    // bottom front-left
+        { max.x, min.y, max.z },    // bottom front-right 
+        { min.x, max.y, max.z },    // top front left 
+        { max.x, max.y, max.z }     // top front right 
+    };
+    // clang-format on
+
+    m_vbo.bind();
+    m_vbo.initialize(&box_vertices[0], box_vertices.size() * sizeof(Vertex), GL_STATIC_DRAW);
+    m_vbo.unbind();
 }
 
 void AABB::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)

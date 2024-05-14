@@ -12,7 +12,7 @@ void Mesh::update(double dt)
 
 void Mesh::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)
 {
-    m_AABB.draw(view, model * m_model, projection);
+    // m_AABB.draw(view, model * m_model, projection);
 
     for (auto &child : m_children)
     {
