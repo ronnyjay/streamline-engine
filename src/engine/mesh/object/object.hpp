@@ -1,5 +1,6 @@
 #pragma once
 
+#include <engine/collisions/aabb.hpp>
 #include <engine/mesh/mesh.hpp>
 #include <engine/mesh/object/material/material.hpp>
 #include <engine/renderer/EBO/EBO.hpp>
@@ -61,17 +62,17 @@ class Object : public Mesh
     void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &) override;
 
   private:
-    Material m_material;
-
-    std::vector<Index> m_indices; // index into m_data to find vertex - EBO
-    std::vector<Point> m_points;  // vertex, uv, normal - VBO
-
     VAO m_vao;
     VBO m_vbo;
     EBO m_ebo;
 
+    Material m_material;
+
     ShaderProgram m_shader_program;
     ShaderProgram m_texture_shader_program;
+
+    std::vector<Index> m_indices; // index into m_data to find vertex - EBO
+    std::vector<Point> m_points;  // vertex, uv, normal - VBO
 };
 
 }; // namespace engine

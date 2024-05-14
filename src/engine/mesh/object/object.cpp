@@ -1,5 +1,6 @@
 #include "engine/mesh/object/material/material.hpp"
 #include <cstdio>
+#include <engine/application/application.hpp>
 #include <engine/mesh/object/object.hpp>
 #include <filesystem>
 #include <fstream>
@@ -12,10 +13,10 @@
 
 using namespace engine;
 
-bool load_obj(const std::basic_string<char> &obj_path, std::vector<Vertex> &vertices, std::vector<Uv> &uvs, std::vector<Normal> &normals,
-              std::vector<FaceIndices> &faces, Material &material)
+bool load(const std::basic_string<char> &path, std::vector<Vertex> &vertices, std::vector<Uv> &uvs, std::vector<Normal> &normals,
+          std::vector<FaceIndices> &faces, Material &material)
 {
-    std::ifstream obj_file(obj_path);
+    std::ifstream obj_file(path);
     std::string line;
 
     if (!obj_file.is_open())
@@ -81,7 +82,7 @@ bool load_obj(const std::basic_string<char> &obj_path, std::vector<Vertex> &vert
         else if (token == "mtllib")
         {
             std::string mtl_filename;
-            std::filesystem::path obj_parent_dir(obj_path);
+            std::filesystem::path obj_parent_dir(path);
             obj_parent_dir = obj_parent_dir.parent_path();
 
             ss >> mtl_filename;
@@ -90,7 +91,7 @@ bool load_obj(const std::basic_string<char> &obj_path, std::vector<Vertex> &vert
 
             if (!material.load_material(mtl_path))
             {
-                throw std::runtime_error("Error loading mtl file: " + obj_path);
+                throw std::runtime_error("Error loading mtl file: " + path);
             }
         }
     }
@@ -160,7 +161,7 @@ void process_faces(std::vector<unsigned int> &indices, std::vector<Point> &point
     }
 }
 
-Object::Object(const std::basic_string<char> &name, const std::basic_string<char> &obj_path) : Mesh(name)
+Object::Object(const std::basic_string<char> &name, const std::basic_string<char> &path) : Mesh(name)
 {
     std::vector<Vertex> vertices;
     std::vector<Uv> uvs;
@@ -173,16 +174,16 @@ Object::Object(const std::basic_string<char> &name, const std::basic_string<char
     Shader texture_vertex_shader("resources/shaders/obj/obj_texture.vs", GL_VERTEX_SHADER);
     Shader texture_fragment_shader("resources/shaders/obj/obj_texture.fs", GL_FRAGMENT_SHADER);
 
-    if (!load_obj(obj_path, vertices, uvs, normals, faces, m_material))
+    if (!load(path, vertices, uvs, normals, faces, m_material))
     {
-        throw std::runtime_error("Error opening obj file: " + obj_path);
+        throw std::runtime_error("Error opening object file: " + path);
     }
 
     process_faces(m_indices, m_points, vertices, uvs, normals, faces);
 
     for (auto &[mat_name, attributes] : m_material.m_materials)
     {
-        std::cout << "OBJ file loaded material: " << mat_name << std::endl;
+        std::cout << "Object file loaded material: " << mat_name << std::endl;
     }
 
     m_shader_program.add_shader(vertex_shader.get_id());
@@ -207,6 +208,8 @@ Object::Object(const std::basic_string<char> &name, const std::basic_string<char
     m_ebo.unbind();
     m_vao.unbind();
     m_vbo.unbind();
+
+    m_AABB.initialize(vertices);
 }
 
 void Object::update(double dt)
@@ -228,6 +231,7 @@ void Object::update(double dt)
 
 void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)
 {
+
     m_vbo.bind();
     m_vao.bind();
     m_ebo.bind();

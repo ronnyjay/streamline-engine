@@ -1,5 +1,6 @@
 #pragma once
 
+#include <engine/collisions/aabb.hpp>
 #include <engine/debug/debug.hpp>
 
 #include <glm/fwd.hpp>
@@ -34,6 +35,9 @@ class Mesh : public Debuggable
     virtual ~Mesh()
     {
     }
+
+  protected:
+    AABB m_AABB;
 
   private:
     glm::vec3 m_position;
