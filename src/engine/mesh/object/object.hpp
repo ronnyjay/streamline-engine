@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/collisions/aabb.hpp>
+#include <engine/collisions/AABB.hpp>
 #include <engine/mesh/mesh.hpp>
 #include <engine/mesh/object/material/material.hpp>
 #include <engine/renderer/EBO/EBO.hpp>
@@ -66,6 +66,7 @@ class Object : public Mesh
     VBO m_vbo;
     EBO m_ebo;
 
+    AABB m_AABB;
     Material m_material;
 
     ShaderProgram m_shader_program;

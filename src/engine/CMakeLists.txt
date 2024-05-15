@@ -5,7 +5,7 @@ target_sources(engine PRIVATE
     camera/camera.cpp
     camera/orthographic/orthographic.cpp
     camera/perspective/perspective.cpp
-    collisions/aabb.cpp
+    collisions/AABB.cpp
     mesh/mesh.cpp
     mesh/pyramid/pyramid.cpp
     mesh/object/object.cpp

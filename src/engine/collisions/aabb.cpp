@@ -1,4 +1,4 @@
-#include <engine/collisions/aabb.hpp>
+#include <engine/collisions/AABB.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
 using namespace engine;
@@ -57,7 +57,7 @@ void AABB::initialize(const std::vector<Vertex> &vertices)
 
     m_vao.set(0, 3, GL_FLOAT, sizeof(Vertex), (void *)0);
 
-    m_vbo.initialize(&box_vertices[0], box_vertices.size() * sizeof(Vertex), GL_STATIC_DRAW);
+    m_vbo.initialize(&box_vertices[0], box_vertices.size() * sizeof(Vertex), GL_DYNAMIC_DRAW);
     m_ebo.initialize(&box_indices[0], box_indices.size() * sizeof(Index), GL_STATIC_DRAW);
 
     m_vao.unbind();
@@ -97,7 +97,7 @@ void AABB::update(const std::vector<Point> &points, const glm::mat4 &model)
     // clang-format on
 
     m_vbo.bind();
-    m_vbo.initialize(&box_vertices[0], box_vertices.size() * sizeof(Vertex), GL_STATIC_DRAW);
+    m_vbo.initialize(&box_vertices[0], box_vertices.size() * sizeof(Vertex), GL_DYNAMIC_DRAW);
     m_vbo.unbind();
 }
 
