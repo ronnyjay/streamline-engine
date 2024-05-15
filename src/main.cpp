@@ -39,9 +39,12 @@ int main(int argc, char const *argv[])
     torus_1.set_position(glm::vec3(10.0f, 5.0f, 0.0f));
     torus_2.set_position(glm::vec3(-10.0f, -5.0f, 0.0f));
 
+    torus_0.add_child(&torus_1);
+    torus_0.add_child(&torus_2);
+
     world.add_mesh(&torus_0);
-    world.add_mesh(&torus_1);
-    world.add_mesh(&torus_2);
+    // world.add_mesh(&torus_1);
+    // world.add_mesh(&torus_2);
 
     application.run();
 

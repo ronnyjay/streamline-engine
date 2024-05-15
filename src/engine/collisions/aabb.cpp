@@ -101,7 +101,7 @@ void AABB::update(const std::vector<Point> &points, const glm::mat4 &model)
     m_vbo.unbind();
 }
 
-void AABB::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)
+void AABB::draw(const glm::mat4 &view, const glm::mat4 &projection)
 {
     m_vbo.bind();
     m_vao.bind();
@@ -109,7 +109,7 @@ void AABB::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &
 
     m_shader_program.bind();
     m_shader_program.set_mat4("view", view);
-    m_shader_program.set_mat4("model", model);
+    m_shader_program.set_mat4("model", glm::mat4(1.0f));
     m_shader_program.set_mat4("projection", projection);
 
     glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, nullptr);
