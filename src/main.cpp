@@ -13,7 +13,10 @@ int main(int argc, char const *argv[])
     engine::PerspectiveCamera perspective_camera;
     engine::OrthographicCamera orthographic_camera;
     engine::World world("Overworld");
-    engine::Object cube("Cube", "resources/objects/crow.obj");
+
+    engine::Object torus_0("Torus 0", "resources/objects/torus.obj");
+    engine::Object torus_1("Torus 1", "resources/objects/torus.obj");
+    engine::Object torus_2("Torus 2", "resources/objects/torus.obj");
 
     application.set_window(&window);
 
@@ -33,7 +36,12 @@ int main(int argc, char const *argv[])
     orthographic_camera.set_yaw(-45.0f);
     orthographic_camera.set_pitch(36.0f);
 
-    world.add_mesh(&cube);
+    torus_1.set_position(glm::vec3(10.0f, 5.0f, 0.0f));
+    torus_2.set_position(glm::vec3(-10.0f, -5.0f, 0.0f));
+
+    world.add_mesh(&torus_0);
+    world.add_mesh(&torus_1);
+    world.add_mesh(&torus_2);
 
     application.run();
 

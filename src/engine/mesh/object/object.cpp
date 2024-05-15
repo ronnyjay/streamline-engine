@@ -223,7 +223,7 @@ void Object::update(double dt)
 
     set_model(glm::translate(glm::mat4(1.0f), position()));
     set_model(glm::translate(model(), glm::vec3(0.0f)));
-    set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)));
+    set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f)));
     set_model(glm::translate(model(), glm::vec3(0.0f)));
 
     m_AABB.update(m_points, model());

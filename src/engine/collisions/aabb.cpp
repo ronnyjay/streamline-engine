@@ -1,4 +1,5 @@
 #include <engine/collisions/aabb.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 using namespace engine;
 
@@ -71,10 +72,15 @@ void AABB::update(const std::vector<Point> &points, const glm::mat4 &model)
 
     for (const auto &point : points)
     {
-        Vertex vertex(glm::vec4(point[0], point[1], point[2], 1.0f) * model);
+        glm::vec4 vector = model * glm::vec4(point[0], point[1], point[2], 1.0f);
 
-        min = glm::min(min, vertex);
-        max = glm::max(max, vertex);
+        min.x = std::min(min.x, vector.x);
+        min.y = std::min(min.y, vector.y);
+        min.z = std::min(min.z, vector.z);
+
+        max.x = std::max(max.x, vector.x);
+        max.y = std::max(max.y, vector.y);
+        max.z = std::max(max.z, vector.z);
     }
 
     // clang-format off
