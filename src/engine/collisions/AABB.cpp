@@ -3,7 +3,7 @@
 
 using namespace engine;
 
-AABB::AABB()
+AABB::AABB() : m_colliding(false)
 {
     Shader vertex_shader("resources/shaders/box/box.vs", GL_VERTEX_SHADER);
     Shader fragment_shader("resources/shaders/box/box.fs", GL_FRAGMENT_SHADER);
@@ -28,6 +28,9 @@ void AABB::initialize(const std::vector<Vertex> &vertices)
         max.y = std::max(max.y, vertex.y);
         max.z = std::max(max.z, vertex.z);
     }
+
+    m_min = min;
+    m_max = max;
 
     // clang-format off
     std::vector<Vertex> box_vertices = {
@@ -83,6 +86,9 @@ void AABB::update(const std::vector<Point> &points, const glm::mat4 &model)
         max.z = std::max(max.z, vector.z);
     }
 
+    m_min = min;
+    m_max = max;
+
     // clang-format off
     std::vector<Vertex> box_vertices = {
         { min.x, min.y, min.z },    // bottom back-left 
@@ -111,10 +117,33 @@ void AABB::draw(const glm::mat4 &view, const glm::mat4 &projection)
     m_shader_program.set_mat4("view", view);
     m_shader_program.set_mat4("model", glm::mat4(1.0f));
     m_shader_program.set_mat4("projection", projection);
+    m_shader_program.set_bool("collision", m_colliding);
 
     glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, nullptr);
 
     m_ebo.unbind();
     m_vao.unbind();
     m_vbo.unbind();
+}
+
+void AABB::check_collision(const glm::vec3 &point)
+{
+    if (point.x >= m_min.x && point.x <= m_max.x && point.y >= m_min.y && point.y <= m_max.y && point.z >= m_min.z && point.z <= m_max.z)
+    {
+        m_colliding = true;
+    }
+    else
+    {
+        m_colliding = false;
+    }
+}
+
+Vertex const &AABB::min() const
+{
+    return m_min;
+}
+
+Vertex const &AABB::max() const
+{
+    return m_max;
 }

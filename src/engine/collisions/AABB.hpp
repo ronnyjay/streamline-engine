@@ -24,7 +24,17 @@ class AABB
     void update(const std::vector<Point> &points, const glm::mat4 &model);
     void draw(const glm::mat4 &view, const glm::mat4 &projection);
 
+    void check_collision(const glm::vec3 &);
+
+    Vertex const &min() const;
+    Vertex const &max() const;
+
   private:
+    Vertex m_min;
+    Vertex m_max;
+
+    bool m_colliding;
+
     VAO m_vao;
     VBO m_vbo;
     EBO m_ebo;

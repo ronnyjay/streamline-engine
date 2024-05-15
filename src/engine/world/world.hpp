@@ -2,6 +2,7 @@
 
 #include <engine/debug/debug.hpp>
 #include <engine/mesh/mesh.hpp>
+#include <engine/mesh/object/object.hpp>
 
 #include <list>
 

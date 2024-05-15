@@ -273,3 +273,8 @@ void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4
 
     Mesh::draw(view, model, projection);
 }
+
+void Object::check_collision(const glm::vec3 &point)
+{
+    m_AABB.check_collision(point);
+}

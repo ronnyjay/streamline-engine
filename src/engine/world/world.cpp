@@ -7,8 +7,13 @@ extern Application application;
 
 void World::update(double dt)
 {
+    // basic collision testing between camera & objects
+    glm::vec3 player_position = application.camera()->position();
+
     for (auto &mesh : m_meshes)
     {
+        static_cast<Object *>(mesh)->check_collision(player_position);
+
         mesh->update(dt);
     }
 }

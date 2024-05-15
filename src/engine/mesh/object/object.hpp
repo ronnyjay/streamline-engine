@@ -59,7 +59,9 @@ class Object : public Mesh
     Object(const std::basic_string<char> &name, const std::basic_string<char> &obj_path);
 
     virtual void update(double) override;
-    void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &) override;
+    virtual void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &) override;
+
+    void check_collision(const glm::vec3 &);
 
   private:
     VAO m_vao;
@@ -67,6 +69,7 @@ class Object : public Mesh
     EBO m_ebo;
 
     AABB m_AABB;
+
     Material m_material;
 
     ShaderProgram m_shader_program;
