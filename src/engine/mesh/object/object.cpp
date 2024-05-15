@@ -13,6 +13,8 @@
 
 using namespace engine;
 
+extern Application application;
+
 bool load(const std::basic_string<char> &path, std::vector<Vertex> &vertices, std::vector<Uv> &uvs, std::vector<Normal> &normals,
           std::vector<FaceIndices> &faces, Material &material)
 {
@@ -263,7 +265,11 @@ void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4
     VBO::unbind();
 
     m_AABB.update(m_points, model * Mesh::model());
-    m_AABB.draw(view, projection);
+
+    if (application.flags().show_collisions)
+    {
+        m_AABB.draw(view, projection);
+    }
 
     Mesh::draw(view, model, projection);
 }

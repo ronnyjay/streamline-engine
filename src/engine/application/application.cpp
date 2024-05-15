@@ -4,9 +4,8 @@
 
 using namespace engine;
 
-Application::Application()
-    : m_window(nullptr), m_camera(nullptr), m_world(nullptr), m_has_mouse(false), m_capture_mouse(false), m_show_wireframes(false),
-      m_show_metrics(false), m_show_debug_window(false)
+Application::Application() : m_window(nullptr), m_camera(nullptr), m_world(nullptr)
+
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -132,7 +131,7 @@ void Application::process_input()
 
 void Application::toggle_wireframes()
 {
-    if (m_show_wireframes)
+    if (m_flags.show_wireframes)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
@@ -238,6 +237,11 @@ void Application::set_world_previous()
     }
 }
 
+ApplicationFlags const &Application::flags() const
+{
+    return m_flags;
+}
+
 void Application::run()
 {
     glfwSwapInterval(1);
@@ -276,16 +280,16 @@ void Application::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (m_show_debug_window)
+        if (m_flags.show_debug_window)
         {
-            if (ImGui::Begin("Streamline Engine Debugger", &m_show_debug_window))
+            if (ImGui::Begin("Streamline Engine Debugger", &m_flags.show_debug_window))
             {
                 if (ImGui::Button("Show Metrics"))
                 {
-                    m_show_metrics = !m_show_metrics;
+                    m_flags.show_metrics = !m_flags.show_metrics;
                 }
 
-                if (m_show_metrics)
+                if (m_flags.show_metrics)
                 {
                     ImGui::ShowMetricsWindow();
                 }
@@ -295,10 +299,14 @@ void Application::run()
                     ImGui::Text("Show Wireframes");
                     ImGui::SameLine();
 
-                    if (ImGui::Checkbox("##wireframes", &m_show_wireframes))
+                    if (ImGui::Checkbox("##wireframes", &m_flags.show_wireframes))
                     {
                         toggle_wireframes();
                     }
+
+                    ImGui::Text("Show Collisions");
+                    ImGui::SameLine();
+                    ImGui::Checkbox("##collisions", &m_flags.show_collisions);
 
                     ImGui::TreePop();
                 }
@@ -393,7 +401,7 @@ void Application::key_callback(GLFWwindow *window, int key, int scancode, int ac
     {
         if (mods == GLFW_MOD_SHIFT)
         {
-            if ((application->m_capture_mouse = !application->m_capture_mouse))
+            if ((application->m_flags.capture_mouse = !application->m_flags.capture_mouse))
             {
                 glfwSetInputMode(application->m_window->glfw_window_ptr(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
@@ -404,7 +412,7 @@ void Application::key_callback(GLFWwindow *window, int key, int scancode, int ac
         }
         else
         {
-            application->m_show_debug_window = !application->m_show_debug_window;
+            application->m_flags.show_debug_window = !application->m_flags.show_debug_window;
         }
     }
 }
@@ -413,17 +421,17 @@ void Application::cursor_callback(GLFWwindow *window, double xPosIn, double yPos
 {
     Application *application = static_cast<engine::Application *>(glfwGetWindowUserPointer(window));
 
-    if (application->m_show_debug_window)
+    if (application->m_flags.show_debug_window)
     {
-        application->m_has_mouse = false;
+        application->m_flags.has_mouse = false;
         return;
     }
 
-    if (!application->m_has_mouse)
+    if (!application->m_flags.has_mouse)
     {
         application->m_cursor_x = xPosIn;
         application->m_cursor_y = yPosIn;
-        application->m_has_mouse = true;
+        application->m_flags.has_mouse = true;
     }
 
     float xPos = static_cast<float>(xPosIn);

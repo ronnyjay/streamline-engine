@@ -13,6 +13,16 @@ typedef std::map<int, Camera *> CameraMap;
 typedef std::map<int, World *> WorldMap;
 typedef std::unordered_map<int, CameraDirection> KeybindMap;
 
+struct ApplicationFlags
+{
+    bool has_mouse = false;
+    bool capture_mouse = false;
+    bool show_wireframes = false;
+    bool show_collisions = false;
+    bool show_metrics = false;
+    bool show_debug_window = false;
+};
+
 class Application
 {
   public:
@@ -29,8 +39,9 @@ class Application
     void add_world(int, World *const);
     void set_world(int);
 
-    void bind_movement_key(int, const CameraDirection);
+    ApplicationFlags const &flags() const;
 
+    void bind_movement_key(int, const CameraDirection);
     void run();
 
     ~Application();
@@ -46,14 +57,10 @@ class Application
 
     KeybindMap m_keybinds;
 
-    bool m_has_mouse;
-    bool m_capture_mouse;
-    bool m_show_wireframes;
-    bool m_show_metrics;
-    bool m_show_debug_window;
-
     float m_cursor_x;
     float m_cursor_y;
+
+    ApplicationFlags m_flags;
 
     void process_input();
 
