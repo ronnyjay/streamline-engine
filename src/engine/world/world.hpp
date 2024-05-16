@@ -21,6 +21,9 @@ class World : public Debuggable
 
     void add_mesh(Mesh *const);
 
+    bool check_collision(const Object *, const glm::vec3 &);
+    bool check_collision(const Object *, const Object *);
+
     virtual void draw_debug_info() override;
 
   private:

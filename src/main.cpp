@@ -17,6 +17,7 @@ int main(int argc, char const *argv[])
     engine::Object torus_0("Torus 0", "resources/objects/torus.obj");
     engine::Object torus_1("Torus 1", "resources/objects/torus.obj");
     engine::Object torus_2("Torus 2", "resources/objects/torus.obj");
+    engine::Object cube("Cube", "resources/objects/crow.obj");
 
     application.set_window(&window);
 
@@ -43,6 +44,7 @@ int main(int argc, char const *argv[])
     torus_0.add_child(&torus_2);
 
     world.add_mesh(&torus_0);
+    world.add_mesh(&cube);
 
     application.run();
 

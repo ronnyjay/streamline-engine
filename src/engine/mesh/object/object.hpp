@@ -11,6 +11,7 @@
 
 #include <glm/ext/vector_float3.hpp>
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -61,14 +62,17 @@ class Object : public Mesh
     virtual void update(double) override;
     virtual void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &) override;
 
+    void on_hit(std::function<void(bool)>);
+
     void check_collision(const glm::vec3 &);
+
+    AABB m_AABB;
+    std::function<void(bool)> on_hit_callback;
 
   private:
     VAO m_vao;
     VBO m_vbo;
     EBO m_ebo;
-
-    AABB m_AABB;
 
     Material m_material;
 

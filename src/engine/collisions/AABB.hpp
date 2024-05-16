@@ -26,6 +26,11 @@ class AABB
 
     void check_collision(const glm::vec3 &);
 
+    void set_colliding(bool value)
+    {
+        m_colliding = value;
+    }
+
     Vertex const &min() const;
     Vertex const &max() const;
 

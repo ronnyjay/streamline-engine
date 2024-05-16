@@ -212,6 +212,8 @@ Object::Object(const std::basic_string<char> &name, const std::basic_string<char
     m_vbo.unbind();
 
     m_AABB.initialize(vertices);
+
+    on_hit_callback = [this](bool value) { this->m_AABB.set_colliding(value); };
 }
 
 void Object::update(double dt)
@@ -277,4 +279,9 @@ void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4
 void Object::check_collision(const glm::vec3 &point)
 {
     m_AABB.check_collision(point);
+}
+
+void Object::on_hit(std::function<void(bool)> callback)
+{
+    on_hit_callback = callback;
 }
