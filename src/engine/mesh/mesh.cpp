@@ -15,7 +15,7 @@ void Mesh::update(double dt)
 
     m_model = glm::translate(glm::mat4(1.0f), m_position);
     m_model = glm::translate(m_model, glm::vec3(0.0f));
-    m_model = glm::rotate(m_model, glm::radians(m_rotation_angle), glm::vec3(1.0f, 0.0f, 0.0f));
+    m_model = glm::rotate(m_model, glm::radians(m_rotation_angle), rotation_axis());
     m_model = glm::translate(m_model, glm::vec3(0.0f));
 
     for (auto &child : m_children)
@@ -41,6 +41,49 @@ void Mesh::draw_debug_info()
         ImGui::DragFloat("Position Z", &m_position.z);
         ImGui::DragFloat("Rotation Angle", &m_rotation_angle);
         ImGui::DragFloat("Rotation Speed", &m_rotation_speed);
+
+        ImGui::Text("Rotation Axis:");
+        ImGui::SameLine();
+
+        if (ImGui::ArrowButton("Axis Previous", ImGuiDir_Left))
+        {
+            switch (m_rotation_axis)
+            {
+            case X:
+                m_rotation_axis = Y;
+                break;
+            case Y:
+                m_rotation_axis = X;
+                break;
+            }
+        }
+
+        ImGui::SameLine();
+
+        switch (m_rotation_axis)
+        {
+        case X:
+            ImGui::Text("X");
+            break;
+        case Y:
+            ImGui::Text("Y");
+            break;
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::ArrowButton("Axis Next", ImGuiDir_Right))
+        {
+            switch (m_rotation_axis)
+            {
+            case X:
+                m_rotation_axis = Y;
+                break;
+            case Y:
+                m_rotation_axis = X;
+                break;
+            }
+        }
 
         if (ImGui::TreeNode((identifier() + " Children").c_str()))
         {
@@ -74,6 +117,24 @@ const float Mesh::rotation_angle() const
 void Mesh::set_rotation_angle(const float angle)
 {
     m_rotation_angle = angle;
+}
+
+const glm::vec3 Mesh::rotation_axis() const
+{
+    switch (m_rotation_axis)
+    {
+    case X:
+        return glm::vec3(1.0f, 0.0f, 0.0f);
+        break;
+    case Y:
+        return glm::vec3(0.0f, 1.0f, 0.0f);
+        break;
+    }
+}
+
+void Mesh::set_rotation_axis(const RotationAxis axis)
+{
+    m_rotation_axis = axis;
 }
 
 const float Mesh::rotation_speed() const

@@ -10,8 +10,10 @@ engine::Application application; // global external
 int main(int argc, char const *argv[])
 {
     engine::Window window(800, 600, "Streamline Engine");
+
     engine::PerspectiveCamera perspective_camera;
     engine::OrthographicCamera orthographic_camera;
+
     engine::World world("Overworld");
 
     engine::Object torus_0("Torus 0", "resources/objects/torus.obj");

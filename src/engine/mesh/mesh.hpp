@@ -11,10 +11,17 @@
 namespace engine
 {
 
+typedef enum
+{
+    X,
+    Y,
+} RotationAxis;
+
 class Mesh : public Debuggable
 {
   public:
-    Mesh(const std::string &identifier) : Debuggable(identifier), m_position(0.0f), m_rotation_angle(0.0f), m_rotation_speed(0.0f), m_model(1.0f)
+    Mesh(const std::string &identifier)
+        : Debuggable(identifier), m_position(0.0f), m_rotation_angle(0.0f), m_rotation_speed(0.0f), m_rotation_axis(X), m_model(1.0f)
     {
     }
 
@@ -31,6 +38,9 @@ class Mesh : public Debuggable
     const float rotation_speed() const;
     void set_rotation_speed(const float);
 
+    const glm::vec3 rotation_axis() const;
+    void set_rotation_axis(const RotationAxis);
+
     const glm::mat4 &model() const;
     void set_model(const glm::mat4 &);
 
@@ -46,6 +56,7 @@ class Mesh : public Debuggable
 
     float m_rotation_angle;
     float m_rotation_speed;
+    RotationAxis m_rotation_axis;
 
     glm::mat4 m_model;
 
