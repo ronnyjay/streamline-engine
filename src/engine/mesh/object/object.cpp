@@ -221,18 +221,6 @@ Object::Object(const std::basic_string<char> &name, const std::basic_string<char
 
 void Object::update(double dt)
 {
-    static float angle = 0.0f;
-    float rotation_speed = 30.0f; // degrees per second
-
-    angle += rotation_speed * dt;
-    if (angle >= 360.0f)
-        angle -= 360.0f;
-
-    set_model(glm::translate(glm::mat4(1.0f), position()));
-    set_model(glm::translate(model(), glm::vec3(0.0f)));
-    set_model(glm::rotate(model(), glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f)));
-    set_model(glm::translate(model(), glm::vec3(0.0f)));
-
     Mesh::update(dt);
 }
 

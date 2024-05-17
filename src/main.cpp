@@ -42,6 +42,7 @@ int main(int argc, char const *argv[])
 
     torus_0.add_child(&torus_1);
     torus_0.add_child(&torus_2);
+    torus_0.set_rotation_speed(30.0f);
 
     world.add_mesh(&torus_0);
     world.add_mesh(&cube);

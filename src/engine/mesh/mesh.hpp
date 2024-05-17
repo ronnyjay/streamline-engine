@@ -14,7 +14,7 @@ namespace engine
 class Mesh : public Debuggable
 {
   public:
-    Mesh(const std::string &identifier) : Debuggable(identifier), m_position(0.0f), m_model(1.0f)
+    Mesh(const std::string &identifier) : Debuggable(identifier), m_position(0.0f), m_rotation_angle(0.0f), m_rotation_speed(0.0f), m_model(1.0f)
     {
     }
 
@@ -24,6 +24,12 @@ class Mesh : public Debuggable
 
     const glm::vec3 &position() const;
     void set_position(const glm::vec3 &);
+
+    const float rotation_angle() const;
+    void set_rotation_angle(const float);
+
+    const float rotation_speed() const;
+    void set_rotation_speed(const float);
 
     const glm::mat4 &model() const;
     void set_model(const glm::mat4 &);
@@ -37,7 +43,12 @@ class Mesh : public Debuggable
 
   private:
     glm::vec3 m_position;
+
+    float m_rotation_angle;
+    float m_rotation_speed;
+
     glm::mat4 m_model;
+
     std::list<Mesh *> m_children;
 };
 
