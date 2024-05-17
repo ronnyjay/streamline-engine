@@ -1,10 +1,12 @@
-#include "engine/mesh/object/material/material.hpp"
-#include <cstdio>
 #include <engine/application/application.hpp>
+#include <engine/mesh/object/material/material.hpp>
 #include <engine/mesh/object/object.hpp>
+
+#include <glm/ext/matrix_transform.hpp>
+
+#include <cstdio>
 #include <filesystem>
 #include <fstream>
-#include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -236,7 +238,6 @@ void Object::update(double dt)
 
 void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)
 {
-
     m_vbo.bind();
     m_vao.bind();
     m_ebo.bind();
