@@ -213,7 +213,8 @@ Object::Object(const std::basic_string<char> &name, const std::basic_string<char
 
     m_AABB.initialize(vertices);
 
-    on_hit_callback = [this](bool value) { this->m_AABB.set_colliding(value); };
+    on_collision([this]() { m_AABB.set_colliding(true); });
+    on_collision_resolve([this]() { m_AABB.set_colliding(false); });
 }
 
 void Object::update(double dt)
@@ -276,12 +277,33 @@ void Object::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4
     Mesh::draw(view, model, projection);
 }
 
-void Object::check_collision(const glm::vec3 &point)
+void Object::on_collision(std::function<void()> callback)
 {
-    m_AABB.check_collision(point);
+    m_collision_callbacks.push_back(callback);
 }
 
-void Object::on_hit(std::function<void(bool)> callback)
+void Object::on_collision_resolve(std::function<void()> callback)
 {
-    on_hit_callback = callback;
+    m_collision_resolve_callbacks.push_back(callback);
+}
+
+void Object::trigger_collision()
+{
+    for (auto &callback : m_collision_callbacks)
+    {
+        callback();
+    }
+}
+
+void Object::trigger_collision_resolve()
+{
+    for (auto &callback : m_collision_resolve_callbacks)
+    {
+        callback();
+    }
+}
+
+AABB const &Object::bounding_box() const
+{
+    return m_AABB;
 }

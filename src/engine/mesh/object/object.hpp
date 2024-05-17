@@ -62,18 +62,20 @@ class Object : public Mesh
     virtual void update(double) override;
     virtual void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &) override;
 
-    void on_hit(std::function<void(bool)>);
+    void on_collision(std::function<void()>);
+    void on_collision_resolve(std::function<void()>);
 
-    void check_collision(const glm::vec3 &);
+    void trigger_collision();
+    void trigger_collision_resolve();
 
-    AABB m_AABB;
-    std::function<void(bool)> on_hit_callback;
+    AABB const &bounding_box() const;
 
   private:
     VAO m_vao;
     VBO m_vbo;
     EBO m_ebo;
 
+    AABB m_AABB;
     Material m_material;
 
     ShaderProgram m_shader_program;
@@ -81,6 +83,9 @@ class Object : public Mesh
 
     std::vector<Index> m_indices; // index into m_data to find vertex - EBO
     std::vector<Point> m_points;  // vertex, uv, normal - VBO
+
+    std::vector<std::function<void()>> m_collision_callbacks;
+    std::vector<std::function<void()>> m_collision_resolve_callbacks;
 };
 
 }; // namespace engine

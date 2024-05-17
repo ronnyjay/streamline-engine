@@ -56,11 +56,10 @@ class Application
     WorldMap m_worlds;
 
     KeybindMap m_keybinds;
+    ApplicationFlags m_flags;
 
     float m_cursor_x;
     float m_cursor_y;
-
-    ApplicationFlags m_flags;
 
     void process_input();
 

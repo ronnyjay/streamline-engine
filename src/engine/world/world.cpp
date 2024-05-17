@@ -9,51 +9,69 @@ extern Application application;
 
 void World::update(double dt)
 {
-    std::set<Object *> collidedObjects;
+    std::set<Object *> collisions;
 
-    // Update each object and check for collisions
+    // Check for collisions between all objects in scene
+    // This should eventually be reworked, but for now it does what's needed.
     for (auto it = m_meshes.begin(); it != m_meshes.end(); ++it)
     {
         (*it)->update(dt);
 
-        // check collisions between meshes
+        // Collisions between meshes
         auto it2 = it;
         ++it2;
         while (it2 != m_meshes.end())
         {
             if (check_collision(static_cast<Object *>(*it), static_cast<Object *>(*it2)))
             {
-                collidedObjects.insert(static_cast<Object *>(*it));
-                collidedObjects.insert(static_cast<Object *>(*it2));
+                collisions.insert(static_cast<Object *>(*it));
+                collisions.insert(static_cast<Object *>(*it2));
             }
             ++it2;
         }
 
-        // check collisions between this object's children and all other meshes
+        // Collision between children & meshes
         for (auto &child : (*it)->children())
         {
             for (auto &other : m_meshes)
             {
                 if (check_collision(static_cast<Object *>(child), static_cast<Object *>(other)))
                 {
-                    collidedObjects.insert(static_cast<Object *>(child));
-                    collidedObjects.insert(static_cast<Object *>(other));
+                    collisions.insert(static_cast<Object *>(child));
+                    collisions.insert(static_cast<Object *>(other));
                 }
             }
         }
     }
 
-    // set collision status
+    // Trigger collision callbacks
     for (auto &mesh : m_meshes)
     {
-        auto obj = static_cast<Object *>(mesh);
-        bool collided = (collidedObjects.find(obj) != collidedObjects.end());
-        obj->on_hit_callback(collided);
+        auto object = static_cast<Object *>(mesh);
+        bool collided = (collisions.find(object) != collisions.end());
 
-        for (auto &child : obj->children())
+        if (collided)
         {
-            bool childCollided = (collidedObjects.find(static_cast<Object *>(child)) != collidedObjects.end());
-            static_cast<Object *>(child)->on_hit_callback(childCollided);
+            object->trigger_collision();
+        }
+        else
+        {
+            object->trigger_collision_resolve();
+        }
+
+        for (auto &child : object->children())
+        {
+            auto child_object = static_cast<Object *>(child);
+            bool child_collided = (collisions.find(static_cast<Object *>(child)) != collisions.end());
+
+            if (child_collided)
+            {
+                child_object->trigger_collision();
+            }
+            else
+            {
+                child_object->trigger_collision_resolve();
+            }
         }
     }
 }
@@ -86,8 +104,8 @@ void World::add_mesh(Mesh *const mesh)
 
 bool World::check_collision(const Object *object, const glm::vec3 &point)
 {
-    auto object_min = object->m_AABB.min();
-    auto object_max = object->m_AABB.max();
+    auto object_min = object->bounding_box().min();
+    auto object_max = object->bounding_box().max();
 
     if (point.x >= object_min.x && point.x <= object_max.x && point.y >= object_min.y && point.y <= object_max.y && point.z >= object_min.z &&
         point.z <= object_max.z)
@@ -100,17 +118,17 @@ bool World::check_collision(const Object *object, const glm::vec3 &point)
 
 bool World::check_collision(const Object *a, const Object *b)
 {
-    auto a_min = a->m_AABB.min();
-    auto a_max = a->m_AABB.max();
-    auto b_min = b->m_AABB.min();
-    auto b_max = b->m_AABB.max();
+    Vertex a_min = a->bounding_box().min();
+    Vertex a_max = a->bounding_box().max();
 
-    // Check for overlap in each dimension
-    bool overlapX = (a_min.x <= b_max.x) && (a_max.x >= b_min.x);
-    bool overlapY = (a_min.y <= b_max.y) && (a_max.y >= b_min.y);
-    bool overlapZ = (a_min.z <= b_max.z) && (a_max.z >= b_min.z);
+    Vertex b_min = b->bounding_box().min();
+    Vertex b_max = b->bounding_box().max();
 
-    if (overlapX && overlapY && overlapZ)
+    bool overlap_x = (a_min.x <= b_max.x) && (a_max.x >= b_min.x);
+    bool overlap_y = (a_min.y <= b_max.y) && (a_max.y >= b_min.y);
+    bool overlap_z = (a_min.z <= b_max.z) && (a_max.z >= b_min.z);
+
+    if (overlap_x && overlap_y && overlap_z)
     {
         return true;
     }
