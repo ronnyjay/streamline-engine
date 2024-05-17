@@ -50,10 +50,13 @@ void Mesh::draw_debug_info()
             switch (m_rotation_axis)
             {
             case X:
-                m_rotation_axis = Y;
+                m_rotation_axis = Z;
                 break;
             case Y:
                 m_rotation_axis = X;
+                break;
+            case Z:
+                m_rotation_axis = Y;
                 break;
             }
         }
@@ -68,6 +71,8 @@ void Mesh::draw_debug_info()
         case Y:
             ImGui::Text("Y");
             break;
+        case Z:
+            ImGui::Text("Z");
         }
 
         ImGui::SameLine();
@@ -80,6 +85,9 @@ void Mesh::draw_debug_info()
                 m_rotation_axis = Y;
                 break;
             case Y:
+                m_rotation_axis = Z;
+                break;
+            case Z:
                 m_rotation_axis = X;
                 break;
             }
@@ -128,6 +136,9 @@ const glm::vec3 Mesh::rotation_axis() const
         break;
     case Y:
         return glm::vec3(0.0f, 1.0f, 0.0f);
+        break;
+    case Z:
+        return glm::vec3(0.0f, 0.0f, 1.0f);
         break;
     }
 }

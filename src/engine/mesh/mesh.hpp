@@ -15,6 +15,7 @@ typedef enum
 {
     X,
     Y,
+    Z
 } RotationAxis;
 
 class Mesh : public Debuggable
