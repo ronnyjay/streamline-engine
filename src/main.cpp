@@ -19,7 +19,6 @@ int main(int argc, char const *argv[])
     engine::Object torus_0("Torus 0", "resources/objects/torus.obj");
     engine::Object torus_1("Torus 1", "resources/objects/torus.obj");
     engine::Object torus_2("Torus 2", "resources/objects/torus.obj");
-    engine::Object cube("Cube", "resources/objects/crow.obj");
 
     application.set_window(&window);
 
@@ -36,18 +35,25 @@ int main(int argc, char const *argv[])
     application.bind_movement_key(GLFW_KEY_SPACE, engine::CameraDirection::Up);
     application.bind_movement_key(GLFW_KEY_LEFT_SHIFT, engine::CameraDirection::Down);
 
+    application.show_collisions(true);
+
     orthographic_camera.set_yaw(-45.0f);
     orthographic_camera.set_pitch(36.0f);
+    orthographic_camera.set_zoom(2.0f);
 
     torus_1.set_position(glm::vec3(10.0f, 5.0f, 0.0f));
+    torus_1.set_rotation_speed(100.0f);
+    torus_1.set_rotation_axis(engine::RotationAxis::Z);
+
     torus_2.set_position(glm::vec3(-10.0f, -5.0f, 0.0f));
+    torus_2.set_rotation_speed(100.0f);
+    torus_2.set_rotation_axis(engine::RotationAxis::Y);
 
     torus_0.add_child(&torus_1);
     torus_0.add_child(&torus_2);
-    torus_0.set_rotation_speed(30.0f);
+    torus_0.set_rotation_speed(100.0f);
 
     world.add_mesh(&torus_0);
-    world.add_mesh(&cube);
 
     application.run();
 

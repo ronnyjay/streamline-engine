@@ -42,6 +42,9 @@ class Application
     ApplicationFlags const &flags() const;
 
     void bind_movement_key(int, const CameraDirection);
+
+    void show_collisions(bool);
+
     void run();
 
     ~Application();

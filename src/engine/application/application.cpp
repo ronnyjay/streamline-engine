@@ -113,6 +113,11 @@ void Application::bind_movement_key(const int key, const CameraDirection directi
     m_keybinds.emplace(key, direction);
 }
 
+void Application::show_collisions(bool collisions)
+{
+    m_flags.show_collisions = collisions;
+}
+
 void Application::process_input()
 {
     for (auto it = m_keybinds.begin(); it != m_keybinds.end(); ++it)
