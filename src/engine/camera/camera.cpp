@@ -2,79 +2,80 @@
 
 using namespace engine;
 
-void Camera::draw_debug_info()
+void Camera::DrawDebugInfo()
 {
-    ImGui::DragFloat("Position X", &m_position.x);
-    ImGui::DragFloat("Position Y", &m_position.y);
-    ImGui::DragFloat("Position Z", &m_position.z);
-    ImGui::DragFloat("Yaw", &m_yaw);
-    ImGui::DragFloat("Pitch", &m_pitch);
-    ImGui::DragFloat("Zoom", &m_zoom);
-    ImGui::DragFloat("Speed", &m_movement_speed);
-    ImGui::DragFloat("Sensitivity", &m_mouse_sensitivity);
+    ImGui::DragFloat("Yaw", &m_Yaw);
+    ImGui::DragFloat("Pitch", &m_Pitch);
+    ImGui::DragFloat("FOV", &m_Zoom, 1.0f, 1.0f, 120.0f);
+    ImGui::DragFloat("Speed", &m_Speed, 0.1f, 0.1f, 1.0f);
+    ImGui::DragFloat("Sensitivity", &m_Sensitivity, 0.01f, 0.01, 1.0);
+    ImGui::DragFloat("Position X", &m_Position.x);
+    ImGui::DragFloat("Position Y", &m_Position.y);
+    ImGui::DragFloat("Position Z", &m_Position.z);
 
-    update_vectors();
+    Update();
 }
 
-const glm::vec3 &Camera::position() const
+float Camera::GetYaw() const
 {
-    return m_position;
+    return m_Yaw;
 }
 
-void Camera::set_position(const glm::vec3 &position)
+void Camera::SetYaw(float yaw)
 {
-    m_position = position;
-    update_vectors();
+    m_Yaw = yaw;
+    Update();
 }
 
-float Camera::yaw() const
+float Camera::GetPitch() const
 {
-    return m_yaw;
+    return m_Pitch;
 }
 
-void Camera::set_yaw(const float yaw)
+void Camera::SetPitch(float pitch)
 {
-    m_yaw = yaw;
-    update_vectors();
+    m_Pitch = pitch;
+    Update();
 }
 
-float Camera::pitch() const
+float Camera::GetZoom() const
 {
-    return m_pitch;
+    return m_Zoom;
 }
 
-void Camera::set_pitch(const float pitch)
+void Camera::SetZoom(float zoom)
 {
-    m_pitch = pitch;
-    update_vectors();
+    m_Zoom = zoom;
+    Update();
 }
 
-float Camera::zoom() const
+float Camera::GetSpeed() const
 {
-    return m_zoom;
+    return m_Speed;
 }
 
-void Camera::set_zoom(const float zoom)
+void Camera::SetSpeed(float speed)
 {
-    m_zoom = zoom;
+    m_Speed = speed;
 }
 
-float Camera::movement_speed() const
+float Camera::GetSensitivity() const
 {
-    return m_movement_speed;
+    return m_Sensitivity;
 }
 
-void Camera::set_movement_speed(const float speed)
+void Camera::SetSensitivity(float sensitivity)
 {
-    m_movement_speed = speed;
+    m_Sensitivity = sensitivity;
 }
 
-float Camera::mouse_sensitivity() const
+const glm::vec3 &Camera::GetPosition() const
 {
-    return m_mouse_sensitivity;
+    return m_Position;
 }
 
-void Camera::set_mouse_sensitivity(const float sensitivity)
+void Camera::SetPosition(const glm::vec3 &position)
 {
-    m_mouse_sensitivity = sensitivity;
+    m_Position = position;
+    Update();
 }

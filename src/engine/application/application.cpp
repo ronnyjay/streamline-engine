@@ -1,11 +1,17 @@
 #include <engine/application/application.hpp>
 #include <engine/stb/stb_image.hpp>
-#include <engine/text/text.hpp>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+#include <iostream>
+#include <stdexcept>
 
 using namespace engine;
 
-Application::Application() : m_window(nullptr), m_camera(nullptr), m_world(nullptr)
-
+Application::Application(const int width, const int height, const char *title)
+    : m_Width(width), m_Height(height), m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -21,6 +27,30 @@ Application::Application() : m_window(nullptr), m_camera(nullptr), m_world(nullp
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+    // Initialize Window
+    m_Window = glfwCreateWindow(width, height, title, NULL, NULL);
+
+    if (m_Window == NULL)
+    {
+        throw std::runtime_error("Failed to create GLFW Window");
+    }
+
+    glfwMakeContextCurrent(m_Window);
+    glfwSetWindowAspectRatio(m_Window, width, height);
+    glfwSetFramebufferSizeCallback(m_Window, Application::FramebufferSizeCallback);
+    glfwSetWindowSizeCallback(m_Window, Application::WindowSizeCallback);
+    glfwSetWindowIconifyCallback(m_Window, Application::MinimizeCallback);
+    glfwSetWindowMaximizeCallback(m_Window, Application::MaximizeCallback);
+    glfwSetKeyCallback(m_Window, Application::KeyCallback);
+    glfwSetCursorPosCallback(m_Window, Application::CursorPosCallback);
+    glfwSetScrollCallback(m_Window, Application::ScrollCallback);
+    glfwSetWindowUserPointer(m_Window, this); // Access this objects instance in glfw callbacks
+
+    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+    {
+        throw std::runtime_error("Failed to intialize GLAD");
+    }
+
     // Initialize ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -29,225 +59,128 @@ Application::Application() : m_window(nullptr), m_camera(nullptr), m_world(nullp
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
-}
-
-Window *const Application::window() const
-{
-    return m_window;
-}
-
-void Application::set_window(Window *const window)
-{
-    m_window = window;
-
-    glfwSetFramebufferSizeCallback(m_window->glfw_window_ptr(), Application::framebuffer_size_callback);
-    glfwSetWindowIconifyCallback(m_window->glfw_window_ptr(), Application::minimize_callback);
-    glfwSetWindowMaximizeCallback(m_window->glfw_window_ptr(), Application::maximize_callback);
-    glfwSetKeyCallback(m_window->glfw_window_ptr(), Application::key_callback);
-    glfwSetCursorPosCallback(m_window->glfw_window_ptr(), Application::cursor_callback);
-    glfwSetScrollCallback(m_window->glfw_window_ptr(), Application::scroll_callback);
-    glfwSetWindowUserPointer(m_window->glfw_window_ptr(), this); // Access this object's instance in glfw callbacks
 
     // Setup Platform/Renderer backend
     // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-    ImGui_ImplGlfw_InitForOpenGL(window->glfw_window_ptr(), true);
-    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+    ImGui_ImplOpenGL3_Init(nullptr);
+
+    // Load shaders
+    LoadShader("Model", "resources/shaders/model.vs", "resources/shaders/model.fs");
+    LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
+
+    // Flip textures on load
+    stbi_set_flip_vertically_on_load(true);
 }
 
-Camera *const Application::camera() const
+int Application::Width() const
 {
-    return m_camera;
+    return m_Width;
 }
 
-void Application::add_camera(const int key, Camera *const camera)
+int Application::Height() const
 {
-    m_cameras.emplace(key, camera);
+    return m_Height;
+}
 
-    if (m_camera == nullptr)
+ApplicationFlags const &Application::Flags() const
+{
+    return m_Flags;
+}
+
+void Application::AddCamera(int key, std::shared_ptr<Camera> camera)
+{
+    m_CameraMap[key] = camera;
+
+    if (m_CurrentCamera == nullptr)
     {
-        m_camera = camera;
+        m_CurrentCamera = camera.get();
+        m_CurrentCameraIndex = key;
     }
 }
 
-void Application::set_camera(const int key)
+void Application::SetCamera(int key)
 {
-    auto camera_it = m_cameras.find(key);
+    auto it = m_CameraMap.find(key);
 
-    if (camera_it == m_cameras.end())
+    if (it == m_CameraMap.end())
     {
         throw std::out_of_range("Camera not found");
     }
 
-    m_camera = camera_it->second;
+    m_CurrentCamera = it->second.get();
+    m_CurrentCameraIndex = it->first;
 }
 
-World *const Application::world() const
+Camera *const Application::GetCurrentCamera() const
 {
-    return m_world;
+    return m_CurrentCamera;
 }
 
-void Application::add_world(const int key, World *const world)
+void Application::AddScene(int key, std::shared_ptr<Scene> scene)
 {
-    m_worlds.emplace(key, world);
+    m_SceneMap[key] = scene;
 
-    if (m_world == nullptr)
+    if (m_CurrentScene == nullptr)
     {
-        m_world = world;
+        m_CurrentScene = scene.get();
+        m_CurrentSceneIndex = key;
     }
 }
 
-void Application::set_world(const int key)
+void Application::SetScene(int key)
 {
-    auto world_it = m_worlds.find(key);
+    auto it = m_SceneMap.find(key);
 
-    if (world_it == m_worlds.end())
+    if (it == m_SceneMap.end())
     {
-        throw std::out_of_range("World not found");
+        throw std::out_of_range("Scene not found");
     }
 
-    m_world = world_it->second;
+    m_CurrentScene = it->second.get();
+    m_CurrentSceneIndex = it->first;
 }
 
-void Application::bind_movement_key(const int key, const CameraDirection direction)
+Scene *const Application::GetCurrentScene() const
 {
-    m_keybinds.emplace(key, direction);
+    return m_CurrentScene;
 }
 
-void Application::show_collisions(bool collisions)
+void Application::LoadShader(const std::string &shader, const std::string &vertexPath, const std::string &fragmentPath)
 {
-    m_flags.show_collisions = collisions;
+    m_ShaderMap.emplace(shader, Shader(vertexPath, fragmentPath));
 }
 
-void Application::process_input()
+Shader &Application::GetShader(const std::string &shader)
 {
-    for (auto it = m_keybinds.begin(); it != m_keybinds.end(); ++it)
+    auto it = m_ShaderMap.find(shader);
+
+    if (it == m_ShaderMap.end())
     {
-        if (glfwGetKey(m_window->glfw_window_ptr(), it->first) == GLFW_PRESS)
-        {
-            m_camera->move(CameraDirection(it->second));
-        }
+        throw std::runtime_error("Shader not found");
     }
 
-    if (glfwGetKey(m_window->glfw_window_ptr(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(m_window->glfw_window_ptr(), GL_TRUE);
-    }
+    return it->second;
 }
 
-void Application::toggle_wireframes()
+void Application::ShowWireframes(const bool value)
 {
-    if (m_flags.show_wireframes)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    else
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+    m_Flags.ShowWireframes = value;
+
+    ToggleWireframes();
 }
 
-void Application::set_camera_next()
+void Application::ShowCollisions(const bool value)
 {
-    if (m_cameras.size() < 2)
-    {
-        return;
-    }
-
-    for (auto it = m_cameras.begin(); it != m_cameras.end(); ++it)
-    {
-        if (it->second == m_camera)
-        {
-            it++;
-
-            if (it == m_cameras.end())
-            {
-                it = m_cameras.begin();
-            }
-
-            m_camera = it->second;
-        }
-    }
+    m_Flags.ShowCollisions = value;
 }
 
-void Application::set_camera_previous()
+void Application::BindMovementKey(const int key, const Direction direction)
 {
-    if (m_cameras.size() < 2)
-    {
-        return;
-    }
-
-    for (auto it = m_cameras.begin(); it != m_cameras.end(); ++it)
-    {
-        if (it->second == m_camera)
-        {
-            if (it == m_cameras.begin())
-            {
-                it = std::prev(m_cameras.end());
-            }
-            else
-            {
-                it = std::prev(it);
-            }
-
-            m_camera = it->second;
-        }
-    }
+    m_KeyMap[key] = direction;
 }
 
-void Application::set_world_next()
-{
-    if (m_worlds.size() < 2)
-    {
-        return;
-    }
-
-    for (auto it = m_worlds.begin(); it != m_worlds.end(); ++it)
-    {
-        if (it->second == m_world)
-        {
-            it++;
-
-            if (it == m_worlds.end())
-            {
-                it = m_worlds.begin();
-            }
-
-            m_world = it->second;
-        }
-    }
-}
-
-void Application::set_world_previous()
-{
-    if (m_worlds.size() < 2)
-    {
-        return;
-    }
-
-    for (auto it = m_worlds.begin(); it != m_worlds.end(); ++it)
-    {
-        if (it->second == m_world)
-        {
-            if (it == m_worlds.begin())
-            {
-                it = std::prev(m_worlds.end());
-            }
-            else
-            {
-                it = std::prev(it);
-            }
-
-            m_world = it->second;
-        }
-    }
-}
-
-ApplicationFlags const &Application::flags() const
-{
-    return m_flags;
-}
-
-void Application::run()
+void Application::Run()
 {
     glfwSwapInterval(1);
 
@@ -257,109 +190,159 @@ void Application::run()
     glDepthFunc(GL_LESS);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    stbi_set_flip_vertically_on_load(true);
+    double currentTime;
+    double lastTime;
+    double deltaTime;
 
-    double current_time;
-    double last_time;
-    double dt;
+    lastTime = currentTime = glfwGetTime();
 
-    last_time = current_time = glfwGetTime();
-
-    Text text("Streamline Engine", -0.95f, +0.70f, 2.0f, glm::vec3(1.0f), 0.9f);
-
-    while (m_window->running())
+    while (!glfwWindowShouldClose(m_Window))
     {
-        dt = (current_time = glfwGetTime()) - last_time;
+        deltaTime = (currentTime = glfwGetTime()) - lastTime;
 
-        process_input();
+        auto monitor = GetMonitor();
+
+        if (monitor && monitor != m_Monitor)
+        {
+            m_Monitor = monitor;
+
+            LoadResolutions();
+        }
+
+        ProcessInput();
 
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_world->update(dt);
-        m_world->draw();
+        // Render scene
+        m_CurrentScene->Update(deltaTime);
+        m_CurrentScene->Draw();
 
-        text.draw();
-
+        // Draw Debug Info
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (m_flags.show_debug_window)
+        if (m_Flags.ShowDebugWindow)
         {
-            if (ImGui::Begin("Streamline Engine Debugger", &m_flags.show_debug_window))
+            if (ImGui::Begin("Streamline Engine Debugger", &m_Flags.ShowDebugWindow))
             {
                 if (ImGui::Button("Show Metrics"))
                 {
-                    m_flags.show_metrics = !m_flags.show_metrics;
+                    m_Flags.ShowMetrics = !m_Flags.ShowMetrics;
                 }
 
-                if (m_flags.show_metrics)
+                if (m_Flags.ShowMetrics)
                 {
                     ImGui::ShowMetricsWindow();
                 }
 
-                if (ImGui::TreeNode("Debug"))
+                if (ImGui::TreeNode("Settings"))
                 {
                     ImGui::Text("Show Wireframes");
                     ImGui::SameLine();
 
-                    if (ImGui::Checkbox("##wireframes", &m_flags.show_wireframes))
+                    if (ImGui::Checkbox("##Wireframes", &m_Flags.ShowWireframes))
                     {
-                        toggle_wireframes();
+                        ToggleWireframes();
                     }
 
                     ImGui::Text("Show Collisions");
                     ImGui::SameLine();
-                    ImGui::Checkbox("##collisions", &m_flags.show_collisions);
+                    ImGui::Checkbox("##Collisions", &m_Flags.ShowCollisions);
+
+                    ImGui::Text("Set Resolution");
+                    ImGui::SameLine();
+
+                    if (ImGui::Combo(
+                            "##Resolution", &m_ResolutionIndex,
+                            [](void *data, int index, const char **text) -> bool
+                            {
+                                auto &vector = *static_cast<std::vector<Resolution> *>(data);
+
+                                if (index < 0 || index >= static_cast<int>(vector.size()))
+                                {
+                                    return false;
+                                }
+                                *text = vector[index].Format();
+
+                                return true;
+                            },
+                            static_cast<void *>(&m_ResolutionList), m_ResolutionList.size()))
+                    {
+
+                        glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
+                        glfwSetWindowSize(m_Window, m_ResolutionList[m_ResolutionIndex].Width,
+                            m_ResolutionList[m_ResolutionIndex].Height);
+
+                        glfwSetWindowAspectRatio(m_Window, m_ResolutionList[m_ResolutionIndex].Width,
+                            m_ResolutionList[m_ResolutionIndex].Height);
+                    }
+
+                    ImGui::Text("Current Resolution: %dx%d", m_Width, m_Height);
 
                     ImGui::TreePop();
                 }
 
                 if (ImGui::TreeNode("Camera"))
                 {
-                    ImGui::Text("Current:");
-                    ImGui::SameLine();
-
-                    if (ImGui::ArrowButton("Camera Previous", ImGuiDir_Left))
+                    if (m_CameraMap.size())
                     {
-                        set_camera_previous();
+                        ImGui::Text("Current:");
+                        ImGui::SameLine();
+
+                        if (ImGui::ArrowButton("Camera Previous", ImGuiDir_Left))
+                        {
+                            SetCameraPrev();
+                        }
+
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted(std::to_string(m_CurrentCameraIndex).c_str());
+                        ImGui::SameLine();
+
+                        if (ImGui::ArrowButton("Camera Next", ImGuiDir_Right))
+                        {
+                            SetCameraNext();
+                        }
+
+                        m_CurrentCamera->DrawDebugInfo();
                     }
-
-                    ImGui::SameLine();
-                    ImGui::TextUnformatted(m_camera->identifier().c_str());
-                    ImGui::SameLine();
-
-                    if (ImGui::ArrowButton("Camera Next", ImGuiDir_Right))
+                    else
                     {
-                        set_camera_next();
+                        ImGui::Text("Camera information unavailable");
                     }
-
-                    m_camera->draw_debug_info();
 
                     ImGui::TreePop();
                 }
 
-                if (ImGui::TreeNode("World"))
+                if (ImGui::TreeNode("Scene"))
                 {
-                    ImGui::Text("Current:");
-                    ImGui::SameLine();
-
-                    if (ImGui::ArrowButton("World Previous", ImGuiDir_Left))
+                    if (m_SceneMap.size())
                     {
-                        set_world_previous();
+                        ImGui::Text("Current:");
+                        ImGui::SameLine();
+
+                        if (ImGui::ArrowButton("Scene Previous", ImGuiDir_Left))
+                        {
+                            SetScenePrev();
+                        }
+
+                        ImGui::SameLine();
+                        ImGui::TextUnformatted(std::to_string(m_CurrentSceneIndex).c_str());
+                        ImGui::SameLine();
+
+                        if (ImGui::ArrowButton("Scene Next", ImGuiDir_Right))
+                        {
+                            SetSceneNext();
+                        }
+
+                        m_CurrentScene->DrawDebugInfo();
                     }
-
-                    ImGui::SameLine();
-                    ImGui::TextUnformatted(m_world->identifier().c_str());
-                    ImGui::SameLine();
-
-                    if (ImGui::ArrowButton("World Next", ImGuiDir_Right))
+                    else
                     {
-                        set_world_next();
+                        ImGui::Text("Scene information unavailable");
                     }
-
-                    m_world->draw_debug_info();
 
                     ImGui::TreePop();
                 }
@@ -371,10 +354,151 @@ void Application::run()
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(m_window->glfw_window_ptr());
+        glfwSwapBuffers(m_Window);
         glfwPollEvents();
 
-        last_time = current_time;
+        lastTime = currentTime;
+    }
+}
+
+GLFWwindow *const Application::GetWindow() const
+{
+    return m_Window;
+}
+
+GLFWmonitor *const Application::GetMonitor() const
+{
+    GLFWmonitor *monitor = glfwGetWindowMonitor(m_Window);
+
+    if (monitor)
+    {
+        return monitor;
+    }
+
+    int windowX, windowY;
+    glfwGetWindowPos(m_Window, &windowX, &windowY);
+
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    for (int i = 0; i < monitorCount; i++)
+    {
+        int monitorX, monitorY;
+        int monitorWidth, monitorHeight;
+        glfwGetMonitorWorkarea(monitors[i], &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+        bool overlapX = windowX >= monitorX && windowX < monitorX + monitorWidth;
+        bool overlapY = windowY >= monitorY && windowY < monitorY + monitorHeight;
+
+        if (overlapX && overlapY)
+        {
+            return monitors[i];
+        }
+    }
+
+    return nullptr;
+}
+
+void Application::ProcessInput()
+{
+    for (auto it = m_KeyMap.begin(); it != m_KeyMap.end(); ++it)
+    {
+        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
+        {
+            m_CurrentCamera->Move(Direction(it->second));
+        }
+
+        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(m_Window, true);
+        }
+    }
+}
+
+void Application::LoadResolutions()
+{
+    int count;
+    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
+
+    m_ResolutionList.clear();
+
+    for (int i = 0; i < count; i++)
+    {
+        m_ResolutionList.emplace_back(Resolution(modes[i].width, modes[i].height));
+    }
+
+    m_ResolutionList.erase(std::unique(m_ResolutionList.begin(), m_ResolutionList.end()), m_ResolutionList.end());
+}
+
+void Application::SetCameraNext()
+{
+    auto it = m_CameraMap.find(m_CurrentCameraIndex);
+
+    if ((it = std::next(it)) == m_CameraMap.end())
+    {
+        it = m_CameraMap.begin();
+    }
+
+    m_CurrentCamera = it->second.get();
+    m_CurrentCameraIndex = it->first;
+}
+
+void Application::SetCameraPrev()
+{
+    auto it = m_CameraMap.find(m_CurrentCameraIndex);
+
+    if (it == m_CameraMap.begin())
+    {
+        it = std::prev(m_CameraMap.end());
+    }
+    else
+    {
+        it = std::prev(it);
+    }
+
+    m_CurrentCamera = it->second.get();
+    m_CurrentCameraIndex = it->first;
+}
+
+void Application::SetSceneNext()
+{
+    auto it = m_SceneMap.find(m_CurrentSceneIndex);
+
+    if ((it = std::next(it)) == m_SceneMap.end())
+    {
+        it = m_SceneMap.begin();
+    }
+
+    m_CurrentScene = it->second.get();
+    m_CurrentSceneIndex = it->first;
+}
+
+void Application::SetScenePrev()
+{
+    auto it = m_SceneMap.find(m_CurrentSceneIndex);
+
+    if (it == m_SceneMap.begin())
+    {
+        it = std::prev(m_SceneMap.end());
+    }
+    else
+    {
+        it = std::prev(it);
+    }
+
+    m_CurrentScene = it->second.get();
+    m_CurrentSceneIndex = it->first;
+}
+
+void Application::ToggleWireframes()
+{
+    if (m_Flags.ShowWireframes)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 }
 
@@ -383,75 +507,119 @@ Application::~Application()
     glfwTerminate();
 }
 
-void Application::framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
-    static_cast<Application *>(glfwGetWindowUserPointer(window))->m_window->resize(width, height);
+    glViewport(0, 0, width, height);
 }
 
-void Application::minimize_callback(GLFWwindow *window, int minimize)
+void Application::WindowSizeCallback(GLFWwindow *window, int width, int height)
 {
-    static_cast<Application *>(glfwGetWindowUserPointer(window))->m_window->minimize(minimize);
+    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
+
+    application->m_Width = width;
+    application->m_Height = height;
 }
 
-void Application::maximize_callback(GLFWwindow *window, int maximize)
+void Application::MinimizeCallback(GLFWwindow *window, int minimize)
 {
-    static_cast<Application *>(glfwGetWindowUserPointer(window))->m_window->maximize(maximize);
+    (minimize) ? glfwIconifyWindow(window) : glfwRestoreWindow(window);
 }
 
-void Application::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void Application::MaximizeCallback(GLFWwindow *window, int maximize)
 {
-    Application *application = static_cast<engine::Application *>(glfwGetWindowUserPointer(window));
+    (maximize) ? glfwMaximizeWindow(window) : glfwRestoreWindow(window);
+}
+
+void Application::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
 
     if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
     {
         if (mods == GLFW_MOD_SHIFT)
         {
-            if ((application->m_flags.capture_mouse = !application->m_flags.capture_mouse))
+            application->m_Flags.ShowCursor = !application->m_Flags.ShowCursor;
+
+            if (application->m_Flags.ShowCursor)
             {
-                glfwSetInputMode(application->m_window->glfw_window_ptr(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             }
             else
             {
-                glfwSetInputMode(application->m_window->glfw_window_ptr(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
+
+            application->m_Flags.FirstMouse = true;
         }
         else
         {
-            application->m_flags.show_debug_window = !application->m_flags.show_debug_window;
+            application->m_Flags.ShowDebugWindow = !application->m_Flags.ShowDebugWindow;
+
+            if (application->m_Flags.ShowDebugWindow)
+            {
+                application->m_Flags.CaptureMouse = false;
+
+                // Temporarily show cursor while debug window is open
+                if (!application->m_Flags.ShowCursor)
+                {
+                    glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
+
+                application->m_Flags.FirstMouse = true;
+            }
+            else
+            {
+                application->m_Flags.CaptureMouse = true;
+
+                // Restore cursor state
+                if (!application->m_Flags.ShowCursor)
+                {
+                    glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                }
+            }
         }
     }
 }
 
-void Application::cursor_callback(GLFWwindow *window, double xPosIn, double yPosIn)
+void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yPosIn)
 {
-    Application *application = static_cast<engine::Application *>(glfwGetWindowUserPointer(window));
+    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
 
-    if (application->m_flags.show_debug_window)
+    static float lastX = application->Width() / 2.0f;
+    static float lastY = application->Height() / 2.0f;
+
+    if (!application->m_Flags.CaptureMouse)
     {
-        application->m_flags.has_mouse = false;
         return;
     }
 
-    if (!application->m_flags.has_mouse)
+    if (application->m_Flags.FirstMouse)
     {
-        application->m_cursor_x = xPosIn;
-        application->m_cursor_y = yPosIn;
-        application->m_flags.has_mouse = true;
+        lastX = xPosIn;
+        lastY = yPosIn;
+        application->m_Flags.FirstMouse = false;
     }
 
     float xPos = static_cast<float>(xPosIn);
     float yPos = static_cast<float>(yPosIn);
 
-    float xOffset = xPos - application->m_cursor_x;
-    float yOffset = application->m_cursor_y - yPos;
+    float xOffset = xPos - lastX;
+    float yOffset = lastY - yPos;
 
-    application->m_cursor_x = xPos;
-    application->m_cursor_y = yPos;
+    lastX = xPos;
+    lastY = yPos;
 
-    application->m_camera->move(xOffset, yOffset);
+    application->m_CurrentCamera->Move(xOffset, yOffset);
 }
 
-void Application::scroll_callback(GLFWwindow *window, double xOffset, double yOffset)
+void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
 {
-    static_cast<Application *>(glfwGetWindowUserPointer(window))->m_camera->move(yOffset);
+    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
+
+    if (application->m_Flags.ShowDebugWindow)
+    {
+        return;
+    }
+
+    application->m_CurrentCamera->Move(yOffset);
 }
