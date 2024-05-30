@@ -1,61 +1,50 @@
 #include <engine/application/application.hpp>
-#include <engine/camera/orthographic/orthographic.hpp>
-#include <engine/camera/perspective/perspective.hpp>
-#include <engine/mesh/object/object.hpp>
-#include <engine/mesh/pyramid/pyramid.hpp>
-#include <engine/world/world.hpp>
+#include <engine/camera/orthographic.hpp>
+#include <engine/camera/perspective.hpp>
+#include <engine/collider/collider.hpp>
+#include <engine/components/components.hpp>
+#include <engine/entity/entity.hpp>
+#include <engine/model/model.hpp>
 
-engine::Application application; // global external
+engine::Application application(800, 600, "Streamline Engine");
 
 int main(int argc, char const *argv[])
 {
-    engine::Window window(800, 600, "Streamline Engine");
+    auto scene = std::make_shared<engine::Scene>();
 
-    engine::PerspectiveCamera perspective_camera;
-    engine::OrthographicCamera orthographic_camera;
+    auto perspectiveCamera = std::make_shared<engine::PerspectiveCamera>();
+    auto orthographicCamera = std::make_shared<engine::OrthographicCamera>();
 
-    engine::World world("Overworld");
+    application.AddScene(0, scene);
 
-    engine::Object torus_0("Torus 0", "resources/objects/torus.obj");
-    engine::Object torus_1("Torus 1", "resources/objects/torus.obj");
-    engine::Object torus_2("Torus 2", "resources/objects/torus.obj");
+    application.AddCamera(0, perspectiveCamera);
+    application.AddCamera(1, orthographicCamera);
+    application.SetCamera(0);
 
-    application.set_window(&window);
+    application.BindMovementKey(GLFW_KEY_W, engine::Direction::Forward);
+    application.BindMovementKey(GLFW_KEY_S, engine::Direction::Backward);
+    application.BindMovementKey(GLFW_KEY_A, engine::Direction::Left);
+    application.BindMovementKey(GLFW_KEY_D, engine::Direction::Right);
+    application.BindMovementKey(GLFW_KEY_SPACE, engine::Direction::Up);
+    application.BindMovementKey(GLFW_KEY_LEFT_SHIFT, engine::Direction::Down);
 
-    application.add_camera(0, &perspective_camera);
-    application.add_camera(1, &orthographic_camera);
-    application.set_camera(1);
+    auto cube = scene.get()->CreateEntity("Cube");
+    auto torus = scene.get()->CreateEntity("Torus");
+    auto pyramid = scene.get()->CreateEntity("Pyramid");
 
-    application.add_world(0, &world);
+    cube.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
+    cube.AddComponent<engine::AABB>();
+    cube.GetComponent<engine::Transform>().SetPosition(-10.0f, 5.0f, 0.0f);
 
-    application.bind_movement_key(GLFW_KEY_W, engine::CameraDirection::Forward);
-    application.bind_movement_key(GLFW_KEY_S, engine::CameraDirection::Backward);
-    application.bind_movement_key(GLFW_KEY_A, engine::CameraDirection::Left);
-    application.bind_movement_key(GLFW_KEY_D, engine::CameraDirection::Right);
-    application.bind_movement_key(GLFW_KEY_SPACE, engine::CameraDirection::Up);
-    application.bind_movement_key(GLFW_KEY_LEFT_SHIFT, engine::CameraDirection::Down);
+    torus.AddComponent<engine::Model>("resources/objects/torus/torus.obj");
+    torus.AddComponent<engine::AABB>();
+    torus.GetComponent<engine::Transform>().SetPosition(0.0f, 0.0f, 0.0f);
 
-    application.show_collisions(true);
+    pyramid.AddComponent<engine::Model>("resources/objects/pyramid/pyramid.obj");
+    pyramid.AddComponent<engine::AABB>();
+    pyramid.GetComponent<engine::Transform>().SetPosition(10.0f, -5.0f, 0.0f);
 
-    orthographic_camera.set_yaw(-45.0f);
-    orthographic_camera.set_pitch(36.0f);
-    orthographic_camera.set_zoom(2.0f);
-
-    torus_1.set_position(glm::vec3(10.0f, 5.0f, 0.0f));
-    torus_1.set_rotation_speed(100.0f);
-    torus_1.set_rotation_axis(engine::RotationAxis::Z);
-
-    torus_2.set_position(glm::vec3(-10.0f, -5.0f, 0.0f));
-    torus_2.set_rotation_speed(100.0f);
-    torus_2.set_rotation_axis(engine::RotationAxis::Y);
-
-    torus_0.add_child(&torus_1);
-    torus_0.add_child(&torus_2);
-    torus_0.set_rotation_speed(100.0f);
-
-    world.add_mesh(&torus_0);
-
-    application.run();
+    application.Run();
 
     return 0;
 }

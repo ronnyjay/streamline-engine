@@ -9,12 +9,22 @@ project(${PROJECT_NAME})
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(Assimp REQUIRED)
 
 set(GLM_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/glm/1.0.1/include")
+set(GLFW_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/glfw/3.3.2/include")
+set(ASSIMP_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/assimp/5.4.1/include")
 
-if(IS_DIRECTORY ${GLM_OSX_INCLUDE_DIR})
-  include_directories(${GLM_OSX_INCLUDE_DIR})
-  include_directories(/opt/homebrew/Cellar/glfw/3.3.2/include)  # Adjust the version/path as necessary
+if(APPLE AND ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    if(IS_DIRECTORY ${GLM_OSX_INCLUDE_DIR})
+        include_directories(${GLM_OSX_INCLUDE_DIR})
+    endif()
+    if(IS_DIRECTORY ${GLFW_OSX_INCLUDE_DIR})
+        include_directories(${GLFW_OSX_INCLUDE_DIR})  
+    endif()
+    if(IS_DIRECTORY ${ASSIMP_OSX_INCLUDE_DIR})
+        include_directories(${ASSIMP_OSX_INCLUDE_DIR})
+    endif()
 endif()
 
 add_compile_options(
@@ -30,6 +40,8 @@ include_directories(
     src
     extern/imgui
     extern/imgui/backends
+    extern/entt/src
+    ${ASSIMP_INCLUDE_DIRS}
 )
 
 add_library(imgui STATIC
@@ -44,4 +56,5 @@ add_library(imgui STATIC
 
 target_link_libraries(imgui PRIVATE glfw)
 
+add_subdirectory(extern/entt)
 add_subdirectory(src)
