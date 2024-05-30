@@ -3,22 +3,15 @@ add_library(engine STATIC)
 target_sources(engine PRIVATE
     application/application.cpp
     camera/camera.cpp
-    camera/orthographic/orthographic.cpp
-    camera/perspective/perspective.cpp
-    collisions/AABB.cpp
+    camera/orthographic.cpp
+    camera/perspective.cpp
+    collider/collider.cpp
+    entity/entity.cpp
     mesh/mesh.cpp
-    mesh/pyramid/pyramid.cpp
-    mesh/object/object.cpp
-    mesh/object/material/material.cpp
-    renderer/VAO/VAO.cpp
-    renderer/VBO/VBO.cpp
-    renderer/EBO/EBO.cpp
+    model/model.cpp
+    scene/scene.cpp
     shader/shader.cpp
     stb/stb_image.cpp
-    text/text.cpp
-    texture/texture.cpp
-    window/window.cpp
-    world/world.cpp
 )
 
-target_link_libraries(engine PUBLIC glfw glm::glm glad imgui)
+target_link_libraries(engine PUBLIC glfw glm::glm glad imgui assimp::assimp)

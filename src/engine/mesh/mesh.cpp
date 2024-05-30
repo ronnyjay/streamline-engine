@@ -1,179 +1,98 @@
 #include <engine/mesh/mesh.hpp>
 
-#include <glm/ext/matrix_transform.hpp>
-
 using namespace engine;
 
-void Mesh::update(double dt)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+    : m_Vertices(vertices), m_Indices(indices), m_Textures(textures)
 {
-    m_rotation_angle += m_rotation_speed * dt;
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_EBO);
 
-    if (m_rotation_angle >= 360.0f)
-    {
-        m_rotation_angle = -360.0f;
-    }
+    glBindVertexArray(m_VAO);
 
-    m_model = glm::translate(glm::mat4(1.0f), m_position);
-    m_model = glm::translate(m_model, glm::vec3(0.0f));
-    m_model = glm::rotate(m_model, glm::radians(m_rotation_angle), rotation_axis());
-    m_model = glm::translate(m_model, glm::vec3(0.0f));
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-    for (auto &child : m_children)
-    {
-        child->update(dt);
-    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+    // Vertex Positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+
+    // Vertex Normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
+
+    // Vertex TexCoords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
+
+    // Vertex Tangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));
+
+    // Vertex Bitangent
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Bitangent));
+
+    // Ids
+    glEnableVertexAttribArray(5);
+    glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void *)offsetof(Vertex, BoneIds));
+
+    // Weights
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Weights));
+
+    glBindVertexArray(0);
 }
 
-void Mesh::draw(const glm::mat4 &view, const glm::mat4 &model, const glm::mat4 &projection)
+void Mesh::Draw(Shader &shader)
 {
-    for (auto &child : m_children)
+    // Bind textures
+    unsigned int diffuseNr = 1;
+    unsigned int specularNr = 1;
+    unsigned int normalNr = 1;
+    unsigned int heightNr = 1;
+
+    for (unsigned int i = 0; i < m_Textures.size(); i++)
     {
-        child->draw(view, model * m_model, projection);
-    }
-}
+        glActiveTexture(GL_TEXTURE0 + i);
 
-void Mesh::draw_debug_info()
-{
-    if (ImGui::TreeNode(identifier().c_str()))
-    {
-        ImGui::DragFloat("Position X", &m_position.x);
-        ImGui::DragFloat("Position Y", &m_position.y);
-        ImGui::DragFloat("Position Z", &m_position.z);
-        ImGui::DragFloat("Rotation Angle", &m_rotation_angle);
-        ImGui::DragFloat("Rotation Speed", &m_rotation_speed);
+        std::string number;
+        std::string name = m_Textures[i].type;
 
-        ImGui::Text("Rotation Axis:");
-        ImGui::SameLine();
-
-        if (ImGui::ArrowButton("Axis Previous", ImGuiDir_Left))
+        if (name == "TexDiffuse")
         {
-            switch (m_rotation_axis)
-            {
-            case X:
-                m_rotation_axis = Z;
-                break;
-            case Y:
-                m_rotation_axis = X;
-                break;
-            case Z:
-                m_rotation_axis = Y;
-                break;
-            }
+            number = std::to_string(diffuseNr++);
+        }
+        else if (name == "TexSpecular")
+        {
+            number = std::to_string(specularNr++);
+        }
+        else if (name == "TexNormal")
+        {
+            number = std::to_string(normalNr++);
+        }
+        else if (name == "TexHeight")
+        {
+            number = std::to_string(heightNr++);
         }
 
-        ImGui::SameLine();
-
-        switch (m_rotation_axis)
-        {
-        case X:
-            ImGui::Text("X");
-            break;
-        case Y:
-            ImGui::Text("Y");
-            break;
-        case Z:
-            ImGui::Text("Z");
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::ArrowButton("Axis Next", ImGuiDir_Right))
-        {
-            switch (m_rotation_axis)
-            {
-            case X:
-                m_rotation_axis = Y;
-                break;
-            case Y:
-                m_rotation_axis = Z;
-                break;
-            case Z:
-                m_rotation_axis = X;
-                break;
-            }
-        }
-
-        if (ImGui::TreeNode((identifier() + " Children").c_str()))
-        {
-            for (auto &mesh : m_children)
-            {
-                mesh->draw_debug_info();
-            }
-
-            ImGui::TreePop();
-        }
-
-        ImGui::TreePop();
+        glUniform1i(glGetUniformLocation(shader.GetId(), (name + number).c_str()), i);
+        glBindTexture(GL_TEXTURE_2D, m_Textures[i].id);
     }
+
+    // Draw Mesh
+    glBindVertexArray(m_VAO);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_Indices.size()), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+    glActiveTexture(GL_TEXTURE0);
 }
 
-const glm::vec3 &Mesh::position() const
+const std::vector<Vertex> &Mesh::GetVertices() const
 {
-    return m_position;
-}
-
-void Mesh::set_position(const glm::vec3 &position)
-{
-    m_position = position;
-}
-
-const float Mesh::rotation_angle() const
-{
-    return m_rotation_angle;
-}
-
-void Mesh::set_rotation_angle(const float angle)
-{
-    m_rotation_angle = angle;
-}
-
-const glm::vec3 Mesh::rotation_axis() const
-{
-    switch (m_rotation_axis)
-    {
-    case X:
-        return glm::vec3(1.0f, 0.0f, 0.0f);
-        break;
-    case Y:
-        return glm::vec3(0.0f, 1.0f, 0.0f);
-        break;
-    case Z:
-        return glm::vec3(0.0f, 0.0f, 1.0f);
-        break;
-    }
-}
-
-void Mesh::set_rotation_axis(const RotationAxis axis)
-{
-    m_rotation_axis = axis;
-}
-
-const float Mesh::rotation_speed() const
-{
-    return m_rotation_speed;
-}
-
-void Mesh::set_rotation_speed(const float speed)
-{
-    m_rotation_speed = speed;
-}
-
-const glm::mat4 &Mesh::model() const
-{
-    return m_model;
-}
-
-void Mesh::set_model(const glm::mat4 &model)
-{
-    m_model = model;
-}
-
-const std::list<Mesh *> &Mesh::children() const
-{
-    return m_children;
-}
-
-void Mesh::add_child(Mesh *const child)
-{
-    m_children.push_back(child);
+    return m_Vertices;
 }

@@ -1,67 +1,53 @@
 #pragma once
 
-#include <engine/debug/debug.hpp>
+#include <engine/shader/shader.hpp>
 
-#include <glm/fwd.hpp>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 
-#include <list>
 #include <string>
+#include <vector>
 
 namespace engine
 {
 
-typedef enum
-{
-    X,
-    Y,
-    Z
-} RotationAxis;
+#define MAX_BONE_INFLUENCE 4
 
-class Mesh : public Debuggable
+struct Vertex
+{
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+    glm::vec3 Tangent;
+    glm::vec3 Bitangent;
+    int BoneIds[MAX_BONE_INFLUENCE];
+    float Weights[MAX_BONE_INFLUENCE];
+};
+
+struct Texture
+{
+    unsigned int id;
+    std::string type;
+    std::string path;
+};
+
+class Mesh
 {
   public:
-    Mesh(const std::string &identifier)
-        : Debuggable(identifier), m_position(0.0f), m_rotation_angle(0.0f), m_rotation_speed(0.0f), m_rotation_axis(X), m_model(1.0f)
-    {
-    }
+    Mesh(std::vector<Vertex>, std::vector<unsigned int>, std::vector<Texture>);
 
-    virtual void update(double);
-    virtual void draw(const glm::mat4 &, const glm::mat4 &, const glm::mat4 &);
-    virtual void draw_debug_info() override;
+    void Draw(Shader &);
 
-    const glm::vec3 &position() const;
-    void set_position(const glm::vec3 &);
-
-    const float rotation_angle() const;
-    void set_rotation_angle(const float);
-
-    const float rotation_speed() const;
-    void set_rotation_speed(const float);
-
-    const glm::vec3 rotation_axis() const;
-    void set_rotation_axis(const RotationAxis);
-
-    const glm::mat4 &model() const;
-    void set_model(const glm::mat4 &);
-
-    const std::list<Mesh *> &children() const;
-    void add_child(Mesh *const);
-
-    virtual ~Mesh()
-    {
-    }
+    const std::vector<Vertex> &GetVertices() const;
 
   private:
-    glm::vec3 m_position;
+    unsigned int m_VAO;
+    unsigned int m_VBO;
+    unsigned int m_EBO;
 
-    float m_rotation_angle;
-    float m_rotation_speed;
-    RotationAxis m_rotation_axis;
-
-    glm::mat4 m_model;
-
-    std::list<Mesh *> m_children;
+    std::vector<Vertex> m_Vertices;
+    std::vector<unsigned int> m_Indices;
+    std::vector<Texture> m_Textures;
 };
 
 }; // namespace engine
