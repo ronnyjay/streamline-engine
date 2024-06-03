@@ -7,6 +7,7 @@ target_sources(engine PRIVATE
     camera/perspective.cpp
     collider/collider.cpp
     entity/entity.cpp
+    framebuffer/framebuffer.cpp
     mesh/mesh.cpp
     model/model.cpp
     scene/scene.cpp

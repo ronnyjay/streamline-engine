@@ -51,6 +51,9 @@ Application::Application(const int width, const int height, const char *title)
         throw std::runtime_error("Failed to intialize GLAD");
     }
 
+    // Initialize framebuffer
+    m_Framebuffer.Initialize(width, height);
+
     // Initialize ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -68,6 +71,7 @@ Application::Application(const int width, const int height, const char *title)
     // Load shaders
     LoadShader("Model", "resources/shaders/model.vs", "resources/shaders/model.fs");
     LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
+    LoadShader("Framebuffer", "resources/shaders/framebuffer.vs", "resources/shaders/framebuffer.fs");
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
@@ -211,12 +215,26 @@ void Application::Run()
 
         ProcessInput();
 
+        // Render scene to framebuffer texture
+        m_Framebuffer.Bind();
+
+        glEnable(GL_DEPTH_TEST);
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, m_Framebuffer.Width(), m_Framebuffer.Height());
 
-        // Render scene
         m_CurrentScene->Update(deltaTime);
         m_CurrentScene->Draw();
+
+        // Render scene with framebuffer texture
+        m_Framebuffer.Unbind();
+
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glViewport(0, 0, m_Width, m_Height);
+
+        m_Framebuffer.Draw();
 
         // Draw Debug Info
         ImGui_ImplOpenGL3_NewFrame();
@@ -270,6 +288,7 @@ void Application::Run()
                             },
                             static_cast<void *>(&m_ResolutionList), m_ResolutionList.size()))
                     {
+                        /** TODO: Resize framebuffer if window is fullscreen, else resize window */
 
                         glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
@@ -509,15 +528,20 @@ Application::~Application()
 
 void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
-    glViewport(0, 0, width, height);
-}
-
-void Application::WindowSizeCallback(GLFWwindow *window, int width, int height)
-{
     Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
 
     application->m_Width = width;
     application->m_Height = height;
+
+    // glViewport(0, 0, width, height);
+}
+
+void Application::WindowSizeCallback(GLFWwindow *window, int width, int height)
+{
+    // Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
+
+    // application->m_Width = width;
+    // application->m_Height = height;
 }
 
 void Application::MinimizeCallback(GLFWwindow *window, int minimize)

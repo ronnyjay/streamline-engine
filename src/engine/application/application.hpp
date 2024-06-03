@@ -6,6 +6,7 @@
 #include <glad/gl.h>
 
 #include <engine/camera/camera.hpp>
+#include <engine/framebuffer/framebuffer.hpp>
 #include <engine/scene/scene.hpp>
 #include <engine/shader/shader.hpp>
 
@@ -118,6 +119,8 @@ class Application
 
     int m_ResolutionIndex;
     ResolutionList m_ResolutionList;
+
+    Framebuffer m_Framebuffer;
 
     ApplicationFlags m_Flags;
 
