@@ -93,7 +93,7 @@ ApplicationFlags const &Application::Flags() const
 
 void Application::AddCamera(int key, std::shared_ptr<Camera> camera)
 {
-    m_CameraMap[key] = camera;
+    m_Cameras[key] = camera;
 
     if (m_CurrentCamera == nullptr)
     {
@@ -104,9 +104,9 @@ void Application::AddCamera(int key, std::shared_ptr<Camera> camera)
 
 void Application::SetCamera(int key)
 {
-    auto it = m_CameraMap.find(key);
+    auto it = m_Cameras.find(key);
 
-    if (it == m_CameraMap.end())
+    if (it == m_Cameras.end())
     {
         throw std::out_of_range("Camera not found");
     }
@@ -122,7 +122,7 @@ Camera *const Application::GetCurrentCamera() const
 
 void Application::AddScene(int key, std::shared_ptr<Scene> scene)
 {
-    m_SceneMap[key] = scene;
+    m_Scenes[key] = scene;
 
     if (m_CurrentScene == nullptr)
     {
@@ -133,9 +133,9 @@ void Application::AddScene(int key, std::shared_ptr<Scene> scene)
 
 void Application::SetScene(int key)
 {
-    auto it = m_SceneMap.find(key);
+    auto it = m_Scenes.find(key);
 
-    if (it == m_SceneMap.end())
+    if (it == m_Scenes.end())
     {
         throw std::out_of_range("Scene not found");
     }
@@ -151,14 +151,14 @@ Scene *const Application::GetCurrentScene() const
 
 void Application::LoadShader(const std::string &shader, const std::string &vertexPath, const std::string &fragmentPath)
 {
-    m_ShaderMap.emplace(shader, Shader(vertexPath, fragmentPath));
+    m_Shaders.emplace(shader, Shader(vertexPath, fragmentPath));
 }
 
 Shader &Application::GetShader(const std::string &shader)
 {
-    auto it = m_ShaderMap.find(shader);
+    auto it = m_Shaders.find(shader);
 
-    if (it == m_ShaderMap.end())
+    if (it == m_Shaders.end())
     {
         throw std::runtime_error("Shader not found");
     }
@@ -169,8 +169,6 @@ Shader &Application::GetShader(const std::string &shader)
 void Application::ShowWireframes(const bool value)
 {
     m_Flags.ShowWireframes = value;
-
-    ToggleWireframes();
 }
 
 void Application::ShowCollisions(const bool value)
@@ -180,7 +178,7 @@ void Application::ShowCollisions(const bool value)
 
 void Application::BindMovementKey(const int key, const Direction direction)
 {
-    m_KeyMap[key] = direction;
+    m_Keybinds[key] = direction;
 }
 
 void Application::Run()
@@ -214,12 +212,18 @@ void Application::Run()
 
         ProcessInput();
 
-        // Render scene
+        // Render scene to framebuffer
         m_Framebuffer.Bind();
 
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (m_Flags.ShowWireframes)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         glViewport(0, 0, m_Framebuffer.Width(), m_Framebuffer.Height());
 
         m_CurrentScene->Update(deltaTime);
@@ -227,12 +231,14 @@ void Application::Run()
 
         m_Framebuffer.Unbind();
 
+        // Render frame buffer texture
         glDisable(GL_DEPTH_TEST);
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         int width, height;
         glfwGetFramebufferSize(m_Window, &width, &height);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glViewport(0, 0, width, height);
 
         m_Framebuffer.Draw();
@@ -256,25 +262,18 @@ void Application::Run()
                     ImGui::ShowMetricsWindow();
                 }
 
-                if (ImGui::TreeNode("Settings"))
+                if (ImGui::TreeNode("Debug"))
                 {
-                    ImGui::Text("Show Wireframes");
-                    ImGui::SameLine();
+                    ImGui::Checkbox("Show Wireframes", &m_Flags.ShowWireframes);
+                    ImGui::Checkbox("Show Collisions", &m_Flags.ShowCollisions);
 
-                    if (ImGui::Checkbox("##Wireframes", &m_Flags.ShowWireframes))
-                    {
-                        ToggleWireframes();
-                    }
+                    ImGui::TreePop();
+                }
 
-                    ImGui::Text("Show Collisions");
-                    ImGui::SameLine();
-                    ImGui::Checkbox("##Collisions", &m_Flags.ShowCollisions);
-
-                    ImGui::Text("Set Resolution");
-                    ImGui::SameLine();
-
+                if (ImGui::TreeNode("Video"))
+                {
                     if (ImGui::Combo(
-                            "##Resolution", &m_ResolutionIndex,
+                            "Resolution", &m_ResolutionIndex,
                             [](void *data, int index, const char **text) -> bool
                             {
                                 auto &vector = *static_cast<std::vector<Resolution> *>(data);
@@ -287,36 +286,43 @@ void Application::Run()
 
                                 return true;
                             },
-                            static_cast<void *>(&m_ResolutionList), m_ResolutionList.size()))
+                            static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
                     {
-                        auto resolution = m_ResolutionList[m_ResolutionIndex];
+                        auto resolution = m_Resolutions[m_ResolutionIndex];
 
-                        if (!IsFullscreen())
+                        float scaleX = 1.0f;
+                        float scaleY = 1.0f;
+
+                        if (auto monitor = GetMonitor())
                         {
-                            float scaleX = 1.0f;
-                            float scaleY = 1.0f;
-
-                            if (auto monitor = GetMonitor())
-                            {
-                                glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
-                            }
-
-                            glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-                            glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
-                            glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
+                            glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
                         }
+
+                        glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+                        glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
+                        glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
 
                         m_Framebuffer.Resize(resolution.Width, resolution.Height);
                     }
 
-                    ImGui::Text("Current Resolution: %dx%d", m_Framebuffer.Width(), m_Framebuffer.Height());
+                    if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, m_DisplayModes.data(),
+                            m_DisplayModes.size()))
+                    {
+                        switch (m_DisplayMode)
+                        {
+                        case Fullscreen:
+                            break;
+                        case Windowed:
+                            break;
+                        }
+                    }
 
                     ImGui::TreePop();
                 }
 
                 if (ImGui::TreeNode("Camera"))
                 {
-                    if (m_CameraMap.size())
+                    if (m_Cameras.size())
                     {
                         ImGui::Text("Current:");
                         ImGui::SameLine();
@@ -347,7 +353,7 @@ void Application::Run()
 
                 if (ImGui::TreeNode("Scene"))
                 {
-                    if (m_SceneMap.size())
+                    if (m_Scenes.size())
                     {
                         ImGui::Text("Current:");
                         ImGui::SameLine();
@@ -428,37 +434,9 @@ GLFWmonitor *const Application::GetMonitor() const
     return nullptr;
 }
 
-bool Application::IsFullscreen()
-{
-    Resolution fullscreen = m_ResolutionList[m_ResolutionList.size() - 1];
-
-    int width, height;
-    glfwGetWindowSize(m_Window, &width, &height);
-
-    if (width == fullscreen.Width && height == fullscreen.Height)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-void Application::LoadResolutions()
-{
-    int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
-
-    m_ResolutionList.clear();
-
-    for (int i = 0; i < count; i++)
-    {
-        m_ResolutionList.emplace_back(Resolution(modes[i].width, modes[i].height, modes[i].refreshRate));
-    }
-}
-
 void Application::ProcessInput()
 {
-    for (auto it = m_KeyMap.begin(); it != m_KeyMap.end(); ++it)
+    for (auto it = m_Keybinds.begin(); it != m_Keybinds.end(); ++it)
     {
         if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
         {
@@ -474,11 +452,11 @@ void Application::ProcessInput()
 
 void Application::SetCameraNext()
 {
-    auto it = m_CameraMap.find(m_CurrentCameraIndex);
+    auto it = m_Cameras.find(m_CurrentCameraIndex);
 
-    if ((it = std::next(it)) == m_CameraMap.end())
+    if ((it = std::next(it)) == m_Cameras.end())
     {
-        it = m_CameraMap.begin();
+        it = m_Cameras.begin();
     }
 
     m_CurrentCamera = it->second.get();
@@ -487,11 +465,11 @@ void Application::SetCameraNext()
 
 void Application::SetCameraPrev()
 {
-    auto it = m_CameraMap.find(m_CurrentCameraIndex);
+    auto it = m_Cameras.find(m_CurrentCameraIndex);
 
-    if (it == m_CameraMap.begin())
+    if (it == m_Cameras.begin())
     {
-        it = std::prev(m_CameraMap.end());
+        it = std::prev(m_Cameras.end());
     }
     else
     {
@@ -504,11 +482,11 @@ void Application::SetCameraPrev()
 
 void Application::SetSceneNext()
 {
-    auto it = m_SceneMap.find(m_CurrentSceneIndex);
+    auto it = m_Scenes.find(m_CurrentSceneIndex);
 
-    if ((it = std::next(it)) == m_SceneMap.end())
+    if ((it = std::next(it)) == m_Scenes.end())
     {
-        it = m_SceneMap.begin();
+        it = m_Scenes.begin();
     }
 
     m_CurrentScene = it->second.get();
@@ -517,11 +495,11 @@ void Application::SetSceneNext()
 
 void Application::SetScenePrev()
 {
-    auto it = m_SceneMap.find(m_CurrentSceneIndex);
+    auto it = m_Scenes.find(m_CurrentSceneIndex);
 
-    if (it == m_SceneMap.begin())
+    if (it == m_Scenes.begin())
     {
-        it = std::prev(m_SceneMap.end());
+        it = std::prev(m_Scenes.end());
     }
     else
     {
@@ -532,15 +510,16 @@ void Application::SetScenePrev()
     m_CurrentSceneIndex = it->first;
 }
 
-void Application::ToggleWireframes()
+void Application::LoadResolutions()
 {
-    if (m_Flags.ShowWireframes)
+    int count;
+    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
+
+    m_Resolutions.clear();
+
+    for (int i = 0; i < count; i++)
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    else
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height, modes[i].refreshRate));
     }
 }
 
