@@ -266,7 +266,6 @@ void Application::Run()
                 {
                     ImGui::Checkbox("Show Wireframes", &m_Flags.ShowWireframes);
                     ImGui::Checkbox("Show Collisions", &m_Flags.ShowCollisions);
-
                     ImGui::TreePop();
                 }
 
@@ -305,15 +304,28 @@ void Application::Run()
                         m_Framebuffer.Resize(resolution.Width, resolution.Height);
                     }
 
-                    if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, m_DisplayModes.data(),
-                            m_DisplayModes.size()))
+                    if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, m_DisplayModes.data(), m_DisplayModes.size()))
                     {
-                        switch (m_DisplayMode)
+                        if (m_DisplayMode == Fullscreen)
                         {
-                        case Fullscreen:
-                            break;
-                        case Windowed:
-                            break;
+                            const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
+
+                            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+                            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+                            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+                            m_Framebuffer.Resize(mode->width, mode->height);
+
+                            m_LastResolutionIndex = m_ResolutionIndex;
+                            m_ResolutionIndex = m_Resolutions.size() - 1;
+                        }
+                        else
+                        {
+                            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0.0f);
+
+                            m_Framebuffer.Resize(m_LastWidth, m_LastHeight);
+
+                            m_ResolutionIndex = m_LastResolutionIndex;
                         }
                     }
 
@@ -519,8 +531,10 @@ void Application::LoadResolutions()
 
     for (int i = 0; i < count; i++)
     {
-        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height, modes[i].refreshRate));
+        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
     }
+
+    m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
 }
 
 Application::~Application()

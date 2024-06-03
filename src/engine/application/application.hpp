@@ -25,7 +25,7 @@ typedef std::unordered_map<std::string, Shader> ShaderMap;
 
 struct Resolution
 {
-    Resolution(const int width, const int height, const int rate) : Width(width), Height(height), RefreshRate(rate)
+    Resolution(const int width, const int height) : Width(width), Height(height)
     {
     }
 
@@ -46,13 +46,12 @@ struct Resolution
 
     int Width;
     int Height;
-    int RefreshRate;
 
-    mutable char TextFormat[32];
+    mutable char TextFormat[10];
 
     const char *Format() const
     {
-        std::snprintf(TextFormat, sizeof(TextFormat), "%dx%d (%d)", Width, Height, RefreshRate);
+        std::snprintf(TextFormat, sizeof(TextFormat), "%dx%d", Width, Height);
         return TextFormat;
     }
 };
@@ -115,6 +114,12 @@ class Application
     int m_Width;
     int m_Height;
 
+    int m_LastWidth;
+    int m_LastHeight;
+
+    int m_WindowX;
+    int m_WindowY;
+
     int m_CurrentCameraIndex;
     Camera *m_CurrentCamera;
     CameraMap m_Cameras;
@@ -127,6 +132,7 @@ class Application
     KeyMap m_Keybinds;
 
     int m_ResolutionIndex;
+    int m_LastResolutionIndex;
     ResolutionList m_Resolutions;
 
     DisplayMode m_DisplayMode = Windowed;
