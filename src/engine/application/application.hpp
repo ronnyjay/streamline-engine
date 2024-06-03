@@ -58,6 +58,14 @@ struct Resolution
 
 typedef std::vector<Resolution> ResolutionList;
 
+typedef enum
+{
+    Fullscreen,
+    Windowed
+} DisplayMode;
+
+typedef std::array<const char *, 2> DisplayModeList;
+
 struct ApplicationFlags
 {
     bool FirstMouse = true;
@@ -106,19 +114,29 @@ class Application
     int m_Width;
     int m_Height;
 
+    int m_LastWidth;
+    int m_LastHeight;
+
+    int m_WindowX;
+    int m_WindowY;
+
     int m_CurrentCameraIndex;
     Camera *m_CurrentCamera;
-    CameraMap m_CameraMap;
+    CameraMap m_Cameras;
 
     int m_CurrentSceneIndex;
     Scene *m_CurrentScene;
-    SceneMap m_SceneMap;
+    SceneMap m_Scenes;
 
-    ShaderMap m_ShaderMap;
-    KeyMap m_KeyMap;
+    ShaderMap m_Shaders;
+    KeyMap m_Keybinds;
 
     int m_ResolutionIndex;
-    ResolutionList m_ResolutionList;
+    int m_LastResolutionIndex;
+    ResolutionList m_Resolutions;
+
+    DisplayMode m_DisplayMode = Windowed;
+    DisplayModeList m_DisplayModes = {"Fullscreen", "Windowed"};
 
     Framebuffer m_Framebuffer;
 
@@ -126,9 +144,6 @@ class Application
 
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;
-
-    bool IsFullscreen();
-    void LoadResolutions();
 
     void ProcessInput();
 
@@ -138,7 +153,7 @@ class Application
     void SetSceneNext();
     void SetScenePrev();
 
-    void ToggleWireframes();
+    void LoadResolutions();
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
     static void MinimizeCallback(GLFWwindow *, int);
