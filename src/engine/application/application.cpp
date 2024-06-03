@@ -38,7 +38,6 @@ Application::Application(const int width, const int height, const char *title)
     glfwMakeContextCurrent(m_Window);
     glfwSetWindowAspectRatio(m_Window, width, height);
     glfwSetFramebufferSizeCallback(m_Window, Application::FramebufferSizeCallback);
-    glfwSetWindowSizeCallback(m_Window, Application::WindowSizeCallback);
     glfwSetWindowIconifyCallback(m_Window, Application::MinimizeCallback);
     glfwSetWindowMaximizeCallback(m_Window, Application::MaximizeCallback);
     glfwSetKeyCallback(m_Window, Application::KeyCallback);
@@ -51,7 +50,6 @@ Application::Application(const int width, const int height, const char *title)
         throw std::runtime_error("Failed to intialize GLAD");
     }
 
-    // Initialize framebuffer
     m_Framebuffer.Initialize(width, height);
 
     // Initialize ImGui
@@ -215,7 +213,7 @@ void Application::Run()
 
         ProcessInput();
 
-        // Render scene to framebuffer texture
+        // Render scene
         m_Framebuffer.Bind();
 
         glEnable(GL_DEPTH_TEST);
@@ -226,13 +224,15 @@ void Application::Run()
         m_CurrentScene->Update(deltaTime);
         m_CurrentScene->Draw();
 
-        // Render scene with framebuffer texture
         m_Framebuffer.Unbind();
 
         glDisable(GL_DEPTH_TEST);
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glViewport(0, 0, m_Width, m_Height);
+
+        int width, height;
+        glfwGetFramebufferSize(m_Window, &width, &height);
+        glViewport(0, 0, width, height);
 
         m_Framebuffer.Draw();
 
@@ -288,15 +288,24 @@ void Application::Run()
                             },
                             static_cast<void *>(&m_ResolutionList), m_ResolutionList.size()))
                     {
-                        /** TODO: Resize framebuffer if window is fullscreen, else resize window */
+                        auto resolution = m_ResolutionList[m_ResolutionIndex];
 
-                        glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+                        if (!IsFullscreen())
+                        {
+                            float scaleX = 1.0f;
+                            float scaleY = 1.0f;
 
-                        glfwSetWindowSize(m_Window, m_ResolutionList[m_ResolutionIndex].Width,
-                            m_ResolutionList[m_ResolutionIndex].Height);
+                            if (auto monitor = GetMonitor())
+                            {
+                                glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
+                            }
 
-                        glfwSetWindowAspectRatio(m_Window, m_ResolutionList[m_ResolutionIndex].Width,
-                            m_ResolutionList[m_ResolutionIndex].Height);
+                            glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+                            glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
+                            glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
+                        }
+
+                        m_Framebuffer.Resize(resolution.Width, resolution.Height);
                     }
 
                     ImGui::Text("Current Resolution: %dx%d", m_Width, m_Height);
@@ -418,20 +427,19 @@ GLFWmonitor *const Application::GetMonitor() const
     return nullptr;
 }
 
-void Application::ProcessInput()
+bool Application::IsFullscreen()
 {
-    for (auto it = m_KeyMap.begin(); it != m_KeyMap.end(); ++it)
-    {
-        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
-        {
-            m_CurrentCamera->Move(Direction(it->second));
-        }
+    Resolution fullscreen = m_ResolutionList[m_ResolutionList.size() - 1];
 
-        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(m_Window, true);
-        }
+    int width, height;
+    glfwGetWindowSize(m_Window, &width, &height);
+
+    if (width == fullscreen.Width && height == fullscreen.Height)
+    {
+        return true;
     }
+
+    return false;
 }
 
 void Application::LoadResolutions()
@@ -447,6 +455,22 @@ void Application::LoadResolutions()
     }
 
     m_ResolutionList.erase(std::unique(m_ResolutionList.begin(), m_ResolutionList.end()), m_ResolutionList.end());
+}
+
+void Application::ProcessInput()
+{
+    for (auto it = m_KeyMap.begin(); it != m_KeyMap.end(); ++it)
+    {
+        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
+        {
+            m_CurrentCamera->Move(Direction(it->second));
+        }
+
+        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(m_Window, true);
+        }
+    }
 }
 
 void Application::SetCameraNext()
@@ -532,16 +556,6 @@ void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int hei
 
     application->m_Width = width;
     application->m_Height = height;
-
-    // glViewport(0, 0, width, height);
-}
-
-void Application::WindowSizeCallback(GLFWwindow *window, int width, int height)
-{
-    // Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-
-    // application->m_Width = width;
-    // application->m_Height = height;
 }
 
 void Application::MinimizeCallback(GLFWwindow *window, int minimize)

@@ -127,8 +127,10 @@ class Application
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;
 
-    void ProcessInput();
+    bool IsFullscreen();
     void LoadResolutions();
+
+    void ProcessInput();
 
     void SetCameraNext();
     void SetCameraPrev();
@@ -139,7 +141,6 @@ class Application
     void ToggleWireframes();
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
-    static void WindowSizeCallback(GLFWwindow *, int, int);
     static void MinimizeCallback(GLFWwindow *, int);
     static void MaximizeCallback(GLFWwindow *, int);
     static void KeyCallback(GLFWwindow *, int, int, int, int);
