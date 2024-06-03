@@ -22,6 +22,7 @@ Application::Application(const int width, const int height, const char *title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -451,10 +452,8 @@ void Application::LoadResolutions()
 
     for (int i = 0; i < count; i++)
     {
-        m_ResolutionList.emplace_back(Resolution(modes[i].width, modes[i].height));
+        m_ResolutionList.emplace_back(Resolution(modes[i].width, modes[i].height, modes[i].refreshRate));
     }
-
-    m_ResolutionList.erase(std::unique(m_ResolutionList.begin(), m_ResolutionList.end()), m_ResolutionList.end());
 }
 
 void Application::ProcessInput()
