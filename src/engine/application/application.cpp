@@ -224,8 +224,6 @@ void Application::Run()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        glViewport(0, 0, m_Framebuffer.Width(), m_Framebuffer.Height());
-
         m_CurrentScene->Update(deltaTime);
         m_CurrentScene->Draw();
 
@@ -239,7 +237,6 @@ void Application::Run()
         int width, height;
         glfwGetFramebufferSize(m_Window, &width, &height);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glViewport(0, 0, width, height);
 
         m_Framebuffer.Draw();
 
@@ -548,6 +545,8 @@ void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int hei
 
     application->m_Width = width;
     application->m_Height = height;
+
+    glViewport(0, 0, width, height);
 }
 
 void Application::MinimizeCallback(GLFWwindow *window, int minimize)

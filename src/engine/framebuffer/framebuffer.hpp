@@ -20,9 +20,6 @@ class Framebuffer
 
     void Draw();
 
-    int Width() const;
-    int Height() const;
-
     ~Framebuffer();
 
   private:
