@@ -308,7 +308,7 @@ void Application::Run()
                         m_Framebuffer.Resize(resolution.Width, resolution.Height);
                     }
 
-                    ImGui::Text("Current Resolution: %dx%d", m_Width, m_Height);
+                    ImGui::Text("Current Resolution: %dx%d", m_Framebuffer.Width(), m_Framebuffer.Height());
 
                     ImGui::TreePop();
                 }
