@@ -6,6 +6,7 @@
 #include <glad/gl.h>
 
 #include <engine/camera/camera.hpp>
+#include <engine/framebuffer/framebuffer.hpp>
 #include <engine/scene/scene.hpp>
 #include <engine/shader/shader.hpp>
 
@@ -119,13 +120,17 @@ class Application
     int m_ResolutionIndex;
     ResolutionList m_ResolutionList;
 
+    Framebuffer m_Framebuffer;
+
     ApplicationFlags m_Flags;
 
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;
 
-    void ProcessInput();
+    bool IsFullscreen();
     void LoadResolutions();
+
+    void ProcessInput();
 
     void SetCameraNext();
     void SetCameraPrev();
@@ -136,7 +141,6 @@ class Application
     void ToggleWireframes();
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
-    static void WindowSizeCallback(GLFWwindow *, int, int);
     static void MinimizeCallback(GLFWwindow *, int);
     static void MaximizeCallback(GLFWwindow *, int);
     static void KeyCallback(GLFWwindow *, int, int, int, int);
