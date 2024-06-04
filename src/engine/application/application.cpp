@@ -278,6 +278,12 @@ void Application::Run()
 
                 if (ImGui::TreeNode("Video"))
                 {
+                    // Lock resolution if windowed borderless
+                    if (m_DisplayMode == Borderless)
+                    {
+                        ImGui::BeginDisabled(true);
+                    }
+
                     if (ImGui::Combo(
                             "Resolution", &m_ResolutionIndex,
                             [](void *data, int index, const char **text) -> bool
@@ -297,7 +303,7 @@ void Application::Run()
                         auto resolution = m_Resolutions[m_ResolutionIndex];
 
                         // Scale resolution down for retina displays to ensure window always fits screen
-                        // If retina display is at max resolution, this has no effect, and still sizes correctly.
+                        // If retina display is at max resolution, this has no effect
                         float scaleX = 1.0f;
                         float scaleY = 1.0f;
 
@@ -313,8 +319,16 @@ void Application::Run()
                         m_Framebuffer.Resize(resolution.Width, resolution.Height);
                     }
 
+                    if (m_DisplayMode == Borderless)
+                    {
+                        ImGui::EndDisabled();
+                    }
+
                     if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, m_DisplayModes.data(), m_DisplayModes.size()))
                     {
+                        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
+                        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
+
                         if (m_DisplayMode == Fullscreen)
                         {
                             const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
@@ -326,8 +340,6 @@ void Application::Run()
                             m_Framebuffer.Resize(mode->width, mode->height);
 
                             m_LastResolutionIndex = m_ResolutionIndex;
-
-                            // Not a guarantee the highest resolution is the returned video mode, find correct index.
                             for (int i = 0; i < m_Resolutions.size(); i++)
                             {
                                 auto resolution = m_Resolutions[i];
@@ -338,14 +350,32 @@ void Application::Run()
                                 }
                             }
                         }
-                        else
+                        else if (m_DisplayMode == Windowed)
                         {
-                            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0.0f);
-
+                            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
                             m_Framebuffer.Resize(m_LastWidth, m_LastHeight);
-
                             m_ResolutionIndex = m_LastResolutionIndex;
                         }
+                        else if (m_DisplayMode == Borderless)
+                        {
+                            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+                            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+                        }
+                    }
+
+                    // This must be done outside of the dropdown
+                    // Dimensions will be incorrect otherwise
+                    if (m_DisplayMode == Borderless)
+                    {
+                        int monitorX, monitorY;
+                        int monitorWidth, monitorHeight;
+                        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+                        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
+                        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+                        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+
+                        m_Framebuffer.Resize(monitorWidth, monitorHeight);
                     }
 
                     ImGui::TreePop();

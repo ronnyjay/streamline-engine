@@ -61,10 +61,11 @@ typedef std::vector<Resolution> ResolutionList;
 typedef enum
 {
     Fullscreen,
-    Windowed
+    Windowed,
+    Borderless
 } DisplayMode;
 
-typedef std::array<const char *, 2> DisplayModeList;
+typedef std::array<const char *, 3> DisplayModeList;
 
 struct ApplicationFlags
 {
@@ -136,7 +137,7 @@ class Application
     ResolutionList m_Resolutions;
 
     DisplayMode m_DisplayMode = Windowed;
-    DisplayModeList m_DisplayModes = {"Fullscreen", "Windowed"};
+    DisplayModeList m_DisplayModes = {"Fullscreen", "Windowed", "Windowed Borderless"};
 
     Framebuffer m_Framebuffer;
 
