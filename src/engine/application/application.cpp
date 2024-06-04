@@ -326,37 +326,7 @@ void Application::Run()
 
                     if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, m_DisplayModes.data(), m_DisplayModes.size()))
                     {
-                        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
-                        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
-
-                        if (m_DisplayMode == Fullscreen)
-                        {
-                            const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
-
-                            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-                            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-                            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-
-                            m_Framebuffer.Resize(mode->width, mode->height);
-
-                            m_LastResolutionIndex = m_ResolutionIndex;
-                            for (int i = 0; i < m_Resolutions.size(); i++)
-                            {
-                                auto resolution = m_Resolutions[i];
-
-                                if (resolution.Width == mode->width && resolution.Height == mode->height)
-                                {
-                                    m_ResolutionIndex = i;
-                                }
-                            }
-                        }
-                        else if (m_DisplayMode == Windowed)
-                        {
-                            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
-                            m_Framebuffer.Resize(m_LastWidth, m_LastHeight);
-                            m_ResolutionIndex = m_LastResolutionIndex;
-                        }
-                        else if (m_DisplayMode == Borderless)
+                        if (m_DisplayMode == Borderless)
                         {
                             glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
                             glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
@@ -370,6 +340,45 @@ void Application::Run()
                             glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
 
                             m_Framebuffer.Resize(monitorWidth, monitorHeight);
+
+                            // Monitor width, height will always be highest supported resolution
+                            m_ResolutionIndex = m_Resolutions.size() - 1;
+                        }
+                        else
+                        {
+                            if (!glfwGetWindowAttrib(m_Window, GLFW_DECORATED))
+                            {
+                                glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
+                                glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
+                            }
+
+                            if (m_DisplayMode == Fullscreen)
+                            {
+                                const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
+
+                                glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+                                glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+                                glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+                                m_Framebuffer.Resize(mode->width, mode->height);
+
+                                m_LastResolutionIndex = m_ResolutionIndex;
+                                for (int i = 0; i < m_Resolutions.size(); i++)
+                                {
+                                    auto resolution = m_Resolutions[i];
+
+                                    if (resolution.Width == mode->width && resolution.Height == mode->height)
+                                    {
+                                        m_ResolutionIndex = i;
+                                    }
+                                }
+                            }
+                            else if (m_DisplayMode == Windowed)
+                            {
+                                glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+                                m_Framebuffer.Resize(m_LastWidth, m_LastHeight);
+                                m_ResolutionIndex = m_LastResolutionIndex;
+                            }
                         }
                     }
 
