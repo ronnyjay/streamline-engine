@@ -229,6 +229,8 @@ void Application::Run()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
+        glViewport(0, 0, m_Framebuffer.Width(), m_Framebuffer.Height());
+
         m_CurrentScene->Update(deltaTime);
         m_CurrentScene->Draw();
 
@@ -239,6 +241,10 @@ void Application::Run()
 
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        int width, height;
+        glfwGetFramebufferSize(m_Window, &width, &height);
+        glViewport(0, 0, width, height);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -290,6 +296,8 @@ void Application::Run()
                     {
                         auto resolution = m_Resolutions[m_ResolutionIndex];
 
+                        // Scale resolution down for retina displays to ensure window always fits screen
+                        // If retina display is at max resolution, this has no effect, and still sizes correctly.
                         float scaleX = 1.0f;
                         float scaleY = 1.0f;
 
@@ -318,7 +326,17 @@ void Application::Run()
                             m_Framebuffer.Resize(mode->width, mode->height);
 
                             m_LastResolutionIndex = m_ResolutionIndex;
-                            m_ResolutionIndex = m_Resolutions.size() - 1;
+
+                            // Not a guarantee the highest resolution is the returned video mode, find correct index.
+                            for (int i = 0; i < m_Resolutions.size(); i++)
+                            {
+                                auto resolution = m_Resolutions[i];
+
+                                if (resolution.Width == mode->width && resolution.Height == mode->height)
+                                {
+                                    m_ResolutionIndex = i;
+                                }
+                            }
                         }
                         else
                         {
@@ -552,8 +570,6 @@ void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int hei
 
     application->m_Width = width;
     application->m_Height = height;
-
-    glViewport(0, 0, width, height);
 }
 
 void Application::MinimizeCallback(GLFWwindow *window, int minimize)

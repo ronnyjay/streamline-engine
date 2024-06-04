@@ -114,6 +114,16 @@ void Framebuffer::Draw()
     glBindVertexArray(0);
 }
 
+int Framebuffer::Width() const
+{
+    return m_Width;
+}
+
+int Framebuffer::Height() const
+{
+    return m_Height;
+}
+
 Framebuffer::~Framebuffer()
 {
     glDeleteVertexArrays(1, &m_VAO);
