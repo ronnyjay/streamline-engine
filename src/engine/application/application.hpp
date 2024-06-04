@@ -70,7 +70,7 @@ struct ApplicationFlags
 {
     bool FirstMouse = true;
     bool CaptureMouse = true;
-    bool ShowCursor = true;
+    bool ShowCursor = false;
     bool ShowWireframes = false;
     bool ShowCollisions = false;
     bool ShowMetrics = false;

@@ -72,6 +72,11 @@ Application::Application(const int width, const int height, const char *title)
     LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
     LoadShader("Framebuffer", "resources/shaders/framebuffer.vs", "resources/shaders/framebuffer.fs");
 
+    if (!m_Flags.ShowCursor)
+    {
+        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
 }
@@ -185,10 +190,9 @@ void Application::Run()
 {
     glfwSwapInterval(1);
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-
     glDepthFunc(GL_LESS);
+
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     double currentTime;
@@ -216,6 +220,7 @@ void Application::Run()
         m_Framebuffer.Bind();
 
         glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -231,11 +236,10 @@ void Application::Run()
 
         // Render frame buffer texture
         glDisable(GL_DEPTH_TEST);
+
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        int width, height;
-        glfwGetFramebufferSize(m_Window, &width, &height);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         m_Framebuffer.Draw();
@@ -536,6 +540,9 @@ void Application::LoadResolutions()
 
 Application::~Application()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+
     glfwTerminate();
 }
 
