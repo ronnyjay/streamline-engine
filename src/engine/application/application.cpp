@@ -360,22 +360,17 @@ void Application::Run()
                         {
                             glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
                             glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+
+                            int monitorX, monitorY;
+                            int monitorWidth, monitorHeight;
+                            glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+                            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+                            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+                            glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
+
+                            m_Framebuffer.Resize(monitorWidth, monitorHeight);
                         }
-                    }
-
-                    // This must be done outside of the dropdown
-                    // Dimensions will be incorrect otherwise
-                    if (m_DisplayMode == Borderless)
-                    {
-                        int monitorX, monitorY;
-                        int monitorWidth, monitorHeight;
-                        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-
-                        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
-                        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
-                        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
-
-                        m_Framebuffer.Resize(monitorWidth, monitorHeight);
                     }
 
                     ImGui::TreePop();
