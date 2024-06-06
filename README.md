@@ -40,8 +40,8 @@ Below is a brief example of creating a simple scene:
 
 ```C++
 #include <engine/application/application.hpp>
-#include <engine/camera/orthographic/orthographic.hpp>
-#include <engine/camera/perspective/perspective.hpp>
+#include <engine/camera/orthographic.hpp>
+#include <engine/camera/perspective.hpp>
 #include <engine/collider/collider.hpp>
 #include <engine/components/components.hpp>
 #include <engine/entity/entity.hpp>
