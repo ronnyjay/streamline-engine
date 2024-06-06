@@ -328,29 +328,26 @@ void Application::Run()
                     {
                         if (m_DisplayMode == Borderless)
                         {
+                            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+                            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+
                             glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
                             glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
 
                             int monitorX, monitorY;
                             int monitorWidth, monitorHeight;
                             glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-
-                            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
-                            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
                             glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
 
                             m_Framebuffer.Resize(monitorWidth, monitorHeight);
 
-                            // Monitor width, height will always be highest supported resolution
+                            // Monitor width, height will always be nearest to highest supported resolution
                             m_ResolutionIndex = m_Resolutions.size() - 1;
                         }
                         else
                         {
-                            if (!glfwGetWindowAttrib(m_Window, GLFW_DECORATED))
-                            {
-                                glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
-                                glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
-                            }
+                            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
+                            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
 
                             if (m_DisplayMode == Fullscreen)
                             {
