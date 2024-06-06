@@ -11,6 +11,14 @@ AABB::AABB(const glm::vec3 &min, const glm::vec3 &max) : m_Min(min), m_Max(max),
     glGenBuffers(1, &m_EBO);
 }
 
+void AABB::Translate(const glm::vec3 &translation)
+{
+    m_Min = m_RefMin + translation;
+    m_Max = m_RefMax + translation;
+
+    UpdateVertices();
+}
+
 void AABB::Update(const std::vector<glm::vec3> &vertices)
 {
     m_Min = glm::vec3(FLT_MAX);
@@ -21,6 +29,9 @@ void AABB::Update(const std::vector<glm::vec3> &vertices)
         m_Min = glm::min(m_Min, vertex);
         m_Max = glm::max(m_Max, vertex);
     }
+
+    m_RefMin = m_Min;
+    m_RefMax = m_Max;
 
     UpdateVertices();
 }
@@ -34,8 +45,7 @@ void AABB::Draw()
 
 bool AABB::Intersects(const AABB &other)
 {
-    return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) &&
-           (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
+    return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) && (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
            (m_Min.z <= other.m_Max.z && m_Max.z >= other.m_Min.z);
 }
 

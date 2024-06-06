@@ -31,6 +31,7 @@ int main(int argc, char const *argv[])
     auto cube = scene.get()->CreateEntity("Cube");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
+    auto backpack = scene.get()->CreateEntity("Backpack");
 
     cube.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
     cube.AddComponent<engine::AABB>();

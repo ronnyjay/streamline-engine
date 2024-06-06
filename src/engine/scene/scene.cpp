@@ -110,6 +110,21 @@ void Scene::UpdateEntity(entt::entity &entity, double deltaTime)
         if (transformComponent.IsDirty())
         {
             childTransformComponent.SetDirty(true);
+
+            if (transformComponent.IsPositionChanged())
+            {
+                childTransformComponent.SetPositionChanged(true);
+            }
+
+            if (transformComponent.IsRotationChanged())
+            {
+                childTransformComponent.SetRotationChanged(true);
+            }
+
+            if (transformComponent.IsScaleChanged())
+            {
+                childTransformComponent.SetScaleChanged(true);
+            }
         }
 
         UpdateEntity(child, deltaTime);
@@ -151,19 +166,33 @@ void Scene::DrawEntity(entt::entity &entity, const glm::mat4 &transform)
     {
         if (transformComponent.IsDirty())
         {
-            std::vector<glm::vec3> vertices;
+            // Isolate translation
+            glm::vec3 boundingTranslation(modelMatrix[3]);
 
-            for (const auto &mesh : modelComponent.GetMeshes())
+            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
             {
-                for (const auto &vertex : mesh.GetVertices())
+                // Remove translation from transform
+                glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+
+                std::vector<glm::vec3> vertices;
+
+                for (const auto &mesh : modelComponent.GetMeshes())
                 {
-                    vertices.push_back(glm::vec3(
-                        (modelMatrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                    for (const auto &vertex : mesh.GetVertices())
+                    {
+                        vertices.push_back(glm::vec3(
+                            (boundingTransform * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                    }
                 }
+
+                boundingComponent->Update(vertices);
             }
 
-            boundingComponent->Update(vertices);
+            boundingComponent->Translate(boundingTranslation);
 
+            transformComponent.SetPositionChanged(false);
+            transformComponent.SetRotationChanged(false);
+            transformComponent.SetScaleChanged(false);
             transformComponent.SetDirty(false);
         }
 
@@ -206,8 +235,7 @@ void Scene::DrawDebugInfo()
 
 void Scene::DrawEntityDebugInfo(entt::entity &entity)
 {
-    auto [identifierComponent, transformComponent, childrenComponent] =
-        m_Registry.get<Identifier, Transform, Children>(entity);
+    auto [identifierComponent, transformComponent, childrenComponent] = m_Registry.get<Identifier, Transform, Children>(entity);
 
     auto position = transformComponent.GetPosition();
     auto rotation = transformComponent.GetRotation();

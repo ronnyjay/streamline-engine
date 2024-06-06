@@ -81,7 +81,7 @@ class Children
 class Transform
 {
   public:
-    Transform() : m_Position(0.0f), m_Rotation(0.0f), m_Scale(1.0f), m_Dirty(true)
+    Transform() : m_Position(0.0f), m_Rotation(0.0f), m_Scale(1.0f)
     {
     }
 
@@ -97,6 +97,7 @@ class Transform
         if (m_Position != position)
         {
             m_Position = position;
+            m_PositionChanged = true;
             m_Dirty = true;
         }
     }
@@ -116,6 +117,7 @@ class Transform
         if (m_Rotation != rotation)
         {
             m_Rotation = rotation;
+            m_RotationChanged = true;
             m_Dirty = true;
         }
     }
@@ -135,6 +137,7 @@ class Transform
         if (m_Scale != scale)
         {
             m_Scale = scale;
+            m_ScaleChanged = true;
             m_Dirty = true;
         }
     }
@@ -142,6 +145,36 @@ class Transform
     void SetScale(const float x, const float y, const float z)
     {
         SetScale(glm::vec3(x, y, z));
+    }
+
+    const bool IsPositionChanged() const
+    {
+        return m_PositionChanged;
+    }
+
+    void SetPositionChanged(const bool changed)
+    {
+        m_PositionChanged = changed;
+    }
+
+    const bool IsRotationChanged() const
+    {
+        return m_RotationChanged;
+    }
+
+    void SetRotationChanged(const bool changed)
+    {
+        m_RotationChanged = changed;
+    }
+
+    const bool IsScaleChanged() const
+    {
+        return m_ScaleChanged;
+    }
+
+    void SetScaleChanged(const bool changed)
+    {
+        m_ScaleChanged = changed;
     }
 
     const bool IsDirty() const
@@ -165,7 +198,10 @@ class Transform
     glm::vec3 m_Rotation;
     glm::vec3 m_Scale;
 
-    mutable bool m_Dirty;
+    mutable bool m_Dirty = true;
+    mutable bool m_PositionChanged = true;
+    mutable bool m_RotationChanged = true;
+    mutable bool m_ScaleChanged = true;
 };
 
 }; // namespace engine
