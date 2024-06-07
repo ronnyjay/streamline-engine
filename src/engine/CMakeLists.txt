@@ -13,6 +13,8 @@ target_sources(engine PRIVATE
     scene/scene.cpp
     shader/shader.cpp
     stb/stb_image.cpp
+    text/text.cpp
+    texture/texture.cpp
 )
 
 target_link_libraries(engine PUBLIC glfw glm::glm glad imgui assimp::assimp)

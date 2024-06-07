@@ -1,5 +1,6 @@
 #include <engine/application/application.hpp>
 #include <engine/stb/stb_image.hpp>
+#include <engine/text/text.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -201,6 +202,8 @@ void Application::Run()
 
     lastTime = currentTime = glfwGetTime();
 
+    Text watermark("Streamline Engine 2024", -0.95f, +0.90f, +0.5f, 0.9f, glm::vec3(1.0f));
+
     while (!glfwWindowShouldClose(m_Window))
     {
         deltaTime = (currentTime = glfwGetTime()) - lastTime;
@@ -249,6 +252,8 @@ void Application::Run()
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         m_Framebuffer.Draw();
+
+        watermark.Draw();
 
         // Draw Debug Info
         ImGui_ImplOpenGL3_NewFrame();
