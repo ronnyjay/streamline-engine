@@ -20,7 +20,7 @@ const char *Application::DisplayModes[] = {
 // clang-format on
 
 Application::Application(const int width, const int height, const char *title)
-    : m_Width(width), m_Height(height), m_CurrentCamera(nullptr), m_CurrentScene(nullptr), m_DisplayMode(Windowed)
+    : m_Width(width), m_Height(height), m_DisplayMode(Windowed), m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
 {
     // Initialize GLFW
     if (!glfwInit())
