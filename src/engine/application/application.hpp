@@ -67,8 +67,6 @@ typedef enum
     Borderless
 } DisplayMode;
 
-typedef std::array<const char *, 3> DisplayModeList;
-
 struct ApplicationFlags
 {
     bool FirstMouse = true;
