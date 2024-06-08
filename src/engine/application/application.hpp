@@ -9,6 +9,7 @@
 #include <engine/framebuffer/framebuffer.hpp>
 #include <engine/scene/scene.hpp>
 #include <engine/shader/shader.hpp>
+#include <engine/texture/texture.hpp>
 
 #include <map>
 #include <memory>
@@ -22,6 +23,7 @@ typedef std::map<int, std::shared_ptr<Camera>> CameraMap;
 typedef std::map<int, std::shared_ptr<Scene>> SceneMap;
 typedef std::unordered_map<int, Direction> KeyMap;
 typedef std::unordered_map<std::string, Shader> ShaderMap;
+typedef std::unordered_map<std::string, Texture> TextureMap;
 
 struct Resolution
 {
@@ -96,8 +98,11 @@ class Application
     void SetScene(int);
     Scene *const GetCurrentScene() const;
 
-    void LoadShader(const std::string &, const std::string &, const std::string &);
-    Shader &GetShader(const std::string &);
+    Shader LoadShader(const char *, const char *, const char *);
+    Shader GetShader(const char *);
+
+    Texture LoadTexture(const char *, const char *);
+    Texture GetTexture(const char *);
 
     void BindMovementKey(int, const Direction);
 
@@ -129,19 +134,22 @@ class Application
     Scene *m_CurrentScene;
     SceneMap m_Scenes;
 
+    KeyMap m_MovementBinds;
+
     ShaderMap m_Shaders;
-    KeyMap m_Keybinds;
+    TextureMap m_Textures;
+
+    DisplayMode m_DisplayMode;
 
     int m_ResolutionIndex;
     int m_LastResolutionIndex;
     ResolutionList m_Resolutions;
 
-    DisplayMode m_DisplayMode = Windowed;
-    DisplayModeList m_DisplayModes = {"Fullscreen", "Windowed", "Windowed Borderless"};
-
-    Framebuffer m_Framebuffer;
+    Framebuffer *m_Framebuffer;
 
     ApplicationFlags m_Flags;
+
+    static const char *DisplayModes[];
 
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;

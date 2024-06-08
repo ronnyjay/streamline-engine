@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/shader/shader.hpp>
+#include <engine/texture/texture.hpp>
 
 namespace engine
 {
@@ -8,17 +9,14 @@ namespace engine
 class Framebuffer
 {
   public:
-    Framebuffer()
-    {
-    }
-
-    void Initialize(int, int);
-    void Resize(int, int);
+    Framebuffer(int, int);
 
     void Bind();
     void Unbind();
 
     void Draw();
+
+    void Resize(int, int);
 
     int Width() const;
     int Height() const;
@@ -32,8 +30,9 @@ class Framebuffer
     unsigned int m_FBO;
     unsigned int m_Width;
     unsigned int m_Height;
-    unsigned int m_Texture;
-    std::unique_ptr<Shader> m_Shader;
+
+    Shader m_Shader;
+    Texture m_Texture;
 };
 
 }; // namespace engine

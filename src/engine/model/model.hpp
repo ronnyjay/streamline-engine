@@ -1,7 +1,6 @@
 #pragma once
 
 #include <engine/mesh/mesh.hpp>
-#include <engine/shader/shader.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -29,13 +28,13 @@ class Model
     glm::vec3 m_Min;
     glm::vec3 m_Max;
 
-    std::vector<Texture> m_TexturesLoaded;
     std::vector<Mesh> m_Meshes;
+    std::vector<MaterialTexture> m_TexturesLoaded;
 
     void ProcessNode(aiNode *, const aiScene *);
     Mesh ProcessMesh(aiMesh *, const aiScene *);
 
-    std::vector<Texture> LoadMaterialTextures(aiMaterial *, aiTextureType, std::string);
+    std::vector<MaterialTexture> LoadMaterialTextures(aiMaterial *, aiTextureType, std::string);
 };
 
 }; // namespace engine

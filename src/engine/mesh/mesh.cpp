@@ -2,7 +2,7 @@
 
 using namespace engine;
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MaterialTexture> textures)
     : m_Vertices(vertices), m_Indices(indices), m_Textures(textures)
 {
     glGenVertexArrays(1, &m_VAO);
@@ -61,7 +61,7 @@ void Mesh::Draw(Shader &shader)
         glActiveTexture(GL_TEXTURE0 + i);
 
         std::string number;
-        std::string name = m_Textures[i].type;
+        std::string name = m_Textures[i].m_Type;
 
         if (name == "TexDiffuse")
         {
@@ -81,7 +81,7 @@ void Mesh::Draw(Shader &shader)
         }
 
         glUniform1i(glGetUniformLocation(shader.GetId(), (name + number).c_str()), i);
-        glBindTexture(GL_TEXTURE_2D, m_Textures[i].id);
+        glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
     }
 
     // Draw Mesh

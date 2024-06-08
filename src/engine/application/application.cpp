@@ -11,8 +11,16 @@
 
 using namespace engine;
 
+// clang-format off
+const char *Application::DisplayModes[] = {
+    "Fullscreen",
+    "Windowed",
+    "Windowed Borderless"
+};
+// clang-format on
+
 Application::Application(const int width, const int height, const char *title)
-    : m_Width(width), m_Height(height), m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
+    : m_Width(width), m_Height(height), m_CurrentCamera(nullptr), m_CurrentScene(nullptr), m_DisplayMode(Windowed)
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -52,7 +60,13 @@ Application::Application(const int width, const int height, const char *title)
         throw std::runtime_error("Failed to intialize GLAD");
     }
 
-    m_Framebuffer.Initialize(width, height);
+    // Initialize framebuffer
+    m_Framebuffer = new Framebuffer(width, height);
+
+    if (!m_Framebuffer)
+    {
+        throw std::runtime_error("Error creating framebuffer");
+    }
 
     // Initialize ImGui
     IMGUI_CHECKVERSION();
@@ -71,7 +85,6 @@ Application::Application(const int width, const int height, const char *title)
     // Load shaders
     LoadShader("Model", "resources/shaders/model.vs", "resources/shaders/model.fs");
     LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
-    LoadShader("Framebuffer", "resources/shaders/framebuffer.vs", "resources/shaders/framebuffer.fs");
 
     if (!m_Flags.ShowCursor)
     {
@@ -155,18 +168,43 @@ Scene *const Application::GetCurrentScene() const
     return m_CurrentScene;
 }
 
-void Application::LoadShader(const std::string &shader, const std::string &vertexPath, const std::string &fragmentPath)
+Shader Application::LoadShader(const char *name, const char *vertexPath, const char *fragmentPath)
 {
-    m_Shaders.emplace(shader, Shader(vertexPath, fragmentPath));
+    Shader shader = Shader::FromFile(vertexPath, fragmentPath);
+
+    m_Shaders[name] = shader;
+
+    return shader;
 }
 
-Shader &Application::GetShader(const std::string &shader)
+Shader Application::GetShader(const char *name)
 {
-    auto it = m_Shaders.find(shader);
+    auto it = m_Shaders.find(name);
 
     if (it == m_Shaders.end())
     {
         throw std::runtime_error("Shader not found");
+    }
+
+    return it->second;
+}
+
+Texture Application::LoadTexture(const char *name, const char *path)
+{
+    Texture texture = Texture::FromFile(path);
+
+    m_Textures[name] = texture;
+
+    return texture;
+}
+
+Texture Application::GetTexture(const char *name)
+{
+    auto it = m_Textures.find(name);
+
+    if (it == m_Textures.end())
+    {
+        throw std::runtime_error("Texture not found");
     }
 
     return it->second;
@@ -184,7 +222,7 @@ void Application::ShowCollisions(const bool value)
 
 void Application::BindMovementKey(const int key, const Direction direction)
 {
-    m_Keybinds[key] = direction;
+    m_MovementBinds[key] = direction;
 }
 
 void Application::Run()
@@ -220,7 +258,7 @@ void Application::Run()
         ProcessInput();
 
         // Render scene to framebuffer
-        m_Framebuffer.Bind();
+        m_Framebuffer->Bind();
 
         glEnable(GL_DEPTH_TEST);
 
@@ -232,12 +270,12 @@ void Application::Run()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        glViewport(0, 0, m_Framebuffer.Width(), m_Framebuffer.Height());
+        glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
 
         m_CurrentScene->Update(deltaTime);
         m_CurrentScene->Draw();
 
-        m_Framebuffer.Unbind();
+        m_Framebuffer->Unbind();
 
         // Render frame buffer texture
         glDisable(GL_DEPTH_TEST);
@@ -251,7 +289,7 @@ void Application::Run()
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        m_Framebuffer.Draw();
+        m_Framebuffer->Draw();
 
         watermark.Draw();
 
@@ -321,7 +359,7 @@ void Application::Run()
                         glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
                         glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
 
-                        m_Framebuffer.Resize(resolution.Width, resolution.Height);
+                        m_Framebuffer->Resize(resolution.Width, resolution.Height);
                     }
 
                     if (m_DisplayMode == Borderless)
@@ -329,7 +367,7 @@ void Application::Run()
                         ImGui::EndDisabled();
                     }
 
-                    if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, m_DisplayModes.data(), m_DisplayModes.size()))
+                    if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
                     {
                         if (m_DisplayMode == Borderless)
                         {
@@ -344,9 +382,10 @@ void Application::Run()
                             glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
                             glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
 
-                            m_Framebuffer.Resize(monitorWidth, monitorHeight);
+                            m_Framebuffer->Resize(monitorWidth, monitorHeight);
 
                             // Monitor width, height will always be nearest to highest supported resolution
+                            m_LastResolutionIndex = m_ResolutionIndex;
                             m_ResolutionIndex = m_Resolutions.size() - 1;
                         }
                         else
@@ -362,7 +401,7 @@ void Application::Run()
                                 glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
                                 glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
-                                m_Framebuffer.Resize(mode->width, mode->height);
+                                m_Framebuffer->Resize(mode->width, mode->height);
 
                                 m_LastResolutionIndex = m_ResolutionIndex;
                                 for (int i = 0; i < m_Resolutions.size(); i++)
@@ -378,7 +417,7 @@ void Application::Run()
                             else if (m_DisplayMode == Windowed)
                             {
                                 glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
-                                m_Framebuffer.Resize(m_LastWidth, m_LastHeight);
+                                m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
                                 m_ResolutionIndex = m_LastResolutionIndex;
                             }
                         }
@@ -503,7 +542,7 @@ GLFWmonitor *const Application::GetMonitor() const
 
 void Application::ProcessInput()
 {
-    for (auto it = m_Keybinds.begin(); it != m_Keybinds.end(); ++it)
+    for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
     {
         if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
         {
@@ -594,6 +633,8 @@ void Application::LoadResolutions()
 
 Application::~Application()
 {
+    delete m_Framebuffer;
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 

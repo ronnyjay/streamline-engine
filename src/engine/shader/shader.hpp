@@ -10,7 +10,13 @@ namespace engine
 class Shader
 {
   public:
-    Shader(const std::string &, const std::string &);
+    Shader()
+    {
+    }
+
+    void Use();
+
+    void Compile(const char *, const char *);
 
     void SetBool(const std::string &, bool) const;
     void SetInt(const std::string &, int) const;
@@ -28,10 +34,10 @@ class Shader
 
     unsigned int GetId() const;
 
-    void Use();
+    static Shader FromFile(const char *, const char *);
 
   private:
-    unsigned int m_Id;
+    unsigned int m_ID;
 
     void CheckCompileErrors(unsigned int, std::string);
 };

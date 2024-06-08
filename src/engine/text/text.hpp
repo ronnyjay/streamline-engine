@@ -10,10 +10,11 @@ class Text
 {
   public:
     Text(const std::string &text, float posX, float posY, float scale, float maxX, glm::vec3 color)
-        : m_Text(text), m_Position(posX, posY), m_Color(color), m_Scale(scale),
-          m_Shader("resources/shaders/text.vs", "resources/shaders/text.fs"),
-          m_Texture("resources/textures/text/characters16x16.bmp")
+        : m_Text(text), m_Position(posX, posY), m_Color(color), m_Scale(scale), m_MaxX(maxX)
     {
+        m_Shader = Shader::FromFile("resources/shaders/text.vs", "resources/shaders/text.fs");
+        m_Texture = Texture::FromFile("resources/textures/text/characters16x16.bmp");
+
         // clang-format off
         const GLfloat data[4][4] = {
             { -1.0f, -1.0f, 0.0f, 0.0f},
@@ -55,7 +56,7 @@ class Text
     unsigned int m_VBO;
 
     Shader m_Shader;
-    Texture2D m_Texture;
+    Texture m_Texture;
 };
 
 }; // namespace engine
