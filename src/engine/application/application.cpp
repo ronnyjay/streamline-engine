@@ -240,8 +240,6 @@ void Application::Run()
 
     lastTime = currentTime = glfwGetTime();
 
-    Text watermark("Streamline Engine 2024", -0.95f, +0.90f, +0.5f, 0.9f, glm::vec3(1.0f));
-
     while (!glfwWindowShouldClose(m_Window))
     {
         deltaTime = (currentTime = glfwGetTime()) - lastTime;
@@ -261,25 +259,22 @@ void Application::Run()
         m_Framebuffer->Bind();
 
         glEnable(GL_DEPTH_TEST);
-
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
 
         if (m_Flags.ShowWireframes)
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
-
         m_CurrentScene->Update(deltaTime);
         m_CurrentScene->Draw();
 
         m_Framebuffer->Unbind();
 
-        // Render frame buffer texture
+        // Render framebuffer texture
         glDisable(GL_DEPTH_TEST);
-
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -287,11 +282,12 @@ void Application::Run()
         glfwGetFramebufferSize(m_Window, &width, &height);
         glViewport(0, 0, width, height);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if (m_Flags.ShowWireframes)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
         m_Framebuffer->Draw();
-
-        watermark.Draw();
 
         // Draw Debug Info
         ImGui_ImplOpenGL3_NewFrame();
@@ -316,6 +312,7 @@ void Application::Run()
                 {
                     ImGui::Checkbox("Show Wireframes", &m_Flags.ShowWireframes);
                     ImGui::Checkbox("Show Collisions", &m_Flags.ShowCollisions);
+
                     ImGui::TreePop();
                 }
 
@@ -343,23 +340,7 @@ void Application::Run()
                             },
                             static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
                     {
-                        auto resolution = m_Resolutions[m_ResolutionIndex];
-
-                        // Scale resolution down for retina displays to ensure window always fits screen
-                        // If retina display is at max resolution, this has no effect
-                        float scaleX = 1.0f;
-                        float scaleY = 1.0f;
-
-                        if (auto monitor = GetMonitor())
-                        {
-                            glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
-                        }
-
-                        glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-                        glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
-                        glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
-
-                        m_Framebuffer->Resize(resolution.Width, resolution.Height);
+                        SetResolution(m_Resolutions[m_ResolutionIndex]);
                     }
 
                     if (m_DisplayMode == Borderless)
@@ -369,58 +350,7 @@ void Application::Run()
 
                     if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
                     {
-                        if (m_DisplayMode == Borderless)
-                        {
-                            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
-                            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
-
-                            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-                            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-
-                            int monitorX, monitorY;
-                            int monitorWidth, monitorHeight;
-                            glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-                            glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
-
-                            m_Framebuffer->Resize(monitorWidth, monitorHeight);
-
-                            // Monitor width, height will always be nearest to highest supported resolution
-                            m_LastResolutionIndex = m_ResolutionIndex;
-                            m_ResolutionIndex = m_Resolutions.size() - 1;
-                        }
-                        else
-                        {
-                            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
-                            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
-
-                            if (m_DisplayMode == Fullscreen)
-                            {
-                                const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
-
-                                glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-                                glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-                                glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-
-                                m_Framebuffer->Resize(mode->width, mode->height);
-
-                                m_LastResolutionIndex = m_ResolutionIndex;
-                                for (int i = 0; i < m_Resolutions.size(); i++)
-                                {
-                                    auto resolution = m_Resolutions[i];
-
-                                    if (resolution.Width == mode->width && resolution.Height == mode->height)
-                                    {
-                                        m_ResolutionIndex = i;
-                                    }
-                                }
-                            }
-                            else if (m_DisplayMode == Windowed)
-                            {
-                                glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
-                                m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
-                                m_ResolutionIndex = m_LastResolutionIndex;
-                            }
-                        }
+                        SetDisplayMode(m_DisplayMode);
                     }
 
                     ImGui::TreePop();
@@ -616,6 +546,85 @@ void Application::SetScenePrev()
     m_CurrentSceneIndex = it->first;
 }
 
+void Application::SetResolution(Resolution resolution)
+{
+    // Get scale for HiDPI displays
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    if (auto monitor = GetMonitor())
+    {
+        glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
+    }
+
+    // Set resolution
+    glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+    glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
+    glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
+
+    m_Framebuffer->Resize(resolution.Width, resolution.Height);
+}
+
+void Application::SetDisplayMode(DisplayMode mode)
+{
+    if (mode == Borderless)
+    {
+        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+
+        int monitorX, monitorY;
+        int monitorWidth, monitorHeight;
+        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+        glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+        glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
+
+        m_Framebuffer->Resize(monitorWidth, monitorHeight);
+
+        m_LastResolutionIndex = m_ResolutionIndex;
+
+        // Resolution will always be highest supported
+        m_ResolutionIndex = m_Resolutions.size() - 1;
+    }
+    else
+    {
+        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
+        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
+
+        if (mode == Fullscreen)
+        {
+            const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
+
+            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+            m_Framebuffer->Resize(mode->width, mode->height);
+
+            m_LastResolutionIndex = m_ResolutionIndex;
+
+            for (int i = 0; i < m_Resolutions.size(); i++)
+            {
+                auto resolution = m_Resolutions[i];
+
+                if (resolution.Width == mode->width && resolution.Height == mode->height)
+                {
+                    m_ResolutionIndex = i;
+                }
+            }
+        }
+        else
+        {
+            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+
+            m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
+
+            m_ResolutionIndex = m_LastResolutionIndex;
+        }
+    }
+}
+
 void Application::LoadResolutions()
 {
     int count;
@@ -633,7 +642,19 @@ void Application::LoadResolutions()
 
 Application::~Application()
 {
+
     delete m_Framebuffer;
+
+    for (auto it : m_Shaders)
+    {
+        glDeleteProgram(it.second);
+    }
+
+    for (auto it : m_Textures)
+    {
+
+        glDeleteTextures(1, (unsigned int *)&it.second);
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

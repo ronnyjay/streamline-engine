@@ -116,6 +116,8 @@ int Framebuffer::Height() const
 
 Framebuffer::~Framebuffer()
 {
+    glDeleteProgram(m_Shader);
+    glDeleteTextures(1, (unsigned int *)&m_Texture);
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteBuffers(1, &m_VAO);
     glDeleteRenderbuffers(1, &m_RBO);

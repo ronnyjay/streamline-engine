@@ -14,6 +14,8 @@ class Shader
     {
     }
 
+    operator unsigned int() const;
+
     void Use();
 
     void Compile(const char *, const char *);
@@ -31,8 +33,6 @@ class Shader
     void SetMat2(const std::string &, const glm::mat2 &) const;
     void SetMat3(const std::string &, const glm::mat3 &) const;
     void SetMat4(const std::string &, const glm::mat4 &) const;
-
-    unsigned int GetId() const;
 
     static Shader FromFile(const char *, const char *);
 

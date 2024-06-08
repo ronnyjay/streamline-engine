@@ -98,13 +98,13 @@ class Application
     void SetScene(int);
     Scene *const GetCurrentScene() const;
 
+    void BindMovementKey(int, const Direction);
+
     Shader LoadShader(const char *, const char *, const char *);
     Shader GetShader(const char *);
 
     Texture LoadTexture(const char *, const char *);
     Texture GetTexture(const char *);
-
-    void BindMovementKey(int, const Direction);
 
     void ShowWireframes(const bool);
     void ShowCollisions(const bool);
@@ -139,17 +139,16 @@ class Application
     ShaderMap m_Shaders;
     TextureMap m_Textures;
 
-    DisplayMode m_DisplayMode;
-
     int m_ResolutionIndex;
     int m_LastResolutionIndex;
     ResolutionList m_Resolutions;
 
+    DisplayMode m_DisplayMode;
+    static const char *DisplayModes[];
+
     Framebuffer *m_Framebuffer;
 
     ApplicationFlags m_Flags;
-
-    static const char *DisplayModes[];
 
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;
@@ -161,6 +160,9 @@ class Application
 
     void SetSceneNext();
     void SetScenePrev();
+
+    void SetResolution(Resolution);
+    void SetDisplayMode(DisplayMode);
 
     void LoadResolutions();
 

@@ -80,7 +80,7 @@ void Mesh::Draw(Shader &shader)
             number = std::to_string(heightNr++);
         }
 
-        glUniform1i(glGetUniformLocation(shader.GetId(), (name + number).c_str()), i);
+        glUniform1i(glGetUniformLocation(shader, (name + number).c_str()), i);
         glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
     }
 

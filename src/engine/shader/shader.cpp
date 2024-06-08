@@ -8,6 +8,11 @@
 
 using namespace engine;
 
+Shader::operator unsigned int() const
+{
+    return m_ID;
+}
+
 void Shader::Use()
 {
     glUseProgram(m_ID);
@@ -100,11 +105,6 @@ void Shader::SetMat3(const std::string &name, const glm::mat3 &mat) const
 void Shader::SetMat4(const std::string &name, const glm::mat4 &mat) const
 {
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
-}
-
-unsigned int Shader::GetId() const
-{
-    return m_ID;
 }
 
 Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
