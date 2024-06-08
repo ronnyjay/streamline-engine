@@ -124,6 +124,12 @@ class Application
     int m_WindowX;
     int m_WindowY;
 
+    int m_ResolutionIndex;
+    int m_LastResolutionIndex;
+    ResolutionList m_Resolutions;
+
+    DisplayMode m_DisplayMode;
+
     int m_CurrentCameraIndex;
     Camera *m_CurrentCamera;
     CameraMap m_Cameras;
@@ -136,13 +142,6 @@ class Application
 
     ShaderMap m_Shaders;
     TextureMap m_Textures;
-
-    int m_ResolutionIndex;
-    int m_LastResolutionIndex;
-    ResolutionList m_Resolutions;
-
-    DisplayMode m_DisplayMode;
-    static const char *DisplayModes[];
 
     Framebuffer *m_Framebuffer;
 
@@ -163,6 +162,8 @@ class Application
     void SetDisplayMode(DisplayMode);
 
     void LoadResolutions();
+
+    static const char *DisplayModes[];
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
     static void MinimizeCallback(GLFWwindow *, int);
