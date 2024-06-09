@@ -551,19 +551,89 @@ GLFWmonitor *const Application::GetMonitor() const
     return nullptr;
 }
 
-void Application::LoadResolutions()
+void Application::ProcessInput(const double timeStep)
 {
-    int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
-
-    m_Resolutions.clear();
-
-    for (int i = 0; i < count; i++)
+    for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
     {
-        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
+        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
+        {
+            m_CurrentCamera->Move(Direction(it->second), timeStep);
+        }
+
+        m_CurrentCamera->Move(m_CursorOffsetX, m_CursorOffsetY);
+
+        m_CursorOffsetX = 0.0;
+        m_CursorOffsetY = 0.0;
+
+        m_CurrentCamera->Move(m_ScrollOffset);
+
+        m_ScrollOffset = 0.0;
+
+        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(m_Window, true);
+        }
+    }
+}
+
+void Application::SetCameraNext()
+{
+    auto it = m_Cameras.find(m_CurrentCameraIndex);
+
+    if ((it = std::next(it)) == m_Cameras.end())
+    {
+        it = m_Cameras.begin();
     }
 
-    m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
+    m_CurrentCamera = it->second.get();
+    m_CurrentCameraIndex = it->first;
+}
+
+void Application::SetCameraPrev()
+{
+    auto it = m_Cameras.find(m_CurrentCameraIndex);
+
+    if (it == m_Cameras.begin())
+    {
+        it = std::prev(m_Cameras.end());
+    }
+    else
+    {
+        it = std::prev(it);
+    }
+
+    m_CurrentCamera = it->second.get();
+    m_CurrentCameraIndex = it->first;
+}
+
+void Application::SetSceneNext()
+{
+    auto it = m_Scenes.find(m_CurrentSceneIndex);
+
+    if ((it = std::next(it)) == m_Scenes.end())
+    {
+        it = m_Scenes.begin();
+    }
+
+    m_CurrentScene = it->second.get();
+    m_CurrentSceneIndex = it->first;
+}
+
+void Application::SetScenePrev()
+{
+    auto it = m_Scenes.find(m_CurrentSceneIndex);
+
+    if (it == m_Scenes.begin())
+    {
+        it = std::prev(m_Scenes.end());
+    }
+    else
+    {
+        it = std::prev(it);
+    }
+
+    m_CurrentScene = it->second.get();
+    m_CurrentSceneIndex = it->first;
 }
 
 void Application::SetResolution(const Resolution resolution)
@@ -645,89 +715,19 @@ void Application::SetDisplayMode(const DisplayMode mode)
     }
 }
 
-void Application::SetCameraNext()
+void Application::LoadResolutions()
 {
-    auto it = m_Cameras.find(m_CurrentCameraIndex);
+    int count;
+    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
 
-    if ((it = std::next(it)) == m_Cameras.end())
+    m_Resolutions.clear();
+
+    for (int i = 0; i < count; i++)
     {
-        it = m_Cameras.begin();
+        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
     }
 
-    m_CurrentCamera = it->second.get();
-    m_CurrentCameraIndex = it->first;
-}
-
-void Application::SetCameraPrev()
-{
-    auto it = m_Cameras.find(m_CurrentCameraIndex);
-
-    if (it == m_Cameras.begin())
-    {
-        it = std::prev(m_Cameras.end());
-    }
-    else
-    {
-        it = std::prev(it);
-    }
-
-    m_CurrentCamera = it->second.get();
-    m_CurrentCameraIndex = it->first;
-}
-
-void Application::SetSceneNext()
-{
-    auto it = m_Scenes.find(m_CurrentSceneIndex);
-
-    if ((it = std::next(it)) == m_Scenes.end())
-    {
-        it = m_Scenes.begin();
-    }
-
-    m_CurrentScene = it->second.get();
-    m_CurrentSceneIndex = it->first;
-}
-
-void Application::SetScenePrev()
-{
-    auto it = m_Scenes.find(m_CurrentSceneIndex);
-
-    if (it == m_Scenes.begin())
-    {
-        it = std::prev(m_Scenes.end());
-    }
-    else
-    {
-        it = std::prev(it);
-    }
-
-    m_CurrentScene = it->second.get();
-    m_CurrentSceneIndex = it->first;
-}
-
-void Application::ProcessInput(const double timeStep)
-{
-    for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
-    {
-        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
-        {
-            m_CurrentCamera->Move(Direction(it->second), timeStep);
-        }
-
-        m_CurrentCamera->Move(m_CursorOffsetX, m_CursorOffsetY);
-
-        m_CursorOffsetX = 0.0;
-        m_CursorOffsetY = 0.0;
-
-        m_CurrentCamera->Move(m_ScrollOffset);
-
-        m_ScrollOffset = 0.0;
-
-        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(m_Window, true);
-        }
-    }
+    m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
 }
 
 Application::~Application()

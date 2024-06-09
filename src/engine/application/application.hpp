@@ -170,10 +170,7 @@ class Application
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;
 
-    void LoadResolutions();
-
-    void SetResolution(const Resolution);
-    void SetDisplayMode(const DisplayMode);
+    void ProcessInput(const double);
 
     void SetCameraNext();
     void SetCameraPrev();
@@ -181,7 +178,10 @@ class Application
     void SetSceneNext();
     void SetScenePrev();
 
-    void ProcessInput(const double);
+    void SetResolution(const Resolution);
+    void SetDisplayMode(const DisplayMode);
+
+    void LoadResolutions();
 
     static const char *DisplayModes[];
     static const char *Framerates[];
