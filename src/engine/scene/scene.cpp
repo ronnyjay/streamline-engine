@@ -107,25 +107,10 @@ void Scene::UpdateEntity(const entt::entity &entity, const double deltaTime)
     {
         auto &childTransformComponent = m_Registry.get<Transform>(child);
 
-        if (transformComponent.IsDirty())
-        {
-            childTransformComponent.SetDirty(true);
-
-            if (transformComponent.IsPositionChanged())
-            {
-                childTransformComponent.SetPositionChanged(true);
-            }
-
-            if (transformComponent.IsRotationChanged())
-            {
-                childTransformComponent.SetRotationChanged(true);
-            }
-
-            if (transformComponent.IsScaleChanged())
-            {
-                childTransformComponent.SetScaleChanged(true);
-            }
-        }
+        childTransformComponent.SetDirty(transformComponent.IsDirty());
+        childTransformComponent.SetPositionChanged(transformComponent.IsPositionChanged());
+        childTransformComponent.SetRotationChanged(transformComponent.IsRotationChanged());
+        childTransformComponent.SetScaleChanged(transformComponent.IsScaleChanged());
 
         UpdateEntity(child, deltaTime);
     }
