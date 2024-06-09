@@ -137,10 +137,6 @@ class Application
     int m_WindowX;
     int m_WindowY;
 
-    double m_CursorOffsetX;
-    double m_CursorOffsetY;
-    double m_ScrollOffset;
-
     int m_Resolution;
     int m_LastResolution;
     ResolutionList m_Resolutions;

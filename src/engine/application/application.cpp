@@ -560,15 +560,6 @@ void Application::ProcessInput(const double timeStep)
             m_CurrentCamera->Move(Direction(it->second), timeStep);
         }
 
-        m_CurrentCamera->Move(m_CursorOffsetX, m_CursorOffsetY);
-
-        m_CursorOffsetX = 0.0;
-        m_CursorOffsetY = 0.0;
-
-        m_CurrentCamera->Move(m_ScrollOffset);
-
-        m_ScrollOffset = 0.0;
-
         if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
             glfwSetWindowShouldClose(m_Window, true);
@@ -849,8 +840,7 @@ void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yP
     lastX = xPos;
     lastY = yPos;
 
-    application->m_CursorOffsetX += xOffset;
-    application->m_CursorOffsetY += yOffset;
+    application->m_CurrentCamera->Move(xOffset, yOffset);
 }
 
 void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
@@ -862,5 +852,5 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
         return;
     }
 
-    application->m_ScrollOffset += yOffset;
+    application->m_CurrentCamera->Move(yOffset);
 }
