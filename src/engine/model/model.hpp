@@ -18,7 +18,7 @@ class Model
   public:
     Model(const std::string &path);
 
-    void Draw(Shader &);
+    void Draw(const Shader &);
 
     const std::vector<Mesh> &GetMeshes() const;
 

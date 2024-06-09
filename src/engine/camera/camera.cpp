@@ -21,7 +21,7 @@ float Camera::GetYaw() const
     return m_Yaw;
 }
 
-void Camera::SetYaw(float yaw)
+void Camera::SetYaw(const float yaw)
 {
     m_Yaw = yaw;
     Update();
@@ -32,7 +32,7 @@ float Camera::GetPitch() const
     return m_Pitch;
 }
 
-void Camera::SetPitch(float pitch)
+void Camera::SetPitch(const float pitch)
 {
     m_Pitch = pitch;
     Update();
@@ -43,7 +43,7 @@ float Camera::GetZoom() const
     return m_Zoom;
 }
 
-void Camera::SetZoom(float zoom)
+void Camera::SetZoom(const float zoom)
 {
     m_Zoom = zoom;
     Update();
@@ -54,7 +54,7 @@ float Camera::GetSpeed() const
     return m_Speed;
 }
 
-void Camera::SetSpeed(float speed)
+void Camera::SetSpeed(const float speed)
 {
     m_Speed = speed;
 }
@@ -64,7 +64,7 @@ float Camera::GetSensitivity() const
     return m_Sensitivity;
 }
 
-void Camera::SetSensitivity(float sensitivity)
+void Camera::SetSensitivity(const float sensitivity)
 {
     m_Sensitivity = sensitivity;
 }

@@ -30,7 +30,7 @@ class Mesh
   public:
     Mesh(std::vector<Vertex>, std::vector<unsigned int>, std::vector<MaterialTexture>);
 
-    void Draw(Shader &);
+    void Draw(const Shader &);
 
     const std::vector<Vertex> &GetVertices() const;
 

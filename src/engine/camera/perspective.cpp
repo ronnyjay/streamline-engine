@@ -31,7 +31,7 @@ glm::mat4 const PerspectiveCamera::ViewMatrix() const
     return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 }
 
-void PerspectiveCamera::Move(Direction direction)
+void PerspectiveCamera::Move(const Direction direction)
 {
     switch (direction)
     {
@@ -93,7 +93,7 @@ void PerspectiveCamera::Move(double xPos, double yPos)
     Update();
 }
 
-void PerspectiveCamera::Move(double yOffset)
+void PerspectiveCamera::Move(const double yOffset)
 {
     m_Zoom -= yOffset;
 
@@ -108,7 +108,7 @@ void PerspectiveCamera::Move(double yOffset)
     }
 }
 
-void PerspectiveCamera::LockHorizontal(bool lock)
+void PerspectiveCamera::LockHorizontal(const bool lock)
 {
     m_LockHorizontal = lock;
 }

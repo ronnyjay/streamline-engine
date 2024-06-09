@@ -24,7 +24,7 @@ Model::Model(const std::string &path) : m_Min(FLT_MAX), m_Max(-FLT_MAX)
     ProcessNode(scene->mRootNode, scene);
 }
 
-void Model::Draw(Shader &shader)
+void Model::Draw(const Shader &shader)
 {
     for (auto &mesh : m_Meshes)
     {
@@ -198,53 +198,4 @@ std::vector<MaterialTexture> Model::LoadMaterialTextures(aiMaterial *material, a
     }
 
     return textures;
-}
-
-unsigned int TextureFromFile(const char *path, const std::string &directory)
-{
-    std::string filename = std::string(path);
-    filename = directory + '/' + filename;
-
-    unsigned int textureId;
-    glGenTextures(1, &textureId);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-
-    if (data)
-    {
-        GLenum format = GL_NONE;
-
-        switch (nrComponents)
-        {
-        case 1:
-            format = GL_RED;
-            break;
-        case 3:
-            format = GL_RGB;
-            break;
-        case 4:
-            format = GL_RGBA;
-            break;
-        default:
-            break;
-        }
-
-        glBindTexture(GL_TEXTURE_2D, textureId);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Failed to load texture at path: " << path << std::endl;
-    }
-
-    return textureId;
 }

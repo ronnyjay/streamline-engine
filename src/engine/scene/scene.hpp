@@ -19,20 +19,20 @@ class Scene : public Debuggable
     Scene();
 
     Entity CreateEntity(const std::string &);
-    Entity CreateChildEntity(Entity &, const std::string &);
-    void DestroyEntity(Entity);
+    Entity CreateChildEntity(const Entity &, const std::string &);
+    void DestroyEntity(const Entity);
 
   private:
     entt::registry m_Registry;
 
-    void Update(double);
-    void UpdateEntity(entt::entity &, double);
+    void Update(const double);
+    void UpdateEntity(const entt::entity &, const double);
 
     void Draw();
-    void DrawEntity(entt::entity &, const glm::mat4 &transform);
+    void DrawEntity(const entt::entity &, const glm::mat4 &transform);
 
     void DrawDebugInfo() override;
-    void DrawEntityDebugInfo(entt::entity &);
+    void DrawEntityDebugInfo(const entt::entity &);
 
     friend class Application;
     friend class Entity;

@@ -28,7 +28,7 @@ Entity Scene::CreateEntity(const std::string &identifier)
     return entity;
 }
 
-Entity Scene::CreateChildEntity(Entity &parent, const std::string &identifier)
+Entity Scene::CreateChildEntity(const Entity &parent, const std::string &identifier)
 {
     Entity child = CreateEntity(identifier);
 
@@ -41,7 +41,7 @@ Entity Scene::CreateChildEntity(Entity &parent, const std::string &identifier)
     return child;
 }
 
-void Scene::DestroyEntity(Entity entity)
+void Scene::DestroyEntity(const Entity entity)
 {
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
@@ -53,7 +53,7 @@ void Scene::DestroyEntity(Entity entity)
     m_Registry.destroy(entity);
 }
 
-void Scene::Update(double deltaTime)
+void Scene::Update(const double deltaTime)
 {
     // Propogate transformation updates
     auto view = m_Registry.view<Transform, Parent, Children>();
@@ -98,7 +98,7 @@ void Scene::Update(double deltaTime)
     }
 }
 
-void Scene::UpdateEntity(entt::entity &entity, double deltaTime)
+void Scene::UpdateEntity(const entt::entity &entity, const double deltaTime)
 {
     auto &transformComponent = m_Registry.get<Transform>(entity);
     auto &childrenComponent = m_Registry.get<Children>(entity);
@@ -144,7 +144,7 @@ void Scene::Draw()
     }
 }
 
-void Scene::DrawEntity(entt::entity &entity, const glm::mat4 &transform)
+void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 {
     auto [modelComponent, transformComponent] = m_Registry.get<Model, Transform>(entity);
 
@@ -233,7 +233,7 @@ void Scene::DrawDebugInfo()
     }
 }
 
-void Scene::DrawEntityDebugInfo(entt::entity &entity)
+void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 {
     auto [identifierComponent, transformComponent, childrenComponent] = m_Registry.get<Identifier, Transform, Children>(entity);
 

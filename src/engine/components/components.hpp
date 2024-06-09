@@ -49,7 +49,7 @@ class Parent
         return m_Parent;
     }
 
-    void Set(entt::entity parent)
+    void Set(const entt::entity parent)
     {
         m_Parent = parent;
     }
@@ -69,7 +69,7 @@ class Children
         return m_Children;
     }
 
-    void Emplace(entt::entity child)
+    void Emplace(const entt::entity child)
     {
         m_Children.emplace_back(child);
     }

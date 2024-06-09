@@ -23,7 +23,7 @@ void Texture::Bind()
     glBindTexture(GL_TEXTURE_2D, m_ID);
 }
 
-void Texture::Generate(unsigned int width, unsigned int height, unsigned char *data)
+void Texture::Generate(const unsigned int width, const unsigned int height, const unsigned char *data)
 {
     m_Width = width;
     m_Height = height;

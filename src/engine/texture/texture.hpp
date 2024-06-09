@@ -16,7 +16,7 @@ class Texture
 
     void Bind();
 
-    void Generate(unsigned int, unsigned int, unsigned char *);
+    void Generate(const unsigned int, const unsigned int, const unsigned char *);
 
     unsigned int m_Width;
     unsigned int m_Height;
@@ -53,7 +53,7 @@ class MaterialTexture : public Texture
     }
 
   private:
-    MaterialTexture(Texture texture, const char *path) : Texture(texture), m_Path(path)
+    MaterialTexture(const Texture texture, const char *path) : Texture(texture), m_Path(path)
     {
     }
 };

@@ -48,7 +48,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     glBindVertexArray(0);
 }
 
-void Mesh::Draw(Shader &shader)
+void Mesh::Draw(const Shader &shader)
 {
     // Bind textures
     unsigned int diffuseNr = 1;

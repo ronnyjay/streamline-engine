@@ -110,7 +110,7 @@ ApplicationFlags const &Application::Flags() const
     return m_Flags;
 }
 
-void Application::AddCamera(int key, std::shared_ptr<Camera> camera)
+void Application::AddCamera(const int key, const std::shared_ptr<Camera> camera)
 {
     m_Cameras[key] = camera;
 
@@ -139,7 +139,7 @@ Camera *const Application::GetCurrentCamera() const
     return m_CurrentCamera;
 }
 
-void Application::AddScene(int key, std::shared_ptr<Scene> scene)
+void Application::AddScene(const int key, const std::shared_ptr<Scene> scene)
 {
     m_Scenes[key] = scene;
 
@@ -325,7 +325,7 @@ void Application::Run()
                     }
 
                     if (ImGui::Combo(
-                            "Resolution", &m_ResolutionIndex,
+                            "Resolution", &m_Resolution,
                             [](void *data, int index, const char **text) -> bool
                             {
                                 auto &vector = *static_cast<std::vector<Resolution> *>(data);
@@ -340,7 +340,7 @@ void Application::Run()
                             },
                             static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
                     {
-                        SetResolution(m_Resolutions[m_ResolutionIndex]);
+                        SetResolution(m_Resolutions[m_Resolution]);
                     }
 
                     if (m_DisplayMode == Borderless)
@@ -470,18 +470,96 @@ GLFWmonitor *const Application::GetMonitor() const
     return nullptr;
 }
 
-void Application::ProcessInput()
+void Application::LoadResolutions()
 {
-    for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
-    {
-        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
-        {
-            m_CurrentCamera->Move(Direction(it->second));
-        }
+    int count;
+    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
 
-        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    m_Resolutions.clear();
+
+    for (int i = 0; i < count; i++)
+    {
+        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
+    }
+
+    m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
+}
+
+void Application::SetResolution(const Resolution resolution)
+{
+    // Get scale for HiDPI displays
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    if (auto monitor = GetMonitor())
+    {
+        glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
+    }
+
+    // Set resolution
+    glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+    glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
+    glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
+
+    m_Framebuffer->Resize(resolution.Width, resolution.Height);
+}
+
+void Application::SetDisplayMode(const DisplayMode mode)
+{
+    if (mode == Borderless)
+    {
+        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+
+        int monitorX, monitorY;
+        int monitorWidth, monitorHeight;
+        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+        glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+        glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
+
+        m_Framebuffer->Resize(monitorWidth, monitorHeight);
+
+        m_LastResolution = m_Resolution;
+
+        // Resolution will always be highest supported
+        m_Resolution = m_Resolutions.size() - 1;
+    }
+    else
+    {
+        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
+        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
+
+        if (mode == Fullscreen)
         {
-            glfwSetWindowShouldClose(m_Window, true);
+            const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
+
+            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+            m_Framebuffer->Resize(mode->width, mode->height);
+
+            m_LastResolution = m_Resolution;
+
+            for (int i = 0; i < m_Resolutions.size(); i++)
+            {
+                auto resolution = m_Resolutions[i];
+
+                if (resolution.Width == mode->width && resolution.Height == mode->height)
+                {
+                    m_Resolution = i;
+                }
+            }
+        }
+        else
+        {
+            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+
+            m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
+
+            m_Resolution = m_LastResolution;
         }
     }
 }
@@ -546,98 +624,20 @@ void Application::SetScenePrev()
     m_CurrentSceneIndex = it->first;
 }
 
-void Application::SetResolution(Resolution resolution)
+void Application::ProcessInput()
 {
-    // Get scale for HiDPI displays
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
-
-    if (auto monitor = GetMonitor())
+    for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
     {
-        glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
-    }
-
-    // Set resolution
-    glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-    glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
-    glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
-
-    m_Framebuffer->Resize(resolution.Width, resolution.Height);
-}
-
-void Application::SetDisplayMode(DisplayMode mode)
-{
-    if (mode == Borderless)
-    {
-        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
-        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
-
-        int monitorX, monitorY;
-        int monitorWidth, monitorHeight;
-        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-
-        glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-        glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
-
-        m_Framebuffer->Resize(monitorWidth, monitorHeight);
-
-        m_LastResolutionIndex = m_ResolutionIndex;
-
-        // Resolution will always be highest supported
-        m_ResolutionIndex = m_Resolutions.size() - 1;
-    }
-    else
-    {
-        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
-        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
-
-        if (mode == Fullscreen)
+        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
         {
-            const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
-
-            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-
-            m_Framebuffer->Resize(mode->width, mode->height);
-
-            m_LastResolutionIndex = m_ResolutionIndex;
-
-            for (int i = 0; i < m_Resolutions.size(); i++)
-            {
-                auto resolution = m_Resolutions[i];
-
-                if (resolution.Width == mode->width && resolution.Height == mode->height)
-                {
-                    m_ResolutionIndex = i;
-                }
-            }
+            m_CurrentCamera->Move(Direction(it->second));
         }
-        else
+
+        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
-
-            m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
-
-            m_ResolutionIndex = m_LastResolutionIndex;
+            glfwSetWindowShouldClose(m_Window, true);
         }
     }
-}
-
-void Application::LoadResolutions()
-{
-    int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
-
-    m_Resolutions.clear();
-
-    for (int i = 0; i < count; i++)
-    {
-        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
-    }
-
-    m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
 }
 
 Application::~Application()

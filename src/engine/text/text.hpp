@@ -9,7 +9,7 @@ namespace engine
 class Text
 {
   public:
-    Text(const std::string &text, float posX, float posY, float scale, float maxX, glm::vec3 color)
+    Text(const std::string &text, const float posX, const float posY, const float scale, const float maxX, const glm::vec3 color)
         : m_Text(text), m_Position(posX, posY), m_Color(color), m_Scale(scale), m_MaxX(maxX)
     {
         m_Shader = Shader::FromFile("resources/shaders/text.vs", "resources/shaders/text.fs");

@@ -88,21 +88,21 @@ class Application
 
     ApplicationFlags const &Flags() const;
 
-    void AddCamera(int, std::shared_ptr<Camera>);
-    void SetCamera(int);
+    void AddCamera(const int, const std::shared_ptr<Camera>);
+    void SetCamera(const int);
     Camera *const GetCurrentCamera() const;
 
-    void AddScene(int, std::shared_ptr<Scene>);
-    void SetScene(int);
+    void AddScene(const int, const std::shared_ptr<Scene>);
+    void SetScene(const int);
     Scene *const GetCurrentScene() const;
-
-    void BindMovementKey(int, const Direction);
 
     Shader LoadShader(const char *, const char *, const char *);
     Shader GetShader(const char *);
 
     Texture LoadTexture(const char *, const char *);
     Texture GetTexture(const char *);
+
+    void BindMovementKey(const int, const Direction);
 
     void ShowWireframes(const bool);
     void ShowCollisions(const bool);
@@ -124,8 +124,8 @@ class Application
     int m_WindowX;
     int m_WindowY;
 
-    int m_ResolutionIndex;
-    int m_LastResolutionIndex;
+    int m_Resolution;
+    int m_LastResolution;
     ResolutionList m_Resolutions;
 
     DisplayMode m_DisplayMode;
@@ -150,7 +150,10 @@ class Application
     GLFWwindow *const GetWindow() const;
     GLFWmonitor *const GetMonitor() const;
 
-    void ProcessInput();
+    void LoadResolutions();
+
+    void SetResolution(const Resolution);
+    void SetDisplayMode(const DisplayMode);
 
     void SetCameraNext();
     void SetCameraPrev();
@@ -158,10 +161,7 @@ class Application
     void SetSceneNext();
     void SetScenePrev();
 
-    void SetResolution(Resolution);
-    void SetDisplayMode(DisplayMode);
-
-    void LoadResolutions();
+    void ProcessInput();
 
     static const char *DisplayModes[];
 

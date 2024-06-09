@@ -31,7 +31,7 @@ glm::mat4 const OrthographicCamera::ViewMatrix() const
     return ProjectionMatrix() * m_ViewModel;
 }
 
-void OrthographicCamera::Move(Direction direction)
+void OrthographicCamera::Move(const Direction direction)
 {
     switch (direction)
     {

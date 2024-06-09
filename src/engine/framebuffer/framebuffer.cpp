@@ -6,7 +6,7 @@
 
 using namespace engine;
 
-Framebuffer::Framebuffer(int width, int height)
+Framebuffer::Framebuffer(const int width, const int height)
 {
     m_Width = width;
     m_Height = height;
@@ -80,7 +80,7 @@ void Framebuffer::Draw()
     glBindVertexArray(0);
 }
 
-void Framebuffer::Resize(int width, int height)
+void Framebuffer::Resize(const int width, const int height)
 {
     if (width == m_Width && height == m_Height)
     {
