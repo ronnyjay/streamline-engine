@@ -241,17 +241,20 @@ void Application::Run()
 {
     glfwSwapInterval(m_Flags.VerticalSync);
 
-    glDepthFunc(GL_LESS);
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LESS);
 
     double currentTime;
     double lastTime;
     double deltaTime;
 
-    double timeStep;
-    double timeAccumulator = 0.0;
+    double renderTimeStep;
+    double renderAccumulator = 0.0;
+
+    double simulationTimeStep = 1.0 / 300.0;
+    double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();
 
@@ -261,14 +264,15 @@ void Application::Run()
 
         if (m_Framerate == FPS_UNLIMITED)
         {
-            timeStep = deltaTime;
+            renderTimeStep = deltaTime;
         }
         else
         {
-            timeStep = 1.0 / static_cast<double>(m_Framerate);
+            renderTimeStep = 1.0 / static_cast<double>(m_Framerate);
         }
 
-        timeAccumulator += deltaTime;
+        renderAccumulator += deltaTime;
+        simulationAccumulator += deltaTime;
 
         auto monitor = GetMonitor();
 
@@ -279,223 +283,231 @@ void Application::Run()
             LoadResolutions();
         }
 
-        while (timeAccumulator >= timeStep)
-        {
-            ProcessInput(timeStep);
+        ProcessInput(deltaTime);
 
-            timeAccumulator -= timeStep;
+        while (simulationAccumulator >= simulationTimeStep)
+        {
+            m_CurrentScene->Update(simulationTimeStep);
+
+            simulationAccumulator -= simulationTimeStep;
         }
 
-        // Render scene to framebuffer
-        m_Framebuffer->Bind();
-
-        glEnable(GL_DEPTH_TEST);
-        glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
-
-        if (m_Flags.ShowWireframes)
+        if (renderAccumulator >= renderTimeStep)
         {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
+            // Begin rendering to framebuffer
+            m_Framebuffer->Bind();
 
-        m_CurrentScene->Update(deltaTime);
-        m_CurrentScene->Draw();
+            glEnable(GL_DEPTH_TEST);
+            glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
 
-        m_Framebuffer->Unbind();
-
-        // Render framebuffer texture
-        glDisable(GL_DEPTH_TEST);
-        glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        int width, height;
-        glfwGetFramebufferSize(m_Window, &width, &height);
-        glViewport(0, 0, width, height);
-
-        if (m_Flags.ShowWireframes)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-
-        m_Framebuffer->Draw();
-
-        // Draw Debug Info
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        if (m_Flags.ShowDebugWindow)
-        {
-            if (ImGui::Begin("Streamline Engine Debugger", &m_Flags.ShowDebugWindow))
+            if (m_Flags.ShowWireframes)
             {
-                if (ImGui::Button("Show Metrics"))
-                {
-                    m_Flags.ShowMetrics = !m_Flags.ShowMetrics;
-                }
-
-                if (m_Flags.ShowMetrics)
-                {
-                    ImGui::ShowMetricsWindow();
-                }
-
-                if (ImGui::TreeNode("Debug"))
-                {
-                    ImGui::Checkbox("Show Wireframes", &m_Flags.ShowWireframes);
-                    ImGui::Checkbox("Show Collisions", &m_Flags.ShowCollisions);
-
-                    ImGui::TreePop();
-                }
-
-                if (ImGui::TreeNode("Video"))
-                {
-                    // Lock resolution if windowed borderless
-                    if (m_DisplayMode == Borderless)
-                    {
-                        ImGui::BeginDisabled(true);
-                    }
-
-                    if (ImGui::Combo(
-                            "Resolution", &m_Resolution,
-                            [](void *data, int index, const char **text) -> bool
-                            {
-                                auto &vector = *static_cast<std::vector<Resolution> *>(data);
-
-                                if (index < 0 || index >= static_cast<int>(vector.size()))
-                                {
-                                    return false;
-                                }
-                                *text = vector[index].Format();
-
-                                return true;
-                            },
-                            static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
-                    {
-                        SetResolution(m_Resolutions[m_Resolution]);
-                    }
-
-                    if (m_DisplayMode == Borderless)
-                    {
-                        ImGui::EndDisabled();
-                    }
-
-                    if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
-                    {
-                        SetDisplayMode(m_DisplayMode);
-                    }
-
-                    if (ImGui::Combo("Frame Rate Limit", &m_FramerateIndex, Framerates, IM_ARRAYSIZE(Framerates)))
-                    {
-                        switch (m_FramerateIndex)
-                        {
-                        case 0:
-                            m_Framerate = FPS_30;
-                            break;
-                        case 1:
-                            m_Framerate = FPS_60;
-                            break;
-                        case 2:
-                            m_Framerate = FPS_120;
-                            break;
-                        case 3:
-                            m_Framerate = FPS_144;
-                            break;
-                        case 4:
-                            m_Framerate = FPS_165;
-                            break;
-                        case 5:
-                            m_Framerate = FPS_240;
-                            break;
-                        case 6:
-                            m_Framerate = FPS_360;
-                            break;
-                        case 7:
-                            m_Framerate = FPS_UNLIMITED;
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-
-                    if (ImGui::Checkbox("Vertical Sync", &m_Flags.VerticalSync))
-                    {
-                        glfwSwapInterval(m_Flags.VerticalSync);
-                    }
-
-                    ImGui::TreePop();
-                }
-
-                if (ImGui::TreeNode("Camera"))
-                {
-                    if (m_Cameras.size())
-                    {
-                        ImGui::Text("Current:");
-                        ImGui::SameLine();
-
-                        if (ImGui::ArrowButton("Camera Previous", ImGuiDir_Left))
-                        {
-                            SetCameraPrev();
-                        }
-
-                        ImGui::SameLine();
-                        ImGui::TextUnformatted(std::to_string(m_CurrentCameraIndex).c_str());
-                        ImGui::SameLine();
-
-                        if (ImGui::ArrowButton("Camera Next", ImGuiDir_Right))
-                        {
-                            SetCameraNext();
-                        }
-
-                        m_CurrentCamera->DrawDebugInfo();
-                    }
-                    else
-                    {
-                        ImGui::Text("Camera information unavailable");
-                    }
-
-                    ImGui::TreePop();
-                }
-
-                if (ImGui::TreeNode("Scene"))
-                {
-                    if (m_Scenes.size())
-                    {
-                        ImGui::Text("Current:");
-                        ImGui::SameLine();
-
-                        if (ImGui::ArrowButton("Scene Previous", ImGuiDir_Left))
-                        {
-                            SetScenePrev();
-                        }
-
-                        ImGui::SameLine();
-                        ImGui::TextUnformatted(std::to_string(m_CurrentSceneIndex).c_str());
-                        ImGui::SameLine();
-
-                        if (ImGui::ArrowButton("Scene Next", ImGuiDir_Right))
-                        {
-                            SetSceneNext();
-                        }
-
-                        m_CurrentScene->DrawDebugInfo();
-                    }
-                    else
-                    {
-                        ImGui::Text("Scene information unavailable");
-                    }
-
-                    ImGui::TreePop();
-                }
-
-                ImGui::End();
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
+
+            // Draw scene
+            m_CurrentScene->Draw();
+
+            // End rendering to framebuffer
+            m_Framebuffer->Unbind();
+
+            int width, height;
+            glfwGetFramebufferSize(m_Window, &width, &height);
+
+            glDisable(GL_DEPTH_TEST);
+            glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glViewport(0, 0, width, height);
+
+            if (m_Flags.ShowWireframes)
+            {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+
+            // Render framebuffer texture
+            m_Framebuffer->Render();
+
+            // Draw Debug Info
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            if (m_Flags.ShowDebugWindow)
+            {
+                if (ImGui::Begin("Streamline Engine Debugger", &m_Flags.ShowDebugWindow))
+                {
+                    if (ImGui::Button("Show Metrics"))
+                    {
+                        m_Flags.ShowMetrics = !m_Flags.ShowMetrics;
+                    }
+
+                    if (m_Flags.ShowMetrics)
+                    {
+                        ImGui::ShowMetricsWindow();
+                    }
+
+                    if (ImGui::TreeNode("Debug"))
+                    {
+                        ImGui::Checkbox("Show Wireframes", &m_Flags.ShowWireframes);
+                        ImGui::Checkbox("Show Collisions", &m_Flags.ShowCollisions);
+
+                        ImGui::TreePop();
+                    }
+
+                    if (ImGui::TreeNode("Video"))
+                    {
+                        // Lock resolution if windowed borderless
+                        if (m_DisplayMode == Borderless)
+                        {
+                            ImGui::BeginDisabled(true);
+                        }
+
+                        if (ImGui::Combo(
+                                "Resolution", &m_Resolution,
+                                [](void *data, int index, const char **text) -> bool
+                                {
+                                    auto &vector = *static_cast<std::vector<Resolution> *>(data);
+
+                                    if (index < 0 || index >= static_cast<int>(vector.size()))
+                                    {
+                                        return false;
+                                    }
+                                    *text = vector[index].Format();
+
+                                    return true;
+                                },
+                                static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
+                        {
+                            SetResolution(m_Resolutions[m_Resolution]);
+                        }
+
+                        if (m_DisplayMode == Borderless)
+                        {
+                            ImGui::EndDisabled();
+                        }
+
+                        if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
+                        {
+                            SetDisplayMode(m_DisplayMode);
+                        }
+
+                        if (ImGui::Combo("Frame Rate Limit", &m_FramerateIndex, Framerates, IM_ARRAYSIZE(Framerates)))
+                        {
+                            switch (m_FramerateIndex)
+                            {
+                            case 0:
+                                m_Framerate = FPS_30;
+                                break;
+                            case 1:
+                                m_Framerate = FPS_60;
+                                break;
+                            case 2:
+                                m_Framerate = FPS_120;
+                                break;
+                            case 3:
+                                m_Framerate = FPS_144;
+                                break;
+                            case 4:
+                                m_Framerate = FPS_165;
+                                break;
+                            case 5:
+                                m_Framerate = FPS_240;
+                                break;
+                            case 6:
+                                m_Framerate = FPS_360;
+                                break;
+                            case 7:
+                                m_Framerate = FPS_UNLIMITED;
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+
+                        if (ImGui::Checkbox("Vertical Sync", &m_Flags.VerticalSync))
+                        {
+                            glfwSwapInterval(m_Flags.VerticalSync);
+                        }
+
+                        ImGui::TreePop();
+                    }
+
+                    if (ImGui::TreeNode("Camera"))
+                    {
+                        if (m_Cameras.size())
+                        {
+                            ImGui::Text("Current:");
+                            ImGui::SameLine();
+
+                            if (ImGui::ArrowButton("Camera Previous", ImGuiDir_Left))
+                            {
+                                SetCameraPrev();
+                            }
+
+                            ImGui::SameLine();
+                            ImGui::TextUnformatted(std::to_string(m_CurrentCameraIndex).c_str());
+                            ImGui::SameLine();
+
+                            if (ImGui::ArrowButton("Camera Next", ImGuiDir_Right))
+                            {
+                                SetCameraNext();
+                            }
+
+                            m_CurrentCamera->DrawDebugInfo();
+                        }
+                        else
+                        {
+                            ImGui::Text("Camera information unavailable");
+                        }
+
+                        ImGui::TreePop();
+                    }
+
+                    if (ImGui::TreeNode("Scene"))
+                    {
+                        if (m_Scenes.size())
+                        {
+                            ImGui::Text("Current:");
+                            ImGui::SameLine();
+
+                            if (ImGui::ArrowButton("Scene Previous", ImGuiDir_Left))
+                            {
+                                SetScenePrev();
+                            }
+
+                            ImGui::SameLine();
+                            ImGui::TextUnformatted(std::to_string(m_CurrentSceneIndex).c_str());
+                            ImGui::SameLine();
+
+                            if (ImGui::ArrowButton("Scene Next", ImGuiDir_Right))
+                            {
+                                SetSceneNext();
+                            }
+
+                            m_CurrentScene->DrawDebugInfo();
+                        }
+                        else
+                        {
+                            ImGui::Text("Scene information unavailable");
+                        }
+
+                        ImGui::TreePop();
+                    }
+
+                    ImGui::End();
+                }
+            }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            glfwSwapBuffers(m_Window);
+            glfwPollEvents();
+
+            renderAccumulator = 0.0;
         }
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        glfwSwapBuffers(m_Window);
-        glfwPollEvents();
 
         lastTime = currentTime;
     }

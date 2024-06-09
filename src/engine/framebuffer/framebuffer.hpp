@@ -14,7 +14,7 @@ class Framebuffer
     void Bind();
     void Unbind();
 
-    void Draw();
+    void Render();
 
     void Resize(const int, const int);
 

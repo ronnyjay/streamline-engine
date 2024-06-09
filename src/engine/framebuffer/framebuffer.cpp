@@ -70,7 +70,7 @@ void Framebuffer::Unbind()
     glViewport(0, 0, m_Width, m_Height);
 }
 
-void Framebuffer::Draw()
+void Framebuffer::Render()
 {
     m_Shader.Use();
     m_Texture.Bind();
