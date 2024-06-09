@@ -137,8 +137,8 @@ class Application
     int m_WindowX;
     int m_WindowY;
 
-    int m_Resolution;
-    int m_LastResolution;
+    int m_ResolutionIndex;
+    int m_LastResolutionIndex;
     ResolutionList m_Resolutions;
 
     int m_FramerateIndex;

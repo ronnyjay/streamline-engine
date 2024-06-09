@@ -365,7 +365,7 @@ void Application::Run()
                         }
 
                         if (ImGui::Combo(
-                                "Resolution", &m_Resolution,
+                                "Resolution", &m_ResolutionIndex,
                                 [](void *data, int index, const char **text) -> bool
                                 {
                                     auto &vector = *static_cast<std::vector<Resolution> *>(data);
@@ -380,7 +380,7 @@ void Application::Run()
                                 },
                                 static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
                         {
-                            SetResolution(m_Resolutions[m_Resolution]);
+                            SetResolution(m_Resolutions[m_ResolutionIndex]);
                         }
 
                         if (m_DisplayMode == Borderless)
@@ -663,10 +663,10 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
         m_Framebuffer->Resize(monitorWidth, monitorHeight);
 
-        m_LastResolution = m_Resolution;
+        m_LastResolutionIndex = m_ResolutionIndex;
 
         // Resolution will always be highest supported
-        m_Resolution = m_Resolutions.size() - 1;
+        m_ResolutionIndex = m_Resolutions.size() - 1;
     }
     else
     {
@@ -683,7 +683,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
             m_Framebuffer->Resize(mode->width, mode->height);
 
-            m_LastResolution = m_Resolution;
+            m_LastResolutionIndex = m_ResolutionIndex;
 
             for (int i = 0; i < m_Resolutions.size(); i++)
             {
@@ -691,7 +691,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
                 if (resolution.Width == mode->width && resolution.Height == mode->height)
                 {
-                    m_Resolution = i;
+                    m_ResolutionIndex = i;
                 }
             }
         }
@@ -701,7 +701,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
             m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
 
-            m_Resolution = m_LastResolution;
+            m_ResolutionIndex = m_LastResolutionIndex;
         }
     }
 }
