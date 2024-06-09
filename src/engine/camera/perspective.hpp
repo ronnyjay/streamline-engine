@@ -20,9 +20,9 @@ class PerspectiveCamera : public Camera
     virtual glm::mat4 const ProjectionMatrix() const override;
     virtual glm::mat4 const ViewMatrix() const override;
 
-    virtual void Move(const Direction) override; // keyboard input
-    virtual void Move(double, double) override;  // mouse position
-    virtual void Move(const double) override;    // mouse scroll
+    virtual void Move(const Direction, double) override; // keyboard input
+    virtual void Move(double, double) override;          // mouse position
+    virtual void Move(double) override;                  // mouse scroll
 
     virtual void DrawDebugInfo() override;
 

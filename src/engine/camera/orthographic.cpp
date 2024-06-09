@@ -31,27 +31,27 @@ glm::mat4 const OrthographicCamera::ViewMatrix() const
     return ProjectionMatrix() * m_ViewModel;
 }
 
-void OrthographicCamera::Move(const Direction direction)
+void OrthographicCamera::Move(const Direction direction, double timeStep)
 {
     switch (direction)
     {
     case Forward:
-        m_Position.z += m_Speed;
+        m_Position.z += m_Speed * timeStep;
         break;
     case Backward:
-        m_Position.z -= m_Speed;
+        m_Position.z -= m_Speed * timeStep;
         break;
     case Left:
-        m_Position.x -= m_Speed;
+        m_Position.x -= m_Speed * timeStep;
         break;
     case Right:
-        m_Position.x += m_Speed;
+        m_Position.x += m_Speed * timeStep;
         break;
     case Up:
-        m_Position.y += m_Speed;
+        m_Position.y += m_Speed * timeStep;
         break;
     case Down:
-        m_Position.y -= m_Speed;
+        m_Position.y -= m_Speed * timeStep;
         break;
     }
 

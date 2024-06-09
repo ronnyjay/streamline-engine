@@ -67,10 +67,23 @@ typedef enum
     Borderless
 } DisplayMode;
 
+typedef enum
+{
+    FPS_30 = 30,
+    FPS_60 = 60,
+    FPS_120 = 120,
+    FPS_144 = 144,
+    FPS_165 = 165,
+    FPS_240 = 240,
+    FPS_360 = 360,
+    FPS_UNLIMITED
+} Framerate;
+
 struct ApplicationFlags
 {
     bool FirstMouse = true;
     bool CaptureMouse = true;
+    bool VerticalSync = false;
     bool ShowCursor = false;
     bool ShowWireframes = false;
     bool ShowCollisions = false;
@@ -124,9 +137,16 @@ class Application
     int m_WindowX;
     int m_WindowY;
 
+    double m_CursorOffsetX;
+    double m_CursorOffsetY;
+    double m_ScrollOffset;
+
     int m_Resolution;
     int m_LastResolution;
     ResolutionList m_Resolutions;
+
+    int m_FramerateIndex;
+    Framerate m_Framerate;
 
     DisplayMode m_DisplayMode;
 
@@ -161,9 +181,10 @@ class Application
     void SetSceneNext();
     void SetScenePrev();
 
-    void ProcessInput();
+    void ProcessInput(const double);
 
     static const char *DisplayModes[];
+    static const char *Framerates[];
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
     static void MinimizeCallback(GLFWwindow *, int);

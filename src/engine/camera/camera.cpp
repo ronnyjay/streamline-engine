@@ -7,7 +7,7 @@ void Camera::DrawDebugInfo()
     ImGui::DragFloat("Yaw", &m_Yaw);
     ImGui::DragFloat("Pitch", &m_Pitch);
     ImGui::DragFloat("FOV", &m_Zoom, 1.0f, 1.0f, 120.0f);
-    ImGui::DragFloat("Speed", &m_Speed, 0.1f, 0.1f, 1.0f);
+    ImGui::DragFloat("Speed", &m_Speed, 1.0f, 10.0f, 100.0f);
     ImGui::DragFloat("Sensitivity", &m_Sensitivity, 0.01f, 0.01, 1.0);
     ImGui::DragFloat("Position X", &m_Position.x);
     ImGui::DragFloat("Position Y", &m_Position.y);

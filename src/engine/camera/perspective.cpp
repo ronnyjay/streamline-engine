@@ -31,41 +31,42 @@ glm::mat4 const PerspectiveCamera::ViewMatrix() const
     return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 }
 
-void PerspectiveCamera::Move(const Direction direction)
+void PerspectiveCamera::Move(const Direction direction, double timeStep)
 {
+
     switch (direction)
     {
     case Forward:
         if (m_LockHorizontal)
         {
-            m_Position += m_ForwardHorizontal * m_Speed;
+            m_Position += m_ForwardHorizontal * m_Speed * (float)timeStep;
         }
         else
         {
-            m_Position += m_Front * m_Speed;
+            m_Position += m_Front * m_Speed * (float)timeStep;
         }
         break;
     case Backward:
         if (m_LockHorizontal)
         {
-            m_Position -= m_ForwardHorizontal * m_Speed;
+            m_Position -= m_ForwardHorizontal * m_Speed * (float)timeStep;
         }
         else
         {
-            m_Position -= m_Front * m_Speed;
+            m_Position -= m_Front * m_Speed * (float)timeStep;
         }
         break;
     case Left:
-        m_Position -= glm::normalize(glm::cross(m_Front, m_Up)) * m_Speed;
+        m_Position -= glm::normalize(glm::cross(m_Front, m_Up)) * m_Speed * (float)timeStep;
         break;
     case Right:
-        m_Position += glm::normalize(glm::cross(m_Front, m_Up)) * m_Speed;
+        m_Position += glm::normalize(glm::cross(m_Front, m_Up)) * m_Speed * (float)timeStep;
         break;
     case Up:
-        m_Position.y += m_Speed;
+        m_Position.y += m_Speed * (float)timeStep;
         break;
     case Down:
-        m_Position.y -= m_Speed;
+        m_Position.y -= m_Speed * (float)timeStep;
         break;
     }
 
@@ -93,7 +94,7 @@ void PerspectiveCamera::Move(double xPos, double yPos)
     Update();
 }
 
-void PerspectiveCamera::Move(const double yOffset)
+void PerspectiveCamera::Move(double yOffset)
 {
     m_Zoom -= yOffset;
 

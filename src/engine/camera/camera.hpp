@@ -25,7 +25,7 @@ typedef enum
 // default camera values
 const float YAW = 0.0f;
 const float PITCH = 0.0f;
-const float SPEED = 0.1f;
+const float SPEED = 10.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM = 1.0f;
 
@@ -42,9 +42,9 @@ class Camera : public Debuggable
     virtual glm::mat4 const ProjectionMatrix() const = 0;
     virtual glm::mat4 const ViewMatrix() const = 0;
 
-    virtual void Move(const Direction) = 0; // keyboard input
-    virtual void Move(double, double) = 0;  // mouse position
-    virtual void Move(const double) = 0;    // mouse scroll
+    virtual void Move(const Direction, double) = 0; // keyboard input
+    virtual void Move(double, double) = 0;          // mouse position
+    virtual void Move(double) = 0;                  // mouse scroll
 
     virtual void DrawDebugInfo() override;
 

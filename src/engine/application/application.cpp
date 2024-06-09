@@ -17,10 +17,22 @@ const char *Application::DisplayModes[] = {
     "Windowed",
     "Windowed Borderless"
 };
+
+const char *Application::Framerates[] = {
+    "30 FPS",
+    "60 FPS",
+    "120 FPS",
+    "144 FPS",
+    "165 FPS",
+    "240 FPS",
+    "360 FPS",
+    "Unlimited"
+};
 // clang-format on
 
 Application::Application(const int width, const int height, const char *title)
-    : m_Width(width), m_Height(height), m_DisplayMode(Windowed), m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
+    : m_Width(width), m_Height(height), m_FramerateIndex(7), m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed),
+      m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -210,6 +222,11 @@ Texture Application::GetTexture(const char *name)
     return it->second;
 }
 
+void Application::BindMovementKey(const int key, const Direction direction)
+{
+    m_MovementBinds[key] = direction;
+}
+
 void Application::ShowWireframes(const bool value)
 {
     m_Flags.ShowWireframes = value;
@@ -220,14 +237,9 @@ void Application::ShowCollisions(const bool value)
     m_Flags.ShowCollisions = value;
 }
 
-void Application::BindMovementKey(const int key, const Direction direction)
-{
-    m_MovementBinds[key] = direction;
-}
-
 void Application::Run()
 {
-    glfwSwapInterval(1);
+    glfwSwapInterval(m_Flags.VerticalSync);
 
     glDepthFunc(GL_LESS);
 
@@ -238,11 +250,25 @@ void Application::Run()
     double lastTime;
     double deltaTime;
 
+    double timeStep;
+    double timeAccumulator = 0.0;
+
     lastTime = currentTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(m_Window))
     {
         deltaTime = (currentTime = glfwGetTime()) - lastTime;
+
+        if (m_Framerate == FPS_UNLIMITED)
+        {
+            timeStep = deltaTime;
+        }
+        else
+        {
+            timeStep = 1.0 / static_cast<double>(m_Framerate);
+        }
+
+        timeAccumulator += deltaTime;
 
         auto monitor = GetMonitor();
 
@@ -253,7 +279,12 @@ void Application::Run()
             LoadResolutions();
         }
 
-        ProcessInput();
+        while (timeAccumulator >= timeStep)
+        {
+            ProcessInput(timeStep);
+
+            timeAccumulator -= timeStep;
+        }
 
         // Render scene to framebuffer
         m_Framebuffer->Bind();
@@ -351,6 +382,44 @@ void Application::Run()
                     if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
                     {
                         SetDisplayMode(m_DisplayMode);
+                    }
+
+                    if (ImGui::Combo("Frame Rate Limit", &m_FramerateIndex, Framerates, IM_ARRAYSIZE(Framerates)))
+                    {
+                        switch (m_FramerateIndex)
+                        {
+                        case 0:
+                            m_Framerate = FPS_30;
+                            break;
+                        case 1:
+                            m_Framerate = FPS_60;
+                            break;
+                        case 2:
+                            m_Framerate = FPS_120;
+                            break;
+                        case 3:
+                            m_Framerate = FPS_144;
+                            break;
+                        case 4:
+                            m_Framerate = FPS_165;
+                            break;
+                        case 5:
+                            m_Framerate = FPS_240;
+                            break;
+                        case 6:
+                            m_Framerate = FPS_360;
+                            break;
+                        case 7:
+                            m_Framerate = FPS_UNLIMITED;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+
+                    if (ImGui::Checkbox("Vertical Sync", &m_Flags.VerticalSync))
+                    {
+                        glfwSwapInterval(m_Flags.VerticalSync);
                     }
 
                     ImGui::TreePop();
@@ -624,14 +693,23 @@ void Application::SetScenePrev()
     m_CurrentSceneIndex = it->first;
 }
 
-void Application::ProcessInput()
+void Application::ProcessInput(const double timeStep)
 {
     for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
     {
         if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
         {
-            m_CurrentCamera->Move(Direction(it->second));
+            m_CurrentCamera->Move(Direction(it->second), timeStep);
         }
+
+        m_CurrentCamera->Move(m_CursorOffsetX, m_CursorOffsetY);
+
+        m_CursorOffsetX = 0.0;
+        m_CursorOffsetY = 0.0;
+
+        m_CurrentCamera->Move(m_ScrollOffset);
+
+        m_ScrollOffset = 0.0;
 
         if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
@@ -759,7 +837,8 @@ void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yP
     lastX = xPos;
     lastY = yPos;
 
-    application->m_CurrentCamera->Move(xOffset, yOffset);
+    application->m_CursorOffsetX += xOffset;
+    application->m_CursorOffsetY += yOffset;
 }
 
 void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
@@ -771,5 +850,5 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
         return;
     }
 
-    application->m_CurrentCamera->Move(yOffset);
+    application->m_ScrollOffset += yOffset;
 }
