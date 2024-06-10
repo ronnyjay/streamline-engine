@@ -16,26 +16,29 @@ class Entity;
 class Scene : public Debuggable
 {
   public:
-    Scene();
+    Scene()
+    {
+    }
 
     Entity CreateEntity(const std::string &);
-    Entity CreateChildEntity(const Entity &, const std::string &);
+    Entity CreateChildEntity(const Entity &parent, const std::string &);
+
     void DestroyEntity(const Entity);
 
   private:
     entt::registry m_Registry;
 
+    friend class Application;
+    friend class Entity;
+
     void Update(const double);
-    void UpdateEntity(const entt::entity &, const double);
+    void UpdateEntity(const entt::entity &, const glm::mat4 &);
 
     void Draw();
-    void DrawEntity(const entt::entity &, const glm::mat4 &transform);
+    void DrawEntity(const entt::entity &, const glm::mat4 &);
 
     void DrawDebugInfo() override;
     void DrawEntityDebugInfo(const entt::entity &);
-
-    friend class Application;
-    friend class Entity;
 };
 
 }; // namespace engine

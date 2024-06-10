@@ -12,10 +12,6 @@ using namespace engine;
 
 extern Application application;
 
-Scene::Scene()
-{
-}
-
 Entity Scene::CreateEntity(const std::string &identifier)
 {
     Entity entity(m_Registry.create(), this);
@@ -55,6 +51,8 @@ void Scene::DestroyEntity(const Entity entity)
 
 void Scene::Update(const double deltaTime)
 {
+    /** TODO: Implement RK4 Differential Equation Solver for Rigid Bodies */
+
     // Propogate transformation updates
     auto view = m_Registry.view<Transform, Parent, Children>();
 
@@ -62,7 +60,7 @@ void Scene::Update(const double deltaTime)
     {
         if (view.get<Parent>(entity).Get() == entt::null)
         {
-            UpdateEntity(entity, deltaTime);
+            UpdateEntity(entity, glm::mat4(1.0f));
         }
     }
 
@@ -98,22 +96,77 @@ void Scene::Update(const double deltaTime)
     }
 }
 
-void Scene::UpdateEntity(const entt::entity &entity, const double deltaTime)
+void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 {
     auto &transformComponent = m_Registry.get<Transform>(entity);
     auto &childrenComponent = m_Registry.get<Children>(entity);
+
+    auto *modelComponent = m_Registry.try_get<Model>(entity);
+    auto *boundingComponent = m_Registry.try_get<AABB>(entity);
+
+    auto modelMatrix = transformComponent.GetTransform() * transform;
+
+    if (modelComponent && boundingComponent)
+    {
+        if (transformComponent.IsDirty())
+        {
+            // Isolate translation
+            glm::vec3 boundingTranslation(modelMatrix[3]);
+
+            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
+            {
+                // Remove translation from transform
+                glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+
+                std::vector<glm::vec3> vertices;
+
+                for (const auto &mesh : modelComponent->GetMeshes())
+                {
+                    for (const auto &vertex : mesh.GetVertices())
+                    {
+                        vertices.push_back(glm::vec3(
+                            (boundingTransform * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                    }
+                }
+
+                boundingComponent->Update(vertices);
+            }
+
+            boundingComponent->Translate(boundingTranslation);
+        }
+    }
 
     for (auto &child : childrenComponent.Get())
     {
         auto &childTransformComponent = m_Registry.get<Transform>(child);
 
-        childTransformComponent.SetDirty(transformComponent.IsDirty());
-        childTransformComponent.SetPositionChanged(transformComponent.IsPositionChanged());
-        childTransformComponent.SetRotationChanged(transformComponent.IsRotationChanged());
-        childTransformComponent.SetScaleChanged(transformComponent.IsScaleChanged());
+        if (transformComponent.IsDirty())
+        {
+            childTransformComponent.SetDirty(true);
 
-        UpdateEntity(child, deltaTime);
+            if (transformComponent.IsPositionChanged())
+            {
+                childTransformComponent.SetPositionChanged(true);
+            }
+
+            if (transformComponent.IsRotationChanged())
+            {
+                childTransformComponent.SetRotationChanged(true);
+            }
+
+            if (transformComponent.IsScaleChanged())
+            {
+                childTransformComponent.SetScaleChanged(true);
+            }
+        }
+
+        UpdateEntity(child, modelMatrix);
     }
+
+    transformComponent.SetPositionChanged(false);
+    transformComponent.SetRotationChanged(false);
+    transformComponent.SetScaleChanged(false);
+    transformComponent.SetDirty(false);
 }
 
 void Scene::Draw()
@@ -149,38 +202,6 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 
     if (auto *boundingComponent = m_Registry.try_get<AABB>(entity))
     {
-        if (transformComponent.IsDirty())
-        {
-            // Isolate translation
-            glm::vec3 boundingTranslation(modelMatrix[3]);
-
-            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
-            {
-                // Remove translation from transform
-                glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
-
-                std::vector<glm::vec3> vertices;
-
-                for (const auto &mesh : modelComponent.GetMeshes())
-                {
-                    for (const auto &vertex : mesh.GetVertices())
-                    {
-                        vertices.push_back(glm::vec3(
-                            (boundingTransform * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
-                    }
-                }
-
-                boundingComponent->Update(vertices);
-            }
-
-            boundingComponent->Translate(boundingTranslation);
-
-            transformComponent.SetPositionChanged(false);
-            transformComponent.SetRotationChanged(false);
-            transformComponent.SetScaleChanged(false);
-            transformComponent.SetDirty(false);
-        }
-
         if (application.Flags().ShowCollisions)
         {
             shader = application.GetShader("Collider");

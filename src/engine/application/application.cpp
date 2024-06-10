@@ -285,6 +285,7 @@ void Application::Run()
 
         ProcessInput(deltaTime);
 
+        // Simulate physics at ~300hz
         while (simulationAccumulator >= simulationTimeStep)
         {
             m_CurrentScene->Update(simulationTimeStep);

@@ -198,10 +198,10 @@ class Transform
     glm::vec3 m_Rotation;
     glm::vec3 m_Scale;
 
-    mutable bool m_Dirty = true;
-    mutable bool m_PositionChanged = true;
-    mutable bool m_RotationChanged = true;
-    mutable bool m_ScaleChanged = true;
+    bool m_Dirty = true;
+    bool m_PositionChanged = true;
+    bool m_RotationChanged = true;
+    bool m_ScaleChanged = true;
 };
 
 }; // namespace engine
