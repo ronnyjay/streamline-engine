@@ -9,7 +9,7 @@ project(${PROJECT_NAME})
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(glm REQUIRED)
-find_package(Assimp REQUIRED)
+find_package(assimp REQUIRED)
 
 set(GLM_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/glm/1.0.1/include")
 set(GLFW_OSX_INCLUDE_DIR "/opt/homebrew/Cellar/glfw/3.3.2/include")

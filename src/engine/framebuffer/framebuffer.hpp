@@ -9,14 +9,14 @@ namespace engine
 class Framebuffer
 {
   public:
-    Framebuffer(const int, const int);
+    Framebuffer(const unsigned int, const unsigned int);
 
     void Bind();
     void Unbind();
 
     void Render();
 
-    void Resize(const int, const int);
+    void Resize(const unsigned int, const unsigned int);
 
     int Width() const;
     int Height() const;

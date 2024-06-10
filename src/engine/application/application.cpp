@@ -713,7 +713,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
             m_LastResolutionIndex = m_ResolutionIndex;
 
-            for (int i = 0; i < m_Resolutions.size(); i++)
+            for (size_t i = 0; i < m_Resolutions.size(); i++)
             {
                 auto resolution = m_Resolutions[i];
 

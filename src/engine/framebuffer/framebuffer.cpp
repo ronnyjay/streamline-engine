@@ -7,7 +7,7 @@
 
 using namespace engine;
 
-Framebuffer::Framebuffer(const int width, const int height)
+Framebuffer::Framebuffer(const unsigned int width, const unsigned int height)
 {
     m_Width = width;
     m_Height = height;
@@ -81,7 +81,7 @@ void Framebuffer::Render()
     glBindVertexArray(0);
 }
 
-void Framebuffer::Resize(const int width, const int height)
+void Framebuffer::Resize(const unsigned int width, const unsigned int height)
 {
     Logger::info("Resizing framebuffer: %dx%d.\n", width, height);
 
