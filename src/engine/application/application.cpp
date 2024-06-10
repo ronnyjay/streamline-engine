@@ -31,7 +31,7 @@ const char *Application::Framerates[] = {
 // clang-format on
 
 Application::Application(const int width, const int height, const char *title)
-    : m_Width(width), m_Height(height), m_FramerateIndex(7), m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed),
+    : m_Width(width), m_Height(height), m_MonitorIndex(0), m_FramerateIndex(7), m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed),
       m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
 {
     // Initialize GLFW
@@ -117,6 +117,11 @@ Application::Application(const int width, const int height, const char *title)
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
+
+    // Load monitors and resolutions
+    LoadMonitors();
+    m_MonitorIndex = GetIndexOfMonitor(glfwGetPrimaryMonitor());
+    LoadResolutions();
 
     Logger::info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, width, height);
 }
@@ -292,16 +297,14 @@ void Application::Run()
         renderAccumulator += deltaTime;
         simulationAccumulator += deltaTime;
 
-        auto monitor = GetMonitor();
+        // auto monitor = GetMonitor();
 
-        if (monitor && monitor != m_Monitor)
-        {
-            Logger::info("Monitor detected: %s.\n", glfwGetMonitorName(monitor));
+        // if (monitor)
+        // {
+        //     Logger::info("Monitor detected: %s.\n", glfwGetMonitorName(monitor));
 
-            m_Monitor = monitor;
-
-            LoadResolutions();
-        }
+        //     LoadResolutions();
+        // }
 
         ProcessInput(deltaTime);
 
@@ -379,10 +382,25 @@ void Application::Run()
 
                     if (ImGui::TreeNode("Video"))
                     {
-                        // Lock resolution if windowed borderless
-                        if (m_DisplayMode == Borderless)
+                        if (ImGui::Combo(
+                                "Monitor", &m_MonitorIndex,
+                                [](void *data, int index, const char **text) -> bool
+                                {
+                                    auto &vector = *static_cast<std::vector<GLFWmonitor*> *>(data);
+
+                                    if (index < 0 || index >= static_cast<int>(vector.size()))
+                                    {
+                                        return false;
+                                    }
+                                    *text = glfwGetMonitorName(vector[index]);
+
+                                    return true;
+                                },
+                                static_cast<void *>(&m_Monitors), m_Monitors.size()))
                         {
-                            ImGui::BeginDisabled(true);
+                            LoadResolutions();
+                            m_ResolutionIndex = m_Resolutions.size() - 1;
+                            SetResolution(m_Resolutions[m_ResolutionIndex]);
                         }
 
                         if (ImGui::Combo(
@@ -402,11 +420,6 @@ void Application::Run()
                                 static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
                         {
                             SetResolution(m_Resolutions[m_ResolutionIndex]);
-                        }
-
-                        if (m_DisplayMode == Borderless)
-                        {
-                            ImGui::EndDisabled();
                         }
 
                         if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
@@ -544,6 +557,15 @@ GLFWwindow *const Application::GetWindow() const
 
 GLFWmonitor *const Application::GetMonitor() const
 {
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if (m_MonitorIndex < monitorCount)
+    {
+        return monitors[m_MonitorIndex];
+    }
+
+    /*
     GLFWmonitor *monitor = glfwGetWindowMonitor(m_Window);
 
     if (monitor)
@@ -572,6 +594,7 @@ GLFWmonitor *const Application::GetMonitor() const
         }
     }
 
+    */
     return nullptr;
 }
 
@@ -674,6 +697,8 @@ void Application::SetResolution(const Resolution resolution)
 
 void Application::SetDisplayMode(const DisplayMode mode)
 {
+    auto monitor = GetMonitor();
+
     if (mode == Borderless)
     {
         glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
@@ -681,7 +706,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
         int monitorX, monitorY;
         int monitorWidth, monitorHeight;
-        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+        glfwGetMonitorWorkarea(monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
 
         glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
         glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
@@ -703,11 +728,11 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
         if (mode == Fullscreen)
         {
-            const GLFWvidmode *mode = glfwGetVideoMode(m_Monitor);
+            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
             glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
             glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
             m_Framebuffer->Resize(mode->width, mode->height);
 
@@ -738,12 +763,55 @@ void Application::SetDisplayMode(const DisplayMode mode)
     }
 }
 
-void Application::LoadResolutions()
+int Application::GetIndexOfMonitor(GLFWmonitor* monitor)
 {
-    Logger::info("Loading resolutions for monitor: %s.\n", glfwGetMonitorName(m_Monitor));
+    int i = 0;
+    for (GLFWmonitor* p : m_Monitors)
+    {
+        if (p == monitor)
+        {
+            return i;
+        }
+
+        i++;
+    }
+
+    return -1;
+}
+
+void Application::LoadMonitors()
+{
+    Logger::info("Loading monitors.\n");
 
     int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
+    m_Monitors.clear();
+
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+    for (int i = 0; i < count; i++)
+    {
+        // int monitorX, monitorY;
+        // int monitorWidth, monitorHeight;
+        // glfwGetMonitorWorkarea(monitors[i], &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+        // bool overlapX = windowX >= monitorX && windowX < monitorX + monitorWidth;
+        // bool overlapY = windowY >= monitorY && windowY < monitorY + monitorHeight;
+
+        // if (overlapX && overlapY)
+        // {
+        //     return monitors[i];
+        // }
+        m_Monitors.push_back(monitors[i]);
+    }
+}
+
+void Application::LoadResolutions()
+{
+    auto monitor = GetMonitor();
+    Logger::info("Loading resolutions for monitor: %s.\n", glfwGetMonitorName(monitor));
+
+    int count;
+    const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
 
     m_Resolutions.clear();
 

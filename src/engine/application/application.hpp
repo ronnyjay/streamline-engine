@@ -58,6 +58,7 @@ struct Resolution
     }
 };
 
+typedef std::vector<GLFWmonitor*> MonitorList;
 typedef std::vector<Resolution> ResolutionList;
 
 typedef enum
@@ -126,7 +127,6 @@ class Application
 
   private:
     GLFWwindow *m_Window;
-    GLFWmonitor *m_Monitor;
 
     int m_Width;
     int m_Height;
@@ -136,6 +136,9 @@ class Application
 
     int m_WindowX;
     int m_WindowY;
+
+    int m_MonitorIndex;
+    MonitorList m_Monitors;
 
     int m_ResolutionIndex;
     int m_LastResolutionIndex;
@@ -177,6 +180,8 @@ class Application
     void SetResolution(const Resolution);
     void SetDisplayMode(const DisplayMode);
 
+    int GetIndexOfMonitor(GLFWmonitor* monitor);
+    void LoadMonitors();
     void LoadResolutions();
 
     static const char *DisplayModes[];
