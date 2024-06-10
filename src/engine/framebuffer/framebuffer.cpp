@@ -54,8 +54,7 @@ Framebuffer::Framebuffer(const int width, const int height)
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        Logger::err("Error initializing framebuffer.\n");
-        exit(EXIT_FAILURE);
+        Logger::warn("Failed to initialize framebuffer.\n");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -102,8 +101,7 @@ void Framebuffer::Resize(const int width, const int height)
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        Logger::err("Error initializing framebuffer.\n");
-        exit(EXIT_FAILURE);
+        Logger::warn("Failed to initialize framebuffer.\n");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
