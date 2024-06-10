@@ -1,3 +1,4 @@
+#include <engine/logger/logger.hpp>
 #include <engine/stb/stb_image.hpp>
 #include <engine/texture/texture.hpp>
 
@@ -41,6 +42,8 @@ void Texture::Generate(const unsigned int width, const unsigned int height, cons
 
 Texture Texture::FromFile(const char *file)
 {
+    Logger::info("Loading texture from file: %s\n", file);
+
     Texture texture;
 
     int width, height, nrChannels;
@@ -70,10 +73,12 @@ Texture Texture::FromFile(const char *file)
 
         // Free image data
         stbi_image_free(data);
+
+        Logger::info("Texture loaded successfully.\n");
     }
     else
     {
-        std::cout << "Failed to load texture: " << file << std::endl;
+        Logger::warn("Failed to load texture from file: %s\n", file);
     }
 
     return texture;

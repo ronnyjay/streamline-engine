@@ -1,6 +1,6 @@
 #include <engine/application/application.hpp>
+#include <engine/logger/logger.hpp>
 #include <engine/stb/stb_image.hpp>
-#include <engine/text/text.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -37,7 +37,8 @@ Application::Application(const int width, const int height, const char *title)
     // Initialize GLFW
     if (!glfwInit())
     {
-        throw std::runtime_error("Failed to initialize GLFW");
+        Logger::err("Failed to initialize GLFW.\n");
+        exit(EXIT_FAILURE);
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -49,12 +50,15 @@ Application::Application(const int width, const int height, const char *title)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+    Logger::info("Initialized GLFW.\n");
+
     // Initialize Window
     m_Window = glfwCreateWindow(width, height, title, NULL, NULL);
 
     if (m_Window == NULL)
     {
-        throw std::runtime_error("Failed to create GLFW Window");
+        Logger::err("Failed to create GLFW Window.\n");
+        exit(EXIT_FAILURE);
     }
 
     glfwMakeContextCurrent(m_Window);
@@ -69,16 +73,22 @@ Application::Application(const int width, const int height, const char *title)
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
-        throw std::runtime_error("Failed to intialize GLAD");
+        Logger::err("Failed to initialize GLAD.\n");
+        exit(EXIT_FAILURE);
     }
+
+    Logger::info("Initialized GLFW Window.\n");
 
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(width, height);
 
     if (!m_Framebuffer)
     {
-        throw std::runtime_error("Error creating framebuffer");
+        Logger::err("Error initializing framebuffer.\n");
+        exit(EXIT_FAILURE);
     }
+
+    Logger::info("Initialized framebuffer.\n");
 
     // Initialize ImGui
     IMGUI_CHECKVERSION();
@@ -94,6 +104,8 @@ Application::Application(const int width, const int height, const char *title)
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     ImGui_ImplOpenGL3_Init(nullptr);
 
+    Logger::info("Initialized ImGui.\n");
+
     // Load shaders
     LoadShader("Model", "resources/shaders/model.vs", "resources/shaders/model.fs");
     LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
@@ -105,6 +117,8 @@ Application::Application(const int width, const int height, const char *title)
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
+
+    Logger::info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, width, height);
 }
 
 int Application::Width() const
@@ -139,7 +153,8 @@ void Application::SetCamera(int key)
 
     if (it == m_Cameras.end())
     {
-        throw std::out_of_range("Camera not found");
+        Logger::err("Camera not found.\n");
+        exit(EXIT_FAILURE);
     }
 
     m_CurrentCamera = it->second.get();
@@ -168,7 +183,8 @@ void Application::SetScene(int key)
 
     if (it == m_Scenes.end())
     {
-        throw std::out_of_range("Scene not found");
+        Logger::err("Scene not found.\n");
+        exit(EXIT_FAILURE);
     }
 
     m_CurrentScene = it->second.get();
@@ -195,7 +211,8 @@ Shader Application::GetShader(const char *name)
 
     if (it == m_Shaders.end())
     {
-        throw std::runtime_error("Shader not found");
+        Logger::err("Shader not found.\n");
+        exit(EXIT_FAILURE);
     }
 
     return it->second;
@@ -216,7 +233,8 @@ Texture Application::GetTexture(const char *name)
 
     if (it == m_Textures.end())
     {
-        throw std::runtime_error("Texture not found");
+        Logger::err("Texture not found.\n");
+        exit(EXIT_FAILURE);
     }
 
     return it->second;
@@ -278,6 +296,8 @@ void Application::Run()
 
         if (monitor && monitor != m_Monitor)
         {
+            Logger::info("Monitor detected: %s.\n", glfwGetMonitorName(monitor));
+
             m_Monitor = monitor;
 
             LoadResolutions();
@@ -425,11 +445,14 @@ void Application::Run()
                             default:
                                 break;
                             }
+
+                            Logger::info("Frame Rate Limit Set: %s.\n", Framerates[m_FramerateIndex]);
                         }
 
                         if (ImGui::Checkbox("Vertical Sync", &m_Flags.VerticalSync))
                         {
                             glfwSwapInterval(m_Flags.VerticalSync);
+                            Logger::info("Vertical Sync Set: %d.\n", m_Flags.VerticalSync);
                         }
 
                         ImGui::TreePop();
@@ -645,6 +668,8 @@ void Application::SetResolution(const Resolution resolution)
     glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
 
     m_Framebuffer->Resize(resolution.Width, resolution.Height);
+
+    Logger::info("Resolution Set: %dx%d.\n", resolution.Width, resolution.Height);
 }
 
 void Application::SetDisplayMode(const DisplayMode mode)
@@ -668,6 +693,8 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
         // Resolution will always be highest supported
         m_ResolutionIndex = m_Resolutions.size() - 1;
+
+        Logger::info("Display Mode Set: Windowed Borderless.\n");
     }
     else
     {
@@ -695,6 +722,8 @@ void Application::SetDisplayMode(const DisplayMode mode)
                     m_ResolutionIndex = i;
                 }
             }
+
+            Logger::info("Display Mode Set: Fullscreen.\n");
         }
         else
         {
@@ -703,12 +732,16 @@ void Application::SetDisplayMode(const DisplayMode mode)
             m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
 
             m_ResolutionIndex = m_LastResolutionIndex;
+
+            Logger::info("Display Mode Set: Windowed.\n");
         }
     }
 }
 
 void Application::LoadResolutions()
 {
+    Logger::info("Loading resolutions for monitor: %s.\n", glfwGetMonitorName(m_Monitor));
+
     int count;
     const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
 
@@ -724,24 +757,29 @@ void Application::LoadResolutions()
 
 Application::~Application()
 {
-
+    Logger::info("Destroying framebuffer.\n");
     delete m_Framebuffer;
 
+    Logger::info("Deallocating shaders.\n");
     for (auto it : m_Shaders)
     {
         glDeleteProgram(it.second);
     }
 
+    Logger::info("Deallocating textures.\n");
     for (auto it : m_Textures)
     {
-
         glDeleteTextures(1, (unsigned int *)&it.second);
     }
 
+    Logger::info("Terminating ImGui.\n");
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
+    Logger::info("Terminating GLFW.\n");
     glfwTerminate();
+
+    Logger::info("Application terminated.\n");
 }
 
 void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int height)

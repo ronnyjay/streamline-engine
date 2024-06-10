@@ -8,6 +8,7 @@ target_sources(engine PRIVATE
     collider/collider.cpp
     entity/entity.cpp
     framebuffer/framebuffer.cpp
+    logger/logger.cpp
     mesh/mesh.cpp
     model/model.cpp
     scene/scene.cpp

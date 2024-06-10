@@ -25,9 +25,6 @@ class Model
   private:
     std::string m_Directory;
 
-    glm::vec3 m_Min;
-    glm::vec3 m_Max;
-
     std::vector<Mesh> m_Meshes;
     std::vector<MaterialTexture> m_TexturesLoaded;
 

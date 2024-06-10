@@ -1,5 +1,6 @@
 #include <engine/application/application.hpp>
 #include <engine/framebuffer/framebuffer.hpp>
+#include <engine/logger/logger.hpp>
 
 #include <glad/gl.h>
 #include <iostream>
@@ -53,7 +54,8 @@ Framebuffer::Framebuffer(const int width, const int height)
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        std::cout << "Error initializing Framebuffer" << std::endl;
+        Logger::err("Error initializing framebuffer.\n");
+        exit(EXIT_FAILURE);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -82,6 +84,8 @@ void Framebuffer::Render()
 
 void Framebuffer::Resize(const int width, const int height)
 {
+    Logger::info("Resizing framebuffer: %dx%d.\n", width, height);
+
     if (width == m_Width && height == m_Height)
     {
         return;
@@ -98,7 +102,8 @@ void Framebuffer::Resize(const int width, const int height)
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        std::cout << "Error resizing Framebuffer" << std::endl;
+        Logger::err("Error initializing framebuffer.\n");
+        exit(EXIT_FAILURE);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

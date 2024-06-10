@@ -1,3 +1,4 @@
+#include <engine/logger/logger.hpp>
 #include <engine/model/model.hpp>
 #include <engine/stb/stb_image.hpp>
 
@@ -5,10 +6,10 @@
 
 using namespace engine;
 
-unsigned int TextureFromFile(const char *path, const std::string &directory);
-
-Model::Model(const std::string &path) : m_Min(FLT_MAX), m_Max(-FLT_MAX)
+Model::Model(const std::string &path)
 {
+    Logger::info("Loading model: %s\n", path.c_str());
+
     Assimp::Importer importer;
 
     const aiScene *scene = importer.ReadFile(path,
@@ -16,12 +17,14 @@ Model::Model(const std::string &path) : m_Min(FLT_MAX), m_Max(-FLT_MAX)
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "Error loading Assimp Model: " << importer.GetErrorString() << std::endl;
+        Logger::warn("Error loading model: %s\n", importer.GetErrorString());
     }
 
     m_Directory = path.substr(0, path.find_last_of('/'));
 
     ProcessNode(scene->mRootNode, scene);
+
+    Logger::info("Model loaded successfully.\n");
 }
 
 void Model::Draw(const Shader &shader)
@@ -68,9 +71,6 @@ Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene)
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
-
-        m_Min = glm::min(m_Min, vector);
-        m_Max = glm::max(m_Max, vector);
 
         vertex.Position = vector;
 

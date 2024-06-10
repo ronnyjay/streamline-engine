@@ -1,3 +1,4 @@
+#include <engine/logger/logger.hpp>
 #include <engine/shader/shader.hpp>
 
 #include <glad/gl.h>
@@ -109,6 +110,9 @@ void Shader::SetMat4(const std::string &name, const glm::mat4 &mat) const
 
 Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
 {
+    Logger::info("Loading vertex shader from file: %s\n", vertexPath);
+    Logger::info("Loading fragment shader from file: %s\n", fragmentPath);
+
     Shader shader;
 
     std::string vShaderContents;
@@ -138,7 +142,7 @@ Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
     }
     catch (std::ifstream::failure &e)
     {
-        std::cout << "Error reading shader file: " << e.what() << std::endl;
+        Logger::err("Error reading shader file: %s\n", e.what());
     }
 
     shader.Compile(vShaderContents.c_str(), fShaderContents.c_str());
@@ -157,7 +161,15 @@ void Shader::CheckCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Shader compilation error: (" + type + ") " << "\n" << infoLog << std::endl;
+
+            std::string longError(infoLog);
+            std::string shortError(longError.substr(longError.find_last_of(':') + 2, longError.length()));
+
+            Logger::warn("Shader compilation failed (%s): %s", type.c_str(), shortError.c_str());
+        }
+        else
+        {
+            Logger::info("Shader compilation success: (%s).\n", type.c_str());
         }
     }
     else
@@ -166,7 +178,15 @@ void Shader::CheckCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Shader linking error: (" + type + ") " << "\n" << infoLog << std::endl;
+
+            std::string longError(infoLog);
+            std::string shortError(longError.substr(longError.find_last_of(':') + 2, longError.length()));
+
+            Logger::warn("Shader linking failed (%s): %s", type.c_str(), shortError.c_str());
+        }
+        else
+        {
+            Logger::info("Shader linking success: (%s).\n", type.c_str());
         }
     }
 }

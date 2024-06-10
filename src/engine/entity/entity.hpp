@@ -1,6 +1,8 @@
 #pragma once
 
+#include <engine/logger/logger.hpp>
 #include <engine/scene/scene.hpp>
+
 #include <entt/entt.hpp>
 
 namespace engine

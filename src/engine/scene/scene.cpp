@@ -2,6 +2,7 @@
 #include <engine/collider/collider.hpp>
 #include <engine/components/components.hpp>
 #include <engine/entity/entity.hpp>
+#include <engine/logger/logger.hpp>
 #include <engine/model/model.hpp>
 #include <engine/scene/scene.hpp>
 
@@ -21,6 +22,8 @@ Entity Scene::CreateEntity(const std::string &identifier)
     entity.AddComponent<Children>();
     entity.AddComponent<Transform>();
 
+    Logger::info("Entity created: \"%s\".\n", identifier.c_str());
+
     return entity;
 }
 
@@ -34,11 +37,14 @@ Entity Scene::CreateChildEntity(const Entity &parent, const std::string &identif
     childrenComponent.Emplace(child);
     parentComponent.Set(parent);
 
+    Logger::info("Entity created as child: \"%s\".\n", identifier.c_str());
+
     return child;
 }
 
 void Scene::DestroyEntity(const Entity entity)
 {
+    auto &identifierComponent = m_Registry.get<Identifier>(entity);
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
     for (auto child : childrenComponent.Get())
@@ -47,6 +53,8 @@ void Scene::DestroyEntity(const Entity entity)
     }
 
     m_Registry.destroy(entity);
+
+    Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.Get().c_str());
 }
 
 void Scene::Update(const double deltaTime)
