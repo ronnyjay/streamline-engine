@@ -33,8 +33,8 @@ const char *Application::Framerates[] = {
 
 Application::Application(const int width, const int height, const char *title)
     : m_Width(width), m_Height(height), m_LastWidth(width), m_LastHeight(height), m_MonitorIndex(0), m_FramerateIndex(7),
-      m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_CurrentCamera(nullptr), m_CurrentScene(nullptr),
-      m_ConfigDirectory(std::filesystem::path(std::getenv("HOME")) / ".config/streamline"),
+      m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_LastDisplayMode(Windowed), m_CurrentCamera(nullptr),
+      m_CurrentScene(nullptr), m_ConfigDirectory(std::filesystem::path(std::getenv("HOME")) / ".config/streamline"),
       m_ConfigPath(m_ConfigDirectory / "video.cfg")
 {
     // Initialize GLFW
@@ -170,23 +170,19 @@ Application::Application(const int width, const int height, const char *title)
     Logger::info("Initialized framebuffer.\n");
 
     // Restore window settings
-    if (m_DisplayMode != Windowed)
+    m_Monitor = GetCurrentMonitor();
+
+    SetDisplayMode(m_DisplayMode);
+    LoadResolutions();
+    SetResolution(Resolution(savedWidth, savedHeight));
+
+    for (size_t i = 0; i < m_Resolutions.size(); i++)
     {
-        SetDisplayMode(m_DisplayMode);
+        auto resolution = m_Resolutions[i];
 
-        m_Monitor = GetCurrentMonitor();
-
-        LoadResolutions();
-        SetResolution(Resolution(savedWidth, savedHeight));
-
-        for (size_t i = 0; i < m_Resolutions.size(); i++)
+        if (resolution.Width == savedWidth && resolution.Height == savedHeight)
         {
-            auto resolution = m_Resolutions[i];
-
-            if (resolution.Width == savedWidth && resolution.Height == savedHeight)
-            {
-                m_ResolutionIndex = i;
-            }
+            m_ResolutionIndex = i;
         }
     }
 
@@ -812,7 +808,32 @@ void Application::SetResolution(const Resolution resolution)
 
 void Application::SetDisplayMode(const DisplayMode mode)
 {
-    auto monitor = GetSetMonitor();
+    // Monitor set by user
+    m_Monitor = GetSetMonitor();
+
+    LoadResolutions();
+
+    // Use these values when going back to windowed mode
+    if (m_LastDisplayMode == Windowed)
+    {
+        glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
+        glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+    }
+
+    // Reset window to last state, ensures scaling factor is available
+    glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    glfwGetMonitorContentScale(m_Monitor, &scaleX, &scaleY);
+
+    // Get highest supported resolution
+    int count;
+    const GLFWvidmode *videoModes = glfwGetVideoModes(m_Monitor, &count);
+    const GLFWvidmode *videoMode = &videoModes[count - 1];
+
+    Logger::info("Video Mode: %dx%d.\n", videoMode->width, videoMode->height);
 
     if (mode == Borderless)
     {
@@ -821,20 +842,13 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
         int monitorX, monitorY;
         int monitorWidth, monitorHeight;
-        glfwGetMonitorWorkarea(monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, videoMode->width / scaleX, videoMode->height / scaleY, 0);
 
-        glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-        glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, 0);
-
-        m_Framebuffer->Resize(monitorWidth, monitorHeight);
+        m_Framebuffer->Resize(videoMode->width, videoMode->height);
 
         m_LastResolutionIndex = m_ResolutionIndex;
-
-        // Resolution will always be highest supported
         m_ResolutionIndex = m_Resolutions.size() - 1;
-
-        Logger::info("Display Mode Set: Windowed Borderless.\n");
     }
     else
     {
@@ -843,40 +857,48 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
         if (mode == Fullscreen)
         {
-            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-
-            glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-            glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
-
-            glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-
-            m_Framebuffer->Resize(mode->width, mode->height);
+            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
+            m_Framebuffer->Resize(videoMode->width, videoMode->height);
 
             m_LastResolutionIndex = m_ResolutionIndex;
+            m_ResolutionIndex = m_Resolutions.size() - 1;
 
-            for (size_t i = 0; i < m_Resolutions.size(); i++)
+            Logger::info("Index: %d.\n", m_ResolutionIndex);
+        }
+        else // Windowed mode
+        {
+            m_Monitor = GetCurrentMonitor();
+
+            LoadResolutions();
+
+            // Resolution could be absent from list if defined in constructor
+            // Set it to a valid value
+            Resolution lowest = m_Resolutions[0];
+
+            if (m_LastWidth < lowest.Width && m_LastHeight < lowest.Height)
             {
-                auto resolution = m_Resolutions[i];
-
-                if (resolution.Width == mode->width && resolution.Height == mode->height)
+                m_LastWidth = lowest.Width;
+                m_LastHeight = lowest.Height;
+                m_ResolutionIndex = 0;
+            }
+            else
+            {
+                for (size_t i = 0; i < m_Resolutions.size(); i++)
                 {
-                    m_ResolutionIndex = i;
+                    Resolution resolution = m_Resolutions[i];
+
+                    if (m_LastWidth == resolution.Width && m_LastHeight == resolution.Height)
+                    {
+                        m_ResolutionIndex = i;
+                    }
                 }
             }
 
-            Logger::info("Display Mode Set: Fullscreen.\n");
-        }
-        else
-        {
-            glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
-
             m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
-
-            m_ResolutionIndex = m_LastResolutionIndex;
-
-            Logger::info("Display Mode Set: Windowed.\n");
         }
     }
+
+    m_LastDisplayMode = mode;
 }
 
 void Application::SetMonitor(GLFWmonitor *monitor)
@@ -888,7 +910,6 @@ void Application::SetMonitor(GLFWmonitor *monitor)
     // Restore display mode
     if (m_DisplayMode == Fullscreen || m_DisplayMode == Borderless)
     {
-        SetDisplayMode(Windowed);
         SetDisplayMode(m_DisplayMode);
     }
 }

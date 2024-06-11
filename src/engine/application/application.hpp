@@ -153,6 +153,7 @@ class Application
     Framerate m_Framerate;
 
     DisplayMode m_DisplayMode;
+    DisplayMode m_LastDisplayMode;
 
     int m_CurrentCameraIndex;
     Camera *m_CurrentCamera;
