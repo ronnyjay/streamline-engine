@@ -183,8 +183,6 @@ Application::Application(const int width, const int height, const char *title)
         {
             auto resolution = m_Resolutions[i];
 
-            Logger::info("Res: %dx%d, Saved: %dx%d.\n", resolution.Width, resolution.Height, savedWidth, savedHeight);
-
             if (resolution.Width == savedWidth && resolution.Height == savedHeight)
             {
                 m_ResolutionIndex = i;
