@@ -15,7 +15,7 @@ using namespace engine;
 const char *Application::DisplayModes[] = {
     "Fullscreen",
     "Windowed",
-    "Windowed Borderless"
+    "Fullscreen Windowed"
 };
 
 const char *Application::Framerates[] = {
@@ -79,6 +79,12 @@ Application::Application(const int width, const int height, const char *title)
 
     Logger::info("Initialized GLFW Window.\n");
 
+    // Load monitors
+    LoadMonitors();
+
+    // Get primary monitor
+    m_MonitorIndex = GetIndexOfMonitor(glfwGetPrimaryMonitor());
+
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(width, height);
 
@@ -117,17 +123,6 @@ Application::Application(const int width, const int height, const char *title)
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
-
-    // Load monitors
-    LoadMonitors();
-
-    // // Get current monitor
-    // m_CurrentMonitor = GetCurrentMonitor();
-
-    m_MonitorIndex = GetIndexOfMonitor(glfwGetPrimaryMonitor());
-
-    // // Load resolutions for current monitor
-    // LoadResolutions();
 
     Logger::info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, width, height);
 }
@@ -305,11 +300,11 @@ void Application::Run()
 
         auto *monitor = GetCurrentMonitor();
 
-        if (monitor && monitor != m_CurrentMonitor)
+        if (monitor && monitor != m_Monitor)
         {
             Logger::info("Monitor detected: %s.\n", glfwGetMonitorName(monitor));
 
-            m_CurrentMonitor = monitor;
+            m_Monitor = monitor;
 
             LoadResolutions();
         }
@@ -390,6 +385,12 @@ void Application::Run()
 
                     if (ImGui::TreeNode("Video"))
                     {
+                        // Changing monitor in windowed has no effect, disable.
+                        if (m_DisplayMode == Windowed)
+                        {
+                            ImGui::BeginDisabled();
+                        }
+
                         if (ImGui::Combo(
                                 "Monitor", &m_MonitorIndex,
                                 [](void *data, int index, const char **text) -> bool
@@ -409,6 +410,18 @@ void Application::Run()
                             SetMonitor(m_Monitors[m_MonitorIndex]);
                         }
 
+                        if (m_DisplayMode == Windowed)
+                        {
+                            ImGui::EndDisabled();
+                        }
+
+                        // Windowed borderless is locked to max resolution
+                        // Changing resolution in this state should not be allowed
+                        if (m_DisplayMode == Borderless)
+                        {
+                            ImGui::BeginDisabled();
+                        }
+
                         if (ImGui::Combo(
                                 "Resolution", &m_ResolutionIndex,
                                 [](void *data, int index, const char **text) -> bool
@@ -426,6 +439,11 @@ void Application::Run()
                                 static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
                         {
                             SetResolution(m_Resolutions[m_ResolutionIndex]);
+                        }
+
+                        if (m_DisplayMode == Borderless)
+                        {
+                            ImGui::EndDisabled();
                         }
 
                         if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
@@ -561,6 +579,16 @@ GLFWwindow *const Application::GetWindow() const
     return m_Window;
 }
 
+GLFWmonitor *const Application::GetSetMonitor() const
+{
+    if (m_MonitorIndex < m_Monitors.size())
+    {
+        return m_Monitors[m_MonitorIndex];
+    }
+
+    return nullptr;
+}
+
 GLFWmonitor *const Application::GetCurrentMonitor() const
 {
     GLFWmonitor *monitor = glfwGetWindowMonitor(m_Window);
@@ -589,16 +617,6 @@ GLFWmonitor *const Application::GetCurrentMonitor() const
         {
             return monitors[i];
         }
-    }
-
-    return nullptr;
-}
-
-GLFWmonitor *const Application::GetSetMonitor() const
-{
-    if (m_MonitorIndex < m_Monitors.size())
-    {
-        return m_Monitors[m_MonitorIndex];
     }
 
     return nullptr;
@@ -686,7 +704,7 @@ void Application::SetResolution(const Resolution resolution)
     float scaleX = 1.0f;
     float scaleY = 1.0f;
 
-    glfwGetMonitorContentScale(m_CurrentMonitor, &scaleX, &scaleY);
+    glfwGetMonitorContentScale(m_Monitor, &scaleX, &scaleY);
 
     // Set resolution
     glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
@@ -768,7 +786,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
 void Application::SetMonitor(GLFWmonitor *monitor)
 {
-    m_CurrentMonitor = monitor;
+    m_Monitor = monitor;
 
     LoadResolutions();
 
@@ -777,22 +795,6 @@ void Application::SetMonitor(GLFWmonitor *monitor)
     {
         SetDisplayMode(m_DisplayMode);
     }
-}
-
-int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
-{
-    int i = 0;
-    for (GLFWmonitor *p : m_Monitors)
-    {
-        if (p == monitor)
-        {
-            return i;
-        }
-
-        i++;
-    }
-
-    return -1;
 }
 
 void Application::LoadMonitors()
@@ -812,10 +814,10 @@ void Application::LoadMonitors()
 
 void Application::LoadResolutions()
 {
-    Logger::info("Loading resolutions for monitor: %s.\n", glfwGetMonitorName(m_CurrentMonitor));
+    Logger::info("Loading resolutions for monitor: %s.\n", glfwGetMonitorName(m_Monitor));
 
     int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(m_CurrentMonitor, &count);
+    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
 
     m_Resolutions.clear();
 
@@ -825,6 +827,22 @@ void Application::LoadResolutions()
     }
 
     m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
+}
+
+int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
+{
+    int i = 0;
+    for (GLFWmonitor *p : m_Monitors)
+    {
+        if (p == monitor)
+        {
+            return i;
+        }
+
+        i++;
+    }
+
+    return -1;
 }
 
 Application::~Application()

@@ -127,6 +127,7 @@ class Application
 
   private:
     GLFWwindow *m_Window;
+    GLFWmonitor *m_Monitor;
 
     int m_Width;
     int m_Height;
@@ -137,10 +138,6 @@ class Application
     int m_WindowX;
     int m_WindowY;
 
-    // Determined based on window position
-    GLFWmonitor *m_CurrentMonitor;
-
-    // Set by user
     int m_MonitorIndex;
     MonitorList m_Monitors;
 
