@@ -6,7 +6,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <stdexcept>
 
 using namespace engine;
@@ -31,8 +32,10 @@ const char *Application::Framerates[] = {
 // clang-format on
 
 Application::Application(const int width, const int height, const char *title)
-    : m_Width(width), m_Height(height), m_MonitorIndex(0), m_FramerateIndex(7), m_Framerate(FPS_UNLIMITED),
-      m_DisplayMode(Windowed), m_CurrentCamera(nullptr), m_CurrentScene(nullptr)
+    : m_Width(width), m_Height(height), m_LastWidth(width), m_LastHeight(height), m_MonitorIndex(0), m_FramerateIndex(7),
+      m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_CurrentCamera(nullptr), m_CurrentScene(nullptr),
+      m_ConfigDirectory(std::filesystem::path(std::getenv("HOME")) / ".config/streamline"),
+      m_ConfigPath(m_ConfigDirectory / "video.cfg")
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -52,8 +55,84 @@ Application::Application(const int width, const int height, const char *title)
 
     Logger::info("Initialized GLFW.\n");
 
+    // Load video settings
+    LoadVideoConfig();
+
+    int savedWidth = m_Width;
+    int savedHeight = m_Height;
+
+    if (m_Configuration.contains("setting.defaultres") && m_Configuration.contains("setting.defaultres"))
+    {
+        try
+        {
+            savedWidth = std::stoi(m_Configuration["setting.defaultres"]);
+            savedHeight = std::stoi(m_Configuration["setting.defaultresheight"]);
+        }
+        catch (const std::exception &e)
+        {
+            Logger::warn("Invalid resolution found in configuration. Reverting to default.\n");
+        }
+    }
+
+    if (m_Configuration.contains("setting.displaymode"))
+    {
+        try
+        {
+            auto displayMode = std::stoi(m_Configuration["setting.displaymode"]);
+
+            if (displayMode >= 0 && displayMode <= 2)
+            {
+                m_DisplayMode = DisplayMode(std::stoi(m_Configuration["setting.displaymode"]));
+            }
+        }
+        catch (const std::exception &e)
+        {
+            Logger::warn("Invalid display mode found in configuration. Reverting to default.\n");
+        }
+    }
+
+    if (m_Configuration.contains("setting.vsync"))
+    {
+        try
+        {
+            auto vsync = std::stoi(m_Configuration["setting.vsync"]);
+
+            if (vsync >= 0 && vsync <= 1)
+            {
+                m_Flags.VerticalSync = vsync;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            Logger::warn("Invalid vsync value found in configuration. Reverting to default.\n");
+        }
+    }
+
+    LoadMonitors();
+
+    if (m_Configuration.contains("setting.monitor"))
+    {
+        try
+        {
+            auto monitorIndex = std::stoi(m_Configuration["setting.monitor"]);
+
+            if (monitorIndex < m_Monitors.size())
+            {
+                m_MonitorIndex = monitorIndex;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            Logger::warn("Invalid monitor found in configuration. Reverting to default.\n");
+        }
+    }
+    else
+    {
+        m_MonitorIndex = GetIndexOfMonitor(glfwGetPrimaryMonitor());
+    }
+
     // Initialize Window
-    m_Window = glfwCreateWindow(width, height, title, NULL, NULL);
+    m_Window = glfwCreateWindow(m_Width, m_Height, title, NULL, NULL);
 
     if (m_Window == NULL)
     {
@@ -62,7 +141,7 @@ Application::Application(const int width, const int height, const char *title)
     }
 
     glfwMakeContextCurrent(m_Window);
-    glfwSetWindowAspectRatio(m_Window, width, height);
+    glfwSetWindowAspectRatio(m_Window, savedWidth, savedHeight);
     glfwSetFramebufferSizeCallback(m_Window, Application::FramebufferSizeCallback);
     glfwSetWindowIconifyCallback(m_Window, Application::MinimizeCallback);
     glfwSetWindowMaximizeCallback(m_Window, Application::MaximizeCallback);
@@ -71,22 +150,16 @@ Application::Application(const int width, const int height, const char *title)
     glfwSetScrollCallback(m_Window, Application::ScrollCallback);
     glfwSetWindowUserPointer(m_Window, this); // Access this objects instance in glfw callbacks
 
+    Logger::info("Initialized GLFW Window.\n");
+
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
         Logger::err("Failed to initialize GLAD.\n");
         exit(EXIT_FAILURE);
     }
 
-    Logger::info("Initialized GLFW Window.\n");
-
-    // Load monitors
-    LoadMonitors();
-
-    // Get primary monitor
-    m_MonitorIndex = GetIndexOfMonitor(glfwGetPrimaryMonitor());
-
     // Initialize framebuffer
-    m_Framebuffer = new Framebuffer(width, height);
+    m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
 
     if (!m_Framebuffer)
     {
@@ -95,6 +168,34 @@ Application::Application(const int width, const int height, const char *title)
     }
 
     Logger::info("Initialized framebuffer.\n");
+
+    // Restore window settings
+    if (m_DisplayMode != Windowed)
+    {
+        SetDisplayMode(m_DisplayMode);
+
+        m_Monitor = GetCurrentMonitor();
+
+        LoadResolutions();
+        SetResolution(Resolution(savedWidth, savedHeight));
+
+        for (size_t i = 0; i < m_Resolutions.size(); i++)
+        {
+            auto resolution = m_Resolutions[i];
+
+            Logger::info("Res: %dx%d, Saved: %dx%d.\n", resolution.Width, resolution.Height, savedWidth, savedHeight);
+
+            if (resolution.Width == savedWidth && resolution.Height == savedHeight)
+            {
+                m_ResolutionIndex = i;
+            }
+        }
+    }
+
+    if (!m_Flags.ShowCursor)
+    {
+        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
 
     // Initialize ImGui
     IMGUI_CHECKVERSION();
@@ -115,11 +216,6 @@ Application::Application(const int width, const int height, const char *title)
     // Load shaders
     LoadShader("Model", "resources/shaders/model.vs", "resources/shaders/model.fs");
     LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
-
-    if (!m_Flags.ShowCursor)
-    {
-        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
@@ -753,6 +849,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
 
             glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
             glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+
             glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
             m_Framebuffer->Resize(mode->width, mode->height);
@@ -793,6 +890,7 @@ void Application::SetMonitor(GLFWmonitor *monitor)
     // Restore display mode
     if (m_DisplayMode == Fullscreen || m_DisplayMode == Borderless)
     {
+        SetDisplayMode(Windowed);
         SetDisplayMode(m_DisplayMode);
     }
 }
@@ -829,6 +927,107 @@ void Application::LoadResolutions()
     m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
 }
 
+void Application::LoadVideoConfig()
+{
+    Logger::info("Attempting to load configuration.\n");
+
+    if (!std::filesystem::exists(m_ConfigDirectory))
+    {
+        Logger::info("Configuration directory not found.\n");
+        Logger::info("Attempting to create configuration directory.\n");
+
+        if (std::filesystem::create_directories(m_ConfigDirectory))
+        {
+            Logger::info("Configuration directory created: \"%s\".\n", m_ConfigDirectory.c_str());
+        }
+        else
+        {
+            Logger::warn("Failed to create configuration directory: \"%s\".\n", m_ConfigDirectory.c_str());
+
+            return;
+        }
+    }
+
+    if (!std::filesystem::exists(m_ConfigPath))
+    {
+        Logger::info("Configuration file not found.\n");
+        Logger::info("Attempting to create configuration file.\n");
+
+        std::ofstream file(m_ConfigPath);
+
+        if (file)
+        {
+            Logger::info("Configuration file created: \"%s\".\n", m_ConfigPath.c_str());
+        }
+        else
+        {
+            Logger::warn("Failed to create configuration file: \"%s\".\n", m_ConfigPath.c_str());
+        }
+
+        return;
+    }
+
+    std::ifstream file(m_ConfigPath);
+
+    if (file.is_open())
+    {
+        Logger::info("Configuration file opened successfully.\n");
+
+        std::string line;
+        std::string key, value;
+        std::istringstream stream;
+
+        while (std::getline(file, line))
+        {
+            stream = std::istringstream(line);
+
+            if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') && std::getline(stream, value, '\"') &&
+                std::getline(stream, value, '\"'))
+            {
+                m_Configuration[key] = value;
+            }
+        }
+
+        file.close();
+    }
+    else
+    {
+        Logger::warn("Failed to open configuration file.\n");
+    }
+}
+
+void Application::StoreVideoConfig()
+{
+    Logger::info("Attempting to store configuration.\n");
+
+    Resolution resolution(m_Resolutions[m_ResolutionIndex]);
+    m_Configuration["setting.defaultres"] = std::to_string(resolution.Width);
+    m_Configuration["setting.defaultresheight"] = std::to_string(resolution.Height);
+
+    m_Configuration["setting.monitor"] = std::to_string(m_MonitorIndex);
+    m_Configuration["setting.displaymode"] = std::to_string(m_DisplayMode);
+    m_Configuration["setting.vsync"] = std::to_string(m_Flags.VerticalSync);
+
+    std::ofstream file(m_ConfigPath);
+
+    if (!file.is_open())
+    {
+        Logger::warn("Failed to open configuration file.\n");
+
+        return;
+    }
+
+    file << "\"videoConfig\"\n{\n";
+    for (const auto &kv : m_Configuration)
+    {
+        file << "   \"" << kv.first << "\" \"" << kv.second << "\"\n";
+    }
+    file << "}\n";
+    file.close();
+
+    Logger::info("Successfully saved configuration.\n");
+}
+
 int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
 {
     int i = 0;
@@ -847,6 +1046,10 @@ int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
 
 Application::~Application()
 {
+    // Save current video settings to file
+    StoreVideoConfig();
+
+    // Deallocate resources
     Logger::info("Destroying framebuffer.\n");
     delete m_Framebuffer;
 
@@ -969,7 +1172,10 @@ void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yP
     lastX = xPos;
     lastY = yPos;
 
-    application->m_CurrentCamera->Move(xOffset, yOffset);
+    if (application->m_CurrentCamera)
+    {
+        application->m_CurrentCamera->Move(xOffset, yOffset);
+    }
 }
 
 void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
@@ -981,5 +1187,8 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
         return;
     }
 
-    application->m_CurrentCamera->Move(yOffset);
+    if (application->m_CurrentCamera)
+    {
+        application->m_CurrentCamera->Move(yOffset);
+    }
 }

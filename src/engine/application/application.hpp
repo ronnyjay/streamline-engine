@@ -11,6 +11,7 @@
 #include <engine/shader/shader.hpp>
 #include <engine/texture/texture.hpp>
 
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>
@@ -63,9 +64,9 @@ typedef std::vector<Resolution> ResolutionList;
 
 typedef enum
 {
-    Fullscreen,
-    Windowed,
-    Borderless
+    Fullscreen = 0,
+    Windowed = 1,
+    Borderless = 2
 } DisplayMode;
 
 typedef enum
@@ -91,6 +92,9 @@ struct ApplicationFlags
     bool ShowMetrics = false;
     bool ShowDebugWindow = false;
 };
+
+typedef std::filesystem::path ConfigPath;
+typedef std::map<std::string, std::string> Configuration;
 
 class Application
 {
@@ -165,6 +169,10 @@ class Application
 
     Framebuffer *m_Framebuffer;
 
+    ConfigPath m_ConfigDirectory;
+    ConfigPath m_ConfigPath;
+    Configuration m_Configuration;
+
     ApplicationFlags m_Flags;
 
     GLFWwindow *const GetWindow() const;
@@ -186,6 +194,9 @@ class Application
 
     void LoadMonitors();
     void LoadResolutions();
+
+    void LoadVideoConfig();
+    void StoreVideoConfig();
 
     int GetIndexOfMonitor(GLFWmonitor *monitor);
 
