@@ -6,6 +6,7 @@ target_sources(engine PRIVATE
     camera/orthographic.cpp
     camera/perspective.cpp
     collider/collider.cpp
+    config/config.cpp
     entity/entity.cpp
     framebuffer/framebuffer.cpp
     logger/logger.cpp

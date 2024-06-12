@@ -6,6 +6,7 @@
 #include <glad/gl.h>
 
 #include <engine/camera/camera.hpp>
+#include <engine/config/config.hpp>
 #include <engine/framebuffer/framebuffer.hpp>
 #include <engine/scene/scene.hpp>
 #include <engine/shader/shader.hpp>
@@ -28,39 +29,96 @@ typedef std::unordered_map<std::string, Texture> TextureMap;
 
 struct Resolution
 {
-    Resolution(const int width, const int height) : Width(width), Height(height)
+    Resolution(const int width, const int height, const int rate) : m_Width(width), m_Height(height), m_Rate(rate)
     {
     }
 
     bool operator==(const Resolution &other) const
     {
-        return Width == other.Width && Height == other.Height;
+        return m_Width == other.m_Width && m_Height == other.m_Height && m_Rate == other.m_Rate;
     }
 
     bool operator<(const Resolution &other) const
     {
-        if (Width != other.Width)
+        if (m_Width != other.m_Width)
         {
-            return Width < other.Width;
+            return m_Width < other.m_Width;
         }
 
-        return Height < other.Height;
+        if (m_Height != other.m_Height)
+        {
+            return m_Height < other.m_Height;
+        }
+
+        return m_Rate < other.m_Rate;
     }
 
-    int Width;
-    int Height;
+    int m_Width;
+    int m_Height;
+    int m_Rate;
 
-    mutable char TextFormat[10];
+    mutable char m_TextFormat[32];
 
     const char *Format() const
     {
-        std::snprintf(TextFormat, sizeof(TextFormat), "%dx%d", Width, Height);
-        return TextFormat;
+        std::snprintf(m_TextFormat, sizeof(m_TextFormat), "%dx%d (%dHz)", m_Width, m_Height, m_Rate);
+        return m_TextFormat;
     }
 };
 
-typedef std::vector<GLFWmonitor *> MonitorList;
 typedef std::vector<Resolution> ResolutionList;
+
+struct Monitor
+{
+    Monitor(GLFWmonitor *monitor) : m_Monitor(monitor), m_Title(glfwGetMonitorName(monitor)), m_ResolutionWindowed(-1)
+
+    {
+        glfwGetMonitorWorkarea(monitor, &m_PositionX, &m_PositionY, &m_Width, &m_Height);
+        glfwGetMonitorContentScale(monitor, &m_ScaleX, &m_ScaleY);
+
+        int count;
+        const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
+
+        for (int i = 0; i < count; i++)
+        {
+            m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height, modes[i].refreshRate));
+        }
+
+        m_ResolutionFullscreen = m_Resolutions.size() - 1;
+        m_ResolutionBorderless = m_Resolutions.size() - 1;
+    }
+
+    bool operator==(const Monitor &other)
+    {
+        return m_Monitor == other.m_Monitor;
+    }
+
+    bool operator!=(const Monitor &other)
+    {
+        return m_Monitor != other.m_Monitor;
+    }
+
+    GLFWmonitor *m_Monitor;
+
+    int m_Width;
+    int m_Height;
+
+    int m_PositionX;
+    int m_PositionY;
+
+    float m_ScaleX;
+    float m_ScaleY;
+
+    const char *m_Title;
+
+    int m_ResolutionFullscreen;
+    int m_ResolutionWindowed;
+    int m_ResolutionBorderless;
+
+    ResolutionList m_Resolutions;
+};
+
+typedef std::vector<Monitor *> MonitorList;
 
 typedef enum
 {
@@ -131,7 +189,6 @@ class Application
 
   private:
     GLFWwindow *m_Window;
-    GLFWmonitor *m_Monitor;
 
     int m_Width;
     int m_Height;
@@ -143,11 +200,11 @@ class Application
     int m_WindowY;
 
     int m_MonitorIndex;
-    MonitorList m_Monitors;
 
-    int m_ResolutionIndex;
-    int m_LastResolutionIndex;
-    ResolutionList m_Resolutions;
+    Monitor *m_PrimaryMonitor;
+    Monitor *m_CurrentMonitor;
+
+    MonitorList m_Monitors;
 
     int m_FramerateIndex;
     Framerate m_Framerate;
@@ -170,16 +227,14 @@ class Application
 
     Framebuffer *m_Framebuffer;
 
-    ConfigPath m_ConfigDirectory;
-    ConfigPath m_ConfigPath;
-    Configuration m_Configuration;
+    Config m_VideoConfig;
 
     ApplicationFlags m_Flags;
 
     GLFWwindow *const GetWindow() const;
 
-    GLFWmonitor *const GetSetMonitor() const;
-    GLFWmonitor *const GetCurrentMonitor() const;
+    Monitor *const GetPrimaryMonitor() const;
+    Monitor *const GetCurrentMonitor() const;
 
     void ProcessInput(const double);
 
@@ -191,10 +246,9 @@ class Application
 
     void SetResolution(const Resolution);
     void SetDisplayMode(const DisplayMode);
-    void SetMonitor(GLFWmonitor *);
 
     void LoadMonitors();
-    void LoadResolutions();
+    void SetMonitor(Monitor *);
 
     void LoadVideoConfig();
     void StoreVideoConfig();

@@ -34,8 +34,7 @@ const char *Application::Framerates[] = {
 Application::Application(const int width, const int height, const char *title)
     : m_Width(width), m_Height(height), m_LastWidth(width), m_LastHeight(height), m_MonitorIndex(0), m_FramerateIndex(7),
       m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_LastDisplayMode(Windowed), m_CurrentCamera(nullptr),
-      m_CurrentScene(nullptr), m_ConfigDirectory(std::filesystem::path(std::getenv("HOME")) / ".config/streamline"),
-      m_ConfigPath(m_ConfigDirectory / "video.cfg")
+      m_CurrentScene(nullptr), m_VideoConfig(std::filesystem::path(std::getenv("HOME")) / ".config/streamline/video.cfg")
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -56,83 +55,46 @@ Application::Application(const int width, const int height, const char *title)
     Logger::info("Initialized GLFW.\n");
 
     // Load video settings
-    LoadVideoConfig();
+    m_VideoConfig.Load();
 
-    int savedWidth = m_Width;
-    int savedHeight = m_Height;
+    int savedWidth = width;
+    int savedHeight = height;
+    int savedRate = GLFW_DONT_CARE;
 
-    if (m_Configuration.contains("setting.defaultres") && m_Configuration.contains("setting.defaultres"))
+    if (m_VideoConfig.Has("setting.defaultres") && m_VideoConfig.Has("setting.defaultresheight"))
     {
-        try
+        savedWidth = m_VideoConfig.Get<int>("setting.defaultres");
+        savedHeight = m_VideoConfig.Get<int>("setting.defaultresheight");
+    }
+
+    if (m_VideoConfig.Has("setting.displaymode"))
+    {
+        m_DisplayMode = DisplayMode(m_VideoConfig.Get<int>("setting.displaymode"));
+        m_LastDisplayMode = m_DisplayMode;
+    }
+
+    if (m_VideoConfig.Has("setting.monitor"))
+    {
+        int monitorIndex = m_VideoConfig.Get<int>("setting.monitor");
+
+        if (monitorIndex < m_Monitors.size())
         {
-            savedWidth = std::stoi(m_Configuration["setting.defaultres"]);
-            savedHeight = std::stoi(m_Configuration["setting.defaultresheight"]);
-        }
-        catch (const std::exception &e)
-        {
-            Logger::warn("Invalid resolution found in configuration. Reverting to default.\n");
+            m_MonitorIndex = monitorIndex;
         }
     }
 
-    if (m_Configuration.contains("setting.displaymode"))
+    if (m_VideoConfig.Has("setting.refreshrate"))
     {
-        try
-        {
-            auto displayMode = std::stoi(m_Configuration["setting.displaymode"]);
-
-            if (displayMode >= 0 && displayMode <= 2)
-            {
-                m_DisplayMode = DisplayMode(std::stoi(m_Configuration["setting.displaymode"]));
-            }
-        }
-        catch (const std::exception &e)
-        {
-            Logger::warn("Invalid display mode found in configuration. Reverting to default.\n");
-        }
+        savedRate = m_VideoConfig.Get<int>("setting.refreshrate");
     }
 
-    if (m_Configuration.contains("setting.vsync"))
+    if (m_VideoConfig.Has("setting.vsync"))
     {
-        try
-        {
-            auto vsync = std::stoi(m_Configuration["setting.vsync"]);
-
-            if (vsync >= 0 && vsync <= 1)
-            {
-                m_Flags.VerticalSync = vsync;
-            }
-        }
-        catch (const std::exception &e)
-        {
-            Logger::warn("Invalid vsync value found in configuration. Reverting to default.\n");
-        }
-    }
-
-    LoadMonitors();
-
-    if (m_Configuration.contains("setting.monitor"))
-    {
-        try
-        {
-            auto monitorIndex = std::stoi(m_Configuration["setting.monitor"]);
-
-            if (monitorIndex < m_Monitors.size())
-            {
-                m_MonitorIndex = monitorIndex;
-            }
-        }
-        catch (const std::exception &e)
-        {
-            Logger::warn("Invalid monitor found in configuration. Reverting to default.\n");
-        }
-    }
-    else
-    {
-        m_MonitorIndex = GetIndexOfMonitor(glfwGetPrimaryMonitor());
+        m_Flags.VerticalSync = m_VideoConfig.Get<int>("setting.vsync");
     }
 
     // Initialize Window
-    m_Window = glfwCreateWindow(m_Width, m_Height, title, NULL, NULL);
+    m_Window = glfwCreateWindow(savedWidth, savedHeight, title, NULL, NULL);
 
     if (m_Window == NULL)
     {
@@ -158,6 +120,12 @@ Application::Application(const int width, const int height, const char *title)
         exit(EXIT_FAILURE);
     }
 
+    // Initialize monitors
+    LoadMonitors();
+
+    m_PrimaryMonitor = m_Monitors.at(0);
+    m_CurrentMonitor = m_Monitors.at(0);
+
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
 
@@ -169,23 +137,11 @@ Application::Application(const int width, const int height, const char *title)
 
     Logger::info("Initialized framebuffer.\n");
 
-    // Restore window settings
-    m_Monitor = GetCurrentMonitor();
+    // Restore video settings
+    SetMonitor(m_PrimaryMonitor);
+    SetResolution(Resolution(savedWidth, savedHeight, savedRate));
 
-    SetDisplayMode(m_DisplayMode);
-    LoadResolutions();
-    SetResolution(Resolution(savedWidth, savedHeight));
-
-    for (size_t i = 0; i < m_Resolutions.size(); i++)
-    {
-        auto resolution = m_Resolutions[i];
-
-        if (resolution.Width == savedWidth && resolution.Height == savedHeight)
-        {
-            m_ResolutionIndex = i;
-        }
-    }
-
+    // Restore flags
     if (!m_Flags.ShowCursor)
     {
         glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -214,7 +170,7 @@ Application::Application(const int width, const int height, const char *title)
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
 
-    Logger::info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, width, height);
+    Logger::info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, savedWidth, savedHeight);
 }
 
 int Application::Width() const
@@ -388,15 +344,13 @@ void Application::Run()
         renderAccumulator += deltaTime;
         simulationAccumulator += deltaTime;
 
-        auto *monitor = GetCurrentMonitor();
+        auto monitor = GetCurrentMonitor();
 
-        if (monitor && monitor != m_Monitor)
+        if (monitor != m_CurrentMonitor)
         {
-            Logger::info("Monitor detected: %s.\n", glfwGetMonitorName(monitor));
+            m_CurrentMonitor = monitor;
 
-            m_Monitor = monitor;
-
-            LoadResolutions();
+            Logger::info("Current monitor detected: %s.\n", m_CurrentMonitor->m_Title);
         }
 
         ProcessInput(deltaTime);
@@ -475,7 +429,6 @@ void Application::Run()
 
                     if (ImGui::TreeNode("Video"))
                     {
-                        // Changing monitor in windowed has no effect, disable.
                         if (m_DisplayMode == Windowed)
                         {
                             ImGui::BeginDisabled();
@@ -485,13 +438,13 @@ void Application::Run()
                                 "Monitor", &m_MonitorIndex,
                                 [](void *data, int index, const char **text) -> bool
                                 {
-                                    auto &vector = *static_cast<std::vector<GLFWmonitor *> *>(data);
+                                    auto &vector = *static_cast<std::vector<Monitor *> *>(data);
 
                                     if (index < 0 || index >= static_cast<int>(vector.size()))
                                     {
                                         return false;
                                     }
-                                    *text = glfwGetMonitorName(vector[index]);
+                                    *text = vector[index]->m_Title;
 
                                     return true;
                                 },
@@ -505,15 +458,28 @@ void Application::Run()
                             ImGui::EndDisabled();
                         }
 
-                        // Windowed borderless is locked to max resolution
-                        // Changing resolution in this state should not be allowed
                         if (m_DisplayMode == Borderless)
                         {
                             ImGui::BeginDisabled();
                         }
 
+                        int *resolutionIndex;
+
+                        switch (m_DisplayMode)
+                        {
+                        case Fullscreen:
+                            resolutionIndex = &m_CurrentMonitor->m_ResolutionFullscreen;
+                            break;
+                        case Windowed:
+                            resolutionIndex = &m_CurrentMonitor->m_ResolutionWindowed;
+                            break;
+                        case Borderless:
+                            resolutionIndex = &m_CurrentMonitor->m_ResolutionBorderless;
+                            break;
+                        }
+
                         if (ImGui::Combo(
-                                "Resolution", &m_ResolutionIndex,
+                                "Resolution", resolutionIndex,
                                 [](void *data, int index, const char **text) -> bool
                                 {
                                     auto &vector = *static_cast<std::vector<Resolution> *>(data);
@@ -526,9 +492,9 @@ void Application::Run()
 
                                     return true;
                                 },
-                                static_cast<void *>(&m_Resolutions), m_Resolutions.size()))
+                                static_cast<void *>(&m_CurrentMonitor->m_Resolutions), m_CurrentMonitor->m_Resolutions.size()))
                         {
-                            SetResolution(m_Resolutions[m_ResolutionIndex]);
+                            SetResolution(m_CurrentMonitor->m_Resolutions[*resolutionIndex]);
                         }
 
                         if (m_DisplayMode == Borderless)
@@ -669,47 +635,30 @@ GLFWwindow *const Application::GetWindow() const
     return m_Window;
 }
 
-GLFWmonitor *const Application::GetSetMonitor() const
+Monitor *const Application::GetPrimaryMonitor() const
 {
-    if (m_MonitorIndex < m_Monitors.size())
-    {
-        return m_Monitors[m_MonitorIndex];
-    }
-
-    return nullptr;
+    return m_PrimaryMonitor;
 }
 
-GLFWmonitor *const Application::GetCurrentMonitor() const
+Monitor *const Application::GetCurrentMonitor() const
 {
-    GLFWmonitor *monitor = glfwGetWindowMonitor(m_Window);
-
-    if (monitor)
-    {
-        return monitor;
-    }
-
     int windowX, windowY;
     glfwGetWindowPos(m_Window, &windowX, &windowY);
 
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    for (int i = 0; i < monitorCount; i++)
+    for (int i = 0; i < m_Monitors.size(); i++)
     {
-        int monitorX, monitorY;
-        int monitorWidth, monitorHeight;
-        glfwGetMonitorWorkarea(monitors[i], &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+        auto monitor = m_Monitors[i];
 
-        bool overlapX = windowX >= monitorX && windowX < monitorX + monitorWidth;
-        bool overlapY = windowY >= monitorY && windowY < monitorY + monitorHeight;
+        bool overlapX = windowX >= monitor->m_PositionX && windowX < monitor->m_PositionX + monitor->m_Width;
+        bool overlapY = windowY >= monitor->m_PositionY && windowY < monitor->m_PositionY + monitor->m_Height;
 
         if (overlapX && overlapY)
         {
-            return monitors[i];
+            return m_Monitors[i];
         }
     }
 
-    return nullptr;
+    return m_PrimaryMonitor;
 }
 
 void Application::ProcessInput(const double timeStep)
@@ -790,124 +739,135 @@ void Application::SetScenePrev()
 
 void Application::SetResolution(const Resolution resolution)
 {
-    // Get scale for HiDPI displays
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
+    int width = resolution.m_Width;
+    int height = resolution.m_Height;
+    int rate = resolution.m_Rate;
 
-    glfwGetMonitorContentScale(m_Monitor, &scaleX, &scaleY);
+    if (m_DisplayMode == Fullscreen)
+    {
+        glfwSetWindowMonitor(m_Window, m_CurrentMonitor->m_Monitor, 0, 0, width, height, rate);
 
-    // Set resolution
-    glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-    glfwSetWindowSize(m_Window, resolution.Width / scaleX, resolution.Height / scaleY);
-    glfwSetWindowAspectRatio(m_Window, resolution.Width, resolution.Height);
+        bool found = false;
 
-    m_Framebuffer->Resize(resolution.Width, resolution.Height);
+        for (size_t i = 0; i < m_CurrentMonitor->m_Resolutions.size(); i++)
+        {
+            Resolution res = m_CurrentMonitor->m_Resolutions[i];
 
-    Logger::info("Resolution Set: %dx%d.\n", resolution.Width, resolution.Height);
+            if (width == res.m_Width && height == res.m_Height && rate == res.m_Rate)
+            {
+                m_CurrentMonitor->m_ResolutionFullscreen = i;
+                found = true;
+            }
+        }
+
+        if (!found)
+        {
+            m_CurrentMonitor->m_ResolutionFullscreen = -1;
+        }
+    }
+    else
+    {
+        float scaleX = m_CurrentMonitor->m_ScaleX;
+        float scaleY = m_CurrentMonitor->m_ScaleY;
+
+        glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+        glfwSetWindowSize(m_Window, width / scaleX, height / scaleY);
+        glfwSetWindowAspectRatio(m_Window, width, height);
+
+        bool found = false;
+
+        for (size_t i = 0; i < m_CurrentMonitor->m_Resolutions.size(); i++)
+        {
+            Resolution res = m_CurrentMonitor->m_Resolutions[i];
+
+            if (width == res.m_Width && height == res.m_Height && rate == res.m_Rate)
+            {
+                m_CurrentMonitor->m_ResolutionWindowed = i;
+                found = true;
+            }
+        }
+
+        if (!found)
+        {
+            m_CurrentMonitor->m_ResolutionWindowed = -1;
+        }
+    }
+
+    m_Framebuffer->Resize(width, height);
 }
 
 void Application::SetDisplayMode(const DisplayMode mode)
 {
-    // Monitor set by user
-    m_Monitor = GetSetMonitor();
-
-    LoadResolutions();
-
-    // Use these values when going back to windowed mode
+    // Store the window's position and size
     if (m_LastDisplayMode == Windowed)
     {
         glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
         glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
     }
 
-    // Reset window to last state, ensures scaling factor is available
-    glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+    if (mode == Fullscreen)
+    {
+        // Get the primary monitor's current resolution
+        Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
 
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
+        // Set the window monitor to the primary monitor
+        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, current.m_Rate);
 
-    glfwGetMonitorContentScale(m_Monitor, &scaleX, &scaleY);
-
-    // Get highest supported resolution
-    int count;
-    const GLFWvidmode *videoModes = glfwGetVideoModes(m_Monitor, &count);
-    const GLFWvidmode *videoMode = &videoModes[count - 1];
-
-    Logger::info("Video Mode: %dx%d.\n", videoMode->width, videoMode->height);
+        // Resize framebuffer
+        m_Framebuffer->Resize(current.m_Width, current.m_Height);
+    }
 
     if (mode == Borderless)
     {
-        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
-        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+        // Set the correct window attributes
+        if (glfwGetWindowAttrib(m_Window, GLFW_DECORATED))
+        {
+            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+        }
 
-        int monitorX, monitorY;
-        int monitorWidth, monitorHeight;
-        glfwGetMonitorWorkarea(m_Monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-        glfwSetWindowMonitor(m_Window, nullptr, monitorX, monitorY, videoMode->width / scaleX, videoMode->height / scaleY, 0);
+        if (!glfwGetWindowAttrib(m_Window, GLFW_FLOATING))
+        {
+            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+        }
 
-        m_Framebuffer->Resize(videoMode->width, videoMode->height);
+        // Set the window monitor to the primary monitor
+        glfwSetWindowMonitor(m_Window, nullptr, m_PrimaryMonitor->m_PositionX, m_PrimaryMonitor->m_PositionY,
+            m_PrimaryMonitor->m_Width, m_PrimaryMonitor->m_Height, 0);
 
-        m_LastResolutionIndex = m_ResolutionIndex;
-        m_ResolutionIndex = m_Resolutions.size() - 1;
+        // Use the primary monitor's highest resolution
+        Resolution highest = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionBorderless];
+
+        // Resize framebuffer
+        m_Framebuffer->Resize(highest.m_Width, highest.m_Height);
     }
-    else
+
+    if (mode == Windowed)
     {
-        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
-        glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
-
-        if (mode == Fullscreen)
+        // Set the correct window attributes
+        if (!glfwGetWindowAttrib(m_Window, GLFW_DECORATED))
         {
-            glfwSetWindowMonitor(m_Window, m_Monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
-            m_Framebuffer->Resize(videoMode->width, videoMode->height);
-
-            m_LastResolutionIndex = m_ResolutionIndex;
-            m_ResolutionIndex = m_Resolutions.size() - 1;
-
-            Logger::info("Index: %d.\n", m_ResolutionIndex);
+            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
         }
-        else // Windowed mode
+
+        if (glfwGetWindowAttrib(m_Window, GLFW_FLOATING))
         {
-            m_Monitor = GetCurrentMonitor();
-
-            LoadResolutions();
-
-            // Resolution could be absent from list if defined in constructor
-            // Set it to a valid value
-            Resolution lowest = m_Resolutions[0];
-
-            if (m_LastWidth < lowest.Width && m_LastHeight < lowest.Height)
-            {
-                m_LastWidth = lowest.Width;
-                m_LastHeight = lowest.Height;
-                m_ResolutionIndex = 0;
-            }
-            else
-            {
-                for (size_t i = 0; i < m_Resolutions.size(); i++)
-                {
-                    Resolution resolution = m_Resolutions[i];
-
-                    if (m_LastWidth == resolution.Width && m_LastHeight == resolution.Height)
-                    {
-                        m_ResolutionIndex = i;
-                    }
-                }
-            }
-
-            m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
+            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
         }
+
+        // Restore window's last position and size
+        glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+
+        // Resize framebuffer
+        m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
     }
 
     m_LastDisplayMode = mode;
 }
 
-void Application::SetMonitor(GLFWmonitor *monitor)
+void Application::SetMonitor(Monitor *monitor)
 {
-    m_Monitor = monitor;
+    m_PrimaryMonitor = monitor;
 
-    LoadResolutions();
-
-    // Restore display mode
     if (m_DisplayMode == Fullscreen || m_DisplayMode == Borderless)
     {
         SetDisplayMode(m_DisplayMode);
@@ -916,7 +876,7 @@ void Application::SetMonitor(GLFWmonitor *monitor)
 
 void Application::LoadMonitors()
 {
-    Logger::info("Loading monitors.\n");
+    Logger::info("Loading available monitors.\n");
 
     int count;
     GLFWmonitor **monitors = glfwGetMonitors(&count);
@@ -925,134 +885,16 @@ void Application::LoadMonitors()
 
     for (int i = 0; i < count; i++)
     {
-        m_Monitors.push_back(monitors[i]);
+        m_Monitors.push_back(new Monitor(monitors[i]));
     }
-}
-
-void Application::LoadResolutions()
-{
-    Logger::info("Loading resolutions for monitor: %s.\n", glfwGetMonitorName(m_Monitor));
-
-    int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(m_Monitor, &count);
-
-    m_Resolutions.clear();
-
-    for (int i = 0; i < count; i++)
-    {
-        m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
-    }
-
-    m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
-}
-
-void Application::LoadVideoConfig()
-{
-    Logger::info("Attempting to load configuration.\n");
-
-    if (!std::filesystem::exists(m_ConfigDirectory))
-    {
-        Logger::info("Configuration directory not found.\n");
-        Logger::info("Attempting to create configuration directory.\n");
-
-        if (std::filesystem::create_directories(m_ConfigDirectory))
-        {
-            Logger::info("Configuration directory created: \"%s\".\n", m_ConfigDirectory.c_str());
-        }
-        else
-        {
-            Logger::warn("Failed to create configuration directory: \"%s\".\n", m_ConfigDirectory.c_str());
-
-            return;
-        }
-    }
-
-    if (!std::filesystem::exists(m_ConfigPath))
-    {
-        Logger::info("Configuration file not found.\n");
-        Logger::info("Attempting to create configuration file.\n");
-
-        std::ofstream file(m_ConfigPath);
-
-        if (file)
-        {
-            Logger::info("Configuration file created: \"%s\".\n", m_ConfigPath.c_str());
-        }
-        else
-        {
-            Logger::warn("Failed to create configuration file: \"%s\".\n", m_ConfigPath.c_str());
-        }
-
-        return;
-    }
-
-    std::ifstream file(m_ConfigPath);
-
-    if (file.is_open())
-    {
-        Logger::info("Configuration file opened successfully.\n");
-
-        std::string line;
-        std::string key, value;
-        std::istringstream stream;
-
-        while (std::getline(file, line))
-        {
-            stream = std::istringstream(line);
-
-            if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') && std::getline(stream, value, '\"') &&
-                std::getline(stream, value, '\"'))
-            {
-                m_Configuration[key] = value;
-            }
-        }
-
-        file.close();
-    }
-    else
-    {
-        Logger::warn("Failed to open configuration file.\n");
-    }
-}
-
-void Application::StoreVideoConfig()
-{
-    Logger::info("Attempting to store configuration.\n");
-
-    Resolution resolution(m_Resolutions[m_ResolutionIndex]);
-    m_Configuration["setting.defaultres"] = std::to_string(resolution.Width);
-    m_Configuration["setting.defaultresheight"] = std::to_string(resolution.Height);
-
-    m_Configuration["setting.monitor"] = std::to_string(m_MonitorIndex);
-    m_Configuration["setting.displaymode"] = std::to_string(m_DisplayMode);
-    m_Configuration["setting.vsync"] = std::to_string(m_Flags.VerticalSync);
-
-    std::ofstream file(m_ConfigPath);
-
-    if (!file.is_open())
-    {
-        Logger::warn("Failed to open configuration file.\n");
-
-        return;
-    }
-
-    file << "\"videoConfig\"\n{\n";
-    for (const auto &kv : m_Configuration)
-    {
-        file << "   \"" << kv.first << "\" \"" << kv.second << "\"\n";
-    }
-    file << "}\n";
-    file.close();
-
-    Logger::info("Successfully saved configuration.\n");
 }
 
 int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
 {
     int i = 0;
-    for (GLFWmonitor *p : m_Monitors)
+    for (Monitor *p : m_Monitors)
     {
-        if (p == monitor)
+        if (p->m_Monitor == monitor)
         {
             return i;
         }
@@ -1065,33 +907,70 @@ int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
 
 Application::~Application()
 {
-    // Save current video settings to file
-    StoreVideoConfig();
+    // Store video settings
+    int width;
+    int height;
+    int rate = GLFW_DONT_CARE;
+    int resolutionIndex;
 
-    // Deallocate resources
-    Logger::info("Destroying framebuffer.\n");
+    switch (m_DisplayMode)
+    {
+    case Fullscreen:
+        resolutionIndex = m_PrimaryMonitor->m_ResolutionFullscreen;
+        break;
+    case Windowed:
+        resolutionIndex = m_PrimaryMonitor->m_ResolutionWindowed;
+        break;
+    case Borderless:
+        resolutionIndex = m_PrimaryMonitor->m_ResolutionBorderless;
+        break;
+    }
+
+    if (resolutionIndex == -1)
+    {
+        glfwGetWindowSize(m_Window, &width, &height);
+    }
+    else
+    {
+        Resolution current = m_PrimaryMonitor->m_Resolutions[resolutionIndex];
+
+        width = current.m_Width;
+        height = current.m_Height;
+        rate = current.m_Rate;
+    }
+
+    m_VideoConfig.Set("setting.defaultres", width);
+    m_VideoConfig.Set("setting.defaultresheight", height);
+    m_VideoConfig.Set("setting.displaymode", m_DisplayMode);
+    m_VideoConfig.Set("setting.monitor", m_MonitorIndex);
+    m_VideoConfig.Set("setting.refreshrate", rate);
+    m_VideoConfig.Set("setting.vsync", m_Flags.VerticalSync);
+
+    m_VideoConfig.Store();
+
+    // De-allocate resources
     delete m_Framebuffer;
 
-    Logger::info("Deallocating shaders.\n");
+    for (auto *monitor : m_Monitors)
+    {
+        delete monitor;
+    }
+
     for (auto it : m_Shaders)
     {
         glDeleteProgram(it.second);
     }
 
-    Logger::info("Deallocating textures.\n");
     for (auto it : m_Textures)
     {
         glDeleteTextures(1, (unsigned int *)&it.second);
     }
 
-    Logger::info("Terminating ImGui.\n");
+    // Terminate
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
-    Logger::info("Terminating GLFW.\n");
     glfwTerminate();
-
-    Logger::info("Application terminated.\n");
 }
 
 void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
