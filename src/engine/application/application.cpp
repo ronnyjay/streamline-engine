@@ -136,7 +136,7 @@ Application::Application(const int width, const int height, const char *title)
 
     // Restore video settings
     m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
-    m_CurrentMonitor = m_Monitors.at(m_MonitorIndex);
+    m_CurrentMonitor = GetCurrentMonitor();
 
     SetMonitor(m_PrimaryMonitor);
     SetResolution(Resolution(savedWidth, savedHeight, savedRate));
