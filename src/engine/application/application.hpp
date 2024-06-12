@@ -29,13 +29,13 @@ typedef std::unordered_map<std::string, Texture> TextureMap;
 
 struct Resolution
 {
-    Resolution(const int width, const int height, const int rate) : m_Width(width), m_Height(height), m_Rate(rate)
+    Resolution(const int width, const int height) : m_Width(width), m_Height(height)
     {
     }
 
     bool operator==(const Resolution &other) const
     {
-        return m_Width == other.m_Width && m_Height == other.m_Height && m_Rate == other.m_Rate;
+        return m_Width == other.m_Width && m_Height == other.m_Height;
     }
 
     bool operator<(const Resolution &other) const
@@ -45,23 +45,17 @@ struct Resolution
             return m_Width < other.m_Width;
         }
 
-        if (m_Height != other.m_Height)
-        {
-            return m_Height < other.m_Height;
-        }
-
-        return m_Rate < other.m_Rate;
+        return m_Height < other.m_Height;
     }
 
     int m_Width;
     int m_Height;
-    int m_Rate;
 
     mutable char m_TextFormat[32];
 
     const char *Format() const
     {
-        std::snprintf(m_TextFormat, sizeof(m_TextFormat), "%dx%d (%dHz)", m_Width, m_Height, m_Rate);
+        std::snprintf(m_TextFormat, sizeof(m_TextFormat), "%dx%d", m_Width, m_Height);
         return m_TextFormat;
     }
 };
@@ -80,8 +74,10 @@ struct Monitor
 
         for (int i = 0; i < count; i++)
         {
-            m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height, modes[i].refreshRate));
+            m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
         }
+
+        m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
 
         m_ResolutionFullscreen = m_Resolutions.size() - 1;
         m_ResolutionBorderless = m_Resolutions.size() - 1;

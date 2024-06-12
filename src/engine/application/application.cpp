@@ -62,7 +62,6 @@ Application::Application(const int width, const int height, const char *title)
 
     int savedWidth = width;
     int savedHeight = height;
-    int savedRate = GLFW_DONT_CARE;
 
     if (m_VideoConfig.Has("setting.defaultres") && m_VideoConfig.Has("setting.defaultresheight"))
     {
@@ -84,11 +83,6 @@ Application::Application(const int width, const int height, const char *title)
         {
             m_MonitorIndex = monitorIndex;
         }
-    }
-
-    if (m_VideoConfig.Has("setting.refreshrate"))
-    {
-        savedRate = m_VideoConfig.Get<int>("setting.refreshrate");
     }
 
     if (m_VideoConfig.Has("setting.vsync"))
@@ -139,7 +133,7 @@ Application::Application(const int width, const int height, const char *title)
     m_CurrentMonitor = GetCurrentMonitor();
 
     SetMonitor(m_PrimaryMonitor);
-    SetResolution(Resolution(savedWidth, savedHeight, savedRate));
+    SetResolution(Resolution(savedWidth, savedHeight));
 
     // Restore flags
     if (!m_Flags.ShowCursor)
@@ -741,11 +735,10 @@ void Application::SetResolution(const Resolution resolution)
 {
     int width = resolution.m_Width;
     int height = resolution.m_Height;
-    int rate = resolution.m_Rate;
 
     if (m_DisplayMode == Fullscreen)
     {
-        glfwSetWindowMonitor(m_Window, m_CurrentMonitor->m_Monitor, 0, 0, width, height, rate);
+        glfwSetWindowMonitor(m_Window, m_CurrentMonitor->m_Monitor, 0, 0, width, height, GLFW_DONT_CARE);
 
         bool found = false;
 
@@ -753,7 +746,7 @@ void Application::SetResolution(const Resolution resolution)
         {
             Resolution res = m_CurrentMonitor->m_Resolutions[i];
 
-            if (width == res.m_Width && height == res.m_Height && rate == res.m_Rate)
+            if (width == res.m_Width && height == res.m_Height)
             {
                 m_CurrentMonitor->m_ResolutionFullscreen = i;
                 found = true;
@@ -780,7 +773,7 @@ void Application::SetResolution(const Resolution resolution)
         {
             Resolution res = m_CurrentMonitor->m_Resolutions[i];
 
-            if (width == res.m_Width && height == res.m_Height && rate == res.m_Rate)
+            if (width == res.m_Width && height == res.m_Height)
             {
                 m_CurrentMonitor->m_ResolutionWindowed = i;
                 found = true;
@@ -811,7 +804,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
         Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
 
         // Set the window monitor to the primary monitor
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, current.m_Rate);
+        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
 
         // Resize framebuffer
         m_Framebuffer->Resize(current.m_Width, current.m_Height);
@@ -910,7 +903,6 @@ Application::~Application()
     // Store video settings
     int width;
     int height;
-    int rate = GLFW_DONT_CARE;
     int resolutionIndex;
 
     switch (m_DisplayMode)
@@ -936,14 +928,12 @@ Application::~Application()
 
         width = current.m_Width;
         height = current.m_Height;
-        rate = current.m_Rate;
     }
 
     m_VideoConfig.Set("setting.defaultres", width);
     m_VideoConfig.Set("setting.defaultresheight", height);
     m_VideoConfig.Set("setting.displaymode", m_DisplayMode);
     m_VideoConfig.Set("setting.monitor", m_MonitorIndex);
-    m_VideoConfig.Set("setting.refreshrate", rate);
     m_VideoConfig.Set("setting.vsync", m_Flags.VerticalSync);
 
     m_VideoConfig.Store();
