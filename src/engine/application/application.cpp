@@ -58,7 +58,10 @@ Application::Application(const int width, const int height, const char *title)
     LoadMonitors();
 
     // Load video settings
-    m_VideoConfig.Load();
+    if (m_VideoConfig.Load() == 1)
+    {
+        exit(EXIT_FAILURE);
+    }
 
     int savedWidth = width;
     int savedHeight = height;
@@ -758,7 +761,7 @@ void Application::SetResolution(const Resolution resolution)
             m_CurrentMonitor->m_ResolutionFullscreen = -1;
         }
     }
-    else
+    else if (m_DisplayMode == Windowed)
     {
         float scaleX = m_CurrentMonitor->m_ScaleX;
         float scaleY = m_CurrentMonitor->m_ScaleY;
@@ -880,22 +883,6 @@ void Application::LoadMonitors()
     {
         m_Monitors.push_back(new Monitor(monitors[i]));
     }
-}
-
-int Application::GetIndexOfMonitor(GLFWmonitor *monitor)
-{
-    int i = 0;
-    for (Monitor *p : m_Monitors)
-    {
-        if (p->m_Monitor == monitor)
-        {
-            return i;
-        }
-
-        i++;
-    }
-
-    return -1;
 }
 
 Application::~Application()

@@ -146,9 +146,6 @@ struct ApplicationFlags
     bool ShowDebugWindow = false;
 };
 
-typedef std::filesystem::path ConfigPath;
-typedef std::map<std::string, std::string> Configuration;
-
 class Application
 {
   public:
@@ -241,14 +238,9 @@ class Application
 
     void SetResolution(const Resolution);
     void SetDisplayMode(const DisplayMode);
-
-    void LoadMonitors();
     void SetMonitor(Monitor *);
 
-    void LoadVideoConfig();
-    void StoreVideoConfig();
-
-    int GetIndexOfMonitor(GLFWmonitor *monitor);
+    void LoadMonitors();
 
     static const char *DisplayModes[];
     static const char *Framerates[];
