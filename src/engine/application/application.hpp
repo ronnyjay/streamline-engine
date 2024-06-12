@@ -71,7 +71,6 @@ typedef std::vector<Resolution> ResolutionList;
 struct Monitor
 {
     Monitor(GLFWmonitor *monitor) : m_Monitor(monitor), m_Title(glfwGetMonitorName(monitor)), m_ResolutionWindowed(-1)
-
     {
         glfwGetMonitorWorkarea(monitor, &m_PositionX, &m_PositionY, &m_Width, &m_Height);
         glfwGetMonitorContentScale(monitor, &m_ScaleX, &m_ScaleY);

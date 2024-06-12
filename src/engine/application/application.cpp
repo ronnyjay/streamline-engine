@@ -54,6 +54,9 @@ Application::Application(const int width, const int height, const char *title)
 
     Logger::info("Initialized GLFW.\n");
 
+    // Load monitors
+    LoadMonitors();
+
     // Load video settings
     m_VideoConfig.Load();
 
@@ -120,12 +123,6 @@ Application::Application(const int width, const int height, const char *title)
         exit(EXIT_FAILURE);
     }
 
-    // Initialize monitors
-    LoadMonitors();
-
-    m_PrimaryMonitor = m_Monitors.at(0);
-    m_CurrentMonitor = m_Monitors.at(0);
-
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
 
@@ -138,6 +135,9 @@ Application::Application(const int width, const int height, const char *title)
     Logger::info("Initialized framebuffer.\n");
 
     // Restore video settings
+    m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
+    m_CurrentMonitor = m_Monitors.at(m_MonitorIndex);
+
     SetMonitor(m_PrimaryMonitor);
     SetResolution(Resolution(savedWidth, savedHeight, savedRate));
 
