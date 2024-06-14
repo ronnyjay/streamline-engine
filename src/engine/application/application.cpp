@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <engine/application/application.hpp>
 #include <engine/logger/logger.hpp>
 #include <engine/stb/stb_image.hpp>
