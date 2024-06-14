@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <engine/application/application.hpp>
 #include <engine/logger/logger.hpp>
 #include <engine/stb/stb_image.hpp>
@@ -5,10 +6,6 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
 
 using namespace engine;
 
@@ -82,7 +79,7 @@ Application::Application(const int width, const int height, const char *title)
     {
         int monitorIndex = m_VideoConfig.Get<int>("setting.monitor");
 
-        if (monitorIndex < m_Monitors.size())
+        if (monitorIndex < (int)m_Monitors.size())
         {
             m_MonitorIndex = monitorIndex;
         }
@@ -642,7 +639,7 @@ Monitor *const Application::GetCurrentMonitor() const
     int windowX, windowY;
     glfwGetWindowPos(m_Window, &windowX, &windowY);
 
-    for (int i = 0; i < m_Monitors.size(); i++)
+    for (size_t i = 0; i < m_Monitors.size(); i++)
     {
         auto monitor = m_Monitors[i];
 
@@ -807,6 +804,8 @@ void Application::SetDisplayMode(const DisplayMode mode)
         Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
 
         // Set the window monitor to the primary monitor
+        glfwSetWindowMonitor(m_Window, nullptr, m_PrimaryMonitor->m_PositionX, m_PrimaryMonitor->m_PositionY,
+            m_PrimaryMonitor->m_Width, m_PrimaryMonitor->m_Height, 0);
         glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
 
         // Resize framebuffer
