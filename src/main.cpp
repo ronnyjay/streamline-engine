@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
     auto light2 = scene.get()->CreateEntity("Light Source 2");
     auto light3 = scene.get()->CreateEntity("Light Source 3");
 
-    cube.AddComponent<engine::Model>("resources/objects/backpack/backpack.obj");
+    cube.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
     cube.AddComponent<engine::AABB>();
     cube.GetComponent<engine::Transform>().SetTranslation(glm::vec3(-10.0f, 5.0f, 0.0f));
 
@@ -47,15 +47,15 @@ int main(int argc, char const *argv[])
     pyramid.AddComponent<engine::AABB>();
     pyramid.GetComponent<engine::Transform>().SetTranslation(glm::vec3(10.0f, -2.0f, 0.0f));
 
-    light1.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
+    light1.AddComponent<engine::Model>("resources/objects/sphere/sphere.obj");
     light1.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
     light1.GetComponent<engine::Transform>().SetTranslation(glm::vec3(-10.0f, -10.0f, 0.0f));
 
-    light2.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
+    light2.AddComponent<engine::Model>("resources/objects/sphere/sphere.obj");
     light2.AddComponent<engine::Light>(glm::vec4(0.0, 1.0, 0.0, 1.0));
     light2.GetComponent<engine::Transform>().SetTranslation(glm::vec3(1.0f, -10.0f, 0.0f));
 
-    light3.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
+    light3.AddComponent<engine::Model>("resources/objects/sphere/sphere.obj");
     light3.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
     light3.GetComponent<engine::Transform>().SetTranslation(glm::vec3(10.0f, -5.0f, 0.0f));
 

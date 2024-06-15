@@ -114,7 +114,11 @@ Application::Application(const int width, const int height, const char *title)
     }
 
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(Application::MessageCallback, 0);
+
+    if (glDebugMessageCallback)
+    {
+        glDebugMessageCallback(Application::MessageCallback, nullptr);
+    }
 
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
@@ -131,8 +135,8 @@ Application::Application(const int width, const int height, const char *title)
     m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
     m_CurrentMonitor = GetCurrentMonitor();
 
-    // SetMonitor(m_PrimaryMonitor);
-    // SetResolution(Resolution(savedWidth, savedHeight));
+    SetMonitor(m_PrimaryMonitor);
+    SetResolution(Resolution(savedWidth, savedHeight));
 
     // Restore flags
     if (!m_Flags.ShowCursor)
@@ -1069,8 +1073,8 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
     }
 }
 
-void GLAPIENTRY Application::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
-    const void *userParam)
+void GLAPIENTRY Application::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+    const GLchar *message, const void *userParam)
 {
     if (type != GL_DEBUG_TYPE_ERROR)
         return;
