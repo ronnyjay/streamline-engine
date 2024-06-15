@@ -12,7 +12,6 @@
 #include <engine/shader/shader.hpp>
 #include <engine/texture/texture.hpp>
 
-#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>

@@ -3,7 +3,6 @@
 #include <engine/logger/logger.hpp>
 
 #include <glad/gl.h>
-#include <iostream>
 
 using namespace engine;
 

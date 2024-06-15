@@ -2,8 +2,6 @@
 #include <engine/model/model.hpp>
 #include <engine/stb/stb_image.hpp>
 
-#include <iostream>
-
 using namespace engine;
 
 Model::Model(const std::string &path)

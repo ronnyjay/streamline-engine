@@ -54,10 +54,7 @@ Application::Application(const int width, const int height, const char *title)
     LoadMonitors();
 
     // Load video settings
-    if (m_VideoConfig.Load() == 1)
-    {
-        exit(EXIT_FAILURE);
-    }
+    m_VideoConfig.Load();
 
     int savedWidth = width;
     int savedHeight = height;
