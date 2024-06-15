@@ -1,10 +1,14 @@
 #include <engine/application/application.hpp>
 #include <engine/collider/collider.hpp>
-#include <engine/components/components.hpp>
 #include <engine/entity/entity.hpp>
 #include <engine/logger/logger.hpp>
 #include <engine/model/model.hpp>
 #include <engine/scene/scene.hpp>
+
+#include <engine/components/children.hpp>
+#include <engine/components/identifier.hpp>
+#include <engine/components/parent.hpp>
+#include <engine/components/transform.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -59,8 +63,6 @@ void Scene::DestroyEntity(const Entity entity)
 
 void Scene::Update(const double deltaTime)
 {
-    /** TODO: Implement RK4 Differential Equation Solver for Rigid Bodies */
-
     // Propogate transformation updates
     auto view = m_Registry.view<Transform, Parent, Children>();
 
@@ -152,9 +154,9 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
         {
             childTransformComponent.SetDirty(true);
 
-            if (transformComponent.IsPositionChanged())
+            if (transformComponent.IsTranslationChanged())
             {
-                childTransformComponent.SetPositionChanged(true);
+                childTransformComponent.SetTranslationChanged(true);
             }
 
             if (transformComponent.IsRotationChanged())
@@ -171,10 +173,26 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
         UpdateEntity(child, modelMatrix);
     }
 
-    transformComponent.SetPositionChanged(false);
-    transformComponent.SetRotationChanged(false);
-    transformComponent.SetScaleChanged(false);
-    transformComponent.SetDirty(false);
+    // Reset flags after updating children
+    if (transformComponent.IsTranslationChanged())
+    {
+        transformComponent.SetTranslationChanged(false);
+    }
+
+    if (transformComponent.IsRotationChanged())
+    {
+        transformComponent.SetRotationChanged(false);
+    }
+
+    if (transformComponent.IsScaleChanged())
+    {
+        transformComponent.SetScaleChanged(false);
+    }
+
+    if (transformComponent.IsDirty())
+    {
+        transformComponent.SetDirty(false);
+    }
 }
 
 void Scene::Draw()
@@ -251,15 +269,15 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 {
     auto [identifierComponent, transformComponent, childrenComponent] = m_Registry.get<Identifier, Transform, Children>(entity);
 
-    auto position = transformComponent.GetPosition();
+    auto translation = transformComponent.GetTranslation();
     auto rotation = transformComponent.GetRotation();
     auto scale = transformComponent.GetScale();
 
     if (ImGui::TreeNode(identifierComponent.Get().c_str()))
     {
-        ImGui::DragFloat("Position X", &position.x);
-        ImGui::DragFloat("Position Y", &position.y);
-        ImGui::DragFloat("Position Z", &position.z);
+        ImGui::DragFloat("Translation X", &translation.x);
+        ImGui::DragFloat("Translation Y", &translation.y);
+        ImGui::DragFloat("Translation Z", &translation.z);
         ImGui::DragFloat("Rotation X", &rotation.x);
         ImGui::DragFloat("Rotation Y", &rotation.y);
         ImGui::DragFloat("Rotation Z", &rotation.z);
@@ -280,7 +298,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::TreePop();
     }
 
-    transformComponent.SetPosition(position);
+    transformComponent.SetTranslation(translation);
     transformComponent.SetRotation(rotation);
     transformComponent.SetScale(scale);
 }
