@@ -14,13 +14,8 @@ class Config
   public:
     Config(std::filesystem::path);
 
-    int Load();
-    int Store();
-
-    bool Has(const std::string &key)
-    {
-        return m_Values.contains(key);
-    }
+    void Load();
+    void Store();
 
     template <typename T>
     T Get(const std::string &key) const
@@ -43,6 +38,11 @@ class Config
     void Set(const std::string &key, T &value)
     {
         m_Values[key] = std::to_string(value);
+    }
+
+    bool Has(const std::string &key)
+    {
+        return m_Values.contains(key);
     }
 
   private:

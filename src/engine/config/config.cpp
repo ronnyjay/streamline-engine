@@ -8,7 +8,7 @@ Config::Config(std::filesystem::path path) : m_Path(path), m_Directory(path.pare
 {
 }
 
-int Config::Load()
+void Config::Load()
 {
     Logger::info("Loading configuration.\n");
 
@@ -23,8 +23,6 @@ int Config::Load()
         else
         {
             Logger::err("Failed to create directory: \"%s\".\n", m_Directory.c_str());
-
-            return 1;
         }
     }
 
@@ -39,63 +37,59 @@ int Config::Load()
         else
         {
             Logger::err("Failed to create file: \"%s\".\n", m_Path.filename().c_str());
-
-            return 1;
         }
+
+        return;
     }
 
     std::ifstream file(m_Path);
 
-    if (file.is_open())
-    {
-        std::string line;
-        std::string key, value;
-        std::istringstream stream;
-
-        while (std::getline(file, line))
-        {
-            stream = std::istringstream(line);
-
-            if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') && std::getline(stream, value, '\"') &&
-                std::getline(stream, value, '\"'))
-            {
-                m_Values[key] = value;
-            }
-        }
-
-        file.close();
-    }
-    else
+    if (!file.is_open())
     {
         Logger::warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
+
+        return;
     }
 
-    return 0;
+    std::string line;
+    std::string key, value;
+    std::istringstream stream;
+
+    while (std::getline(file, line))
+    {
+        stream = std::istringstream(line);
+
+        if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') && std::getline(stream, value, '\"') &&
+            std::getline(stream, value, '\"'))
+        {
+            m_Values[key] = value;
+        }
+    }
+
+    file.close();
 }
 
-int Config::Store()
+void Config::Store()
 {
     Logger::info("Saving configuration.\n");
 
     std::ofstream file(m_Path);
 
-    if (file.is_open())
-    {
-        file << "{\n";
-
-        for (const auto &kv : m_Values)
-        {
-            file << "   \"" << kv.first << "\" \"" << kv.second << "\"\n";
-        }
-
-        file << "}\n";
-
-        file.close();
-    }
-    else
+    if (!file.is_open())
     {
         Logger::warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
+
+        return;
     }
 
-    return 0;
+    file << "{\n";
+
+    for (const auto &kv : m_Values)
+    {
+        file << "   \"" << kv.first << "\" \"" << kv.second << "\"\n";
+    }
+
+    file << "}\n";
+
+    file.close();
 }

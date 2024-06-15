@@ -2,8 +2,6 @@
 #include <engine/stb/stb_image.hpp>
 #include <engine/texture/texture.hpp>
 
-#include <iostream>
-
 using namespace engine;
 
 Texture::Texture()
