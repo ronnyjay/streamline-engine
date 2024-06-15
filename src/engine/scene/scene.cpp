@@ -180,6 +180,46 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 void Scene::Draw()
 {
     auto view = m_Registry.view<Model, Transform, Parent, Children>();
+    auto lights = m_Registry.view<Light, Transform>();
+
+    auto numLightsInShader = std::min(lights.size_hint(), Shader::MAX_NUM_LIGHTS);
+
+    std::array<Light, Shader::MAX_NUM_LIGHTS> selectedLights;
+
+    // TODO: get closest/strongest lights first, up to max size shader supports
+    // Currently just grabs first because it's easy
+    auto it_lights = lights.begin();
+    for (size_t i = 0; i < Shader::MAX_NUM_LIGHTS; i++)
+    {
+        if (it_lights != lights.end())
+        {
+            auto &light = m_Registry.get<Light>(*it_lights);
+            selectedLights[i] = light;
+            it_lights++;
+        }
+        else
+        {
+            selectedLights[i] = Light{glm::vec4(1.0), glm::vec4(1.0)};
+        }
+    }
+
+    auto modelShader = application.GetShader("Model");
+    modelShader.Use();
+    modelShader.UpdateLights(selectedLights);
+    modelShader.SetUInt("NumLights", numLightsInShader);
+
+    auto camera = application.GetCurrentCamera();
+    auto projectionMatrix = camera->ProjectionMatrix();
+    auto viewMatrix = camera->ViewMatrix();
+
+    modelShader.SetMat4("projection", projectionMatrix);
+    modelShader.SetMat4("view", viewMatrix);
+
+    auto colliderShader = application.GetShader("Collider");
+    colliderShader.Use();
+
+    colliderShader.SetMat4("projection", projectionMatrix);
+    colliderShader.SetMat4("view", viewMatrix);
 
     for (auto entity : view)
     {
@@ -194,30 +234,20 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 {
     auto [modelComponent, transformComponent] = m_Registry.get<Model, Transform>(entity);
 
-    auto camera = application.GetCurrentCamera();
-    auto shader = application.GetShader("Model");
-
-    auto projectionMatrix = camera->ProjectionMatrix();
-    auto viewMatrix = camera->ViewMatrix();
     auto modelMatrix = transformComponent.GetTransform() * transform;
+    auto modelShader = application.GetShader("Model");
+    auto &colliderShader = application.GetShader("Collider");
 
-    shader.Use();
-    shader.SetMat4("projection", projectionMatrix);
-    shader.SetMat4("view", viewMatrix);
-    shader.SetMat4("model", modelMatrix);
-
-    modelComponent.Draw(shader);
+    modelShader.Use();
+    modelShader.SetMat4("model", modelMatrix);
+    modelComponent.Draw(modelShader);
 
     if (auto *boundingComponent = m_Registry.try_get<AABB>(entity))
     {
         if (application.Flags().ShowCollisions)
         {
-            shader = application.GetShader("Collider");
-
-            shader.Use();
-            shader.SetMat4("projection", projectionMatrix);
-            shader.SetMat4("view", viewMatrix);
-            shader.SetBool("colliding", boundingComponent->GetColliding());
+            colliderShader.Use();
+            colliderShader.SetBool("colliding", boundingComponent->GetColliding());
 
             boundingComponent->Draw();
         }

@@ -31,6 +31,8 @@ int main(int argc, char const *argv[])
     auto cube = scene.get()->CreateEntity("Cube");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
+    auto light1 = scene.get()->CreateEntity("Light Source");
+    // auto light2 = scene.get()->CreateEntity("Light Source 2");
 
     cube.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
     cube.AddComponent<engine::AABB>();
@@ -43,6 +45,10 @@ int main(int argc, char const *argv[])
     pyramid.AddComponent<engine::Model>("resources/objects/pyramid/pyramid.obj");
     pyramid.AddComponent<engine::AABB>();
     pyramid.GetComponent<engine::Transform>().SetPosition(10.0f, -5.0f, 0.0f);
+
+    light1.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
+    light1.AddComponent<engine::Light>(glm::vec4(1.0, 1.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 1.0, 1.0));
+    // light2.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 1.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0));
 
     application.Run();
 

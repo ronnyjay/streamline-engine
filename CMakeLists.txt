@@ -31,6 +31,8 @@ add_compile_options(
     -Werror
     -Wall
     -Wpedantic
+    -Wno-unused-but-set-variable
+    -Wno-unused
     -g
 )
 

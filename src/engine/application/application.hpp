@@ -165,7 +165,7 @@ class Application
     Scene *const GetCurrentScene() const;
 
     Shader LoadShader(const char *, const char *, const char *);
-    Shader GetShader(const char *);
+    Shader &GetShader(const char *);
 
     Texture LoadTexture(const char *, const char *);
     Texture GetTexture(const char *);

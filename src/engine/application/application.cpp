@@ -27,6 +27,15 @@ const char *Application::Framerates[] = {
 };
 // clang-format on
 
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+    const void *userParam)
+{
+    if (type != GL_DEBUG_TYPE_ERROR)
+        return;
+
+    Logger::err("GL ERROR CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n", type, severity, message);
+}
+
 Application::Application(const int width, const int height, const char *title)
     : m_Width(width), m_Height(height), m_LastWidth(width), m_LastHeight(height), m_MonitorIndex(0), m_FramerateIndex(7),
       m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_LastDisplayMode(Windowed), m_CurrentCamera(nullptr),
@@ -115,6 +124,9 @@ Application::Application(const int width, const int height, const char *title)
         Logger::err("Failed to initialize GLAD.\n");
         exit(EXIT_FAILURE);
     }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
 
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
@@ -250,7 +262,7 @@ Shader Application::LoadShader(const char *name, const char *vertexPath, const c
     return shader;
 }
 
-Shader Application::GetShader(const char *name)
+Shader &Application::GetShader(const char *name)
 {
     auto it = m_Shaders.find(name);
 

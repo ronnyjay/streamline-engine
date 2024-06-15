@@ -204,4 +204,10 @@ class Transform
     bool m_ScaleChanged = true;
 };
 
+struct Light
+{
+  glm::vec4 pos;
+  glm::vec4 color;
+};
+
 }; // namespace engine

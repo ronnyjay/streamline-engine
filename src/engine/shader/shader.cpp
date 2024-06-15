@@ -3,6 +3,7 @@
 
 #include <glad/gl.h>
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -17,30 +18,55 @@ Shader::operator unsigned int() const
 void Shader::Use()
 {
     glUseProgram(m_ID);
+    if (m_LightBlockBinding != GL_INVALID_INDEX)
+        glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
 }
 
-void Shader::Compile(const char *vertexSource, const char *fragmentSource)
+bool Shader::Compile(const char *vertexSource, const char *fragmentSource)
 {
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
-    CheckCompileErrors(vertexShader, "Vertex");
+    if (!CheckCompileErrors(vertexShader, "Vertex"))
+    {
+        return false;
+    }
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     glCompileShader(fragmentShader);
-    CheckCompileErrors(fragmentShader, "Fragment");
+    if (!CheckCompileErrors(fragmentShader, "Fragment"))
+    {
+        return false;
+    }
 
     // Create Shader Program
-    m_ID = glCreateProgram();
     glAttachShader(m_ID, vertexShader);
     glAttachShader(m_ID, fragmentShader);
     glLinkProgram(m_ID);
-    CheckCompileErrors(m_ID, "Program");
+    if (!CheckCompileErrors(m_ID, "Program"))
+    {
+        return false;
+    }
 
     // Cleanup
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    // Add uniform buffer
+    m_LightBlockBinding = glGetUniformBlockIndex(m_ID, "LightBlock");
+    if (m_LightBlockBinding != GL_INVALID_INDEX)
+    {
+        glUniformBlockBinding(m_ID, m_LightBlockBinding, 0);
+
+        glGenBuffers(1, &m_LightUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
+        glBufferData(GL_UNIFORM_BUFFER, m_Lights.size() * sizeof(Light), NULL, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_LightUBO, 0, m_Lights.size() * sizeof(Light));
+    }
+
+    return true;
 }
 
 void Shader::SetBool(const std::string &name, bool value) const
@@ -108,6 +134,13 @@ void Shader::SetMat4(const std::string &name, const glm::mat4 &mat) const
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
+void Shader::UpdateLights(const std::array<Light, Shader::MAX_NUM_LIGHTS> &lights)
+{
+    std::copy(lights.cbegin(), lights.cend(), m_Lights.begin());
+    glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, Shader::MAX_NUM_LIGHTS * sizeof(Light), m_Lights.data());
+}
+
 Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
 {
     Logger::info("Loading vertex shader from file: %s\n", vertexPath);
@@ -145,12 +178,15 @@ Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
         Logger::err("Error reading shader file: %s\n", e.what());
     }
 
-    shader.Compile(vShaderContents.c_str(), fShaderContents.c_str());
+    if (!shader.Compile(vShaderContents.c_str(), fShaderContents.c_str()))
+    {
+        throw std::runtime_error("Error compiling shaders.");
+    }
 
     return shader;
 }
 
-void Shader::CheckCompileErrors(unsigned int shader, std::string type)
+bool Shader::CheckCompileErrors(unsigned int shader, std::string type)
 {
     int success;
     char infoLog[1024];
@@ -163,9 +199,9 @@ void Shader::CheckCompileErrors(unsigned int shader, std::string type)
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 
             std::string longError(infoLog);
-            std::string shortError(longError.substr(longError.find_last_of(':') + 2, longError.length()));
 
-            Logger::warn("Shader compilation failed (%s): %s", type.c_str(), shortError.c_str());
+            Logger::err("Shader compilation failed (%s): %s", type.c_str(), longError.c_str());
+            return false;
         }
         else
         {
@@ -180,13 +216,15 @@ void Shader::CheckCompileErrors(unsigned int shader, std::string type)
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 
             std::string longError(infoLog);
-            std::string shortError(longError.substr(longError.find_last_of(':') + 2, longError.length()));
 
-            Logger::warn("Shader linking failed (%s): %s", type.c_str(), shortError.c_str());
+            Logger::warn("Shader linking failed (%s): %s\n", type.c_str(), longError.c_str());
+            return false;
         }
         else
         {
             Logger::info("Shader linking success: (%s).\n", type.c_str());
         }
     }
+
+    return true;
 }
