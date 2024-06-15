@@ -251,6 +251,7 @@ class Application
     static void KeyCallback(GLFWwindow *, int, int, int, int);
     static void CursorPosCallback(GLFWwindow *, double, double);
     static void ScrollCallback(GLFWwindow *, double, double);
+    static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
 };
 
 }; // namespace engine

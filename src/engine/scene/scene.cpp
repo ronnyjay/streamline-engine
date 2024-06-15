@@ -184,7 +184,7 @@ void Scene::Draw()
 
     auto numLightsInShader = std::min(lights.size_hint(), Shader::MAX_NUM_LIGHTS);
 
-    std::array<Light, Shader::MAX_NUM_LIGHTS> selectedLights;
+    std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> selectedLights;
 
     // TODO: get closest/strongest lights first, up to max size shader supports
     // Currently just grabs first because it's easy
@@ -194,12 +194,16 @@ void Scene::Draw()
         if (it_lights != lights.end())
         {
             auto &light = m_Registry.get<Light>(*it_lights);
-            selectedLights[i] = light;
+            auto &pos = m_Registry.get<Transform>(*it_lights);
+
+            selectedLights[i].pos = glm::vec4(pos.GetPosition(), 1.0f);
+            selectedLights[i].properties = light;
+
             it_lights++;
         }
         else
         {
-            selectedLights[i] = Light{glm::vec4(1.0), glm::vec4(1.0)};
+            selectedLights[i] = ShaderLight{glm::vec4(0.0), {glm::vec4(0.0)}};
         }
     }
 
@@ -214,6 +218,7 @@ void Scene::Draw()
 
     modelShader.SetMat4("projection", projectionMatrix);
     modelShader.SetMat4("view", viewMatrix);
+    modelShader.SetVec3("viewPos", camera->GetPosition());
 
     auto colliderShader = application.GetShader("Collider");
     colliderShader.Use();

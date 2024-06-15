@@ -27,15 +27,6 @@ const char *Application::Framerates[] = {
 };
 // clang-format on
 
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
-    const void *userParam)
-{
-    if (type != GL_DEBUG_TYPE_ERROR)
-        return;
-
-    Logger::err("GL ERROR CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n", type, severity, message);
-}
-
 Application::Application(const int width, const int height, const char *title)
     : m_Width(width), m_Height(height), m_LastWidth(width), m_LastHeight(height), m_MonitorIndex(0), m_FramerateIndex(7),
       m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_LastDisplayMode(Windowed), m_CurrentCamera(nullptr),
@@ -126,7 +117,7 @@ Application::Application(const int width, const int height, const char *title)
     }
 
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, 0);
+    glDebugMessageCallback(Application::MessageCallback, 0);
 
     // Initialize framebuffer
     m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
@@ -143,8 +134,8 @@ Application::Application(const int width, const int height, const char *title)
     m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
     m_CurrentMonitor = GetCurrentMonitor();
 
-    SetMonitor(m_PrimaryMonitor);
-    SetResolution(Resolution(savedWidth, savedHeight));
+    // SetMonitor(m_PrimaryMonitor);
+    // SetResolution(Resolution(savedWidth, savedHeight));
 
     // Restore flags
     if (!m_Flags.ShowCursor)
@@ -374,6 +365,8 @@ void Application::Run()
             m_Framebuffer->Bind();
 
             glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+
             glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
@@ -393,8 +386,9 @@ void Application::Run()
             glfwGetFramebufferSize(m_Window, &width, &height);
 
             glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
             glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, width, height);
 
             if (m_Flags.ShowWireframes)
@@ -1076,4 +1070,13 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
     {
         application->m_CurrentCamera->Move(yOffset);
     }
+}
+
+void GLAPIENTRY Application::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+    const void *userParam)
+{
+    if (type != GL_DEBUG_TYPE_ERROR)
+        return;
+
+    Logger::err("GL ERROR CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n", type, severity, message);
 }

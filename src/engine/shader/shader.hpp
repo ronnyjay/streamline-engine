@@ -39,11 +39,11 @@ class Shader
     void SetMat2(const std::string &, const glm::mat2 &) const;
     void SetMat3(const std::string &, const glm::mat3 &) const;
     void SetMat4(const std::string &, const glm::mat4 &) const;
-    void UpdateLights(const std::array<Light, Shader::MAX_NUM_LIGHTS> &lights);
+    void UpdateLights(const std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> &lights);
 
     static Shader FromFile(const char *, const char *);
 
-    std::array<Light, Shader::MAX_NUM_LIGHTS> m_Lights;
+    std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> m_Lights;
 
   private:
     unsigned int m_ID;

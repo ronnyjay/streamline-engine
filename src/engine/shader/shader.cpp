@@ -61,9 +61,9 @@ bool Shader::Compile(const char *vertexSource, const char *fragmentSource)
 
         glGenBuffers(1, &m_LightUBO);
         glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
-        glBufferData(GL_UNIFORM_BUFFER, m_Lights.size() * sizeof(Light), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, m_Lights.size() * sizeof(ShaderLight), NULL, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_LightUBO, 0, m_Lights.size() * sizeof(Light));
+        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_LightUBO, 0, m_Lights.size() * sizeof(ShaderLight));
     }
 
     return true;
@@ -134,11 +134,11 @@ void Shader::SetMat4(const std::string &name, const glm::mat4 &mat) const
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader::UpdateLights(const std::array<Light, Shader::MAX_NUM_LIGHTS> &lights)
+void Shader::UpdateLights(const std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> &lights)
 {
     std::copy(lights.cbegin(), lights.cend(), m_Lights.begin());
     glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, Shader::MAX_NUM_LIGHTS * sizeof(Light), m_Lights.data());
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, Shader::MAX_NUM_LIGHTS * sizeof(ShaderLight), m_Lights.data());
 }
 
 Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
@@ -198,9 +198,7 @@ bool Shader::CheckCompileErrors(unsigned int shader, std::string type)
         {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 
-            std::string longError(infoLog);
-
-            Logger::err("Shader compilation failed (%s): %s", type.c_str(), longError.c_str());
+            Logger::err("Shader compilation failed (%s): %s", type.c_str(), infoLog);
             return false;
         }
         else
@@ -215,9 +213,7 @@ bool Shader::CheckCompileErrors(unsigned int shader, std::string type)
         {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 
-            std::string longError(infoLog);
-
-            Logger::warn("Shader linking failed (%s): %s\n", type.c_str(), longError.c_str());
+            Logger::warn("Shader linking failed (%s): %s\n", infoLog);
             return false;
         }
         else

@@ -206,8 +206,13 @@ class Transform
 
 struct Light
 {
-  glm::vec4 pos;
   glm::vec4 color;
+};
+
+struct ShaderLight
+{
+  glm::vec4 pos;
+  Light properties;
 };
 
 }; // namespace engine
