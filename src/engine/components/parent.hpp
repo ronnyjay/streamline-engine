@@ -8,7 +8,8 @@ namespace engine
 class Parent
 {
   public:
-    Parent() : m_Parent(entt::null)
+    Parent()
+        : m_Parent(entt::null)
     {
     }
 

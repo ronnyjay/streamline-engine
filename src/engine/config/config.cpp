@@ -4,7 +4,9 @@
 
 using namespace engine;
 
-Config::Config(std::filesystem::path path) : m_Path(path), m_Directory(path.parent_path())
+Config::Config(std::filesystem::path path)
+    : m_Path(path)
+    , m_Directory(path.parent_path())
 {
 }
 

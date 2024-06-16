@@ -28,9 +28,18 @@ const char *Application::Framerates[] = {
 // clang-format on
 
 Application::Application(const int width, const int height, const char *title)
-    : m_Width(width), m_Height(height), m_LastWidth(width), m_LastHeight(height), m_MonitorIndex(0), m_FramerateIndex(7),
-      m_Framerate(FPS_UNLIMITED), m_DisplayMode(Windowed), m_LastDisplayMode(Windowed), m_CurrentCamera(nullptr),
-      m_CurrentScene(nullptr), m_VideoConfig(std::filesystem::path(std::getenv("HOME")) / ".config/streamline/video.cfg")
+    : m_Width(width)
+    , m_Height(height)
+    , m_LastWidth(width)
+    , m_LastHeight(height)
+    , m_MonitorIndex(0)
+    , m_FramerateIndex(7)
+    , m_Framerate(FPS_UNLIMITED)
+    , m_DisplayMode(Windowed)
+    , m_LastDisplayMode(Windowed)
+    , m_CurrentCamera(nullptr)
+    , m_CurrentScene(nullptr)
+    , m_VideoConfig(std::filesystem::path(std::getenv("HOME")) / ".config/streamline/video.cfg")
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -157,8 +166,13 @@ Application::Application(const int width, const int height, const char *title)
     Logger::info("Initialized ImGui.\n");
 
     // Load shaders
-    LoadShader("Model", "resources/shaders/model.vs", "resources/shaders/model.fs");
-    LoadShader("Collider", "resources/shaders/collider.vs", "resources/shaders/collider.fs");
+    m_Shaders["Model"].AddShader("resources/shaders/model.vs", GL_VERTEX_SHADER);
+    m_Shaders["Model"].AddShader("resources/shaders/model.fs", GL_FRAGMENT_SHADER);
+    m_Shaders["Model"].Compile();
+
+    m_Shaders["Collider"].AddShader("resources/shaders/collider.vs", GL_VERTEX_SHADER);
+    m_Shaders["Collider"].AddShader("resources/shaders/collider.fs", GL_FRAGMENT_SHADER);
+    m_Shaders["Collider"].Compile();
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
@@ -241,44 +255,13 @@ Scene *const Application::GetCurrentScene() const
     return m_CurrentScene;
 }
 
-Shader Application::LoadShader(const char *name, const char *vertexPath, const char *fragmentPath)
-{
-    Shader shader = Shader::FromFile(vertexPath, fragmentPath);
-
-    m_Shaders[name] = shader;
-
-    return shader;
-}
-
-Shader &Application::GetShader(const char *name)
+ShaderProgram &Application::GetShader(const char *name)
 {
     auto it = m_Shaders.find(name);
 
     if (it == m_Shaders.end())
     {
         Logger::err("Shader not found.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    return it->second;
-}
-
-Texture Application::LoadTexture(const char *name, const char *path)
-{
-    Texture texture = Texture::FromFile(path);
-
-    m_Textures[name] = texture;
-
-    return texture;
-}
-
-Texture Application::GetTexture(const char *name)
-{
-    auto it = m_Textures.find(name);
-
-    if (it == m_Textures.end())
-    {
-        Logger::err("Texture not found.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -431,7 +414,8 @@ void Application::Run()
                         }
 
                         if (ImGui::Combo(
-                                "Monitor", &m_MonitorIndex,
+                                "Monitor",
+                                &m_MonitorIndex,
                                 [](void *data, int index, const char **text) -> bool
                                 {
                                     auto &vector = *static_cast<std::vector<Monitor *> *>(data);
@@ -444,7 +428,8 @@ void Application::Run()
 
                                     return true;
                                 },
-                                static_cast<void *>(&m_Monitors), m_Monitors.size()))
+                                static_cast<void *>(&m_Monitors),
+                                m_Monitors.size()))
                         {
                             SetMonitor(m_Monitors[m_MonitorIndex]);
                         }
@@ -475,7 +460,8 @@ void Application::Run()
                         }
 
                         if (ImGui::Combo(
-                                "Resolution", resolutionIndex,
+                                "Resolution",
+                                resolutionIndex,
                                 [](void *data, int index, const char **text) -> bool
                                 {
                                     auto &vector = *static_cast<std::vector<Resolution> *>(data);
@@ -488,7 +474,8 @@ void Application::Run()
 
                                     return true;
                                 },
-                                static_cast<void *>(&m_CurrentMonitor->m_Resolutions), m_CurrentMonitor->m_Resolutions.size()))
+                                static_cast<void *>(&m_CurrentMonitor->m_Resolutions),
+                                m_CurrentMonitor->m_Resolutions.size()))
                         {
                             SetResolution(m_CurrentMonitor->m_Resolutions[*resolutionIndex]);
                         }
@@ -498,7 +485,8 @@ void Application::Run()
                             ImGui::EndDisabled();
                         }
 
-                        if (ImGui::Combo("Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
+                        if (ImGui::Combo(
+                                "Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
                         {
                             SetDisplayMode(m_DisplayMode);
                         }
@@ -806,9 +794,16 @@ void Application::SetDisplayMode(const DisplayMode mode)
         Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
 
         // Set the window monitor to the primary monitor
-        glfwSetWindowMonitor(m_Window, nullptr, m_PrimaryMonitor->m_PositionX, m_PrimaryMonitor->m_PositionY,
-            m_PrimaryMonitor->m_Width, m_PrimaryMonitor->m_Height, 0);
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(
+            m_Window,
+            nullptr,
+            m_PrimaryMonitor->m_PositionX,
+            m_PrimaryMonitor->m_PositionY,
+            m_PrimaryMonitor->m_Width,
+            m_PrimaryMonitor->m_Height,
+            0);
+        glfwSetWindowMonitor(
+            m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
 
         // Resize framebuffer
         m_Framebuffer->Resize(current.m_Width, current.m_Height);
@@ -828,8 +823,14 @@ void Application::SetDisplayMode(const DisplayMode mode)
         }
 
         // Set the window monitor to the primary monitor
-        glfwSetWindowMonitor(m_Window, nullptr, m_PrimaryMonitor->m_PositionX, m_PrimaryMonitor->m_PositionY,
-            m_PrimaryMonitor->m_Width, m_PrimaryMonitor->m_Height, 0);
+        glfwSetWindowMonitor(
+            m_Window,
+            nullptr,
+            m_PrimaryMonitor->m_PositionX,
+            m_PrimaryMonitor->m_PositionY,
+            m_PrimaryMonitor->m_Width,
+            m_PrimaryMonitor->m_Height,
+            0);
 
         // Use the primary monitor's highest resolution
         Resolution highest = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionBorderless];
@@ -1069,7 +1070,13 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
     }
 }
 
-void GLAPIENTRY Application::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+void GLAPIENTRY Application::MessageCallback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar *message,
     const void *userParam)
 {
     if (type != GL_DEBUG_TYPE_ERROR)

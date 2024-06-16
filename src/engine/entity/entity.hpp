@@ -15,28 +15,24 @@ class Entity
     Entity(entt::entity, Scene *);
     Entity(const Entity &) = default;
 
-    template <typename T, typename... Args>
-    T &AddComponent(Args &&...args)
+    template <typename T, typename... Args> T &AddComponent(Args &&...args)
     {
         assert(!HasComponent<T>() && "Entity already has component!");
         return m_Scene->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    T &GetComponent()
+    template <typename T> T &GetComponent()
     {
         assert(HasComponent<T>() && "Entity does not have component!");
         return m_Scene->m_Registry.get<T>(m_Handle);
     }
 
-    template <typename T>
-    bool HasComponent()
+    template <typename T> bool HasComponent()
     {
         return m_Scene->m_Registry.all_of<T>(m_Handle);
     }
 
-    template <typename T>
-    void RemoveComponent()
+    template <typename T> void RemoveComponent()
     {
         assert(HasComponent<T>() && "Entity does not have component!");
         m_Scene->m_Registry.remove<T>(m_Handle);

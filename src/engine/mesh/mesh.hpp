@@ -27,9 +27,9 @@ struct Vertex
 class Mesh
 {
   public:
-    Mesh(std::vector<Vertex>, std::vector<unsigned int>, std::vector<MaterialTexture>);
+    Mesh(const std::vector<Vertex> &, const std::vector<unsigned int> &, const std::vector<std::shared_ptr<Texture>> &);
 
-    void Draw(const Shader &);
+    void Draw(const ShaderProgram &);
 
     const std::vector<Vertex> &GetVertices() const;
 
@@ -40,7 +40,7 @@ class Mesh
 
     std::vector<Vertex> m_Vertices;
     std::vector<unsigned int> m_Indices;
-    std::vector<MaterialTexture> m_Textures;
+    std::vector<std::shared_ptr<Texture>> m_Textures;
 };
 
 }; // namespace engine

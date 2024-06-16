@@ -17,6 +17,7 @@ target_sources(engine PRIVATE
     stb/stb_image.cpp
     text/text.cpp
     texture/texture.cpp
+    resource_manager/resource_manager.cpp
 )
 
 target_link_libraries(engine PUBLIC glfw glm::glm glad imgui assimp::assimp)

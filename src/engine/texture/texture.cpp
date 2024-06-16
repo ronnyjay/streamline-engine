@@ -1,20 +1,22 @@
 #include <engine/logger/logger.hpp>
 #include <engine/stb/stb_image.hpp>
 #include <engine/texture/texture.hpp>
+#include <memory>
+#include <string>
 
 using namespace engine;
 
 Texture::Texture()
-    : m_Width(0), m_Height(0), m_InternalFormat(GL_RGB), m_ImageFormat(GL_RGB), m_Wrap_S(GL_REPEAT), m_Wrap_T(GL_REPEAT),
-      m_FilterMin(GL_NEAREST), m_FilterMax(GL_NEAREST)
-
+    : m_Width(0)
+    , m_Height(0)
+    , m_InternalFormat(GL_RGB)
+    , m_ImageFormat(GL_RGB)
+    , m_Wrap_S(GL_REPEAT)
+    , m_Wrap_T(GL_REPEAT)
+    , m_FilterMin(GL_NEAREST)
+    , m_FilterMax(GL_NEAREST)
 {
     glGenTextures(1, &m_ID);
-}
-
-Texture::operator unsigned int() const
-{
-    return m_ID;
 }
 
 void Texture::Bind()
@@ -38,36 +40,34 @@ void Texture::Generate(const unsigned int width, const unsigned int height, cons
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Texture Texture::FromFile(const char *file)
+void Texture::Load(const std::basic_string<char> &path)
 {
-    Logger::info("Loading texture from file: %s\n", file);
-
-    Texture texture;
+    Logger::info("Loading texture from file: %s\n", path.c_str());
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load(file, &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 
     if (data)
     {
         switch (nrChannels)
         {
         case 1:
-            texture.m_InternalFormat = GL_RED;
-            texture.m_ImageFormat = GL_RED;
+            m_InternalFormat = GL_RED;
+            m_ImageFormat = GL_RED;
             break;
         case 3:
-            texture.m_InternalFormat = GL_RGB;
-            texture.m_ImageFormat = GL_RGB;
+            m_InternalFormat = GL_RGB;
+            m_ImageFormat = GL_RGB;
             break;
         case 4:
-            texture.m_InternalFormat = GL_RGBA;
-            texture.m_ImageFormat = GL_RGBA;
+            m_InternalFormat = GL_RGBA;
+            m_ImageFormat = GL_RGBA;
             break;
         default:
             break;
         }
 
-        texture.Generate(width, height, data);
+        Generate(width, height, data);
 
         // Free image data
         stbi_image_free(data);
@@ -76,8 +76,6 @@ Texture Texture::FromFile(const char *file)
     }
     else
     {
-        Logger::warn("Failed to load texture from file: %s\n", file);
+        Logger::warn("Failed to load texture from file: %s\n", path.c_str());
     }
-
-    return texture;
 }

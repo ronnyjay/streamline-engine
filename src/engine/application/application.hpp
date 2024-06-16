@@ -23,12 +23,14 @@ namespace engine
 typedef std::map<int, std::shared_ptr<Camera>> CameraMap;
 typedef std::map<int, std::shared_ptr<Scene>> SceneMap;
 typedef std::unordered_map<int, Direction> KeyMap;
-typedef std::unordered_map<std::string, Shader> ShaderMap;
+typedef std::unordered_map<std::string, ShaderProgram> ShaderMap;
 typedef std::unordered_map<std::string, Texture> TextureMap;
 
 struct Resolution
 {
-    Resolution(const int width, const int height) : m_Width(width), m_Height(height)
+    Resolution(const int width, const int height)
+        : m_Width(width)
+        , m_Height(height)
     {
     }
 
@@ -63,7 +65,10 @@ typedef std::vector<Resolution> ResolutionList;
 
 struct Monitor
 {
-    Monitor(GLFWmonitor *monitor) : m_Monitor(monitor), m_Title(glfwGetMonitorName(monitor)), m_ResolutionWindowed(-1)
+    Monitor(GLFWmonitor *monitor)
+        : m_Monitor(monitor)
+        , m_Title(glfwGetMonitorName(monitor))
+        , m_ResolutionWindowed(-1)
     {
         glfwGetMonitorWorkarea(monitor, &m_PositionX, &m_PositionY, &m_Width, &m_Height);
         glfwGetMonitorContentScale(monitor, &m_ScaleX, &m_ScaleY);
@@ -163,11 +168,7 @@ class Application
     void SetScene(const int);
     Scene *const GetCurrentScene() const;
 
-    Shader LoadShader(const char *, const char *, const char *);
-    Shader &GetShader(const char *);
-
-    Texture LoadTexture(const char *, const char *);
-    Texture GetTexture(const char *);
+    ShaderProgram &GetShader(const char *);
 
     void BindMovementKey(const int, const Direction);
 
@@ -250,7 +251,14 @@ class Application
     static void KeyCallback(GLFWwindow *, int, int, int, int);
     static void CursorPosCallback(GLFWwindow *, double, double);
     static void ScrollCallback(GLFWwindow *, double, double);
-    static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+    static void GLAPIENTRY MessageCallback(
+        GLenum source,
+        GLenum type,
+        GLuint id,
+        GLenum severity,
+        GLsizei length,
+        const GLchar *message,
+        const void *userParam);
 };
 
 }; // namespace engine

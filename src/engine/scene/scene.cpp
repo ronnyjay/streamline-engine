@@ -135,7 +135,8 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
                     for (const auto &vertex : mesh.GetVertices())
                     {
                         vertices.push_back(glm::vec3(
-                            (boundingTransform * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                            (boundingTransform *
+                             glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
                     }
                 }
 
@@ -200,14 +201,14 @@ void Scene::Draw()
     auto view = m_Registry.view<Model, Transform, Parent, Children>();
     auto lights = m_Registry.view<Light, Transform>();
 
-    auto numLightsInShader = std::min(lights.size_hint(), Shader::MAX_NUM_LIGHTS);
+    auto numLightsInShader = std::min(lights.size_hint(), ShaderProgram::MAX_NUM_LIGHTS);
 
-    std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> selectedLights;
+    std::array<ShaderLight, ShaderProgram::MAX_NUM_LIGHTS> selectedLights;
 
     // TODO: get closest/strongest lights first, up to max size shader supports
     // Currently just grabs first because it's easy
     auto it_lights = lights.begin();
-    for (size_t i = 0; i < Shader::MAX_NUM_LIGHTS; i++)
+    for (size_t i = 0; i < numLightsInShader; i++)
     {
         if (it_lights != lights.end())
         {
@@ -218,10 +219,6 @@ void Scene::Draw()
             selectedLights[i].properties = light;
 
             it_lights++;
-        }
-        else
-        {
-            selectedLights[i] = ShaderLight{glm::vec4(0.0), {glm::vec4(0.0)}};
         }
     }
 
@@ -302,7 +299,8 @@ void Scene::DrawDebugInfo()
 
 void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 {
-    auto [identifierComponent, transformComponent, childrenComponent] = m_Registry.get<Identifier, Transform, Children>(entity);
+    auto [identifierComponent, transformComponent, childrenComponent] =
+        m_Registry.get<Identifier, Transform, Children>(entity);
 
     auto translation = transformComponent.GetTranslation();
     auto rotation = transformComponent.GetRotation();

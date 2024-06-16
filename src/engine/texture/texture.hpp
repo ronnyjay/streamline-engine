@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/engine.hpp"
 #include <glad/gl.h>
 
 #include <string>
@@ -7,12 +8,15 @@
 namespace engine
 {
 
-class Texture
+class Texture : public Loadable
 {
   public:
     Texture();
 
-    operator unsigned int() const;
+    operator unsigned int() const
+    {
+        return m_ID;
+    }
 
     void Bind();
 
@@ -29,33 +33,35 @@ class Texture
     unsigned int m_FilterMin;
     unsigned int m_FilterMax;
 
-    static Texture FromFile(const char *);
+    std::string m_Type;
+
+    void Load(const std::basic_string<char> &path) override;
 
   private:
     unsigned int m_ID;
 };
 
-class MaterialTexture : public Texture
-{
-  public:
-    MaterialTexture() : Texture()
-    {
-    }
+// class Texture : public Texture
+// {
+//   public:
+//     Texture() : Texture()
+//     {
+//     }
 
-    std::string m_Path;
-    std::string m_Type;
+//     std::string m_Path;
+//     std::string m_Type;
 
-    static MaterialTexture FromFile(const char *path, const char *directory)
-    {
-        auto filename = std::string(directory) + '/' + std::string(path);
+//     static Texture FromFile(const char *path, const char *directory)
+//     {
+//         auto filename = std::string(directory) + '/' + std::string(path);
 
-        return MaterialTexture(Texture::FromFile(filename.c_str()), path);
-    }
+//         return Texture(Texture::FromFile(filename.c_str()), path);
+//     }
 
-  private:
-    MaterialTexture(const Texture texture, const char *path) : Texture(texture), m_Path(path)
-    {
-    }
-};
+//   private:
+//     Texture(const Texture texture, const char *path) : Texture(texture), m_Path(path)
+//     {
+//     }
+// };
 
 }; // namespace engine

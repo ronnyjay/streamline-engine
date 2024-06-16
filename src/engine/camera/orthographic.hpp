@@ -8,7 +8,10 @@ namespace engine
 class OrthographicCamera : public Camera
 {
   public:
-    OrthographicCamera(const glm::vec3 position = glm::vec3(0.0f), const float yaw = YAW, const float pitch = PITCH,
+    OrthographicCamera(
+        const glm::vec3 position = glm::vec3(0.0f),
+        const float yaw = YAW,
+        const float pitch = PITCH,
         const float zoom = ZOOM)
         : Camera(position, yaw, pitch, zoom)
     {
@@ -21,8 +24,8 @@ class OrthographicCamera : public Camera
     virtual glm::mat4 const ViewMatrix() const override;
 
     virtual void Move(const Direction, double) override; // keyboard input
-    virtual void Move(double, double) override {};       // mouse position
-    virtual void Move(double) override {};               // mouse scroll
+    virtual void Move(double, double) override{};        // mouse position
+    virtual void Move(double) override{};                // mouse scroll
 
   private:
     glm::mat4 m_ViewModel;
