@@ -744,24 +744,24 @@ void Application::SetResolution(const Resolution resolution)
 
     if (m_DisplayMode == Fullscreen)
     {
-        glfwSetWindowMonitor(m_Window, m_CurrentMonitor->m_Monitor, 0, 0, width, height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, width, height, GLFW_DONT_CARE);
 
         bool found = false;
 
-        for (size_t i = 0; i < m_CurrentMonitor->m_Resolutions.size(); i++)
+        for (size_t i = 0; i < m_PrimaryMonitor->m_Resolutions.size(); i++)
         {
-            Resolution res = m_CurrentMonitor->m_Resolutions[i];
+            Resolution res = m_PrimaryMonitor->m_Resolutions[i];
 
             if (width == res.m_Width && height == res.m_Height)
             {
-                m_CurrentMonitor->m_ResolutionFullscreen = i;
+                m_PrimaryMonitor->m_ResolutionFullscreen = i;
                 found = true;
             }
         }
 
         if (!found)
         {
-            m_CurrentMonitor->m_ResolutionFullscreen = -1;
+            m_PrimaryMonitor->m_ResolutionFullscreen = -1;
         }
     }
     else if (m_DisplayMode == Windowed)
@@ -810,8 +810,6 @@ void Application::SetDisplayMode(const DisplayMode mode)
         Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
 
         // Set the window monitor to the primary monitor
-        glfwSetWindowMonitor(m_Window, nullptr, m_PrimaryMonitor->m_PositionX, m_PrimaryMonitor->m_PositionY,
-            m_PrimaryMonitor->m_Width, m_PrimaryMonitor->m_Height, 0);
         glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
 
         // Resize framebuffer
