@@ -17,8 +17,7 @@ class Config
     void Load();
     void Store();
 
-    template <typename T>
-    T Get(const std::string &key) const
+    template <typename T> T Get(const std::string &key) const
     {
         T value;
 
@@ -34,8 +33,7 @@ class Config
         return value;
     }
 
-    template <typename T>
-    void Set(const std::string &key, T &value)
+    template <typename T> void Set(const std::string &key, T &value)
     {
         m_Values[key] = std::to_string(value);
     }

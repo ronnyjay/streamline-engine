@@ -10,12 +10,12 @@
 namespace engine
 {
 
-class Shader
+class ShaderProgram
 {
   public:
     static constexpr size_t MAX_NUM_LIGHTS = 10;
 
-    Shader()
+    ShaderProgram()
     {
         m_ID = glCreateProgram();
     }
@@ -24,7 +24,7 @@ class Shader
 
     void Use();
 
-    bool Compile(const char *, const char *);
+    bool Compile();
 
     void SetBool(const std::string &, bool) const;
     void SetInt(const std::string &, int) const;
@@ -39,11 +39,12 @@ class Shader
     void SetMat2(const std::string &, const glm::mat2 &) const;
     void SetMat3(const std::string &, const glm::mat3 &) const;
     void SetMat4(const std::string &, const glm::mat4 &) const;
-    void UpdateLights(const std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> &lights);
+    void UpdateLights(const std::array<ShaderLight, ShaderProgram::MAX_NUM_LIGHTS> &lights);
 
-    static Shader FromFile(const char *, const char *);
+    static ShaderProgram FromFile(const char *, const char *);
 
-    std::array<ShaderLight, Shader::MAX_NUM_LIGHTS> m_Lights;
+    bool AddShader(const std::string &path, GLint type);
+    std::array<ShaderLight, ShaderProgram::MAX_NUM_LIGHTS> m_Lights;
 
   private:
     unsigned int m_ID;
@@ -51,7 +52,7 @@ class Shader
     GLuint m_LightUBO;
     GLuint m_LightBlockBinding;
 
-    bool CheckCompileErrors(unsigned int, std::string);
+    bool CheckCompileErrors(unsigned int);
 };
 
 }; // namespace engine

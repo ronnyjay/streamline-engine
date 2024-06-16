@@ -1,3 +1,4 @@
+#include "engine/resource_manager/resource_manager.hpp"
 #include <engine/application/application.hpp>
 #include <engine/camera/orthographic.hpp>
 #include <engine/camera/perspective.hpp>
@@ -28,34 +29,40 @@ int main(int argc, char const *argv[])
     application.BindMovementKey(GLFW_KEY_SPACE, engine::Direction::Up);
     application.BindMovementKey(GLFW_KEY_LEFT_SHIFT, engine::Direction::Down);
 
-    auto cube = scene.get()->CreateEntity("Cube");
+    auto backpack = scene.get()->CreateEntity("Backpack");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
     auto light1 = scene.get()->CreateEntity("Light Source");
     auto light2 = scene.get()->CreateEntity("Light Source 2");
     auto light3 = scene.get()->CreateEntity("Light Source 3");
 
-    cube.AddComponent<engine::Model>("resources/objects/cube/cube.obj");
-    cube.AddComponent<engine::AABB>();
-    cube.GetComponent<engine::Transform>().SetTranslation(glm::vec3(-10.0f, 5.0f, 0.0f));
+    auto sphereModel = engine::resource_manager::get_reference().Get<engine::Model>("resources/objects/sphere/sphere.obj");
+    auto backpackModel = engine::resource_manager::get_reference().Get<engine::Model>("resources/objects/backpack/backpack.obj");
+    auto cubeModel = engine::resource_manager::get_reference().Get<engine::Model>("resources/objects/cube/cube.obj");
+    auto torusModel = engine::resource_manager::get_reference().Get<engine::Model>("resources/objects/torus/torus.obj");
+    auto pyramidModel = engine::resource_manager::get_reference().Get<engine::Model>("resources/objects/pyramid/pyramid.obj");
 
-    torus.AddComponent<engine::Model>("resources/objects/torus/torus.obj");
+    backpack.AddComponent<std::shared_ptr<engine::Model>>(backpackModel);
+    backpack.AddComponent<engine::AABB>();
+    backpack.GetComponent<engine::Transform>().SetTranslation(glm::vec3(-10.0f, 5.0f, 0.0f));
+
+    torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
     torus.AddComponent<engine::AABB>();
     torus.GetComponent<engine::Transform>().SetTranslation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    pyramid.AddComponent<engine::Model>("resources/objects/pyramid/pyramid.obj");
+    pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
     pyramid.AddComponent<engine::AABB>();
     pyramid.GetComponent<engine::Transform>().SetTranslation(glm::vec3(10.0f, -2.0f, 0.0f));
 
-    light1.AddComponent<engine::Model>("resources/objects/sphere/sphere.obj");
+    light1.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light1.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
     light1.GetComponent<engine::Transform>().SetTranslation(glm::vec3(-10.0f, -10.0f, 0.0f));
 
-    light2.AddComponent<engine::Model>("resources/objects/sphere/sphere.obj");
+    light2.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light2.AddComponent<engine::Light>(glm::vec4(0.0, 1.0, 0.0, 1.0));
     light2.GetComponent<engine::Transform>().SetTranslation(glm::vec3(1.0f, -10.0f, 0.0f));
 
-    light3.AddComponent<engine::Model>("resources/objects/sphere/sphere.obj");
+    light3.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light3.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
     light3.GetComponent<engine::Transform>().SetTranslation(glm::vec3(10.0f, -5.0f, 0.0f));
 

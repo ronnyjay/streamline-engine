@@ -8,11 +8,11 @@ void Text::Draw()
     const float scaleY = 0.1f;
     const float padding = 0.05f;
 
-    const float charWidthPixels = (float)m_Texture.m_Width / 32; // image width / characters per line
+    const float charWidthPixels = (float)m_Texture->m_Width / 32; // image width / characters per line
     const float charHeightPixels = charWidthPixels;
 
-    const float charWidthUV = charWidthPixels / m_Texture.m_Width;
-    const float charHeightUV = charHeightPixels / m_Texture.m_Height;
+    const float charWidthUV = charWidthPixels / m_Texture->m_Width;
+    const float charHeightUV = charHeightPixels / m_Texture->m_Height;
 
     float x1 = m_Position.x;
     float y1 = m_Position.y;
@@ -23,7 +23,7 @@ void Text::Draw()
     glBindVertexArray(m_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-    m_Texture.Bind();
+    m_Texture->Bind();
 
     for (const char c : m_Text)
     {

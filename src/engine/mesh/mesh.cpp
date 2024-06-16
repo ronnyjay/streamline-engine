@@ -2,8 +2,13 @@
 
 using namespace engine;
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MaterialTexture> textures)
-    : m_Vertices(vertices), m_Indices(indices), m_Textures(textures)
+Mesh::Mesh(
+    const std::vector<Vertex> &vertices,
+    const std::vector<unsigned int> &indices,
+    const std::vector<std::shared_ptr<Texture>> &textures)
+    : m_Vertices(vertices)
+    , m_Indices(indices)
+    , m_Textures(textures)
 {
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
@@ -48,7 +53,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     glBindVertexArray(0);
 }
 
-void Mesh::Draw(const Shader &shader)
+void Mesh::Draw(const ShaderProgram &shader)
 {
     // Bind textures
     unsigned int diffuseNr = 1;
@@ -61,7 +66,7 @@ void Mesh::Draw(const Shader &shader)
         glActiveTexture(GL_TEXTURE0 + i);
 
         std::string number;
-        std::string name = m_Textures[i].m_Type;
+        std::string name = m_Textures[i]->m_Type;
 
         if (name == "TexDiffuse")
         {
@@ -81,7 +86,7 @@ void Mesh::Draw(const Shader &shader)
         }
 
         glUniform1i(glGetUniformLocation(shader, (name + number).c_str()), i);
-        glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
+        glBindTexture(GL_TEXTURE_2D, *m_Textures[i]);
     }
 
     // Draw Mesh

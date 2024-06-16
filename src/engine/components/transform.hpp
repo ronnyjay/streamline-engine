@@ -10,7 +10,10 @@ namespace engine
 class Transform
 {
   public:
-    Transform() : m_Translation(0.0f), m_Rotation(0.0f), m_Scale(1.0f)
+    Transform()
+        : m_Translation(0.0f)
+        , m_Rotation(0.0f)
+        , m_Scale(1.0f)
     {
     }
 

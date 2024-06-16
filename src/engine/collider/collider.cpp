@@ -4,7 +4,10 @@
 
 using namespace engine;
 
-AABB::AABB(const glm::vec3 &min, const glm::vec3 &max) : m_Min(min), m_Max(max), m_Colliding(false)
+AABB::AABB(const glm::vec3 &min, const glm::vec3 &max)
+    : m_Min(min)
+    , m_Max(max)
+    , m_Colliding(false)
 {
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
@@ -45,7 +48,8 @@ void AABB::Draw()
 
 bool AABB::Intersects(const AABB &other)
 {
-    return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) && (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
+    return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) &&
+           (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
            (m_Min.z <= other.m_Max.z && m_Max.z >= other.m_Min.z);
 }
 

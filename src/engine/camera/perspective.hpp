@@ -8,9 +8,16 @@ namespace engine
 class PerspectiveCamera : public Camera
 {
   public:
-    PerspectiveCamera(const glm::vec3 position = glm::vec3(0.0f, 1.0f, 0.0f), const float yaw = 90.0f, const float pitch = PITCH,
+    PerspectiveCamera(
+        const glm::vec3 position = glm::vec3(0.0f, 1.0f, 0.0f),
+        const float yaw = 90.0f,
+        const float pitch = PITCH,
         const float zoom = 45.0f)
-        : Camera(position, yaw, pitch, zoom), m_Front(0.0f), m_Up(0.0f, 1.0f, 0.0f), m_WorldUp(m_Up), m_LockHorizontal(false)
+        : Camera(position, yaw, pitch, zoom)
+        , m_Front(0.0f)
+        , m_Up(0.0f, 1.0f, 0.0f)
+        , m_WorldUp(m_Up)
+        , m_LockHorizontal(false)
     {
         Update();
     }

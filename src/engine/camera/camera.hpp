@@ -32,8 +32,17 @@ const float ZOOM = 1.0f;
 class Camera : public Debuggable
 {
   public:
-    Camera(const glm::vec3 position = glm::vec3(0.0f), const float yaw = YAW, const float pitch = PITCH, const float zoom = ZOOM)
-        : m_Yaw(yaw), m_Pitch(pitch), m_Zoom(zoom), m_Speed(SPEED), m_Sensitivity(SENSITIVITY), m_Position(position)
+    Camera(
+        const glm::vec3 position = glm::vec3(0.0f),
+        const float yaw = YAW,
+        const float pitch = PITCH,
+        const float zoom = ZOOM)
+        : m_Yaw(yaw)
+        , m_Pitch(pitch)
+        , m_Zoom(zoom)
+        , m_Speed(SPEED)
+        , m_Sensitivity(SENSITIVITY)
+        , m_Position(position)
     {
     }
 

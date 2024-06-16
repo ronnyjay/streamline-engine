@@ -7,7 +7,7 @@ build:
 	mkdir -p build
 
 format:
-	clang-format -i src/**/*.cpp
+	clang-format -i `find src -name "*.cpp"` `find src -name "*.hpp"`
 
 run: streamline-engine
 	build/src/streamline-engine

@@ -8,7 +8,8 @@ namespace engine
 class Identifier
 {
   public:
-    Identifier(const std::string &identifier) : m_Identifier(identifier)
+    Identifier(const std::string &identifier)
+        : m_Identifier(identifier)
     {
     }
 

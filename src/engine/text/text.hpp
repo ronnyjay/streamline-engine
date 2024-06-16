@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/resource_manager/resource_manager.hpp"
 #include <engine/shader/shader.hpp>
 #include <engine/texture/texture.hpp>
 
@@ -9,11 +10,23 @@ namespace engine
 class Text
 {
   public:
-    Text(const std::string &text, const float posX, const float posY, const float scale, const float maxX, const glm::vec3 color)
-        : m_Text(text), m_Position(posX, posY), m_Color(color), m_Scale(scale), m_MaxX(maxX)
+    Text(
+        const std::string &text,
+        const float posX,
+        const float posY,
+        const float scale,
+        const float maxX,
+        const glm::vec3 color)
+        : m_Text(text)
+        , m_Position(posX, posY)
+        , m_Color(color)
+        , m_Scale(scale)
+        , m_MaxX(maxX)
     {
-        m_Shader = Shader::FromFile("resources/shaders/text.vs", "resources/shaders/text.fs");
-        m_Texture = Texture::FromFile("resources/textures/text/characters16x16.bmp");
+        m_Shader.AddShader("resources/shaders/text.vs", GL_VERTEX_SHADER);
+        m_Shader.AddShader("resources/shaders/text.fs", GL_FRAGMENT_SHADER);
+
+        m_Texture = resource_manager::get_reference().Get<Texture>("resources/textures/text/characters16x16.bmp");
 
         // clang-format off
         const GLfloat data[4][4] = {
@@ -55,8 +68,8 @@ class Text
     unsigned int m_VAO;
     unsigned int m_VBO;
 
-    Shader m_Shader;
-    Texture m_Texture;
+    ShaderProgram m_Shader;
+    std::shared_ptr<Texture> m_Texture;
 };
 
 }; // namespace engine

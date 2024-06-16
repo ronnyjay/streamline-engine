@@ -1,37 +1,43 @@
 #pragma once
 
+#include "engine/resource_manager/resource_manager.hpp"
 #include <engine/mesh/mesh.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#define DEFAULT_TEXTURE_DIR "resources/textures/default"
+#include <filesystem>
 
 namespace engine
 {
 
 typedef glm::vec3 Vector;
 
-class Model
+class Model : public Loadable
 {
   public:
-    Model(const std::string &path);
+    Model()
+    {
+    }
 
-    void Draw(const Shader &);
+    ~Model();
+
+    void Draw(const ShaderProgram &);
 
     const std::vector<Mesh> &GetMeshes() const;
+    void Load(const std::basic_string<char> &path) override;
 
   private:
-    std::string m_Directory;
+    std::filesystem::path m_Path;
 
     std::vector<Mesh> m_Meshes;
-    std::vector<MaterialTexture> m_TexturesLoaded;
+    std::vector<std::shared_ptr<Texture>> m_TexturesLoaded;
 
     void ProcessNode(aiNode *, const aiScene *);
     Mesh ProcessMesh(aiMesh *, const aiScene *);
 
-    std::vector<MaterialTexture> LoadMaterialTextures(aiMaterial *, aiTextureType, std::string);
+    std::vector<std::shared_ptr<Texture>> LoadMaterialTextures(aiMaterial *, aiTextureType, std::string);
 };
 
 }; // namespace engine

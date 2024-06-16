@@ -31,7 +31,7 @@ class Framebuffer
     unsigned int m_Width;
     unsigned int m_Height;
 
-    Shader m_Shader;
+    ShaderProgram m_Shader;
     Texture m_Texture;
 };
 

@@ -11,7 +11,9 @@ Framebuffer::Framebuffer(const unsigned int width, const unsigned int height)
     m_Width = width;
     m_Height = height;
 
-    m_Shader = Shader::FromFile("resources/shaders/framebuffer.vs", "resources/shaders/framebuffer.fs");
+    m_Shader.AddShader("resources/shaders/framebuffer.vs", GL_VERTEX_SHADER);
+    m_Shader.AddShader("resources/shaders/framebuffer.fs", GL_FRAGMENT_SHADER);
+    m_Shader.Compile();
 
     m_Texture.m_FilterMin = GL_LINEAR;
     m_Texture.m_FilterMax = GL_LINEAR;
