@@ -198,7 +198,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 
 void Scene::Draw()
 {
-    auto view = m_Registry.view<Model, Transform, Parent, Children>();
+    auto view = m_Registry.view<std::shared_ptr<Model>, Transform, Parent, Children>();
     auto lights = m_Registry.view<Light, Transform>();
 
     auto numLightsInShader = std::min(lights.size_hint(), ShaderProgram::MAX_NUM_LIGHTS);
@@ -252,7 +252,7 @@ void Scene::Draw()
 
 void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 {
-    auto [modelComponent, transformComponent] = m_Registry.get<Model, Transform>(entity);
+    auto [modelComponent, transformComponent] = m_Registry.get<std::shared_ptr<Model>, Transform>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
     auto modelShader = application.GetShader("Model");
@@ -260,7 +260,7 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 
     modelShader.Use();
     modelShader.SetMat4("model", modelMatrix);
-    modelComponent.Draw(modelShader);
+    modelComponent->Draw(modelShader);
 
     if (auto *boundingComponent = m_Registry.try_get<AABB>(entity))
     {

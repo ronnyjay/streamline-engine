@@ -14,13 +14,11 @@ namespace engine
 
 typedef glm::vec3 Vector;
 
-class Model : Loadable
+class Model : public Loadable
 {
   public:
-    Model(const std::basic_string<char> &path)
-        : m_Path(path)
+    Model()
     {
-      Load(path);
     }
 
     ~Model();

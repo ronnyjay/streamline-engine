@@ -34,9 +34,9 @@ layout (std140) uniform LightBlock {
 
 void main() {
     vec4 ObjectColor = texture(TexDiffuse1, TexCoords);
-    vec4 AmbientColor = vec4(0.2, 0.2, 0.2, 1.0);
     vec4 SpecularEffect = texture(TexSpecular1, TexCoords);
     vec4 NormalEffect = texture(TexNormal1, TexCoords);
+    vec4 AmbientEffect = texture(TexAmbient1, TexCoords) * 0.1;
 
     vec3 norm = normalize(Normal * NormalEffect.xyz);
 
@@ -49,8 +49,7 @@ void main() {
         vec3 lightToFrag = lights[i].pos.xyz - FragPos;
         vec3 lightDir = normalize(lightToFrag);
         float distanceToLight = length(lightToFrag);
-        // float intensity = (1.0 / pow(distanceToLight * distanceToLight, 0.5));
-        float intensity = 1.0;
+        float intensity = 1 / pow(distanceToLight * distanceToLight, 0.1);
 
         float diff = max(dot(norm, lightDir), 0.0);
 
@@ -63,7 +62,7 @@ void main() {
         lightColor += vec4(diffuse, 1.0) + specular;
     }
 
-    lightColor += AmbientColor;
+    lightColor += AmbientEffect;
 
     FragColor = lightColor;
     // FragColor = ObjectColor;

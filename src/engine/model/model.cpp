@@ -9,6 +9,7 @@ using namespace engine;
 void Model::Load(const std::basic_string<char> &path)
 {
     Logger::info("Loading model: %s\n", path.c_str());
+    m_Path = path;
 
     Assimp::Importer importer;
 
