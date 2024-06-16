@@ -810,6 +810,8 @@ void Application::SetDisplayMode(const DisplayMode mode)
         Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
 
         // Set the window monitor to the primary monitor
+        glfwSetWindowMonitor(m_Window, nullptr, m_PrimaryMonitor->m_PositionX, m_PrimaryMonitor->m_PositionY,
+            m_PrimaryMonitor->m_Width, m_PrimaryMonitor->m_Height, 0);
         glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
 
         // Resize framebuffer
