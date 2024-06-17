@@ -14,11 +14,6 @@ struct ForceAccumulator
         AccumulatedForces += force;
     }
 
-    void Clear()
-    {
-        AccumulatedForces = glm::vec3(0.0f);
-    }
-
     glm::vec3 AccumulatedForces;
 };
 

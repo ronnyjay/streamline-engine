@@ -30,7 +30,7 @@ struct TransformVector
         return Vector;
     }
 
-    bool Changed = true;
+    bool Changed = false;
 
   private:
     glm::vec3 Vector = glm::vec3(0.0f);

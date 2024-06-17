@@ -92,8 +92,8 @@ void Scene::Update(const float dt)
 
             transform.Position = initialPosition + (k1_p + 2.0f * (k2_p + k3_p) + k4_p) * (dt / 6.0f);
             rigidBody.Velocity = initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f);
-
-            forceAccumulator.Clear();
+            
+            forceAccumulator.AccumulatedForces = glm::vec3(0.0f);
         });
 
     // Propogate transformation updates

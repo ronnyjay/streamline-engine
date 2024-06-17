@@ -1,17 +1,32 @@
 #include <engine/collider/collider.hpp>
 
+#include <glm/ext/scalar_common.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace engine;
 
-AABB::AABB(const glm::vec3 &min, const glm::vec3 &max)
-    : m_Min(min)
-    , m_Max(max)
+AABB::AABB(std::shared_ptr<Model> model)
+    : m_Min(FLT_MAX)
+    , m_Max(-FLT_MAX)
     , m_Colliding(false)
 {
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_EBO);
+
+    for (const auto &mesh : model->GetMeshes())
+    {
+        for (const auto &vertex : mesh.GetVertices())
+        {
+            m_Min = glm::min(m_Min, vertex.Position);
+            m_Max = glm::max(m_Max, vertex.Position);
+        }
+    }
+
+    m_RefMin = m_Min;
+    m_RefMax = m_Max;
+
+    UpdateVertices();
 }
 
 void AABB::Translate(const glm::vec3 &translation)
