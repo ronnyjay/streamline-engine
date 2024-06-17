@@ -25,6 +25,22 @@ struct TransformVector
         return *this;
     }
 
+    TransformVector &operator+=(const glm::vec3 &v)
+    {
+        Vector += v;
+        Changed = true;
+
+        return *this;
+    }
+
+    TransformVector &operator-=(const glm::vec3 &v)
+    {
+        Vector -= v;
+        Changed = true;
+
+        return *this;
+    }
+
     operator glm::vec3() const
     {
         return Vector;

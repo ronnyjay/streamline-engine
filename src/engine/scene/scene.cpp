@@ -12,6 +12,7 @@
 #include <engine/components/parent.hpp>
 #include <engine/components/transform.hpp>
 
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
@@ -92,7 +93,7 @@ void Scene::Update(const float dt)
 
             transform.Position = initialPosition + (k1_p + 2.0f * (k2_p + k3_p) + k4_p) * (dt / 6.0f);
             rigidBody.Velocity = initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f);
-            
+
             forceAccumulator.AccumulatedForces = glm::vec3(0.0f);
         });
 
@@ -131,10 +132,37 @@ void Scene::Update(const float dt)
         if (collisions.find(&boundingComponent) != collisions.end())
         {
             boundingComponent.SetColliding(true);
+
+            if (auto *rigidBody = m_Registry.try_get<RigidBody>(entity))
+            {
+                glm::vec3 relativeVelocity = rigidBody->Velocity;
+
+                if (glm::length(relativeVelocity) > rigidBody->RestitutionThreshold)
+                {
+                    rigidBody->Velocity = -rigidBody->Restituion * relativeVelocity;
+                }
+                else
+                {
+                    rigidBody->Velocity = -rigidBody->Velocity;
+                }
+
+                if (glm::length(rigidBody->Velocity) < 0.01f)
+                {
+                    rigidBody->Velocity = glm::vec3(0.0f);
+                }
+            }
         }
         else
         {
             boundingComponent.SetColliding(false);
+        }
+    }
+
+    for (auto entity : view)
+    {
+        if (view.get<Parent>(entity).Get() == entt::null)
+        {
+            UpdateEntity(entity, glm::mat4(1.0f));
         }
     }
 }
