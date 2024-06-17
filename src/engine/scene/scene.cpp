@@ -1,3 +1,5 @@
+#include "engine/physics/force_accumulator.hpp"
+#include "engine/physics/rigid_body.hpp"
 #include <engine/application/application.hpp>
 #include <engine/collider/collider.hpp>
 #include <engine/entity/entity.hpp>
@@ -12,6 +14,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 using namespace engine;
 
@@ -61,8 +64,38 @@ void Scene::DestroyEntity(const Entity entity)
     Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.Get().c_str());
 }
 
-void Scene::Update(const double deltaTime)
+void Scene::Update(const float dt)
 {
+    m_Registry.view<RigidBody, ForceAccumulator, Transform>().each(
+        [&](RigidBody &rigidBody, ForceAccumulator &forceAccumulator, Transform &transform)
+        {
+            // Apply forces
+            m_ForceGenerator.ApplyForce(rigidBody, forceAccumulator);
+
+            // Integrate
+            glm::vec3 initialPosition = transform.Position;
+            glm::vec3 initialVelocity = rigidBody.Velocity;
+
+            glm::vec3 acceleration = forceAccumulator.AccumulatedForces;
+
+            glm::vec3 k1_p = initialVelocity;
+            glm::vec3 k1_v = acceleration;
+
+            glm::vec3 k2_p = initialVelocity + k1_v * (dt * 0.5f);
+            glm::vec3 k2_v = acceleration;
+
+            glm::vec3 k3_p = initialVelocity + k2_v * (dt * 0.5f);
+            glm::vec3 k3_v = acceleration;
+
+            glm::vec3 k4_p = initialVelocity + k3_v * (dt * 0.5f);
+            glm::vec3 k4_v = acceleration;
+
+            transform.Position = initialPosition + (k1_p + 2.0f * (k2_p + k3_p) + k4_p) * (dt / 6.0f);
+            rigidBody.Velocity = initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f);
+
+            forceAccumulator.Clear();
+        });
+
     // Propogate transformation updates
     auto view = m_Registry.view<Transform, Parent, Children>();
 
@@ -111,26 +144,26 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     auto &transformComponent = m_Registry.get<Transform>(entity);
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
-    auto *modelComponent = m_Registry.try_get<Model>(entity);
+    auto *modelComponent = m_Registry.try_get<std::shared_ptr<Model>>(entity);
     auto *boundingComponent = m_Registry.try_get<AABB>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
 
     if (modelComponent && boundingComponent)
     {
-        if (transformComponent.IsDirty())
+        if (transformComponent.Dirty())
         {
             // Isolate translation
             glm::vec3 boundingTranslation(modelMatrix[3]);
 
-            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
+            if (transformComponent.Rotation.Changed || transformComponent.Scale.Changed)
             {
                 // Remove translation from transform
                 glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
 
                 std::vector<glm::vec3> vertices;
 
-                for (const auto &mesh : modelComponent->GetMeshes())
+                for (const auto &mesh : modelComponent->get()->GetMeshes())
                 {
                     for (const auto &vertex : mesh.GetVertices())
                     {
@@ -151,23 +184,21 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     {
         auto &childTransformComponent = m_Registry.get<Transform>(child);
 
-        if (transformComponent.IsDirty())
+        if (transformComponent.Dirty())
         {
-            childTransformComponent.SetDirty(true);
-
-            if (transformComponent.IsTranslationChanged())
+            if (transformComponent.Position.Changed)
             {
-                childTransformComponent.SetTranslationChanged(true);
+                childTransformComponent.Position.Changed = true;
             }
 
-            if (transformComponent.IsRotationChanged())
+            if (transformComponent.Rotation.Changed)
             {
-                childTransformComponent.SetRotationChanged(true);
+                childTransformComponent.Rotation.Changed = true;
             }
 
-            if (transformComponent.IsScaleChanged())
+            if (transformComponent.Scale.Changed)
             {
-                childTransformComponent.SetScaleChanged(true);
+                childTransformComponent.Scale.Changed = true;
             }
         }
 
@@ -175,24 +206,19 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     }
 
     // Reset flags after updating children
-    if (transformComponent.IsTranslationChanged())
+    if (transformComponent.Position.Changed)
     {
-        transformComponent.SetTranslationChanged(false);
+        transformComponent.Position.Changed = false;
     }
 
-    if (transformComponent.IsRotationChanged())
+    if (transformComponent.Rotation.Changed)
     {
-        transformComponent.SetRotationChanged(false);
+        transformComponent.Rotation.Changed = false;
     }
 
-    if (transformComponent.IsScaleChanged())
+    if (transformComponent.Scale.Changed)
     {
-        transformComponent.SetScaleChanged(false);
-    }
-
-    if (transformComponent.IsDirty())
-    {
-        transformComponent.SetDirty(false);
+        transformComponent.Scale.Changed = false;
     }
 }
 
@@ -215,7 +241,7 @@ void Scene::Draw()
             auto &light = m_Registry.get<Light>(*it_lights);
             auto &pos = m_Registry.get<Transform>(*it_lights);
 
-            selectedLights[i].pos = glm::vec4(pos.GetTranslation(), 1.0f);
+            selectedLights[i].pos = glm::vec4((glm::vec3)pos.Position, 1.0f);
             selectedLights[i].properties = light;
 
             it_lights++;
@@ -302,15 +328,15 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
     auto [identifierComponent, transformComponent, childrenComponent] =
         m_Registry.get<Identifier, Transform, Children>(entity);
 
-    auto translation = transformComponent.GetTranslation();
-    auto rotation = transformComponent.GetRotation();
-    auto scale = transformComponent.GetScale();
+    glm::vec3 position = transformComponent.Position;
+    glm::vec3 rotation = transformComponent.Rotation;
+    glm::vec3 scale = transformComponent.Scale;
 
     if (ImGui::TreeNode(identifierComponent.Get().c_str()))
     {
-        ImGui::DragFloat("Translation X", &translation.x);
-        ImGui::DragFloat("Translation Y", &translation.y);
-        ImGui::DragFloat("Translation Z", &translation.z);
+        ImGui::DragFloat("Position X", &position.x);
+        ImGui::DragFloat("Position Y", &position.y);
+        ImGui::DragFloat("Position Z", &position.z);
         ImGui::DragFloat("Rotation X", &rotation.x);
         ImGui::DragFloat("Rotation Y", &rotation.y);
         ImGui::DragFloat("Rotation Z", &rotation.z);
@@ -331,7 +357,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::TreePop();
     }
 
-    transformComponent.SetTranslation(translation);
-    transformComponent.SetRotation(rotation);
-    transformComponent.SetScale(scale);
+    transformComponent.Position = position;
+    transformComponent.Rotation = rotation;
+    transformComponent.Scale = scale;
 }

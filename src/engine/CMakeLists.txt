@@ -12,6 +12,9 @@ target_sources(engine PRIVATE
     logger/logger.cpp
     mesh/mesh.cpp
     model/model.cpp
+    physics/force_accumulator.cpp
+    physics/force_generator.cpp
+    physics/rigid_body.cpp
     scene/scene.cpp
     shader/shader.cpp
     stb/stb_image.cpp

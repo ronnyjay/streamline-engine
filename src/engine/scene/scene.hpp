@@ -1,11 +1,11 @@
 #pragma once
 
 #include <engine/debug/debuggable.hpp>
+#include <engine/physics/force_generator.hpp>
+
 #include <entt/entity/registry.hpp>
 
 #include <glm/glm.hpp>
-
-#include <unordered_map>
 
 namespace engine
 {
@@ -17,6 +17,7 @@ class Scene : public Debuggable
 {
   public:
     Scene()
+        : m_ForceGenerator(glm::vec3(0.0f, -9.81f, 0.0f))
     {
     }
 
@@ -28,10 +29,12 @@ class Scene : public Debuggable
   private:
     entt::registry m_Registry;
 
+    ConstantForceGenerator m_ForceGenerator;
+
     friend class Application;
     friend class Entity;
 
-    void Update(const double);
+    void Update(const float);
     void UpdateEntity(const entt::entity &, const glm::mat4 &);
 
     void Draw();
