@@ -11,6 +11,13 @@
 namespace engine
 {
 
+struct Collision
+{
+    glm::vec3 Depth;
+    glm::vec3 Normal;
+    bool Collided = false;
+};
+
 class AABB
 {
   public:
@@ -20,7 +27,8 @@ class AABB
     void Update(const std::vector<glm::vec3> &);
     void Draw();
 
-    bool Intersects(const AABB &);
+    // bool Intersects(const AABB &);
+    Collision Intersects(const AABB &);
 
     bool GetColliding() const;
     void SetColliding(const bool);

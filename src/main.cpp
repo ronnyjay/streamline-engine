@@ -65,19 +65,20 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::RigidBody>();
     cube.AddComponent<engine::ForceAccumulator>();
     cube.GetComponent<engine::Transform>().Position = glm::vec3(0.0f, 100.0f, 0.0f);
-    cube.GetComponent<engine::RigidBody>().Mass = 5.0f;
+    cube.GetComponent<engine::RigidBody>().Mass = 10.0f;
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
     torus.AddComponent<engine::AABB>(torusModel);
     torus.AddComponent<engine::RigidBody>();
     torus.AddComponent<engine::ForceAccumulator>();
     torus.GetComponent<engine::Transform>().Position = glm::vec3(-5.0f, 50.0f, 0.0f);
+    torus.GetComponent<engine::RigidBody>().Mass = 5.0f;
 
     pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
     pyramid.AddComponent<engine::AABB>(pyramidModel);
     pyramid.AddComponent<engine::RigidBody>();
     pyramid.AddComponent<engine::ForceAccumulator>();
-    pyramid.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 25.0f, 0.0f);
+    pyramid.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 50.0f, 0.0f);
     pyramid.GetComponent<engine::RigidBody>().Mass = 5.0f;
 
     plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);

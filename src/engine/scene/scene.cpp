@@ -117,10 +117,39 @@ void Scene::Update(const float dt)
             m_Registry.view<AABB>().each(
                 [&](auto entityB, AABB &aabbB)
                 {
-                    if (entityA < entityB && aabbA.Intersects(aabbB))
+                    if (entityA < entityB)
                     {
-                        collisions.insert(&aabbA);
-                        collisions.insert(&aabbB);
+                        Collision collision = aabbA.Intersects(aabbB);
+
+                        if (collision.Collided)
+                        {
+                            collisions.insert(&aabbA);
+                            collisions.insert(&aabbB);
+
+                            if (auto *rigidBody = m_Registry.try_get<RigidBody>(entityA))
+                            {
+                                glm::vec3 relativeVelocity = rigidBody->Velocity;
+
+                                if (glm::length(relativeVelocity) > rigidBody->RestitutionThreshold)
+                                {
+                                    rigidBody->Velocity = -rigidBody->Restituion * relativeVelocity;
+                                }
+                                else
+                                {
+                                    rigidBody->Velocity = -rigidBody->Velocity;
+                                }
+
+                                if (glm::length(rigidBody->Velocity) < 1.0f)
+                                {
+                                    rigidBody->Velocity = glm::vec3(0.0f);
+                                }
+
+                                // Apply correction
+                                Transform &transform = m_Registry.get<Transform>(entityA);
+
+                                transform.Position += collision.Depth * collision.Normal;
+                            }
+                        }
                     }
                 });
         });
@@ -132,37 +161,10 @@ void Scene::Update(const float dt)
         if (collisions.find(&boundingComponent) != collisions.end())
         {
             boundingComponent.SetColliding(true);
-
-            if (auto *rigidBody = m_Registry.try_get<RigidBody>(entity))
-            {
-                glm::vec3 relativeVelocity = rigidBody->Velocity;
-
-                if (glm::length(relativeVelocity) > rigidBody->RestitutionThreshold)
-                {
-                    rigidBody->Velocity = -rigidBody->Restituion * relativeVelocity;
-                }
-                else
-                {
-                    rigidBody->Velocity = -rigidBody->Velocity;
-                }
-
-                if (glm::length(rigidBody->Velocity) < 0.01f)
-                {
-                    rigidBody->Velocity = glm::vec3(0.0f);
-                }
-            }
         }
         else
         {
             boundingComponent.SetColliding(false);
-        }
-    }
-
-    for (auto entity : view)
-    {
-        if (view.get<Parent>(entity).Get() == entt::null)
-        {
-            UpdateEntity(entity, glm::mat4(1.0f));
         }
     }
 }
