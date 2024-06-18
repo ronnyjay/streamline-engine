@@ -95,6 +95,7 @@ void Scene::Update(const float dt)
             rigidBody.Velocity = initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f);
 
             forceAccumulator.AccumulatedForces = glm::vec3(0.0f);
+            rigidBody.Impulse = glm::vec3(0.0f);
         });
 
     // Propogate transformation updates
@@ -123,25 +124,61 @@ void Scene::Update(const float dt)
 
                         if (collision.Collided)
                         {
-                            collisions.insert(&aabbA);
-                            collisions.insert(&aabbB);
+                            auto *rigidBodyA = m_Registry.try_get<RigidBody>(entityA);
+                            auto *rigidBodyB = m_Registry.try_get<RigidBody>(entityB);
+                            auto &transformA = m_Registry.get<Transform>(entityA);
+                            auto &transformB = m_Registry.get<Transform>(entityB);
 
-                            if (auto *rigidBody = m_Registry.try_get<RigidBody>(entityA))
+                            if (rigidBodyA && rigidBodyB)
                             {
-                                glm::vec3 relativeVelocity = rigidBody->Velocity;
+                                glm::vec3 relativeVelocity = rigidBodyB->Velocity - rigidBodyA->Velocity;
 
-                                if (glm::length(relativeVelocity) > rigidBody->RestitutionThreshold)
+                                float e = std::min(rigidBodyA->Restitution, rigidBodyB->Restitution);
+                                float j = -(1 + e) * glm::dot(relativeVelocity, collision.Normal) /
+                                          ((1 / rigidBodyA->Mass) + (1 / rigidBodyB->Mass));
+
+                                glm::vec3 impulse = j * collision.Normal;
+
+                                rigidBodyA->Velocity -= impulse / rigidBodyA->Mass;
+                                rigidBodyB->Velocity += impulse / rigidBodyB->Mass;
+
+                                const float kineticEnergyA = 0.5f * rigidBodyA->Mass *
+                                                             glm::length(rigidBodyA->Velocity) *
+                                                             glm::length(rigidBodyA->Velocity);
+                                const float kineticEnergyB = 0.5f * rigidBodyB->Mass *
+                                                             glm::length(rigidBodyB->Velocity) *
+                                                             glm::length(rigidBodyB->Velocity);
+
+                                if (kineticEnergyA < 1.0f && kineticEnergyB < 1.0f)
                                 {
-                                    rigidBody->Velocity = -rigidBody->Restituion * relativeVelocity;
+                                    rigidBodyA->Velocity = glm::vec3(0);
+                                    rigidBodyB->Velocity = glm::vec3(0);
+                                }
+
+                                float totalInverse = (1 / rigidBodyA->Mass) + (1 / rigidBodyB->Mass);
+
+                                glm::vec3 correcton =
+                                    collision.Normal *
+                                    (collision.Depth / ((1 / rigidBodyA->Mass) + (1 / rigidBodyB->Mass)));
+
+                                transformA.Position += correcton * (1 / rigidBodyB->Mass) * .80f;
+                            }
+                            else
+                            {
+                                glm::vec3 relativeVelocity = rigidBodyA->Velocity;
+
+                                if (glm::length(relativeVelocity) > rigidBodyA->RestitutionThreshold)
+                                {
+                                    rigidBodyA->Velocity = -rigidBodyA->Restitution * relativeVelocity;
                                 }
                                 else
                                 {
-                                    rigidBody->Velocity = -rigidBody->Velocity;
+                                    rigidBodyA->Velocity = -rigidBodyA->Velocity;
                                 }
 
-                                if (glm::length(rigidBody->Velocity) < 1.0f)
+                                if (glm::length(rigidBodyA->Velocity) < 1.0f)
                                 {
-                                    rigidBody->Velocity = glm::vec3(0.0f);
+                                    rigidBodyA->Velocity = glm::vec3(0.0f);
                                 }
 
                                 // Apply correction
@@ -149,6 +186,32 @@ void Scene::Update(const float dt)
 
                                 transform.Position += collision.Depth * collision.Normal;
                             }
+
+                            // if (auto *rigidBody = m_Registry.try_get<RigidBody>(entityA))
+                            // {
+                            //     glm::vec3 relativeVelocity = rigidBody->Velocity;
+
+                            //     if (glm::length(relativeVelocity) > rigidBody->RestitutionThreshold)
+                            //     {
+                            //         rigidBody->Velocity = -rigidBody->Restitution * relativeVelocity;
+                            //     }
+                            //     else
+                            //     {
+                            //         rigidBody->Velocity = -rigidBody->Velocity;
+                            //     }
+
+                            //     if (glm::length(rigidBody->Velocity) < 1.0f)
+                            //     {
+                            //         rigidBody->Velocity = glm::vec3(0.0f);
+                            //     }
+
+                            //     // Apply correction
+                            //     Transform &transform = m_Registry.get<Transform>(entityA);
+
+                            //     transform.Position += collision.Depth * collision.Normal;
+                            // }
+                            collisions.insert(&aabbA);
+                            collisions.insert(&aabbB);
                         }
                     }
                 });

@@ -11,11 +11,11 @@ struct RigidBody
     RigidBody(const RigidBody &) = default;
 
     float Mass;
-    float Restituion;
+    float Restitution;
     float RestitutionThreshold;
 
     glm::vec3 Velocity;
-    glm::vec3 AngularVelocity;
+    glm::vec3 Impulse;
 };
 
 } // namespace engine
