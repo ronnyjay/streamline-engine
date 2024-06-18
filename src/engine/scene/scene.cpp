@@ -161,7 +161,8 @@ void Scene::Update(const float dt)
                                     collision.Normal *
                                     (collision.Depth / ((1 / rigidBodyA->Mass) + (1 / rigidBodyB->Mass)));
 
-                                transformA.Position += correcton * (1 / rigidBodyB->Mass) * .80f;
+                                transformA.Position += correcton * (1 / rigidBodyB->Mass) * 0.70f;
+                                transformB.Position -= correcton * (1 / rigidBodyA->Mass) * 0.70f;
                             }
                             else if (rigidBodyA)
                             {

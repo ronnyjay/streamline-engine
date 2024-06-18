@@ -64,7 +64,7 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
     cube.AddComponent<engine::ForceAccumulator>();
-    cube.GetComponent<engine::Transform>().Position = glm::vec3(-5.0f, 200.0f, 0.0f);
+    cube.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 200.0f, 0.0f);
     cube.GetComponent<engine::RigidBody>().Mass = 10.0f;
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
