@@ -39,8 +39,8 @@ int main(int argc, char const *argv[])
 
     auto backpack = scene.get()->CreateEntity("Backpack");
     auto cube = scene.get()->CreateEntity("Cube");
-    auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
+    auto torus = scene.get()->CreateEntity("Torus");
     auto plane = scene.get()->CreateEntity("Plane");
     auto light1 = scene.get()->CreateEntity("Light Source");
     auto light2 = scene.get()->CreateEntity("Light Source 2");
@@ -64,7 +64,7 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
     cube.AddComponent<engine::ForceAccumulator>();
-    cube.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 200.0f, 0.0f);
+    cube.GetComponent<engine::Transform>().Position = glm::vec3(-5.0f, 200.0f, 0.0f);
     cube.GetComponent<engine::RigidBody>().Mass = 10.0f;
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
@@ -79,7 +79,7 @@ int main(int argc, char const *argv[])
     pyramid.AddComponent<engine::RigidBody>();
     pyramid.AddComponent<engine::ForceAccumulator>();
     pyramid.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 100.0f, 0.0f);
-    pyramid.GetComponent<engine::RigidBody>().Mass = 2.0f;
+    pyramid.GetComponent<engine::RigidBody>().Mass = 3.0f;
 
     plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
     plane.AddComponent<engine::AABB>(planeModel);

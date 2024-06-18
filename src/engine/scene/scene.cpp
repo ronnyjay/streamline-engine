@@ -118,7 +118,7 @@ void Scene::Update(const float dt)
             m_Registry.view<AABB>().each(
                 [&](auto entityB, AABB &aabbB)
                 {
-                    if (entityA < entityB)
+                    if (entityA != entityB)
                     {
                         Collision collision = aabbA.Intersects(aabbB);
 
@@ -163,7 +163,7 @@ void Scene::Update(const float dt)
 
                                 transformA.Position += correcton * (1 / rigidBodyB->Mass) * .80f;
                             }
-                            else
+                            else if (rigidBodyA)
                             {
                                 glm::vec3 relativeVelocity = rigidBodyA->Velocity;
 
@@ -187,29 +187,6 @@ void Scene::Update(const float dt)
                                 transform.Position += collision.Depth * collision.Normal;
                             }
 
-                            // if (auto *rigidBody = m_Registry.try_get<RigidBody>(entityA))
-                            // {
-                            //     glm::vec3 relativeVelocity = rigidBody->Velocity;
-
-                            //     if (glm::length(relativeVelocity) > rigidBody->RestitutionThreshold)
-                            //     {
-                            //         rigidBody->Velocity = -rigidBody->Restitution * relativeVelocity;
-                            //     }
-                            //     else
-                            //     {
-                            //         rigidBody->Velocity = -rigidBody->Velocity;
-                            //     }
-
-                            //     if (glm::length(rigidBody->Velocity) < 1.0f)
-                            //     {
-                            //         rigidBody->Velocity = glm::vec3(0.0f);
-                            //     }
-
-                            //     // Apply correction
-                            //     Transform &transform = m_Registry.get<Transform>(entityA);
-
-                            //     transform.Position += collision.Depth * collision.Normal;
-                            // }
                             collisions.insert(&aabbA);
                             collisions.insert(&aabbB);
                         }
