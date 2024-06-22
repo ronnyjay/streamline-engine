@@ -63,46 +63,46 @@ void AABB::Draw()
     glBindVertexArray(0);
 }
 
-// bool AABB::Intersects(const AABB &other)
-// {
-//     return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) &&
-//            (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
-//            (m_Min.z <= other.m_Max.z && m_Max.z >= other.m_Min.z);
-// }
-
-Collision AABB::Intersects(const AABB &other)
+bool AABB::Intersects(const AABB &other)
 {
-    Collision collision;
-
-    glm::vec3 halfExtentsA = (m_Max - m_Min) * 0.5f;
-    glm::vec3 halfExtentsB = (other.m_Max - other.m_Min) * 0.5f;
-    glm::vec3 centerA = (m_Max + m_Min) * 0.5f;
-    glm::vec3 centerB = (other.m_Max + other.m_Min) * 0.5f;
-    glm::vec3 delta = (centerB - centerA);
-    glm::vec3 overlap = halfExtentsA + halfExtentsB - glm::abs(delta);
-
-    if (overlap.x > 0 && overlap.y > 0 && overlap.z > 0)
-    {
-        collision.Depth = overlap;
-
-        if (overlap.x < overlap.y && overlap.x < overlap.z)
-        {
-            collision.Normal = glm::vec3((delta.x > 0) ? -1.0f : 1.0f, 0.0f, 0.0f);
-        }
-        else if (overlap.y < overlap.x && overlap.y < overlap.z)
-        {
-            collision.Normal = glm::vec3(0.0f, (delta.y > 0) ? -1.0f : 1.0f, 0.0f);
-        }
-        else
-        {
-            collision.Normal = glm::vec3(0.0f, 0.0f, (delta.z > 0) ? -1.0f : 1.0f);
-        }
-
-        collision.Collided = true;
-    }
-
-    return collision;
+    return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) &&
+           (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
+           (m_Min.z <= other.m_Max.z && m_Max.z >= other.m_Min.z);
 }
+
+// Collision AABB::Intersects(const AABB &other)
+// {
+//     Collision collision;
+
+//     glm::vec3 halfExtentsA = (m_Max - m_Min) * 0.5f;
+//     glm::vec3 halfExtentsB = (other.m_Max - other.m_Min) * 0.5f;
+//     glm::vec3 centerA = (m_Max + m_Min) * 0.5f;
+//     glm::vec3 centerB = (other.m_Max + other.m_Min) * 0.5f;
+//     glm::vec3 delta = (centerB - centerA);
+//     glm::vec3 overlap = halfExtentsA + halfExtentsB - glm::abs(delta);
+
+//     if (overlap.x > 0 && overlap.y > 0 && overlap.z > 0)
+//     {
+//         collision.Depth = overlap;
+
+//         if (overlap.x < overlap.y && overlap.x < overlap.z)
+//         {
+//             collision.Normal = glm::vec3((delta.x > 0) ? -1.0f : 1.0f, 0.0f, 0.0f);
+//         }
+//         else if (overlap.y < overlap.x && overlap.y < overlap.z)
+//         {
+//             collision.Normal = glm::vec3(0.0f, (delta.y > 0) ? -1.0f : 1.0f, 0.0f);
+//         }
+//         else
+//         {
+//             collision.Normal = glm::vec3(0.0f, 0.0f, (delta.z > 0) ? -1.0f : 1.0f);
+//         }
+
+//         collision.Collided = true;
+//     }
+
+//     return collision;
+// }
 
 bool AABB::GetColliding() const
 {

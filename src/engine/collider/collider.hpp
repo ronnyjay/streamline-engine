@@ -27,8 +27,18 @@ class AABB
     void Update(const std::vector<glm::vec3> &);
     void Draw();
 
-    // bool Intersects(const AABB &);
-    Collision Intersects(const AABB &);
+    bool Intersects(const AABB &);
+    // Collision Intersects(const AABB &);
+
+    glm::vec3 const &Min() const
+    {
+        return m_Min;
+    }
+
+    glm::vec3 const &Max() const
+    {
+        return m_Max;
+    }
 
     bool GetColliding() const;
     void SetColliding(const bool);
