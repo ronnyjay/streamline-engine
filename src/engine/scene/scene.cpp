@@ -18,7 +18,6 @@
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -82,8 +81,8 @@ void Scene::Update(const float dt)
             m_ForceGenerator.ApplyForce(rigidBody, forceAccumulator);
 
             // Integrate
-            glm::vec3 initialPosition = transform.Position;
-            glm::vec3 initialVelocity = rigidBody.Velocity;
+            glm::vec3 initialPosition = transform.GetPosition();
+            glm::vec3 initialVelocity = rigidBody.GetLinearVelocity();
 
             glm::vec3 acceleration = forceAccumulator.AccumulatedForces;
 
@@ -99,11 +98,10 @@ void Scene::Update(const float dt)
             glm::vec3 k4_p = initialVelocity + k3_v * (dt * 0.5f);
             glm::vec3 k4_v = acceleration;
 
-            transform.Position = initialPosition + (k1_p + 2.0f * (k2_p + k3_p) + k4_p) * (dt / 6.0f);
-            rigidBody.Velocity = initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f);
+            transform.SetPosition(initialPosition + (k1_p + 2.0f * (k2_p + k3_p) + k4_p) * (dt / 6.0f));
+            rigidBody.SetLinearVelocity(initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f));
 
             forceAccumulator.AccumulatedForces = glm::vec3(0.0f);
-            rigidBody.Impulse = glm::vec3(0.0f);
         });
 
     // Propogate transformation updates
@@ -179,43 +177,35 @@ void Scene::Update(const float dt)
 
         if (bodyA && bodyB)
         {
-            float inverseMassA = 1 / bodyA->Mass;
-            float inverseMassB = 1 / bodyB->Mass;
+            float totalMass = bodyA->GetInverseMass() + bodyB->GetInverseMass();
 
-            float totalMass = inverseMassA + inverseMassB;
+            transformA.SetPosition(
+                transformA.GetPosition() - collisionNormal * collisionDepth * (bodyA->GetInverseMass() / totalMass));
 
-            transformA.Position -= collisionNormal * collisionDepth * (inverseMassA / totalMass);
-            transformB.Position += collisionNormal * collisionDepth * (inverseMassB / totalMass);
+            transformB.SetPosition(
+                transformB.GetPosition() + collisionNormal * collisionDepth * (bodyB->GetInverseMass() / totalMass));
 
-            glm::vec3 contactVelocity = bodyB->Velocity - bodyA->Velocity;
+            glm::vec3 contactVelocity = bodyB->GetLinearVelocity() - bodyA->GetLinearVelocity();
 
-            float e = (bodyA->Restitution + bodyB->Restitution) * 0.5f;
+            float e = (bodyA->GetRestitution() + bodyB->GetRestitution()) * 0.5f;
             float j = (-(1.0f + e) * glm::dot(contactVelocity, collisionNormal)) / totalMass;
 
-            glm::vec3 impulse = collisionNormal * j;
+            glm::vec3 fullImpulse = collisionNormal * j;
 
-            bodyA->Velocity -= impulse * inverseMassA;
-            bodyB->Velocity += impulse * inverseMassB;
+            bodyA->ApplyLinearImpulse(-fullImpulse);
+            bodyB->ApplyLinearImpulse(fullImpulse);
         }
         else if (bodyB)
         {
-            glm::vec3 relativeVelocity = bodyB->Velocity;
+            transformB.SetPosition(
+                transformB.GetPosition() + collisionNormal * collisionDepth * bodyB->GetInverseMass());
 
-            if (glm::length(relativeVelocity) > bodyB->RestitutionThreshold)
-            {
-                bodyB->Velocity = -bodyB->Restitution * relativeVelocity;
-            }
-            else
-            {
-                bodyB->Velocity = -bodyB->Velocity;
-            }
+            float e = bodyB->GetRestitution();
+            float j = (-(1.0f + e) * glm::dot(bodyB->GetLinearVelocity(), collisionNormal));
 
-            if (glm::length(bodyB->Velocity) < 1.0f)
-            {
-                bodyB->Velocity = glm::vec3(0.0f);
-            }
+            glm::vec3 fullImpulse = collisionNormal * j;
 
-            transformB.Position += collisionDepth * collisionNormal;
+            bodyB->ApplyLinearImpulse(fullImpulse);
         }
     }
 }
@@ -232,12 +222,12 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 
     if (modelComponent && boundingComponent)
     {
-        if (transformComponent.Dirty())
+        if (transformComponent.IsDirty())
         {
             // Isolate translation
             glm::vec3 boundingTranslation(modelMatrix[3]);
 
-            if (transformComponent.Rotation.Changed || transformComponent.Scale.Changed)
+            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
             {
                 // Remove translation from transform
                 glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
@@ -265,21 +255,21 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     {
         auto &childTransformComponent = m_Registry.get<Transform>(child);
 
-        if (transformComponent.Dirty())
+        if (transformComponent.IsDirty())
         {
-            if (transformComponent.Position.Changed)
+            if (transformComponent.IsPositionChanged())
             {
-                childTransformComponent.Position.Changed = true;
+                childTransformComponent.SetTranslationChanged(true);
             }
 
-            if (transformComponent.Rotation.Changed)
+            if (transformComponent.IsRotationChanged())
             {
-                childTransformComponent.Rotation.Changed = true;
+                childTransformComponent.SetRotationChanged(true);
             }
 
-            if (transformComponent.Scale.Changed)
+            if (transformComponent.IsScaleChanged())
             {
-                childTransformComponent.Scale.Changed = true;
+                childTransformComponent.SetScaleChanged(true);
             }
         }
 
@@ -287,19 +277,19 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     }
 
     // Reset flags after updating children
-    if (transformComponent.Position.Changed)
+    if (transformComponent.IsPositionChanged())
     {
-        transformComponent.Position.Changed = false;
+        transformComponent.SetTranslationChanged(false);
     }
 
-    if (transformComponent.Rotation.Changed)
+    if (transformComponent.IsRotationChanged())
     {
-        transformComponent.Rotation.Changed = false;
+        transformComponent.SetRotationChanged(false);
     }
 
-    if (transformComponent.Scale.Changed)
+    if (transformComponent.IsScaleChanged())
     {
-        transformComponent.Scale.Changed = false;
+        transformComponent.SetScaleChanged(false);
     }
 }
 
@@ -322,7 +312,7 @@ void Scene::Draw()
             auto &light = m_Registry.get<Light>(*it_lights);
             auto &pos = m_Registry.get<Transform>(*it_lights);
 
-            selectedLights[i].pos = glm::vec4((glm::vec3)pos.Position, 1.0f);
+            selectedLights[i].pos = glm::vec4((glm::vec3)pos.GetPosition(), 1.0f);
             selectedLights[i].properties = light;
 
             it_lights++;
@@ -409,9 +399,9 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
     auto [identifierComponent, transformComponent, childrenComponent] =
         m_Registry.get<Identifier, Transform, Children>(entity);
 
-    glm::vec3 position = transformComponent.Position;
-    glm::vec3 rotation = transformComponent.Rotation;
-    glm::vec3 scale = transformComponent.Scale;
+    glm::vec3 position = transformComponent.GetPosition();
+    glm::vec3 rotation = transformComponent.GetRotation();
+    glm::vec3 scale = transformComponent.GetScale();
 
     if (ImGui::TreeNode(identifierComponent.Get().c_str()))
     {
@@ -438,7 +428,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::TreePop();
     }
 
-    transformComponent.Position = position;
-    transformComponent.Rotation = rotation;
-    transformComponent.Scale = scale;
+    transformComponent.SetPosition(position);
+    transformComponent.SetRotation(rotation);
+    transformComponent.SetScale(scale);
 }

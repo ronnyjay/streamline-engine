@@ -5,17 +5,35 @@
 namespace engine
 {
 
-struct RigidBody
+class RigidBody
 {
+  public:
     RigidBody();
     RigidBody(const RigidBody &) = default;
 
-    float Mass;
-    float Restitution;
-    float RestitutionThreshold;
+    float GetMass() const;
+    float GetInverseMass() const;
 
-    glm::vec3 Velocity;
-    glm::vec3 Impulse;
+    float GetRestitution() const;
+
+    glm::vec3 const &GetLinearVelocity() const;
+    glm::vec3 const &GetAngularVelocity() const;
+
+    void SetMass(const float);
+    void SetRestitution(const float);
+
+    void SetLinearVelocity(const glm::vec3 &);
+    void SetAngularVelocity(const glm::vec3 &);
+
+    void ApplyLinearImpulse(const glm::vec3 &);
+    void ApplyAngularImpulse(const glm::vec3 &);
+
+  private:
+    float m_Mass;
+    float m_Restitution;
+
+    glm::vec3 m_LinearVelocity;
+    glm::vec3 m_AngularVelocity;
 };
 
 } // namespace engine

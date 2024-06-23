@@ -7,79 +7,118 @@
 namespace engine
 {
 
-struct TransformVector
-{
-    TransformVector(const float scalar)
-        : Vector(scalar)
-    {
-    }
-
-    TransformVector &operator=(const glm::vec3 &v)
-    {
-        if (Vector != v)
-        {
-            Vector = v;
-            Changed = true;
-        }
-
-        return *this;
-    }
-
-    TransformVector &operator+=(const glm::vec3 &v)
-    {
-        Vector += v;
-        Changed = true;
-
-        return *this;
-    }
-
-    TransformVector &operator-=(const glm::vec3 &v)
-    {
-        Vector -= v;
-        Changed = true;
-
-        return *this;
-    }
-
-    operator glm::vec3() const
-    {
-        return Vector;
-    }
-
-    bool Changed = false;
-
-  private:
-    glm::vec3 Vector = glm::vec3(0.0f);
-};
-
 class Transform
 {
   public:
     Transform()
-        : Position(0.0f)
-        , Rotation(0.0f)
-        , Scale(1.0f)
+        : m_Position(0.0f)
+        , m_Rotation(0.0f)
+        , m_Scale(1.0f)
     {
     }
 
     Transform(const Transform &) = default;
 
+    const glm::vec3 &GetPosition() const
+    {
+        return m_Position;
+    }
+
+    const glm::vec3 &GetRotation() const
+    {
+        return m_Rotation;
+    }
+
+    const glm::vec3 &GetScale() const
+    {
+        return m_Scale;
+    }
+
+    void SetPosition(const glm::vec3 &translation)
+    {
+        if (translation != m_Position)
+        {
+            m_Position = translation;
+            m_Dirty = true;
+            m_TranslationChanged = true;
+        }
+    }
+
+    void SetRotation(const glm::vec3 &rotation)
+    {
+        if (rotation != m_Rotation)
+        {
+            m_Rotation = rotation;
+            m_Dirty = true;
+            m_RotationChanged = true;
+        }
+    }
+
+    void SetScale(const glm::vec3 &scale)
+    {
+        if (scale != m_Scale)
+        {
+            m_Scale = scale;
+            m_Dirty = true;
+            m_ScaleChanged = true;
+        }
+    }
+
+    bool IsPositionChanged()
+    {
+        return m_TranslationChanged;
+    }
+
+    bool IsRotationChanged() const
+    {
+        return m_RotationChanged;
+    }
+
+    bool IsScaleChanged() const
+    {
+        return m_ScaleChanged;
+    }
+
+    bool IsDirty() const
+    {
+        return m_Dirty;
+    }
+
+    void SetTranslationChanged(const bool changed)
+    {
+        m_TranslationChanged = changed;
+    }
+
+    void SetRotationChanged(const bool changed)
+    {
+        m_RotationChanged = changed;
+    }
+
+    void SetScaleChanged(const bool changed)
+    {
+        m_ScaleChanged = changed;
+    }
+
+    void SetDirty(const bool dirty)
+    {
+        m_Dirty = dirty;
+    }
+
     const glm::mat4 GetTransform() const
     {
-        return glm::translate(glm::mat4(1.0f), (glm::vec3)Position) * glm::toMat4(glm::quat((glm::vec3)Rotation)) *
-               glm::scale(glm::mat4(1.0f), glm::vec3(Scale));
+        return glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(glm::quat(m_Rotation)) *
+               glm::scale(glm::mat4(1.0f), m_Scale);
     }
-
-    bool Dirty() const
-    {
-        return Position.Changed || Rotation.Changed || Scale.Changed;
-    }
-
-    TransformVector Position;
-    TransformVector Rotation;
-    TransformVector Scale;
 
   private:
+    glm::vec3 m_Position;
+    glm::vec3 m_Rotation;
+    glm::vec3 m_Scale;
+
+    bool m_Dirty = true;
+    bool m_TranslationChanged = true;
+    bool m_RotationChanged = true;
+    bool m_ScaleChanged = true;
 };
 
 }; // namespace engine

@@ -64,38 +64,35 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
     cube.AddComponent<engine::ForceAccumulator>();
-    cube.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 200.0f, 0.0f);
-    cube.GetComponent<engine::RigidBody>().Mass = 10.0f;
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 200.0f, 0.0f));
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
     torus.AddComponent<engine::AABB>(torusModel);
     torus.AddComponent<engine::RigidBody>();
     torus.AddComponent<engine::ForceAccumulator>();
-    torus.GetComponent<engine::Transform>().Position = glm::vec3(0.0f, 50.0f, 0.0f);
-    torus.GetComponent<engine::RigidBody>().Mass = 2.0f;
+    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 50.0f, 0.0f));
 
     pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
     pyramid.AddComponent<engine::AABB>(pyramidModel);
     pyramid.AddComponent<engine::RigidBody>();
     pyramid.AddComponent<engine::ForceAccumulator>();
-    pyramid.GetComponent<engine::Transform>().Position = glm::vec3(5.0f, 100.0f, 0.0f);
-    pyramid.GetComponent<engine::RigidBody>().Mass = 3.0f;
+    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 100.0f, 0.0f));
 
     plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
     plane.AddComponent<engine::AABB>(planeModel);
-    plane.GetComponent<engine::Transform>().Position = glm::vec3(0.0f, 0.0f, 0.0f);
+    plane.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 
     light1.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light1.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
-    light1.GetComponent<engine::Transform>().Position = glm::vec3(-10.0f, 15.0f, 0.0f);
+    light1.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 15.0f, 0.0f));
 
     light2.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light2.AddComponent<engine::Light>(glm::vec4(0.0, 1.0, 0.0, 1.0));
-    light2.GetComponent<engine::Transform>().Position = glm::vec3(1.0f, -20.0f, 0.0f);
+    light2.GetComponent<engine::Transform>().SetPosition(glm::vec3(1.0f, -15.0f, 0.0f));
 
     light3.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light3.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
-    light3.GetComponent<engine::Transform>().Position = glm::vec3(10.0f, 15.0f, 0.0f);
+    light3.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 15.0f, 0.0f));
 
     application.ShowCollisions(true);
 
