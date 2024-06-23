@@ -19,6 +19,8 @@ class RigidBody
     glm::vec3 const &GetLinearVelocity() const;
     glm::vec3 const &GetAngularVelocity() const;
 
+    glm::mat3 const &GetInertiaTensor() const;
+
     void SetMass(const float);
     void SetRestitution(const float);
 
@@ -32,8 +34,11 @@ class RigidBody
     float m_Mass;
     float m_Restitution;
 
+    glm::vec3 m_Torque;
     glm::vec3 m_LinearVelocity;
     glm::vec3 m_AngularVelocity;
+
+    mutable glm::mat3 m_IntertiaTensor;
 };
 
 } // namespace engine

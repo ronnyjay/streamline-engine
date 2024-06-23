@@ -33,15 +33,17 @@ int main(int argc, char const *argv[])
     application.BindMovementKey(GLFW_KEY_SPACE, engine::Direction::Up);
     application.BindMovementKey(GLFW_KEY_LEFT_SHIFT, engine::Direction::Down);
 
-    perspectiveCamera->SetPosition(glm::vec3(-3.337f, -0.900f, -45.0f));
+    perspectiveCamera->SetPosition(glm::vec3(-3.337f, 2.900f, -45.0f));
     perspectiveCamera->SetYaw(95.0f);
-    perspectiveCamera->SetPitch(17.0f);
+    perspectiveCamera->SetPitch(0.0f);
 
     auto backpack = scene.get()->CreateEntity("Backpack");
     auto cube = scene.get()->CreateEntity("Cube");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
     auto torus = scene.get()->CreateEntity("Torus");
     auto plane = scene.get()->CreateEntity("Plane");
+    auto plane2 = scene.get()->CreateEntity("Plane2");
+    auto plane3 = scene.get()->CreateEntity("Plane3");
     auto light1 = scene.get()->CreateEntity("Light Source");
     auto light2 = scene.get()->CreateEntity("Light Source 2");
     auto light3 = scene.get()->CreateEntity("Light Source 3");
@@ -64,23 +66,34 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
     cube.AddComponent<engine::ForceAccumulator>();
-    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 200.0f, 0.0f));
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(3.5f, 200.0f, 0.0f));
+    cube.GetComponent<engine::RigidBody>().SetMass(5.0f);
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
     torus.AddComponent<engine::AABB>(torusModel);
     torus.AddComponent<engine::RigidBody>();
     torus.AddComponent<engine::ForceAccumulator>();
-    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 50.0f, 0.0f));
+    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
 
     pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
     pyramid.AddComponent<engine::AABB>(pyramidModel);
     pyramid.AddComponent<engine::RigidBody>();
     pyramid.AddComponent<engine::ForceAccumulator>();
-    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 100.0f, 0.0f));
+    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 10.0f, 0.0f));
 
     plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
     plane.AddComponent<engine::AABB>(planeModel);
     plane.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    plane2.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
+    plane2.AddComponent<engine::AABB>(planeModel);
+    plane2.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
+    plane2.GetComponent<engine::Transform>().SetRotation(glm::vec3(0.0f, 0.0f, 1.65f));
+
+    plane3.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
+    plane3.AddComponent<engine::AABB>(planeModel);
+    plane3.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
+    plane3.GetComponent<engine::Transform>().SetRotation(glm::vec3(0.0f, 0.0f, -1.65f));
 
     light1.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light1.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
@@ -94,7 +107,7 @@ int main(int argc, char const *argv[])
     light3.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
     light3.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 15.0f, 0.0f));
 
-    application.ShowCollisions(true);
+    application.ShowCollisions(false);
 
     application.Run();
 
