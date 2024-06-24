@@ -10,6 +10,7 @@
 #include <engine/physics/force_accumulator.hpp>
 #include <engine/physics/rigid_body.hpp>
 #include <memory>
+#include <string>
 
 engine::Application application(800, 600, "Streamline Engine");
 
@@ -66,7 +67,7 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
     cube.AddComponent<engine::ForceAccumulator>();
-    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(3.5f, 200.0f, 0.0f));
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(3.5f, 50.0f, 0.0f));
     cube.GetComponent<engine::RigidBody>().SetMass(5.0f);
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
@@ -88,12 +89,12 @@ int main(int argc, char const *argv[])
     plane2.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
     plane2.AddComponent<engine::AABB>(planeModel);
     plane2.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
-    plane2.GetComponent<engine::Transform>().SetRotation(glm::vec3(0.0f, 0.0f, 1.65f));
+    plane2.GetComponent<engine::Transform>().SetRotation(glm::vec3(0.0f, 0.0f, 1.57f));
 
     plane3.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
     plane3.AddComponent<engine::AABB>(planeModel);
     plane3.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
-    plane3.GetComponent<engine::Transform>().SetRotation(glm::vec3(0.0f, 0.0f, -1.65f));
+    plane3.GetComponent<engine::Transform>().SetRotation(glm::vec3(0.0f, 0.0f, -1.57f));
 
     light1.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     light1.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));

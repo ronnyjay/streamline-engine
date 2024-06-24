@@ -10,7 +10,7 @@ ConstantForceGenerator::ConstantForceGenerator(const glm::vec3 &force)
 
 void ConstantForceGenerator::ApplyForce(const RigidBody &body, ForceAccumulator &accumulator)
 {
-    accumulator.AddForce(m_Force * body.GetMass());
+    accumulator.AddForce(m_Force * body.GetInverseMass());
 }
 
 } // namespace engine

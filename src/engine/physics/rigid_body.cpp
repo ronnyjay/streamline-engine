@@ -11,7 +11,7 @@ RigidBody::RigidBody()
     , m_Torque(0.0f)
     , m_LinearVelocity(0.0f)
     , m_AngularVelocity(0.0f)
-    , m_IntertiaTensor(0.0f)
+    , m_InertiaTensor(0.0f)
 {
 }
 
@@ -50,11 +50,27 @@ glm::mat3 const &RigidBody::GetInertiaTensor() const
     float Iyy = (1.0f / 12.0f) * m_Mass * (w2 + d2);
     float Izz = (1.0f / 12.0f) * m_Mass * (w2 + h2);
 
-    m_IntertiaTensor[0][0] = Ixx;
-    m_IntertiaTensor[1][1] = Iyy;
-    m_IntertiaTensor[2][2] = Izz;
+    m_InertiaTensor[0][0] = Ixx;
+    m_InertiaTensor[1][1] = Iyy;
+    m_InertiaTensor[2][2] = Izz;
 
-    return m_IntertiaTensor;
+    // float width = 4.0f;  // Width of the pyramid base
+    // float height = 4.0f; // Height of the pyramid
+    // float depth = 4.0f;  // Depth of the pyramid base
+
+    // float w2 = width * width;
+    // float h2 = height * height;
+    // float d2 = depth * depth;
+
+    // float Ixx = (1.0f / 20.0f) * m_Mass * (h2 + (w2 / 4.0f));
+    // float Iyy = (1.0f / 20.0f) * m_Mass * (h2 + (d2 / 4.0f));
+    // float Izz = (1.0f / 10.0f) * m_Mass * ((w2 / 4.0f) + (d2 / 4.0f));
+
+    // m_InertiaTensor[0][0] = Ixx;
+    // m_InertiaTensor[1][1] = Iyy;
+    // m_InertiaTensor[2][2] = Izz;
+
+    return m_InertiaTensor;
 }
 
 void RigidBody::SetMass(const float mass)

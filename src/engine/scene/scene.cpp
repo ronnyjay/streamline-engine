@@ -1,6 +1,7 @@
 #include "engine/physics/force_accumulator.hpp"
 #include "engine/physics/rigid_body.hpp"
 #include "entt/entity/fwd.hpp"
+#include <cmath>
 #include <cstddef>
 #include <engine/application/application.hpp>
 #include <engine/collider/collider.hpp>
@@ -79,14 +80,14 @@ void Scene::Update(const float dt)
     m_Registry.view<RigidBody, ForceAccumulator, Transform>().each(
         [&](RigidBody &rigidBody, ForceAccumulator &forceAccumulator, Transform &transform)
         {
-            // Apply forces
-            m_ForceGenerator.ApplyForce(rigidBody, forceAccumulator);
+            float dampingFactor = 1.0f - 0.95f;
+            float frameDamping = std::pow(dampingFactor, dt);
 
-            // Integrate
+            // Integrate linear velocity
             glm::vec3 initialPosition = transform.GetPosition();
             glm::vec3 initialVelocity = rigidBody.GetLinearVelocity();
 
-            glm::vec3 acceleration = forceAccumulator.AccumulatedForces;
+            glm::vec3 acceleration = forceAccumulator.AccumulatedForces + glm::vec3(0.0f, -9.81f, 0.0f);
 
             glm::vec3 k1_p = initialVelocity;
             glm::vec3 k1_v = acceleration;
@@ -103,7 +104,7 @@ void Scene::Update(const float dt)
             transform.SetPosition(initialPosition + (k1_p + 2.0f * (k2_p + k3_p) + k4_p) * (dt / 6.0f));
             rigidBody.SetLinearVelocity(initialVelocity + (k1_v + 2.0f * (k2_v + k3_v) + k4_v) * (dt / 6.0f));
 
-            // Integrate angular components
+            // Integrate angular velocity
             glm::vec3 initialAngularVelocity = rigidBody.GetAngularVelocity();
             glm::vec3 angularAcceleration = glm::vec3(0.0f);
 
@@ -121,7 +122,7 @@ void Scene::Update(const float dt)
 
             transform.SetRotation(transform.GetRotation() + (initialAngularVelocity * dt));
             rigidBody.SetAngularVelocity(initialAngularVelocity + (k1_w + 2.0f * (k2_w + k3_w) + k4_w) * (dt / 6.0f));
-            rigidBody.SetAngularVelocity(rigidBody.GetAngularVelocity() * 0.99f);
+            rigidBody.SetAngularVelocity(rigidBody.GetAngularVelocity() * frameDamping);
 
             forceAccumulator.AccumulatedForces = glm::vec3(0.0f);
         });
@@ -218,9 +219,6 @@ void Scene::Update(const float dt)
                 transformB.GetPosition() +
                 collisionNormal * collisionPenetration * (bodyB->GetInverseMass() / totalMass));
 
-            // glm::vec3 relativePositionA = collisionPosition - transformA.GetPosition();
-            // glm::vec3 relativePositionB = collisionPosition - transformB.GetPosition();
-
             glm::vec3 relativeVelocityA = collisionPosition - transformA.GetPosition();
             glm::vec3 relativeVelocityB = collisionPosition - transformB.GetPosition();
 
@@ -235,7 +233,7 @@ void Scene::Update(const float dt)
             float impulseForce = glm::dot(contactVelocity, collisionNormal);
 
             glm::vec3 inertiaA = glm::cross(
-                bodyA->GetInertiaTensor() * glm::cross(relativeVelocityA, collisionNormal), relativeVelocityA);
+                (bodyA->GetInertiaTensor()) * glm::cross(relativeVelocityA, collisionNormal), relativeVelocityA);
 
             glm::vec3 inertiaB = glm::cross(
                 bodyB->GetInertiaTensor() * glm::cross(relativeVelocityB, collisionNormal), relativeVelocityB);
@@ -257,12 +255,23 @@ void Scene::Update(const float dt)
             transformB.SetPosition(
                 transformB.GetPosition() + collisionNormal * collisionPenetration * bodyB->GetInverseMass());
 
+            glm::vec3 relativeVelocityB = collisionPosition - transformB.GetPosition();
+            glm::vec3 angularVelocityB = glm::cross(bodyB->GetAngularVelocity(), relativeVelocityB);
+            glm::vec3 fullVelocityB = bodyB->GetLinearVelocity() + angularVelocityB;
+
+            float impulseForce = glm::dot(fullVelocityB, collisionNormal);
+
+            glm::vec3 inertiaB = glm::cross(
+                bodyB->GetInertiaTensor() * glm::cross(relativeVelocityB, collisionNormal), relativeVelocityB);
+
+            float a = glm::dot(inertiaB, collisionNormal);
             float e = bodyB->GetRestitution();
-            float j = (-(1.0f + e) * glm::dot(bodyB->GetLinearVelocity(), collisionNormal));
+            float j = (-(1.0f + e) * impulseForce) / (bodyB->GetInverseMass() + a);
 
             glm::vec3 fullImpulse = collisionNormal * j;
 
             bodyB->ApplyLinearImpulse(fullImpulse);
+            bodyB->ApplyAngularImpulse(glm::cross(relativeVelocityB, -fullImpulse));
         }
     }
 }

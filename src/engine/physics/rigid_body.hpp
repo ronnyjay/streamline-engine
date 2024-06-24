@@ -38,7 +38,7 @@ class RigidBody
     glm::vec3 m_LinearVelocity;
     glm::vec3 m_AngularVelocity;
 
-    mutable glm::mat3 m_IntertiaTensor;
+    mutable glm::mat3 m_InertiaTensor;
 };
 
 } // namespace engine
