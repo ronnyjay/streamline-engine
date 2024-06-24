@@ -3,14 +3,14 @@
 
 using namespace engine;
 
-std::unique_ptr<resource_manager> resource_manager::m_instance = nullptr;
+std::unique_ptr<ResourceManager> ResourceManager::m_Instance = nullptr;
 
-resource_manager &resource_manager::get_reference()
+ResourceManager &ResourceManager::GetReference()
 {
-    if (m_instance == nullptr)
+    if (m_Instance == nullptr)
     {
-        m_instance = std::unique_ptr<resource_manager>(new resource_manager);
+        m_Instance = std::unique_ptr<ResourceManager>(new ResourceManager);
     }
 
-    return *m_instance;
+    return *m_Instance;
 }

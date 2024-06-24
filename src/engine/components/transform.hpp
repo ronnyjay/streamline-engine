@@ -11,7 +11,7 @@ class Transform
 {
   public:
     Transform()
-        : m_Translation(0.0f)
+        : m_Position(0.0f)
         , m_Rotation(0.0f)
         , m_Scale(1.0f)
     {
@@ -19,9 +19,9 @@ class Transform
 
     Transform(const Transform &) = default;
 
-    const glm::vec3 &GetTranslation() const
+    const glm::vec3 &GetPosition() const
     {
-        return m_Translation;
+        return m_Position;
     }
 
     const glm::vec3 &GetRotation() const
@@ -34,11 +34,11 @@ class Transform
         return m_Scale;
     }
 
-    void SetTranslation(const glm::vec3 &translation)
+    void setPosition(const glm::vec3 &translation)
     {
-        if (translation != m_Translation)
+        if (translation != m_Position)
         {
-            m_Translation = translation;
+            m_Position = translation;
             m_Dirty = true;
             m_TranslationChanged = true;
         }
@@ -64,7 +64,7 @@ class Transform
         }
     }
 
-    bool IsTranslationChanged()
+    bool IsPositionChanged()
     {
         return m_TranslationChanged;
     }
@@ -106,12 +106,12 @@ class Transform
 
     const glm::mat4 GetTransform() const
     {
-        return glm::translate(glm::mat4(1.0f), m_Translation) * glm::toMat4(glm::quat(m_Rotation)) *
+        return glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(glm::quat(m_Rotation)) *
                glm::scale(glm::mat4(1.0f), m_Scale);
     }
 
   private:
-    glm::vec3 m_Translation;
+    glm::vec3 m_Position;
     glm::vec3 m_Rotation;
     glm::vec3 m_Scale;
 

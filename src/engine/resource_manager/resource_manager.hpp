@@ -9,10 +9,10 @@
 namespace engine
 {
 
-class resource_manager
+class ResourceManager
 {
   public:
-    static resource_manager &get_reference();
+    static ResourceManager &GetReference();
 
     template <typename T> std::shared_ptr<T> Get(const std::basic_string<char> &path)
     {
@@ -23,20 +23,20 @@ class resource_manager
             l->Load(path);
             it = m_Loadables.emplace(path, l).first;
         }
-        
+
         return std::dynamic_pointer_cast<T>(it->second);
     }
 
     inline static const std::string DEFAULT_TEXTURE_DIR = "resources/textures/default";
 
   private:
-    static std::unique_ptr<resource_manager> m_instance;
+    ResourceManager()
+    {
+    }
 
     std::unordered_map<std::string, std::shared_ptr<Loadable>> m_Loadables;
 
-    resource_manager()
-    {
-    }
+    static std::unique_ptr<ResourceManager> m_Instance;
 };
 
 } // namespace engine

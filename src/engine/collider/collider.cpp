@@ -1,40 +1,53 @@
 #include <engine/collider/collider.hpp>
-
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext/scalar_common.hpp>
 
 using namespace engine;
 
-AABB::AABB(const glm::vec3 &min, const glm::vec3 &max)
-    : m_Min(min)
-    , m_Max(max)
+AABB::AABB(std::shared_ptr<Model> model)
+    : m_GlobalMin(FLT_MAX)
+    , m_GlobalMax(-FLT_MAX)
     , m_Colliding(false)
 {
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_EBO);
+
+    for (const auto &mesh : model.get()->GetMeshes())
+    {
+        for (const auto &vertex : mesh.GetVertices())
+        {
+            m_GlobalMin = glm::min(m_GlobalMin, vertex.Position);
+            m_GlobalMax = glm::max(m_GlobalMax, vertex.Position);
+        }
+    }
+
+    m_LocalMin = m_GlobalMin;
+    m_LocalMax = m_GlobalMax;
+
+    UpdateVertices();
 }
 
 void AABB::Translate(const glm::vec3 &translation)
 {
-    m_Min = m_RefMin + translation;
-    m_Max = m_RefMax + translation;
+    m_GlobalMin = m_LocalMin + translation;
+    m_GlobalMax = m_LocalMax + translation;
 
     UpdateVertices();
 }
 
 void AABB::Update(const std::vector<glm::vec3> &vertices)
 {
-    m_Min = glm::vec3(FLT_MAX);
-    m_Max = glm::vec3(-FLT_MAX);
+    m_GlobalMin = glm::vec3(FLT_MAX);
+    m_GlobalMax = glm::vec3(-FLT_MAX);
 
     for (auto &vertex : vertices)
     {
-        m_Min = glm::min(m_Min, vertex);
-        m_Max = glm::max(m_Max, vertex);
+        m_GlobalMin = glm::min(m_GlobalMin, vertex);
+        m_GlobalMax = glm::max(m_GlobalMax, vertex);
     }
 
-    m_RefMin = m_Min;
-    m_RefMax = m_Max;
+    m_LocalMin = m_GlobalMin;
+    m_LocalMax = m_GlobalMax;
 
     UpdateVertices();
 }
@@ -48,9 +61,9 @@ void AABB::Draw()
 
 bool AABB::Intersects(const AABB &other)
 {
-    return (m_Min.x <= other.m_Max.x && m_Max.x >= other.m_Min.x) &&
-           (m_Min.y <= other.m_Max.y && m_Max.y >= other.m_Min.y) &&
-           (m_Min.z <= other.m_Max.z && m_Max.z >= other.m_Min.z);
+    return (m_GlobalMin.x <= other.m_GlobalMax.x && m_GlobalMax.x >= other.m_GlobalMin.x) &&
+           (m_GlobalMin.y <= other.m_GlobalMax.y && m_GlobalMax.y >= other.m_GlobalMin.y) &&
+           (m_GlobalMin.z <= other.m_GlobalMax.z && m_GlobalMax.z >= other.m_GlobalMin.z);
 }
 
 bool AABB::GetColliding() const
@@ -67,14 +80,14 @@ void AABB::UpdateVertices()
 {
     // clang-format off
     const std::vector<glm::vec3> vertices = {
-        { m_Min.x, m_Min.y, m_Min.z },   
-        { m_Max.x, m_Min.y, m_Min.z },    
-        { m_Min.x, m_Max.y, m_Min.z },   
-        { m_Max.x, m_Max.y, m_Min.z },     
-        { m_Min.x, m_Min.y, m_Max.z },   
-        { m_Max.x, m_Min.y, m_Max.z },    
-        { m_Min.x, m_Max.y, m_Max.z },    
-        { m_Max.x, m_Max.y, m_Max.z }    
+        { m_GlobalMin.x, m_GlobalMin.y, m_GlobalMin.z },   
+        { m_GlobalMax.x, m_GlobalMin.y, m_GlobalMin.z },    
+        { m_GlobalMin.x, m_GlobalMax.y, m_GlobalMin.z },   
+        { m_GlobalMax.x, m_GlobalMax.y, m_GlobalMin.z },     
+        { m_GlobalMin.x, m_GlobalMin.y, m_GlobalMax.z },   
+        { m_GlobalMax.x, m_GlobalMin.y, m_GlobalMax.z },    
+        { m_GlobalMin.x, m_GlobalMax.y, m_GlobalMax.z },    
+        { m_GlobalMax.x, m_GlobalMax.y, m_GlobalMax.z }    
     };
 
     const std::vector<GLuint> indices = {

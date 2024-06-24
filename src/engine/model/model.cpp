@@ -177,14 +177,14 @@ Model::LoadMaterialTextures(aiMaterial *material, aiTextureType type, std::strin
                 break;
             }
 
-            directory = aiString(resource_manager::DEFAULT_TEXTURE_DIR);
+            directory = aiString(ResourceManager::DEFAULT_TEXTURE_DIR);
         }
 
         // Check if texture has been previously loaded
         std::filesystem::path texturePath(directory.C_Str());
         texturePath.append(path.C_Str());
 
-        auto texture = resource_manager::get_reference().Get<Texture>(texturePath);
+        auto texture = ResourceManager::GetReference().Get<Texture>(texturePath);
         texture->m_Type = typeName;
         textures.push_back(texture);
     }

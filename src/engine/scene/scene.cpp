@@ -12,6 +12,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 using namespace engine;
 
@@ -111,7 +112,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     auto &transformComponent = m_Registry.get<Transform>(entity);
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
-    auto *modelComponent = m_Registry.try_get<Model>(entity);
+    auto *modelComponent = m_Registry.try_get<std::shared_ptr<Model>>(entity);
     auto *boundingComponent = m_Registry.try_get<AABB>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
@@ -130,7 +131,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 
                 std::vector<glm::vec3> vertices;
 
-                for (const auto &mesh : modelComponent->GetMeshes())
+                for (const auto &mesh : modelComponent->get()->GetMeshes())
                 {
                     for (const auto &vertex : mesh.GetVertices())
                     {
@@ -155,7 +156,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
         {
             childTransformComponent.SetDirty(true);
 
-            if (transformComponent.IsTranslationChanged())
+            if (transformComponent.IsPositionChanged())
             {
                 childTransformComponent.SetTranslationChanged(true);
             }
@@ -175,7 +176,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     }
 
     // Reset flags after updating children
-    if (transformComponent.IsTranslationChanged())
+    if (transformComponent.IsPositionChanged())
     {
         transformComponent.SetTranslationChanged(false);
     }
@@ -215,7 +216,7 @@ void Scene::Draw()
             auto &light = m_Registry.get<Light>(*it_lights);
             auto &pos = m_Registry.get<Transform>(*it_lights);
 
-            selectedLights[i].pos = glm::vec4(pos.GetTranslation(), 1.0f);
+            selectedLights[i].pos = glm::vec4(pos.GetPosition(), 1.0f);
             selectedLights[i].properties = light;
 
             it_lights++;
@@ -302,7 +303,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
     auto [identifierComponent, transformComponent, childrenComponent] =
         m_Registry.get<Identifier, Transform, Children>(entity);
 
-    auto translation = transformComponent.GetTranslation();
+    auto translation = transformComponent.GetPosition();
     auto rotation = transformComponent.GetRotation();
     auto scale = transformComponent.GetScale();
 
@@ -331,7 +332,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::TreePop();
     }
 
-    transformComponent.SetTranslation(translation);
+    transformComponent.setPosition(translation);
     transformComponent.SetRotation(rotation);
     transformComponent.SetScale(scale);
 }

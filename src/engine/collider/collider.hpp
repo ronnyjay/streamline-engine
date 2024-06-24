@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace engine
@@ -13,7 +14,7 @@ namespace engine
 class AABB
 {
   public:
-    AABB(const glm::vec3 &min = glm::vec3(FLT_MAX), const glm::vec3 &max = glm::vec3(-FLT_MAX));
+    AABB(std::shared_ptr<Model>);
 
     void Translate(const glm::vec3 &);
     void Update(const std::vector<glm::vec3> &);
@@ -27,12 +28,10 @@ class AABB
     ~AABB();
 
   private:
-    glm::vec3 m_Min;
-    glm::vec3 m_Max;
-
-    // Used as reference for applying translations as to not compound
-    glm::vec3 m_RefMin;
-    glm::vec3 m_RefMax;
+    glm::vec3 m_GlobalMin;
+    glm::vec3 m_LocalMin;
+    glm::vec3 m_GlobalMax;
+    glm::vec3 m_LocalMax;
 
     bool m_Colliding;
 

@@ -26,7 +26,7 @@ class Text
         m_Shader.AddShader("resources/shaders/text.vs", GL_VERTEX_SHADER);
         m_Shader.AddShader("resources/shaders/text.fs", GL_FRAGMENT_SHADER);
 
-        m_Texture = resource_manager::get_reference().Get<Texture>("resources/textures/text/characters16x16.bmp");
+        m_Texture = ResourceManager::GetReference().Get<Texture>("resources/textures/text/characters16x16.bmp");
 
         // clang-format off
         const GLfloat data[4][4] = {
