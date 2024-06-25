@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <engine/Application/Application.hpp>
 #include <engine/Entity/Entity.hpp>
 #include <engine/Logger/Logger.hpp>
@@ -14,6 +15,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iterator>
+#include <vector>
 
 using namespace engine;
 
@@ -90,6 +93,18 @@ void Scene::Update(const float dt)
         linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
 
         body.SetLinearVelocity(linearVelocity);
+    }
+
+    // Detect collisions
+    auto collisionView = m_Registry.view<AABB>();
+
+    for (auto a = collisionView.begin(); a != collisionView.end(); ++a)
+    {
+        for (auto b = std::next(a); b != collisionView.end(); ++b)
+        {
+            auto &colliderA = collisionView.get<AABB>(*a);
+            auto &colliderB = collisionView.get<AABB>(*b);
+        }
     }
 
     // Integrate velocity

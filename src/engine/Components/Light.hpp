@@ -20,7 +20,7 @@ class Light
 
     Light(const Light &) = default;
 
-    const glm::vec3 GetColor() const
+    const glm::vec4 &GetColor() const
     {
         return m_Color;
     }
