@@ -5,13 +5,15 @@ target_sources(engine PRIVATE
     camera/camera.cpp
     camera/orthographic.cpp
     camera/perspective.cpp
-    collider/collider.cpp
+    components/AABB.cpp
+    components/Transform.cpp
+    components/RigidBody.cpp
     config/config.cpp
     entity/entity.cpp
     framebuffer/framebuffer.cpp
     logger/logger.cpp
     mesh/mesh.cpp
-    model/model.cpp
+    model/model.cpp 
     scene/scene.cpp
     shader/shader.cpp
     stb/stb_image.cpp

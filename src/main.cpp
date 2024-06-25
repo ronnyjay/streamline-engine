@@ -1,11 +1,13 @@
-#include "engine/resource_manager/resource_manager.hpp"
 #include <engine/application/application.hpp>
 #include <engine/camera/orthographic.hpp>
 #include <engine/camera/perspective.hpp>
-#include <engine/collider/collider.hpp>
-#include <engine/components/transform.hpp>
 #include <engine/entity/entity.hpp>
 #include <engine/model/model.hpp>
+#include <engine/resource_manager/resource_manager.hpp>
+
+#include <engine/components/AABB.hpp>
+#include <engine/components/RigidBody.hpp>
+#include <engine/components/Transform.hpp>
 
 engine::Application application(800, 600, "Streamline Engine");
 
@@ -33,44 +35,46 @@ int main(int argc, char const *argv[])
     const std::string torusModelPath = "resources/objects/torus/torus.obj";
     const std::string pyramidModelPath = "resources/objects/pyramid/pyramid.obj";
     const std::string sphereModelPath = "resources/objects/sphere/sphere.obj";
-    const std::string backpackModelPath = "resources/objects/backpack/backpack.obj";
 
     auto cubeModel = engine::ResourceManager::GetReference().Get<engine::Model>(cubeModelPath);
     auto torusModel = engine::ResourceManager::GetReference().Get<engine::Model>(torusModelPath);
     auto pyramidModel = engine::ResourceManager::GetReference().Get<engine::Model>(pyramidModelPath);
     auto sphereModel = engine::ResourceManager::GetReference().Get<engine::Model>(sphereModelPath);
-    auto backpackModel = engine::ResourceManager::GetReference().Get<engine::Model>(backpackModelPath);
 
-    auto backpack = scene.get()->CreateEntity("Backpack");
+    auto cube = scene.get()->CreateEntity("Cube");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
     auto redLight = scene.get()->CreateEntity("Red Light Source");
     auto greenLight = scene.get()->CreateEntity("Green Light Source");
     auto blueLight = scene.get()->CreateEntity("Blue Light Source");
 
-    backpack.AddComponent<std::shared_ptr<engine::Model>>(backpackModel);
-    backpack.AddComponent<engine::AABB>(backpackModel);
-    backpack.GetComponent<engine::Transform>().setPosition(glm::vec3(-10.0f, 5.0f, 0.0f));
+    cube.AddComponent<std::shared_ptr<engine::Model>>(cubeModel);
+    cube.AddComponent<engine::AABB>(cubeModel);
+    cube.AddComponent<engine::RigidBody>();
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
+    cube.GetComponent<engine::RigidBody>().SetInverseMass(0.0f);
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
     torus.AddComponent<engine::AABB>(torusModel);
-    torus.GetComponent<engine::Transform>().setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    torus.AddComponent<engine::RigidBody>();
+    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 
     pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
     pyramid.AddComponent<engine::AABB>(pyramidModel);
-    pyramid.GetComponent<engine::Transform>().setPosition(glm::vec3(10.0f, -2.0f, 0.0f));
+    pyramid.AddComponent<engine::RigidBody>();
+    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
 
     redLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     redLight.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
-    redLight.GetComponent<engine::Transform>().setPosition(glm::vec3(-10.0f, -10.0f, 0.0f));
+    redLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, -10.0f, 0.0f));
 
     greenLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     greenLight.AddComponent<engine::Light>(glm::vec4(0.0, 1.0, 0.0, 1.0));
-    greenLight.GetComponent<engine::Transform>().setPosition(glm::vec3(1.0f, -10.0f, 0.0f));
+    greenLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(1.0f, -10.0f, 0.0f));
 
     blueLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     blueLight.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
-    blueLight.GetComponent<engine::Transform>().setPosition(glm::vec3(10.0f, -5.0f, 0.0f));
+    blueLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, -5.0f, 0.0f));
 
     application.Run();
 

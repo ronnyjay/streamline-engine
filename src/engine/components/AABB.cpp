@@ -1,5 +1,4 @@
-#include <engine/collider/collider.hpp>
-#include <glm/ext/scalar_common.hpp>
+#include <engine/components/AABB.hpp>
 
 using namespace engine;
 

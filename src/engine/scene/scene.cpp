@@ -1,18 +1,20 @@
+#include <cmath>
 #include <engine/application/application.hpp>
-#include <engine/collider/collider.hpp>
 #include <engine/entity/entity.hpp>
 #include <engine/logger/logger.hpp>
 #include <engine/model/model.hpp>
 #include <engine/scene/scene.hpp>
 
-#include <engine/components/children.hpp>
-#include <engine/components/identifier.hpp>
-#include <engine/components/parent.hpp>
-#include <engine/components/transform.hpp>
+#include <engine/components/AABB.hpp>
+#include <engine/components/Children.hpp>
+#include <engine/components/Identifier.hpp>
+#include <engine/components/Light.hpp>
+#include <engine/components/Parent.hpp>
+#include <engine/components/RigidBody.hpp>
+#include <engine/components/Transform.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <memory>
 
 using namespace engine;
 
@@ -62,47 +64,70 @@ void Scene::DestroyEntity(const Entity entity)
     Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.Get().c_str());
 }
 
-void Scene::Update(const double deltaTime)
+void Scene::Update(const float dt)
 {
-    // Propogate transformation updates
-    auto view = m_Registry.view<Transform, Parent, Children>();
+    auto physicsView = m_Registry.view<RigidBody, Transform>();
 
-    for (auto entity : view)
+    // Integrate acceleration
+    for (auto entity : physicsView)
     {
-        if (view.get<Parent>(entity).Get() == entt::null)
+        RigidBody &body = physicsView.get<RigidBody>(entity);
+        Transform &transform = physicsView.get<Transform>(entity);
+
+        glm::vec3 acceleration = body.GetForce() * body.GetInverseMass();
+
+        if (body.GetInverseMass() > 0)
         {
-            UpdateEntity(entity, glm::mat4(1.0f));
+            acceleration += glm::vec3(0.0f, -9.81f, 0.0f);
         }
+
+        glm::vec3 linearVelocity = body.GetLinearVelocity();
+
+        glm::vec3 k1 = dt * acceleration;
+        glm::vec3 k2 = dt * (acceleration + k1 * 0.5f);
+        glm::vec3 k3 = dt * (acceleration + k2 * 0.5f);
+        glm::vec3 k4 = dt * (acceleration + k3);
+
+        linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
+
+        body.SetLinearVelocity(linearVelocity);
     }
 
-    // Check for collisions
-    std::set<AABB *> collisions;
-
-    m_Registry.view<AABB>().each(
-        [&](auto entityA, AABB &aabbA)
-        {
-            m_Registry.view<AABB>().each(
-                [&](auto entityB, AABB &aabbB)
-                {
-                    if (entityA < entityB && aabbA.Intersects(aabbB))
-                    {
-                        collisions.insert(&aabbA);
-                        collisions.insert(&aabbB);
-                    }
-                });
-        });
-
-    for (auto &entity : m_Registry.view<AABB>())
+    // Integrate velocity
+    for (auto entity : physicsView)
     {
-        auto &boundingComponent = m_Registry.get<AABB>(entity);
+        RigidBody &body = physicsView.get<RigidBody>(entity);
+        Transform &transform = physicsView.get<Transform>(entity);
 
-        if (collisions.find(&boundingComponent) != collisions.end())
+        glm::vec3 linearVelocity = body.GetLinearVelocity();
+
+        glm::vec3 k1 = dt * linearVelocity;
+        glm::vec3 k2 = dt * (linearVelocity + k1 * 0.5f);
+        glm::vec3 k3 = dt * (linearVelocity + k2 * 0.5f);
+        glm::vec3 k4 = dt * (linearVelocity + k3);
+
+        linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
+
+        body.SetLinearVelocity(linearVelocity);
+    }
+
+    // Integrate position
+    for (auto entity : physicsView)
+    {
+        RigidBody &rigidBody = physicsView.get<RigidBody>(entity);
+        Transform &transform = physicsView.get<Transform>(entity);
+
+        transform.SetPosition(transform.GetPosition() + rigidBody.GetLinearVelocity() * dt);
+    }
+
+    // Update transforms
+    auto transformView = m_Registry.view<Transform, Parent, Children>();
+
+    for (auto entity : transformView)
+    {
+        if (transformView.get<Parent>(entity).Get() == entt::null)
         {
-            boundingComponent.SetColliding(true);
-        }
-        else
-        {
-            boundingComponent.SetColliding(false);
+            UpdateEntity(entity, glm::mat4(1.0f));
         }
     }
 }
@@ -213,12 +238,11 @@ void Scene::Draw()
     {
         if (it_lights != lights.end())
         {
-            auto &light = m_Registry.get<Light>(*it_lights);
-            auto &pos = m_Registry.get<Transform>(*it_lights);
+            auto &position = m_Registry.get<Transform>(*it_lights);
+            auto &properties = m_Registry.get<Light>(*it_lights);
 
-            selectedLights[i].pos = glm::vec4(pos.GetPosition(), 1.0f);
-            selectedLights[i].properties = light;
-
+            selectedLights[i].SetPosition(glm::vec4(position.GetPosition(), 1.0f));
+            selectedLights[i].SetProperties(properties);
             it_lights++;
         }
     }
@@ -332,7 +356,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::TreePop();
     }
 
-    transformComponent.setPosition(translation);
+    transformComponent.SetPosition(translation);
     transformComponent.SetRotation(rotation);
     transformComponent.SetScale(scale);
 }

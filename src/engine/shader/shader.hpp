@@ -2,9 +2,11 @@
 
 #include <glad/gl.h>
 
+#include <engine/components/Light.hpp>
+
 #include <glm/glm.hpp>
 
-#include <engine/components/components.hpp>
+#include <array>
 #include <string>
 
 namespace engine

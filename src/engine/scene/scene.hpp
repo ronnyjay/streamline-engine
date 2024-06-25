@@ -5,8 +5,6 @@
 
 #include <glm/glm.hpp>
 
-#include <unordered_map>
-
 namespace engine
 {
 
@@ -21,6 +19,7 @@ class Scene : public Debuggable
     }
 
     Entity CreateEntity(const std::string &);
+
     Entity CreateChildEntity(const Entity &parent, const std::string &);
 
     void DestroyEntity(const Entity);
@@ -31,7 +30,7 @@ class Scene : public Debuggable
     friend class Application;
     friend class Entity;
 
-    void Update(const double);
+    void Update(const float);
     void UpdateEntity(const entt::entity &, const glm::mat4 &);
 
     void Draw();

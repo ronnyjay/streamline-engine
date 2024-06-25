@@ -1,4 +1,4 @@
-#include <engine/physics/rigidbody.hpp>
+#include <engine/components/RigidBody.hpp>
 
 namespace engine
 {
@@ -7,6 +7,13 @@ RigidBody::RigidBody()
     : m_InverseMass(1.0f)
     , m_Elasticity(0.8f)
     , m_Friction(0.8f)
+    , m_LinearVelocity(0.0f)
+    , m_Force(0.0f)
+    , m_AngularVelocity(0.0f)
+    , m_Torque(0.0f)
+    , m_InverseInertia(0.0f)
+    , m_InverseInertiaTensor(1.0f)
+
 {
 }
 
@@ -73,6 +80,16 @@ void RigidBody::SetLinearVelocity(const glm::vec3 &linearVelocity)
 void RigidBody::SetAngularVelocity(const glm::vec3 &angularVelocity)
 {
     m_AngularVelocity = angularVelocity;
+}
+
+void RigidBody::ApplyLinearImpulse(const glm::vec3 &force)
+{
+    m_LinearVelocity += force * m_InverseMass;
+}
+
+void RigidBody::ApplyAngularImpulse(const glm::vec3 &force)
+{
+    m_AngularVelocity += m_InverseInertiaTensor * force;
 }
 
 void RigidBody::AddForce(const glm::vec3 &addedForce)
