@@ -1,7 +1,6 @@
 #include <engine/Components/RigidBody.hpp>
 
-namespace engine
-{
+using namespace engine;
 
 RigidBody::RigidBody()
     : m_InverseMass(1.0f)
@@ -107,5 +106,3 @@ void RigidBody::ClearForces()
     m_Force = glm::vec3(0.0f);
     m_Torque = glm::vec3(0.0f);
 }
-
-} // namespace engine

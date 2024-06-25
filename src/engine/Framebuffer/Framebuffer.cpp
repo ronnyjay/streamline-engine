@@ -4,8 +4,7 @@
 
 #include <glad/gl.h>
 
-namespace engine
-{
+using namespace engine;
 
 Framebuffer::Framebuffer(const unsigned int width, const unsigned int height)
 {
@@ -128,5 +127,3 @@ Framebuffer::~Framebuffer()
     glDeleteRenderbuffers(1, &m_RBO);
     glDeleteFramebuffers(1, &m_FBO);
 }
-
-} // namespace engine

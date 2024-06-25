@@ -9,8 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace engine
-{
+using namespace engine;
 
 ShaderProgram::operator unsigned int() const
 {
@@ -184,5 +183,3 @@ bool ShaderProgram::AddShader(const std::string &path, GLint shaderType)
 
     return true;
 }
-
-} // namespace engine

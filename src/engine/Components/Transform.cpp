@@ -1,7 +1,6 @@
 #include <engine/Components/Transform.hpp>
 
-namespace engine
-{
+using namespace engine;
 
 Transform::Transform()
     : m_Position(0.0f)
@@ -104,5 +103,3 @@ const glm::mat4 Transform::GetTransform() const
     return glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(glm::quat(m_Rotation)) *
            glm::scale(glm::mat4(1.0f), m_Scale);
 }
-
-} // namespace engine

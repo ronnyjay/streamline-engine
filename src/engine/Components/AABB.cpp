@@ -1,7 +1,6 @@
 #include <engine/Components/AABB.hpp>
 
-namespace engine
-{
+using namespace engine;
 
 AABB::AABB(std::shared_ptr<Model> model)
     : m_GlobalMin(FLT_MAX)
@@ -120,5 +119,3 @@ AABB::~AABB()
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
 }
-
-} // namespace engine

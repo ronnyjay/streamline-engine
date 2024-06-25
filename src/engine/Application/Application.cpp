@@ -6,8 +6,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-namespace engine
-{
+using namespace engine;
 
 // clang-format off
 const char *Application::DisplayModes[] = {
@@ -1089,5 +1088,3 @@ void GLAPIENTRY Application::MessageCallback(
 
     Logger::Err("GL ERROR CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n", type, severity, message);
 }
-
-} // namespace engine

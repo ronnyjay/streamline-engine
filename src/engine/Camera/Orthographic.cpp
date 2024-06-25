@@ -1,10 +1,9 @@
 #include <engine/Application/Application.hpp>
 #include <engine/Camera/Orthographic.hpp>
 
-extern engine::Application application;
+using namespace engine;
 
-namespace engine
-{
+extern Application application;
 
 void OrthographicCamera::Update()
 {
@@ -58,5 +57,3 @@ void OrthographicCamera::Move(const Direction direction, double timeStep)
 
     Update();
 }
-
-} // namespace engine

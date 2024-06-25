@@ -18,10 +18,9 @@
 #include <iterator>
 #include <vector>
 
-extern engine::Application application;
+using namespace engine;
 
-namespace engine
-{
+extern Application application;
 
 Entity Scene::CreateEntity(const std::string &identifier)
 {
@@ -376,5 +375,3 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
     transformComponent.SetRotation(rotation);
     transformComponent.SetScale(scale);
 }
-
-} // namespace engine

@@ -2,8 +2,7 @@
 
 #include <memory>
 
-namespace engine
-{
+using namespace engine;
 
 std::unique_ptr<ResourceManager> ResourceManager::m_Instance = nullptr;
 
@@ -16,5 +15,3 @@ ResourceManager &ResourceManager::GetReference()
 
     return *m_Instance;
 }
-
-} // namespace engine

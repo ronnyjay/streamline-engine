@@ -1,7 +1,6 @@
 #include <engine/Components/Mesh.hpp>
 
-namespace engine
-{
+using namespace engine;
 
 Mesh::Mesh(
     const std::vector<Vertex> &vertices,
@@ -102,5 +101,3 @@ const std::vector<Vertex> &Mesh::GetVertices() const
 {
     return m_Vertices;
 }
-
-} // namespace engine

@@ -1,7 +1,6 @@
 #include <engine/Camera/Camera.hpp>
 
-namespace engine
-{
+using namespace engine;
 
 float Camera::GetYaw() const
 {
@@ -80,5 +79,3 @@ void Camera::DrawDebugInfo()
 
     Update();
 }
-
-} // namespace engine

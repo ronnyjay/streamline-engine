@@ -1,10 +1,9 @@
 #include <engine/Application/Application.hpp>
 #include <engine/Camera/Perspective.hpp>
 
-extern engine::Application application;
+using namespace engine;
 
-namespace engine
-{
+extern Application application;
 
 void PerspectiveCamera::Update()
 {
@@ -123,5 +122,3 @@ void PerspectiveCamera::DrawDebugInfo()
     ImGui::SameLine();
     ImGui::Checkbox("##LockHorizontal", &m_LockHorizontal);
 }
-
-} // namespace engine
