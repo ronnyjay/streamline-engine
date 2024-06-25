@@ -49,4 +49,4 @@ class Config
     std::map<std::string, std::string> m_Values;
 };
 
-}; // namespace engine
+} // namespace engine

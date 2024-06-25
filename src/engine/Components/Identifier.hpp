@@ -18,4 +18,4 @@ struct Identifier
     std::string identifier;
 };
 
-}; // namespace engine
+} // namespace engine

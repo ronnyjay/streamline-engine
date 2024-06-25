@@ -72,4 +72,4 @@ class Text
     std::shared_ptr<Texture> m_Texture;
 };
 
-}; // namespace engine
+} // namespace engine

@@ -26,6 +26,8 @@ class ShaderProgram
 
     void Use();
 
+    bool AddShader(const std::string &path, GLint type);
+
     bool Compile();
 
     void SetBool(const std::string &, bool) const;
@@ -43,9 +45,6 @@ class ShaderProgram
     void SetMat4(const std::string &, const glm::mat4 &) const;
     void UpdateLights(const std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> &lights);
 
-    static ShaderProgram FromFile(const char *, const char *);
-
-    bool AddShader(const std::string &path, GLint type);
     std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> m_Lights;
 
   private:
@@ -57,4 +56,4 @@ class ShaderProgram
     bool CheckCompileErrors(unsigned int);
 };
 
-}; // namespace engine
+} // namespace engine

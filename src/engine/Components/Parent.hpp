@@ -18,4 +18,4 @@ struct Parent
     entt::entity parent;
 };
 
-}; // namespace engine
+} // namespace engine

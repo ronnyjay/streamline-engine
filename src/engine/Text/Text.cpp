@@ -1,6 +1,7 @@
 #include <engine/Text/Text.hpp>
 
-using namespace engine;
+namespace engine
+{
 
 void Text::Draw()
 {
@@ -66,3 +67,5 @@ void Text::Draw()
 
     glBindVertexArray(0);
 }
+
+} // namespace engine

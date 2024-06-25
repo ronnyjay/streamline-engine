@@ -44,4 +44,4 @@ class Transform
     bool m_ScaleChanged;
 };
 
-}; // namespace engine
+} // namespace engine

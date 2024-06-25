@@ -23,4 +23,4 @@ struct Logger
     static void Err(const std::basic_string<char>, ...);
 };
 
-}; // namespace engine
+} // namespace engine

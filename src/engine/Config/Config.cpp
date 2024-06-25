@@ -2,7 +2,8 @@
 
 #include <fstream>
 
-using namespace engine;
+namespace engine
+{
 
 Config::Config(std::filesystem::path path)
     : m_Path(path)
@@ -95,3 +96,5 @@ void Config::Store()
 
     file.close();
 }
+
+} // namespace engine

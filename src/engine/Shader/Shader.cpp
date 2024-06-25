@@ -9,7 +9,8 @@
 #include <iostream>
 #include <sstream>
 
-using namespace engine;
+namespace engine
+{
 
 ShaderProgram::operator unsigned int() const
 {
@@ -127,30 +128,6 @@ void ShaderProgram::UpdateLights(const std::array<Light, ShaderProgram::MAX_NUM_
     glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderProgram::MAX_NUM_LIGHTS * sizeof(Light), m_Lights.data());
 }
 
-/*
-Shader Shader::FromFile(const char *vertexPath, const char *fragmentPath)
-{
-    Logger::info("Loading vertex shader from file: %s\n", vertexPath);
-    Logger::info("Loading fragment shader from file: %s\n", fragmentPath);
-
-    Shader shader;
-
-    std::string vShaderContents;
-
-    std::ifstream fShaderFile;
-
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-
-    if (!shader.Compile(vShaderContents.c_str(), fShaderContents.c_str()))
-    {
-        throw std::runtime_error("Error compiling shaders.");
-    }
-
-    return shader;
-}
-*/
-
 bool ShaderProgram::CheckCompileErrors(unsigned int shader)
 {
     int success;
@@ -201,11 +178,11 @@ bool ShaderProgram::AddShader(const std::string &path, GLint shaderType)
         return false;
     }
 
-    // Create Shader Program
     glAttachShader(m_ID, shader);
 
-    // Cleanup
     glDeleteShader(shader);
 
     return true;
 }
+
+} // namespace engine

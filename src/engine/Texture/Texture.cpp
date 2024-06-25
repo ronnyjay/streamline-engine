@@ -6,6 +6,9 @@
 
 using namespace engine;
 
+namespace engine
+{
+
 Texture::Texture()
     : m_Width(0)
     , m_Height(0)
@@ -79,3 +82,5 @@ void Texture::Load(const std::basic_string<char> &path)
         Logger::Warn("Failed to load texture from file: %s\n", path.c_str());
     }
 }
+
+} // namespace engine

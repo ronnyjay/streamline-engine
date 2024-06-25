@@ -41,4 +41,4 @@ class AABB
     void UpdateVertices();
 };
 
-}; // namespace engine
+} // namespace engine

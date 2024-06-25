@@ -41,4 +41,4 @@ class Scene : public Debuggable
     void DrawEntityDebugInfo(const entt::entity &);
 };
 
-}; // namespace engine
+} // namespace engine

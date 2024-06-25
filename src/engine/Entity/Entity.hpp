@@ -58,4 +58,4 @@ class Entity
     Scene *m_Scene;
 };
 
-}; // namespace engine
+} // namespace engine

@@ -19,4 +19,4 @@ class Debuggable
     }
 };
 
-}; // namespace engine
+} // namespace engine

@@ -40,4 +40,4 @@ class Model : public Loadable
     std::vector<std::shared_ptr<Texture>> LoadMaterialTextures(aiMaterial *, aiTextureType, std::string);
 };
 
-}; // namespace engine
+} // namespace engine

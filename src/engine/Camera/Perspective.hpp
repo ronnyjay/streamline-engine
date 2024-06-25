@@ -44,4 +44,4 @@ class PerspectiveCamera : public Camera
     bool m_LockHorizontal;
 };
 
-}; // namespace engine
+} // namespace engine

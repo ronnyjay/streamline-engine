@@ -41,27 +41,4 @@ class Texture : public Loadable
     unsigned int m_ID;
 };
 
-// class Texture : public Texture
-// {
-//   public:
-//     Texture() : Texture()
-//     {
-//     }
-
-//     std::string m_Path;
-//     std::string m_Type;
-
-//     static Texture FromFile(const char *path, const char *directory)
-//     {
-//         auto filename = std::string(directory) + '/' + std::string(path);
-
-//         return Texture(Texture::FromFile(filename.c_str()), path);
-//     }
-
-//   private:
-//     Texture(const Texture texture, const char *path) : Texture(texture), m_Path(path)
-//     {
-//     }
-// };
-
-}; // namespace engine
+} // namespace engine

@@ -88,4 +88,4 @@ class Camera : public Debuggable
     glm::vec3 m_Position;
 };
 
-}; // namespace engine
+} // namespace engine

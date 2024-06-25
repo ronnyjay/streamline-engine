@@ -4,6 +4,9 @@
 
 using namespace engine;
 
+namespace engine
+{
+
 void Logger::Info(const std::basic_string<char> format, ...)
 {
     va_list args;
@@ -41,3 +44,5 @@ void Logger::Err(const std::basic_string<char> format, ...)
     vprintf(format.c_str(), args);
     va_end(args);
 }
+
+} // namespace engine

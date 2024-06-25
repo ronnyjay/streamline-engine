@@ -5,7 +5,8 @@
 
 #include <memory>
 
-using namespace engine;
+namespace engine
+{
 
 void Model::Load(const std::basic_string<char> &path)
 {
@@ -192,3 +193,5 @@ Model::LoadMaterialTextures(aiMaterial *material, aiTextureType type, std::strin
 
     return textures;
 }
+
+} // namespace engine

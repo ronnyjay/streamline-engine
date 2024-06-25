@@ -35,4 +35,4 @@ class Framebuffer
     Texture m_Texture;
 };
 
-}; // namespace engine
+} // namespace engine

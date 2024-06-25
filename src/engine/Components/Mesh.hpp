@@ -43,4 +43,4 @@ class Mesh
     std::vector<std::shared_ptr<Texture>> m_Textures;
 };
 
-}; // namespace engine
+} // namespace engine

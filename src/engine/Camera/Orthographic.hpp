@@ -31,4 +31,4 @@ class OrthographicCamera : public Camera
     glm::mat4 m_ViewModel;
 };
 
-}; // namespace engine
+} // namespace engine
