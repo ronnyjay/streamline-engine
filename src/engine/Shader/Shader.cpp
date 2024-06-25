@@ -1,3 +1,4 @@
+#include "engine/Components/Light.hpp"
 #include <engine/Logger/Logger.hpp>
 #include <engine/Shader/Shader.hpp>
 
@@ -46,9 +47,9 @@ bool ShaderProgram::Compile()
 
         glGenBuffers(1, &m_LightUBO);
         glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
-        glBufferData(GL_UNIFORM_BUFFER, m_Lights.size() * sizeof(ShaderLight), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, m_Lights.size() * sizeof(Light), NULL, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_LightUBO, 0, m_Lights.size() * sizeof(ShaderLight));
+        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m_LightUBO, 0, m_Lights.size() * sizeof(Light));
     }
 
     return true;
@@ -119,11 +120,11 @@ void ShaderProgram::SetMat4(const std::string &name, const glm::mat4 &mat) const
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
-void ShaderProgram::UpdateLights(const std::array<ShaderLight, ShaderProgram::MAX_NUM_LIGHTS> &lights)
+void ShaderProgram::UpdateLights(const std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> &lights)
 {
     std::copy(lights.cbegin(), lights.cend(), m_Lights.begin());
     glBindBuffer(GL_UNIFORM_BUFFER, m_LightUBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderProgram::MAX_NUM_LIGHTS * sizeof(ShaderLight), m_Lights.data());
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, ShaderProgram::MAX_NUM_LIGHTS * sizeof(Light), m_Lights.data());
 }
 
 /*

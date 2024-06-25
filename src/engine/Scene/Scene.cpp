@@ -243,7 +243,7 @@ void Scene::Draw()
 
     auto numLightsInShader = std::min(lights.size_hint(), ShaderProgram::MAX_NUM_LIGHTS);
 
-    std::array<ShaderLight, ShaderProgram::MAX_NUM_LIGHTS> selectedLights;
+    std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> selectedLights;
 
     // TODO: get closest/strongest lights first, up to max size shader supports
     // Currently just grabs first because it's easy
@@ -253,10 +253,11 @@ void Scene::Draw()
         if (it_lights != lights.end())
         {
             auto &position = m_Registry.get<Transform>(*it_lights);
-            auto &properties = m_Registry.get<Light>(*it_lights);
+            auto &light = m_Registry.get<Light>(*it_lights);
 
+            selectedLights[i].color = light.color;
             selectedLights[i].position = (glm::vec4(position.GetPosition(), 1.0f));
-            selectedLights[i].properties = properties;
+            // selectedLights[i].properties = properties;
             it_lights++;
         }
     }
