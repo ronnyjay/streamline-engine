@@ -330,7 +330,7 @@ void Application::Run()
         {
             m_CurrentMonitor = monitor;
 
-            Logger::Info("Current monitor detected: %s.\n", m_CurrentMonitor->m_Title);
+            Logger::Info("Current monitor detected: %s.\n", m_CurrentMonitor->title);
         }
 
         ProcessInput(deltaTime);
@@ -428,7 +428,7 @@ void Application::Run()
                                     {
                                         return false;
                                     }
-                                    *text = vector[index]->m_Title;
+                                    *text = vector[index]->title;
 
                                     return true;
                                 },
@@ -453,13 +453,13 @@ void Application::Run()
                         switch (m_DisplayMode)
                         {
                         case Fullscreen:
-                            resolutionIndex = &m_CurrentMonitor->m_ResolutionFullscreen;
+                            resolutionIndex = &m_CurrentMonitor->resolutionFullscreen;
                             break;
                         case Windowed:
-                            resolutionIndex = &m_CurrentMonitor->m_ResolutionWindowed;
+                            resolutionIndex = &m_CurrentMonitor->resolutionWindowed;
                             break;
                         case Borderless:
-                            resolutionIndex = &m_CurrentMonitor->m_ResolutionBorderless;
+                            resolutionIndex = &m_CurrentMonitor->resolutionBorderless;
                             break;
                         }
 
@@ -478,10 +478,10 @@ void Application::Run()
 
                                     return true;
                                 },
-                                static_cast<void *>(&m_CurrentMonitor->m_Resolutions),
-                                m_CurrentMonitor->m_Resolutions.size()))
+                                static_cast<void *>(&m_CurrentMonitor->resolutions),
+                                m_CurrentMonitor->resolutions.size()))
                         {
-                            SetResolution(m_CurrentMonitor->m_Resolutions[*resolutionIndex]);
+                            SetResolution(m_CurrentMonitor->resolutions[*resolutionIndex]);
                         }
 
                         if (m_DisplayMode == Borderless)
@@ -637,8 +637,8 @@ Monitor *const Application::GetCurrentMonitor() const
     {
         auto monitor = m_Monitors[i];
 
-        bool overlapX = windowX >= monitor->m_PositionX && windowX < monitor->m_PositionX + monitor->m_Width;
-        bool overlapY = windowY >= monitor->m_PositionY && windowY < monitor->m_PositionY + monitor->m_Height;
+        bool overlapX = windowX >= monitor->positionX && windowX < monitor->positionX + monitor->width;
+        bool overlapY = windowY >= monitor->positionY && windowY < monitor->positionY + monitor->height;
 
         if (overlapX && overlapY)
         {
@@ -727,35 +727,35 @@ void Application::SetScenePrev()
 
 void Application::SetResolution(const Resolution resolution)
 {
-    int width = resolution.m_Width;
-    int height = resolution.m_Height;
+    int width = resolution.width;
+    int height = resolution.height;
 
     if (m_DisplayMode == Fullscreen)
     {
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, width, height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, width, height, GLFW_DONT_CARE);
 
         bool found = false;
 
-        for (size_t i = 0; i < m_PrimaryMonitor->m_Resolutions.size(); i++)
+        for (size_t i = 0; i < m_PrimaryMonitor->resolutions.size(); i++)
         {
-            Resolution res = m_PrimaryMonitor->m_Resolutions[i];
+            Resolution res = m_PrimaryMonitor->resolutions[i];
 
-            if (width == res.m_Width && height == res.m_Height)
+            if (width == res.width && height == res.height)
             {
-                m_PrimaryMonitor->m_ResolutionFullscreen = i;
+                m_PrimaryMonitor->resolutionFullscreen = i;
                 found = true;
             }
         }
 
         if (!found)
         {
-            m_PrimaryMonitor->m_ResolutionFullscreen = -1;
+            m_PrimaryMonitor->resolutionFullscreen = -1;
         }
     }
     else if (m_DisplayMode == Windowed)
     {
-        float scaleX = m_CurrentMonitor->m_ScaleX;
-        float scaleY = m_CurrentMonitor->m_ScaleY;
+        float scaleX = m_CurrentMonitor->scaleX;
+        float scaleY = m_CurrentMonitor->scaleY;
 
         glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
         glfwSetWindowSize(m_Window, width / scaleX, height / scaleY);
@@ -763,20 +763,20 @@ void Application::SetResolution(const Resolution resolution)
 
         bool found = false;
 
-        for (size_t i = 0; i < m_CurrentMonitor->m_Resolutions.size(); i++)
+        for (size_t i = 0; i < m_CurrentMonitor->resolutions.size(); i++)
         {
-            Resolution res = m_CurrentMonitor->m_Resolutions[i];
+            Resolution res = m_CurrentMonitor->resolutions[i];
 
-            if (width == res.m_Width && height == res.m_Height)
+            if (width == res.width && height == res.height)
             {
-                m_CurrentMonitor->m_ResolutionWindowed = i;
+                m_CurrentMonitor->resolutionWindowed = i;
                 found = true;
             }
         }
 
         if (!found)
         {
-            m_CurrentMonitor->m_ResolutionWindowed = -1;
+            m_CurrentMonitor->resolutionWindowed = -1;
         }
     }
 
@@ -795,22 +795,21 @@ void Application::SetDisplayMode(const DisplayMode mode)
     if (mode == Fullscreen)
     {
         // Get the primary monitor's current resolution
-        Resolution current = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionFullscreen];
+        Resolution current = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolutionFullscreen];
 
         // Set the window monitor to the primary monitor
         glfwSetWindowMonitor(
             m_Window,
             nullptr,
-            m_PrimaryMonitor->m_PositionX,
-            m_PrimaryMonitor->m_PositionY,
-            m_PrimaryMonitor->m_Width,
-            m_PrimaryMonitor->m_Height,
+            m_PrimaryMonitor->positionX,
+            m_PrimaryMonitor->positionY,
+            m_PrimaryMonitor->width,
+            m_PrimaryMonitor->height,
             0);
-        glfwSetWindowMonitor(
-            m_Window, m_PrimaryMonitor->m_Monitor, 0, 0, current.m_Width, current.m_Height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
 
         // Resize framebuffer
-        m_Framebuffer->Resize(current.m_Width, current.m_Height);
+        m_Framebuffer->Resize(current.width, current.height);
     }
 
     if (mode == Borderless)
@@ -830,17 +829,17 @@ void Application::SetDisplayMode(const DisplayMode mode)
         glfwSetWindowMonitor(
             m_Window,
             nullptr,
-            m_PrimaryMonitor->m_PositionX,
-            m_PrimaryMonitor->m_PositionY,
-            m_PrimaryMonitor->m_Width,
-            m_PrimaryMonitor->m_Height,
+            m_PrimaryMonitor->positionX,
+            m_PrimaryMonitor->positionY,
+            m_PrimaryMonitor->width,
+            m_PrimaryMonitor->height,
             0);
 
         // Use the primary monitor's highest resolution
-        Resolution highest = m_PrimaryMonitor->m_Resolutions[m_PrimaryMonitor->m_ResolutionBorderless];
+        Resolution highest = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolutionBorderless];
 
         // Resize framebuffer
-        m_Framebuffer->Resize(highest.m_Width, highest.m_Height);
+        m_Framebuffer->Resize(highest.width, highest.height);
     }
 
     if (mode == Windowed)
@@ -901,13 +900,13 @@ Application::~Application()
     switch (m_DisplayMode)
     {
     case Fullscreen:
-        resolutionIndex = m_PrimaryMonitor->m_ResolutionFullscreen;
+        resolutionIndex = m_PrimaryMonitor->resolutionFullscreen;
         break;
     case Windowed:
-        resolutionIndex = m_PrimaryMonitor->m_ResolutionWindowed;
+        resolutionIndex = m_PrimaryMonitor->resolutionWindowed;
         break;
     case Borderless:
-        resolutionIndex = m_PrimaryMonitor->m_ResolutionBorderless;
+        resolutionIndex = m_PrimaryMonitor->resolutionBorderless;
         break;
     }
 
@@ -917,10 +916,10 @@ Application::~Application()
     }
     else
     {
-        Resolution current = m_PrimaryMonitor->m_Resolutions[resolutionIndex];
+        Resolution current = m_PrimaryMonitor->resolutions[resolutionIndex];
 
-        width = current.m_Width;
-        height = current.m_Height;
+        width = current.width;
+        height = current.height;
     }
 
     m_VideoConfig.Set("setting.defaultres", width);

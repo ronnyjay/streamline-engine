@@ -28,93 +28,95 @@ typedef std::unordered_map<std::string, Texture> TextureMap;
 
 struct Resolution
 {
-    Resolution(const int width, const int height)
-        : m_Width(width)
-        , m_Height(height)
+    Resolution(const int resWidth, const int resHeight)
+        : width(resWidth)
+        , height(resHeight)
     {
     }
 
     bool operator==(const Resolution &other) const
     {
-        return m_Width == other.m_Width && m_Height == other.m_Height;
+        return width == other.width && height == other.height;
     }
 
     bool operator<(const Resolution &other) const
     {
-        if (m_Width != other.m_Width)
+        if (width != other.width)
         {
-            return m_Width < other.m_Width;
+            return width < other.width;
         }
 
-        return m_Height < other.m_Height;
+        return height < other.height;
     }
 
-    int m_Width;
-    int m_Height;
+    int width;
+    int height;
 
-    mutable char m_TextFormat[32];
+    mutable char format[32];
 
     const char *Format() const
     {
-        std::snprintf(m_TextFormat, sizeof(m_TextFormat), "%dx%d", m_Width, m_Height);
-        return m_TextFormat;
+        std::snprintf(format, sizeof(format), "%dx%d", width, height);
+        return format;
     }
+
+  private:
 };
 
 typedef std::vector<Resolution> ResolutionList;
 
 struct Monitor
 {
-    Monitor(GLFWmonitor *monitor)
-        : m_Monitor(monitor)
-        , m_Title(glfwGetMonitorName(monitor))
-        , m_ResolutionWindowed(-1)
+    Monitor(GLFWmonitor *glMonitor)
+        : monitor(glMonitor)
+        , title(glfwGetMonitorName(glMonitor))
+        , resolutionWindowed(-1)
     {
-        glfwGetMonitorWorkarea(monitor, &m_PositionX, &m_PositionY, &m_Width, &m_Height);
-        glfwGetMonitorContentScale(monitor, &m_ScaleX, &m_ScaleY);
+        glfwGetMonitorWorkarea(glMonitor, &positionX, &positionY, &width, &height);
+        glfwGetMonitorContentScale(glMonitor, &scaleX, &scaleY);
 
         int count;
-        const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
+        const GLFWvidmode *modes = glfwGetVideoModes(glMonitor, &count);
 
         for (int i = 0; i < count; i++)
         {
-            m_Resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
+            resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
         }
 
-        m_Resolutions.erase(std::unique(m_Resolutions.begin(), m_Resolutions.end()), m_Resolutions.end());
+        resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
 
-        m_ResolutionFullscreen = m_Resolutions.size() - 1;
-        m_ResolutionBorderless = m_Resolutions.size() - 1;
+        resolutionFullscreen = resolutions.size() - 1;
+        resolutionBorderless = resolutions.size() - 1;
     }
 
     bool operator==(const Monitor &other)
     {
-        return m_Monitor == other.m_Monitor;
+        return monitor == other.monitor;
     }
 
     bool operator!=(const Monitor &other)
     {
-        return m_Monitor != other.m_Monitor;
+        return monitor != other.monitor;
     }
 
-    GLFWmonitor *m_Monitor;
+    GLFWmonitor *monitor;
 
-    int m_Width;
-    int m_Height;
+    int width;
+    int height;
 
-    int m_PositionX;
-    int m_PositionY;
+    int positionX;
+    int positionY;
 
-    float m_ScaleX;
-    float m_ScaleY;
+    float scaleX;
+    float scaleY;
 
-    const char *m_Title;
+    const char *title;
 
-    int m_ResolutionFullscreen;
-    int m_ResolutionWindowed;
-    int m_ResolutionBorderless;
+    int resolutionFullscreen;
+    int resolutionWindowed;
+    int resolutionBorderless;
 
-    ResolutionList m_Resolutions;
+    ResolutionList resolutions;
 };
 
 typedef std::vector<Monitor *> MonitorList;
