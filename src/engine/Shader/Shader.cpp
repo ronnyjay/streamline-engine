@@ -34,7 +34,7 @@ bool ShaderProgram::Compile()
     {
         glGetProgramInfoLog(m_ID, 1024, NULL, infoLog);
 
-        Logger::warn("Shader program linking failed: %s\n", infoLog);
+        Logger::Warn("Shader program linking failed: %s\n", infoLog);
         return false;
     }
 
@@ -160,7 +160,7 @@ bool ShaderProgram::CheckCompileErrors(unsigned int shader)
     {
         glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 
-        Logger::err("Shader compilation failed: %s\n", infoLog);
+        Logger::Err("Shader compilation failed: %s\n", infoLog);
         return false;
     }
 
@@ -186,7 +186,7 @@ bool ShaderProgram::AddShader(const std::string &path, GLint shaderType)
     }
     catch (std::ifstream::failure &e)
     {
-        Logger::err("Error reading shader file: %s\n", e.what());
+        Logger::Err("Error reading shader file: %s\n", e.what());
         return false;
     }
 

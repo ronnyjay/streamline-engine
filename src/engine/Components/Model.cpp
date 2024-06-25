@@ -9,7 +9,7 @@ using namespace engine;
 
 void Model::Load(const std::basic_string<char> &path)
 {
-    Logger::info("Loading model: %s\n", path.c_str());
+    Logger::Info("Loading model: %s\n", path.c_str());
     m_Path = path;
 
     Assimp::Importer importer;
@@ -19,12 +19,12 @@ void Model::Load(const std::basic_string<char> &path)
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        Logger::warn("Error loading model: %s\n", importer.GetErrorString());
+        Logger::Warn("Error loading model: %s\n", importer.GetErrorString());
     }
 
     ProcessNode(scene->mRootNode, scene);
 
-    Logger::info("Model loaded successfully.\n");
+    Logger::Info("Model loaded successfully.\n");
 }
 
 Model::~Model()

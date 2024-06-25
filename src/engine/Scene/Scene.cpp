@@ -31,7 +31,7 @@ Entity Scene::CreateEntity(const std::string &identifier)
     entity.AddComponent<Children>();
     entity.AddComponent<Transform>();
 
-    Logger::info("Entity created: \"%s\".\n", identifier.c_str());
+    Logger::Info("Entity created: \"%s\".\n", identifier.c_str());
 
     return entity;
 }
@@ -46,7 +46,7 @@ Entity Scene::CreateChildEntity(const Entity &parent, const std::string &identif
     childrenComponent.children.emplace_back(child);
     parentComponent.parent = parent;
 
-    Logger::info("Entity created as child: \"%s\".\n", identifier.c_str());
+    Logger::Info("Entity created as child: \"%s\".\n", identifier.c_str());
 
     return child;
 }
@@ -63,7 +63,7 @@ void Scene::DestroyEntity(const Entity entity)
 
     m_Registry.destroy(entity);
 
-    Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.identifier.c_str());
+    Logger::Info("Entity destroyed: \"%s\".\n", identifierComponent.identifier.c_str());
 }
 
 void Scene::Update(const float dt)

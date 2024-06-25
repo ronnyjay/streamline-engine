@@ -25,7 +25,7 @@ class Config
 
         if (!(stream >> value))
         {
-            Logger::err("Type conversion failed for key: \"%s\".\n", key.c_str());
+            Logger::Err("Type conversion failed for key: \"%s\".\n", key.c_str());
 
             return T{};
         }

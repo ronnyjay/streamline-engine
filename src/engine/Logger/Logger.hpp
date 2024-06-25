@@ -18,9 +18,9 @@ struct Logger
     {
     }
 
-    static void info(const std::basic_string<char>, ...);
-    static void warn(const std::basic_string<char>, ...);
-    static void err(const std::basic_string<char>, ...);
+    static void Info(const std::basic_string<char>, ...);
+    static void Warn(const std::basic_string<char>, ...);
+    static void Err(const std::basic_string<char>, ...);
 };
 
 }; // namespace engine

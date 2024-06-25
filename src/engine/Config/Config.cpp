@@ -12,33 +12,33 @@ Config::Config(std::filesystem::path path)
 
 void Config::Load()
 {
-    Logger::info("Loading configuration.\n");
+    Logger::Info("Loading configuration.\n");
 
     if (!std::filesystem::exists(m_Directory))
     {
-        Logger::warn("Directory not found: \"%s\".\n", m_Directory.c_str());
+        Logger::Warn("Directory not found: \"%s\".\n", m_Directory.c_str());
 
         if (std::filesystem::create_directories(m_Directory))
         {
-            Logger::info("Created directory: \"%s\".\n", m_Directory.c_str());
+            Logger::Info("Created directory: \"%s\".\n", m_Directory.c_str());
         }
         else
         {
-            Logger::err("Failed to create directory: \"%s\".\n", m_Directory.c_str());
+            Logger::Err("Failed to create directory: \"%s\".\n", m_Directory.c_str());
         }
     }
 
     if (!std::filesystem::exists(m_Path))
     {
-        Logger::warn("File not found: \"%s\".\n", m_Path.filename().c_str());
+        Logger::Warn("File not found: \"%s\".\n", m_Path.filename().c_str());
 
         if (std::ofstream(m_Path))
         {
-            Logger::info("Created file: \"%s\".\n", m_Path.filename().c_str());
+            Logger::Info("Created file: \"%s\".\n", m_Path.filename().c_str());
         }
         else
         {
-            Logger::err("Failed to create file: \"%s\".\n", m_Path.filename().c_str());
+            Logger::Err("Failed to create file: \"%s\".\n", m_Path.filename().c_str());
         }
 
         return;
@@ -48,7 +48,7 @@ void Config::Load()
 
     if (!file.is_open())
     {
-        Logger::warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
+        Logger::Warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
 
         return;
     }
@@ -73,13 +73,13 @@ void Config::Load()
 
 void Config::Store()
 {
-    Logger::info("Saving configuration.\n");
+    Logger::Info("Saving configuration.\n");
 
     std::ofstream file(m_Path);
 
     if (!file.is_open())
     {
-        Logger::warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
+        Logger::Warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
 
         return;
     }

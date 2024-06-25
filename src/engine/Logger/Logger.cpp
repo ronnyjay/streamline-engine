@@ -4,7 +4,7 @@
 
 using namespace engine;
 
-void Logger::info(const std::basic_string<char> format, ...)
+void Logger::Info(const std::basic_string<char> format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -17,7 +17,7 @@ void Logger::info(const std::basic_string<char> format, ...)
     va_end(args);
 }
 
-void Logger::warn(const std::basic_string<char> format, ...)
+void Logger::Warn(const std::basic_string<char> format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -30,7 +30,7 @@ void Logger::warn(const std::basic_string<char> format, ...)
     va_end(args);
 }
 
-void Logger::err(const std::basic_string<char> format, ...)
+void Logger::Err(const std::basic_string<char> format, ...)
 {
     va_list args;
     va_start(args, format);
