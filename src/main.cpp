@@ -1,13 +1,13 @@
-#include <engine/application/application.hpp>
-#include <engine/camera/orthographic.hpp>
-#include <engine/camera/perspective.hpp>
-#include <engine/entity/entity.hpp>
-#include <engine/model/model.hpp>
-#include <engine/resource_manager/resource_manager.hpp>
+#include <engine/Application/Application.hpp>
+#include <engine/Camera/Orthographic.hpp>
+#include <engine/Camera/Perspective.hpp>
+#include <engine/Entity/Entity.hpp>
+#include <engine/Model/Model.hpp>
+#include <engine/ResourceManager/ResourceManager.hpp>
 
-#include <engine/components/AABB.hpp>
-#include <engine/components/RigidBody.hpp>
-#include <engine/components/Transform.hpp>
+#include <engine/Components/AABB.hpp>
+#include <engine/Components/RigidBody.hpp>
+#include <engine/Components/Transform.hpp>
 
 engine::Application application(800, 600, "Streamline Engine");
 
