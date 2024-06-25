@@ -1,14 +1,14 @@
-#include <cstddef>
 #include <engine/Application/Application.hpp>
+
 #include <engine/Entity/Entity.hpp>
 #include <engine/Logger/Logger.hpp>
-#include <engine/Model/Model.hpp>
 #include <engine/Scene/Scene.hpp>
 
 #include <engine/Components/AABB.hpp>
 #include <engine/Components/Children.hpp>
 #include <engine/Components/Identifier.hpp>
 #include <engine/Components/Light.hpp>
+#include <engine/Components/Model.hpp>
 #include <engine/Components/Parent.hpp>
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
@@ -43,8 +43,8 @@ Entity Scene::CreateChildEntity(const Entity &parent, const std::string &identif
     auto &childrenComponent = m_Registry.get<Children>(parent);
     auto &parentComponent = m_Registry.get<Parent>(child);
 
-    childrenComponent.Emplace(child);
-    parentComponent.Set(parent);
+    childrenComponent.children.emplace_back(child);
+    parentComponent.parent = parent;
 
     Logger::info("Entity created as child: \"%s\".\n", identifier.c_str());
 
@@ -56,14 +56,14 @@ void Scene::DestroyEntity(const Entity entity)
     auto &identifierComponent = m_Registry.get<Identifier>(entity);
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
-    for (auto child : childrenComponent.Get())
+    for (auto child : childrenComponent.children)
     {
         DestroyEntity(Entity(child, this));
     }
 
     m_Registry.destroy(entity);
 
-    Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.Get().c_str());
+    Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.identifier.c_str());
 }
 
 void Scene::Update(const float dt)
@@ -139,7 +139,7 @@ void Scene::Update(const float dt)
 
     for (auto entity : transformView)
     {
-        if (transformView.get<Parent>(entity).Get() == entt::null)
+        if (transformView.get<Parent>(entity).parent == entt::null)
         {
             UpdateEntity(entity, glm::mat4(1.0f));
         }
@@ -187,7 +187,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
         }
     }
 
-    for (auto &child : childrenComponent.Get())
+    for (auto &child : childrenComponent.children)
     {
         auto &childTransformComponent = m_Registry.get<Transform>(child);
 
@@ -255,8 +255,8 @@ void Scene::Draw()
             auto &position = m_Registry.get<Transform>(*it_lights);
             auto &properties = m_Registry.get<Light>(*it_lights);
 
-            selectedLights[i].SetPosition(glm::vec4(position.GetPosition(), 1.0f));
-            selectedLights[i].SetProperties(properties);
+            selectedLights[i].position = (glm::vec4(position.GetPosition(), 1.0f));
+            selectedLights[i].properties = properties;
             it_lights++;
         }
     }
@@ -282,7 +282,7 @@ void Scene::Draw()
 
     for (auto entity : view)
     {
-        if (view.get<Parent>(entity).Get() == entt::null)
+        if (view.get<Parent>(entity).parent == entt::null)
         {
             DrawEntity(entity, glm::mat4(1.0f));
         }
@@ -312,7 +312,7 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
         }
     }
 
-    for (auto &child : m_Registry.get<Children>(entity).Get())
+    for (auto &child : m_Registry.get<Children>(entity).children)
     {
         DrawEntity(child, modelMatrix);
     }
@@ -326,7 +326,7 @@ void Scene::DrawDebugInfo()
 
         for (auto entity : view)
         {
-            if (view.get<Parent>(entity).Get() == entt::null)
+            if (view.get<Parent>(entity).parent == entt::null)
             {
                 DrawEntityDebugInfo(entity);
             }
@@ -345,7 +345,7 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
     auto rotation = transformComponent.GetRotation();
     auto scale = transformComponent.GetScale();
 
-    if (ImGui::TreeNode(identifierComponent.Get().c_str()))
+    if (ImGui::TreeNode(identifierComponent.identifier.c_str()))
     {
         ImGui::DragFloat("Translation X", &translation.x);
         ImGui::DragFloat("Translation Y", &translation.y);
@@ -357,9 +357,9 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::DragFloat("Scale Y", &scale.y);
         ImGui::DragFloat("Scale Z", &scale.z);
 
-        if (ImGui::TreeNode((identifierComponent.Get() + " Children").c_str()))
+        if (ImGui::TreeNode((identifierComponent.identifier + " Children").c_str()))
         {
-            for (auto &child : childrenComponent.Get())
+            for (auto &child : childrenComponent.children)
             {
                 DrawEntityDebugInfo(child);
             }

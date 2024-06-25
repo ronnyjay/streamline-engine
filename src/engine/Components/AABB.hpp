@@ -1,7 +1,6 @@
 #pragma once
 
-#include <engine/Mesh/Mesh.hpp>
-#include <engine/Model/Model.hpp>
+#include <engine/Components/Model.hpp>
 
 #include <glm/glm.hpp>
 

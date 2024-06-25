@@ -5,31 +5,17 @@
 namespace engine
 {
 
-class Parent
+struct Parent
 {
   public:
     Parent()
-        : m_Parent(entt::null)
+        : parent(entt::null)
     {
     }
 
     Parent(const Parent &) = default;
 
-    const entt::entity Get() const
-    {
-        return m_Parent;
-    }
-
-    void Set(const entt::entity parent)
-    {
-        if (parent != m_Parent)
-        {
-            m_Parent = parent;
-        }
-    }
-
-  private:
-    entt::entity m_Parent;
+    entt::entity parent;
 };
 
 }; // namespace engine

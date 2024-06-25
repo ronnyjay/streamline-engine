@@ -1,4 +1,4 @@
-#include <engine/Mesh/Mesh.hpp>
+#include <engine/Components/Mesh.hpp>
 
 using namespace engine;
 

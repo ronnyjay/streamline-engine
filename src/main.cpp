@@ -2,10 +2,10 @@
 #include <engine/Camera/Orthographic.hpp>
 #include <engine/Camera/Perspective.hpp>
 #include <engine/Entity/Entity.hpp>
-#include <engine/Model/Model.hpp>
 #include <engine/ResourceManager/ResourceManager.hpp>
 
 #include <engine/Components/AABB.hpp>
+#include <engine/Components/Model.hpp>
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
 

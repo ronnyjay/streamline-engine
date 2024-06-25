@@ -1,5 +1,5 @@
+#include <engine/Components/Model.hpp>
 #include <engine/Logger/Logger.hpp>
-#include <engine/Model/Model.hpp>
 #include <engine/ResourceManager/ResourceManager.hpp>
 #include <engine/stb/stb_image.hpp>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/Mesh/Mesh.hpp>
+#include <engine/Components/Mesh.hpp>
 #include <engine/ResourceManager/ResourceManager.hpp>
 
 #include <assimp/Importer.hpp>
