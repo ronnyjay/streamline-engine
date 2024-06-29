@@ -303,7 +303,7 @@ void Application::Run()
     double renderTimeStep;
     double renderAccumulator = 0.0;
 
-    double simulationTimeStep = 1.0 / 300.0;
+    double simulationTimeStep = 1.0 / 5000.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();

@@ -15,24 +15,24 @@ class AABB
   public:
     AABB(std::shared_ptr<Model>);
 
+    const glm::vec3 &Min() const;
+    const glm::vec3 &Max() const;
+
     void Translate(const glm::vec3 &);
     void Update(const std::vector<glm::vec3> &);
-    void Draw();
 
     bool Intersects(const AABB &);
 
-    bool GetColliding() const;
-    void SetColliding(const bool);
+    void Draw();
 
     ~AABB();
 
   private:
     glm::vec3 m_GlobalMin;
-    glm::vec3 m_LocalMin;
     glm::vec3 m_GlobalMax;
-    glm::vec3 m_LocalMax;
 
-    bool m_Colliding;
+    glm::vec3 m_LocalMin;
+    glm::vec3 m_LocalMax;
 
     unsigned int m_VAO;
     unsigned int m_VBO;

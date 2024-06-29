@@ -68,9 +68,18 @@ void Scene::DestroyEntity(const Entity entity)
 
 void Scene::Update(const float dt)
 {
-    auto physicsView = m_Registry.view<RigidBody, Transform>();
+    auto transformView = m_Registry.view<Transform, Parent, Children>();
 
-    // Integrate acceleration
+    for (auto entity : transformView)
+    {
+        if (transformView.get<Parent>(entity).parent == entt::null)
+        {
+            UpdateEntity(entity, glm::mat4(1.0f));
+        }
+    }
+
+    auto physicsView = m_Registry.view<AABB, RigidBody, Transform>();
+
     for (auto entity : physicsView)
     {
         RigidBody &body = physicsView.get<RigidBody>(entity);
@@ -83,66 +92,90 @@ void Scene::Update(const float dt)
             acceleration += glm::vec3(0.0f, -9.81f, 0.0f);
         }
 
-        glm::vec3 linearVelocity = body.GetLinearVelocity();
-
-        glm::vec3 k1 = dt * acceleration;
-        glm::vec3 k2 = dt * (acceleration + k1 * 0.5f);
-        glm::vec3 k3 = dt * (acceleration + k2 * 0.5f);
-        glm::vec3 k4 = dt * (acceleration + k3);
-
-        linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
-
-        body.SetLinearVelocity(linearVelocity);
+        body.SetLinearVelocity(body.GetLinearVelocity() + acceleration * dt);
     }
 
-    // Detect collisions
-    auto collisionView = m_Registry.view<AABB>();
-
-    for (auto a = collisionView.begin(); a != collisionView.end(); ++a)
+    for (auto a = physicsView.begin(); a != physicsView.end(); ++a)
     {
-        for (auto b = std::next(a); b != collisionView.end(); ++b)
+        for (auto b = std::next(a); b != physicsView.end(); ++b)
         {
-            auto &colliderA = collisionView.get<AABB>(*a);
-            auto &colliderB = collisionView.get<AABB>(*b);
+            auto &boxA = physicsView.get<AABB>(*a);
+            auto &boxB = physicsView.get<AABB>(*b);
+
+            if (boxA.Intersects(boxB))
+            {
+                RigidBody &bodyA = physicsView.get<RigidBody>(*a);
+                RigidBody &bodyB = physicsView.get<RigidBody>(*b);
+
+                Transform &transformA = physicsView.get<Transform>(*a);
+                Transform &transformB = physicsView.get<Transform>(*b);
+
+                glm::vec3 minA = boxA.Min();
+                glm::vec3 maxA = boxA.Max();
+
+                glm::vec3 minB = boxB.Min();
+                glm::vec3 maxB = boxB.Max();
+
+                glm::vec3 halfWidthA = (maxA - minA) * 0.5f;
+                glm::vec3 halfWidthB = (maxB - minB) * 0.5f;
+
+                glm::vec3 centerA = (maxA + minA) * 0.5f;
+                glm::vec3 centerB = (maxB + minB) * 0.5f;
+
+                glm::vec3 difference = (centerB - centerA);
+                glm::vec3 overlap = halfWidthA + halfWidthB - glm::abs(difference);
+
+                glm::vec3 collisionNormal;
+
+                if (overlap.x < overlap.y && overlap.y < overlap.z)
+                {
+                    collisionNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+                }
+                else if (overlap.y < overlap.z)
+                {
+                    collisionNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                }
+                else
+                {
+                    collisionNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+                }
+
+                if (glm::dot(difference, collisionNormal) < 0.0f)
+                {
+                    collisionNormal = -collisionNormal;
+                }
+
+                float collisionPenetration = glm::min(overlap.x, glm::min(overlap.y, overlap.z));
+
+                float totalMass = bodyA.GetInverseMass() + bodyB.GetInverseMass();
+
+                transformA.SetPosition(
+                    transformA.GetPosition() -
+                    collisionNormal * collisionPenetration * (bodyA.GetInverseMass() / totalMass));
+
+                transformB.SetPosition(
+                    transformB.GetPosition() +
+                    collisionNormal * collisionPenetration * (bodyB.GetInverseMass() / totalMass));
+
+                glm::vec3 contactVelocity = bodyB.GetLinearVelocity() - bodyA.GetLinearVelocity();
+
+                float e = (bodyA.GetElasticity() + bodyB.GetElasticity()) * 0.5f;
+                float j = (-(1.0f + e) * glm::dot(contactVelocity, collisionNormal)) / totalMass;
+
+                glm::vec3 fullImpulse = collisionNormal * j;
+
+                bodyA.ApplyLinearImpulse(-fullImpulse);
+                bodyB.ApplyLinearImpulse(fullImpulse);
+            }
         }
     }
 
-    // Integrate velocity
     for (auto entity : physicsView)
     {
         RigidBody &body = physicsView.get<RigidBody>(entity);
         Transform &transform = physicsView.get<Transform>(entity);
 
-        glm::vec3 linearVelocity = body.GetLinearVelocity();
-
-        glm::vec3 k1 = dt * linearVelocity;
-        glm::vec3 k2 = dt * (linearVelocity + k1 * 0.5f);
-        glm::vec3 k3 = dt * (linearVelocity + k2 * 0.5f);
-        glm::vec3 k4 = dt * (linearVelocity + k3);
-
-        linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
-
-        body.SetLinearVelocity(linearVelocity);
-    }
-
-    // Integrate position
-    for (auto entity : physicsView)
-    {
-        RigidBody &rigidBody = physicsView.get<RigidBody>(entity);
-        Transform &transform = physicsView.get<Transform>(entity);
-
-        transform.SetPosition(transform.GetPosition() + rigidBody.GetLinearVelocity() * dt);
-    }
-
-    // Update transforms
-    auto transformView = m_Registry.view<Transform, Parent, Children>();
-
-    for (auto entity : transformView)
-    {
-        if (transformView.get<Parent>(entity).parent == entt::null)
-        {
-            UpdateEntity(entity, glm::mat4(1.0f));
-        }
+        transform.SetPosition(transform.GetPosition() + (body.GetLinearVelocity() * dt));
     }
 }
 
@@ -245,8 +278,6 @@ void Scene::Draw()
 
     std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> selectedLights;
 
-    // TODO: get closest/strongest lights first, up to max size shader supports
-    // Currently just grabs first because it's easy
     auto it_lights = lights.begin();
     for (size_t i = 0; i < numLightsInShader; i++)
     {
@@ -257,7 +288,6 @@ void Scene::Draw()
 
             selectedLights[i].color = light.color;
             selectedLights[i].position = (glm::vec4(position.GetPosition(), 1.0f));
-            // selectedLights[i].properties = properties;
             it_lights++;
         }
     }
@@ -307,8 +337,6 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
         if (application.Flags().ShowCollisions)
         {
             colliderShader.Use();
-            colliderShader.SetBool("colliding", boundingComponent->GetColliding());
-
             boundingComponent->Draw();
         }
     }

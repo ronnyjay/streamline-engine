@@ -5,7 +5,6 @@ using namespace engine;
 AABB::AABB(std::shared_ptr<Model> model)
     : m_GlobalMin(FLT_MAX)
     , m_GlobalMax(-FLT_MAX)
-    , m_Colliding(false)
 {
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
@@ -24,6 +23,16 @@ AABB::AABB(std::shared_ptr<Model> model)
     m_LocalMax = m_GlobalMax;
 
     UpdateVertices();
+}
+
+const glm::vec3 &AABB::Min() const
+{
+    return m_GlobalMin;
+}
+
+const glm::vec3 &AABB::Max() const
+{
+    return m_GlobalMax;
 }
 
 void AABB::Translate(const glm::vec3 &translation)
@@ -51,13 +60,6 @@ void AABB::Update(const std::vector<glm::vec3> &vertices)
     UpdateVertices();
 }
 
-void AABB::Draw()
-{
-    glBindVertexArray(m_VAO);
-    glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
-
 bool AABB::Intersects(const AABB &other)
 {
     return (m_GlobalMin.x <= other.m_GlobalMax.x && m_GlobalMax.x >= other.m_GlobalMin.x) &&
@@ -65,14 +67,11 @@ bool AABB::Intersects(const AABB &other)
            (m_GlobalMin.z <= other.m_GlobalMax.z && m_GlobalMax.z >= other.m_GlobalMin.z);
 }
 
-bool AABB::GetColliding() const
+void AABB::Draw()
 {
-    return m_Colliding;
-}
-
-void AABB::SetColliding(const bool colliding)
-{
-    m_Colliding = colliding;
+    glBindVertexArray(m_VAO);
+    glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 void AABB::UpdateVertices()
