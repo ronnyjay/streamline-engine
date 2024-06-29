@@ -35,15 +35,18 @@ int main(int argc, char const *argv[])
     const std::string torusModelPath = "resources/objects/torus/torus.obj";
     const std::string pyramidModelPath = "resources/objects/pyramid/pyramid.obj";
     const std::string sphereModelPath = "resources/objects/sphere/sphere.obj";
+    const std::string planeModelPath = "resources/objects/plane/plane.obj";
 
     auto cubeModel = engine::ResourceManager::GetReference().Get<engine::Model>(cubeModelPath);
     auto torusModel = engine::ResourceManager::GetReference().Get<engine::Model>(torusModelPath);
     auto pyramidModel = engine::ResourceManager::GetReference().Get<engine::Model>(pyramidModelPath);
     auto sphereModel = engine::ResourceManager::GetReference().Get<engine::Model>(sphereModelPath);
+    auto planeModel = engine::ResourceManager::GetReference().Get<engine::Model>(planeModelPath);
 
     auto cube = scene.get()->CreateEntity("Cube");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
+    auto plane = scene.get()->CreateEntity("Plane");
     auto redLight = scene.get()->CreateEntity("Red Light Source");
     auto greenLight = scene.get()->CreateEntity("Green Light Source");
     auto blueLight = scene.get()->CreateEntity("Blue Light Source");
@@ -52,7 +55,6 @@ int main(int argc, char const *argv[])
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
     cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
-    cube.GetComponent<engine::RigidBody>().SetInverseMass(0.0f);
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
     torus.AddComponent<engine::AABB>(torusModel);
@@ -64,17 +66,23 @@ int main(int argc, char const *argv[])
     pyramid.AddComponent<engine::RigidBody>();
     pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
 
+    plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
+    plane.AddComponent<engine::AABB>(planeModel);
+    plane.AddComponent<engine::RigidBody>();
+    plane.GetComponent<engine::RigidBody>().SetInverseMass(0.0f);
+    plane.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, -10.0f, 0.0f));
+
     redLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     redLight.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
-    redLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, -10.0f, 0.0f));
+    redLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 10.0f, 0.0f));
 
     greenLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     greenLight.AddComponent<engine::Light>(glm::vec4(0.0, 1.0, 0.0, 1.0));
-    greenLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(1.0f, -10.0f, 0.0f));
+    greenLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(1.0f, 10.0f, 0.0f));
 
     blueLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     blueLight.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
-    blueLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, -5.0f, 0.0f));
+    blueLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 10.0f, 0.0f));
 
     application.Run();
 
