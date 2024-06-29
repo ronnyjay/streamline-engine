@@ -13,15 +13,10 @@ uniform sampler2D TexAmbient1;
 
 uniform vec3 viewPos;
 
-struct LightProperties
-{
-    vec4 color;
-};
-
 struct Light
 {
-    vec4 pos;
-    LightProperties properties;
+    vec4 color;
+    vec4 position;
 };
 
 #define MAX_NUM_LIGHTS 10
@@ -46,18 +41,18 @@ void main() {
 
     for (uint i = 0u; i < NumLights; i++)
     {
-        vec3 lightToFrag = lights[i].pos.xyz - FragPos;
+        vec3 lightToFrag = lights[i].position.xyz - FragPos;
         vec3 lightDir = normalize(lightToFrag);
         float distanceToLight = length(lightToFrag);
         float intensity = 1 / pow(distanceToLight * distanceToLight, 0.1);
 
         float diff = max(dot(norm, lightDir), 0.0);
 
-        vec3 diffuse = diff * (lights[i].properties.color.rgb + ObjectColor.rgb) * intensity;
+        vec3 diffuse = diff * (lights[i].color.rgb + ObjectColor.rgb) * intensity;
 
         vec3 reflectDir = reflect(-lightDir, norm);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);  // Shininess factor
-        vec4 specular = (spec * lights[i].properties.color * intensity) * SpecularEffect;
+        vec4 specular = (spec * lights[i].color * intensity) * SpecularEffect;
 
         lightColor += vec4(diffuse, 1.0) + specular;
     }
@@ -65,5 +60,4 @@ void main() {
     lightColor += AmbientEffect;
 
     FragColor = lightColor;
-    // FragColor = ObjectColor;
 }
