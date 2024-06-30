@@ -15,6 +15,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <iterator>
 #include <vector>
 
@@ -68,7 +69,7 @@ void Scene::DestroyEntity(const Entity entity)
 
 void Scene::Update(const float dt)
 {
-    auto transformView = m_Registry.view<Transform, Parent, Children>();
+    auto transformView = m_Registry.view<Parent, Children, Transform>();
 
     for (auto entity : transformView)
     {
@@ -85,7 +86,10 @@ void Scene::Update(const float dt)
         RigidBody &body = physicsView.get<RigidBody>(entity);
         Transform &transform = physicsView.get<Transform>(entity);
 
+        body.UpdateInertiaTensor(transform.GetRotation());
+
         glm::vec3 acceleration = body.GetForce() * body.GetInverseMass();
+        glm::vec3 angularAcceleration = body.GetInertiaTensor() * body.GetTorque();
 
         if (body.GetInverseMass() > 0)
         {
@@ -93,6 +97,7 @@ void Scene::Update(const float dt)
         }
 
         body.SetLinearVelocity(body.GetLinearVelocity() + acceleration * dt);
+        body.SetAngularVelocity(body.GetAngularVelocity() + angularAcceleration * dt);
     }
 
     for (auto a = physicsView.begin(); a != physicsView.end(); ++a)
@@ -126,18 +131,25 @@ void Scene::Update(const float dt)
                 glm::vec3 overlap = halfWidthA + halfWidthB - glm::abs(difference);
 
                 glm::vec3 collisionNormal;
+                glm::vec3 collisionPosition;
 
                 if (overlap.x < overlap.y && overlap.y < overlap.z)
                 {
                     collisionNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+                    collisionPosition =
+                        glm::vec3(centerA.x + glm::sign(difference.x) * halfWidthA.x, centerB.y, centerB.z);
                 }
                 else if (overlap.y < overlap.z)
                 {
                     collisionNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    collisionPosition =
+                        glm::vec3(centerB.x, centerA.y + glm::sign(difference.y) * halfWidthA.y, centerB.z);
                 }
                 else
                 {
                     collisionNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+                    collisionPosition =
+                        glm::vec3(centerB.x, centerB.y, centerA.z + glm::sign(difference.z) * halfWidthA.z);
                 }
 
                 if (glm::dot(difference, collisionNormal) < 0.0f)
@@ -157,15 +169,36 @@ void Scene::Update(const float dt)
                     transformB.GetPosition() +
                     collisionNormal * collisionPenetration * (bodyB.GetInverseMass() / totalMass));
 
-                glm::vec3 contactVelocity = bodyB.GetLinearVelocity() - bodyA.GetLinearVelocity();
+                glm::vec3 relativeA = collisionPosition - transformA.GetPosition();
+                glm::vec3 relativeB = collisionPosition - transformB.GetPosition();
+
+                glm::vec3 angularVelocityA = glm::cross(bodyA.GetAngularVelocity(), relativeA);
+                glm::vec3 angularVelocityB = glm::cross(bodyB.GetAngularVelocity(), relativeB);
+
+                glm::vec3 fullVelocityA = bodyA.GetLinearVelocity() + angularVelocityA;
+                glm::vec3 fullVelocityB = bodyB.GetLinearVelocity() + angularVelocityB;
+
+                glm::vec3 contactVelocity = fullVelocityB - fullVelocityA;
+
+                glm::vec3 inertiaA =
+                    glm::cross(bodyA.GetInertiaTensor() * glm::cross(relativeA, collisionNormal), relativeA);
+
+                glm::vec3 inertiaB =
+                    glm::cross(bodyB.GetInertiaTensor() * glm::cross(relativeB, collisionNormal), relativeB);
+
+                float angularEffect = glm::dot(inertiaA + inertiaB, collisionNormal);
 
                 float e = (bodyA.GetElasticity() + bodyB.GetElasticity()) * 0.5f;
-                float j = (-(1.0f + e) * glm::dot(contactVelocity, collisionNormal)) / totalMass;
+
+                float j = (-(1.0f + e) * glm::dot(contactVelocity, collisionNormal)) / (totalMass + angularEffect);
 
                 glm::vec3 fullImpulse = collisionNormal * j;
 
                 bodyA.ApplyLinearImpulse(-fullImpulse);
                 bodyB.ApplyLinearImpulse(fullImpulse);
+
+                bodyA.ApplyAngularImpulse(glm::cross(relativeA, -fullImpulse));
+                bodyB.ApplyAngularImpulse(glm::cross(relativeB, fullImpulse));
             }
         }
     }
@@ -175,7 +208,13 @@ void Scene::Update(const float dt)
         RigidBody &body = physicsView.get<RigidBody>(entity);
         Transform &transform = physicsView.get<Transform>(entity);
 
-        transform.SetPosition(transform.GetPosition() + (body.GetLinearVelocity() * dt));
+        transform.SetPosition(transform.GetPosition() + body.GetLinearVelocity() * dt);
+        transform.SetRotation(transform.GetRotation() + body.GetAngularVelocity() * dt);
+
+        float dampingFactor = 1.0f - 0.95f;
+        float frameDamping = std::pow(dampingFactor, dt);
+
+        body.SetAngularVelocity(body.GetAngularVelocity() * frameDamping);
     }
 }
 

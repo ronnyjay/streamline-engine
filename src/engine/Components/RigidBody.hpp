@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtx/matrix_operation.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace engine
 {
@@ -38,7 +40,11 @@ class RigidBody
 
     void ClearForces();
 
-    void UpdateInertiaTensor();
+    void InitCubeInertia(const glm::vec3 &);
+    void InitConeInertia(const glm::vec3 &);
+    void InitSphereInertia(const glm::vec3 &);
+
+    void UpdateInertiaTensor(const glm::vec3 &);
 
   private:
     float m_InverseMass;

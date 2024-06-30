@@ -106,3 +106,33 @@ void RigidBody::ClearForces()
     m_Force = glm::vec3(0.0f);
     m_Torque = glm::vec3(0.0f);
 }
+
+void RigidBody::InitCubeInertia(const glm::vec3 &dimensions)
+{
+    glm::vec3 dimSqr = dimensions * dimensions;
+
+    m_InverseInertia.x = (12.0f * m_InverseMass) / (dimSqr.y + dimSqr.z);
+    m_InverseInertia.y = (12.0f * m_InverseMass) / (dimSqr.x + dimSqr.z);
+    m_InverseInertia.z = (12.0f * m_InverseMass) / (dimSqr.x + dimSqr.y);
+}
+
+void RigidBody::InitConeInertia(const glm::vec3 &dimensions)
+{
+}
+
+void RigidBody::InitSphereInertia(const glm::vec3 &dimensions)
+{
+    float radius = glm::max(dimensions.x, glm::max(dimensions.y, dimensions.z));
+    float i = 2.5f * m_InverseMass / (radius * radius);
+
+    m_InverseInertia.x = i;
+    m_InverseInertia.y = i;
+    m_InverseInertia.z = i;
+}
+
+void RigidBody::UpdateInertiaTensor(const glm::vec3 &orientation)
+{
+    glm::quat q = glm::quat(orientation);
+
+    m_InverseInertiaTensor = glm::mat3_cast(q) * glm::diagonal3x3(m_InverseInertia) * glm::mat3_cast(glm::conjugate(q));
+}

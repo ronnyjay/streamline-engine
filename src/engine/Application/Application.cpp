@@ -303,7 +303,7 @@ void Application::Run()
     double renderTimeStep;
     double renderAccumulator = 0.0;
 
-    double simulationTimeStep = 1.0 / 5000.0;
+    double simulationTimeStep = 1.0 / 480.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();
@@ -335,7 +335,6 @@ void Application::Run()
 
         ProcessInput(deltaTime);
 
-        // Simulate physics at ~300hz
         while (simulationAccumulator >= simulationTimeStep)
         {
             m_CurrentScene->Update(simulationTimeStep);
