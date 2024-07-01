@@ -6,10 +6,6 @@ AABB::AABB(std::shared_ptr<Model> model)
     : m_GlobalMin(FLT_MAX)
     , m_GlobalMax(-FLT_MAX)
 {
-    glGenVertexArrays(1, &m_VAO);
-    glGenBuffers(1, &m_VBO);
-    glGenBuffers(1, &m_EBO);
-
     for (const auto &mesh : model.get()->GetMeshes())
     {
         for (const auto &vertex : mesh.GetVertices())
@@ -22,6 +18,10 @@ AABB::AABB(std::shared_ptr<Model> model)
     m_LocalMin = m_GlobalMin;
     m_LocalMax = m_GlobalMax;
 
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_EBO);
+
     UpdateVertices();
 }
 
@@ -33,14 +33,6 @@ const glm::vec3 &AABB::Min() const
 const glm::vec3 &AABB::Max() const
 {
     return m_GlobalMax;
-}
-
-void AABB::Translate(const glm::vec3 &translation)
-{
-    m_GlobalMin = m_LocalMin + translation;
-    m_GlobalMax = m_LocalMax + translation;
-
-    UpdateVertices();
 }
 
 void AABB::Update(const std::vector<glm::vec3> &vertices)
@@ -56,6 +48,14 @@ void AABB::Update(const std::vector<glm::vec3> &vertices)
 
     m_LocalMin = m_GlobalMin;
     m_LocalMax = m_GlobalMax;
+
+    UpdateVertices();
+}
+
+void AABB::Translate(const glm::vec3 &translation)
+{
+    m_GlobalMin = m_LocalMin + translation;
+    m_GlobalMax = m_LocalMax + translation;
 
     UpdateVertices();
 }

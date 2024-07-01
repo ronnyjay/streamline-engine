@@ -18,8 +18,8 @@ class AABB
     const glm::vec3 &Min() const;
     const glm::vec3 &Max() const;
 
-    void Translate(const glm::vec3 &);
     void Update(const std::vector<glm::vec3> &);
+    void Translate(const glm::vec3 &);
 
     bool Intersects(const AABB &);
 

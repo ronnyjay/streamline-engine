@@ -5,6 +5,7 @@
 #include <engine/Scene/Scene.hpp>
 
 #include <engine/Components/AABB.hpp>
+#include <engine/Components/BSphere.hpp>
 #include <engine/Components/Children.hpp>
 #include <engine/Components/Identifier.hpp>
 #include <engine/Components/Light.hpp>
@@ -224,38 +225,73 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
     auto *modelComponent = m_Registry.try_get<std::shared_ptr<Model>>(entity);
-    auto *boundingComponent = m_Registry.try_get<AABB>(entity);
+    auto *boxComponent = m_Registry.try_get<AABB>(entity);
+    auto *sphereComponent = m_Registry.try_get<BSphere>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
 
-    if (modelComponent && boundingComponent)
+    if (modelComponent)
     {
-        if (transformComponent.IsDirty())
+        if (boxComponent)
         {
-            // Isolate translation
-            glm::vec3 boundingTranslation(modelMatrix[3]);
-
-            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
+            if (transformComponent.IsDirty())
             {
-                // Remove translation from transform
-                glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+                // Isolate translation
+                glm::vec3 boundingTranslation(modelMatrix[3]);
 
-                std::vector<glm::vec3> vertices;
-
-                for (const auto &mesh : modelComponent->get()->GetMeshes())
+                if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
                 {
-                    for (const auto &vertex : mesh.GetVertices())
+                    // Remove translation from transform
+                    glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+
+                    std::vector<glm::vec3> vertices;
+
+                    for (const auto &mesh : modelComponent->get()->GetMeshes())
                     {
-                        vertices.push_back(glm::vec3(
-                            (boundingTransform *
-                             glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                        for (const auto &vertex : mesh.GetVertices())
+                        {
+                            vertices.push_back(glm::vec3(
+                                (boundingTransform *
+                                 glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                        }
                     }
+
+                    boxComponent->Update(vertices);
                 }
 
-                boundingComponent->Update(vertices);
+                boxComponent->Translate(boundingTranslation);
             }
+        }
 
-            boundingComponent->Translate(boundingTranslation);
+        if (sphereComponent)
+        {
+            if (transformComponent.IsDirty())
+            {
+                // Isolate translation
+                glm::vec3 boundingTranslation(modelMatrix[3]);
+
+                if (transformComponent.IsScaleChanged())
+                {
+                    // Remove translation from transform
+                    glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+
+                    std::vector<glm::vec3> vertices;
+
+                    for (const auto &mesh : modelComponent->get()->GetMeshes())
+                    {
+                        for (const auto &vertex : mesh.GetVertices())
+                        {
+                            vertices.push_back(glm::vec3(
+                                boundingTransform *
+                                glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
+                        }
+                    }
+
+                    sphereComponent->Update(vertices);
+                }
+
+                sphereComponent->Translate(boundingTranslation);
+            }
         }
     }
 
@@ -372,6 +408,15 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
     modelComponent->Draw(modelShader);
 
     if (auto *boundingComponent = m_Registry.try_get<AABB>(entity))
+    {
+        if (application.Flags().ShowCollisions)
+        {
+            colliderShader.Use();
+            boundingComponent->Draw();
+        }
+    }
+
+    if (auto *boundingComponent = m_Registry.try_get<BSphere>(entity))
     {
         if (application.Flags().ShowCollisions)
         {

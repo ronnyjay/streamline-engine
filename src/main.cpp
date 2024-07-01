@@ -5,6 +5,7 @@
 #include <engine/ResourceManager/ResourceManager.hpp>
 
 #include <engine/Components/AABB.hpp>
+#include <engine/Components/BSphere.hpp>
 #include <engine/Components/Model.hpp>
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
@@ -46,6 +47,7 @@ int main(int argc, char const *argv[])
     auto cube = scene.get()->CreateEntity("Cube");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
+    auto sphere = scene.get()->CreateEntity("Sphere");
     auto plane = scene.get()->CreateEntity("Plane");
     auto redLight = scene.get()->CreateEntity("Red Light Source");
     auto greenLight = scene.get()->CreateEntity("Green Light Source");
@@ -54,7 +56,7 @@ int main(int argc, char const *argv[])
     cube.AddComponent<std::shared_ptr<engine::Model>>(cubeModel);
     cube.AddComponent<engine::AABB>(cubeModel);
     cube.AddComponent<engine::RigidBody>();
-    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 50.0f, 0.0f));
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 10.0f, 0.0f));
     cube.GetComponent<engine::RigidBody>().InitCubeInertia(cube.GetComponent<engine::Transform>().GetScale());
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
@@ -68,6 +70,12 @@ int main(int argc, char const *argv[])
     pyramid.AddComponent<engine::RigidBody>();
     pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-5.0f, 10.0f, 0.0f));
     pyramid.GetComponent<engine::RigidBody>().InitCubeInertia(pyramid.GetComponent<engine::Transform>().GetScale());
+
+    sphere.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
+    sphere.AddComponent<engine::BSphere>(sphereModel);
+    sphere.AddComponent<engine::RigidBody>();
+    sphere.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 30.0f, 0.0f));
+    sphere.GetComponent<engine::RigidBody>().InitSphereInertia(sphere.GetComponent<engine::Transform>().GetScale());
 
     plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
     plane.AddComponent<engine::AABB>(planeModel);
