@@ -361,7 +361,7 @@ void Application::Run()
             }
 
             // Draw scene
-            m_CurrentScene->Draw();
+            m_CurrentScene->Draw(deltaTime);
 
             // End rendering to framebuffer
             m_Framebuffer->Unbind();

@@ -34,7 +34,7 @@ class Scene : public Debuggable
     void Update(const float);
     void UpdateEntity(const entt::entity &, const glm::mat4 &);
 
-    void Draw();
+    void Draw(const double);
     void DrawEntity(const entt::entity &, const glm::mat4 &);
 
     void DrawDebugInfo() override;

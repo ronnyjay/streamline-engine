@@ -1,3 +1,4 @@
+#include "engine/Components/Animator.hpp"
 #include <engine/Application/Application.hpp>
 
 #include <engine/Entity/Entity.hpp>
@@ -236,7 +237,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     }
 }
 
-void Scene::Draw()
+void Scene::Draw(const double deltaTime)
 {
     auto view = m_Registry.view<std::shared_ptr<Model>, Transform, Parent, Children>();
     auto lights = m_Registry.view<Light, Transform>();
@@ -285,6 +286,15 @@ void Scene::Draw()
     {
         if (view.get<Parent>(entity).parent == entt::null)
         {
+            // if object has an animator, update time step and get bone matrices
+            if (auto animator_sp = m_Registry.try_get<std::shared_ptr<Animator>>(entity))
+            {
+                auto animator = *animator_sp;
+                animator->UpdateAnimation(deltaTime);
+                auto transforms = animator->GetFinalBoneMatrices();
+                for (uint i = 0; i < transforms.size(); ++i)
+                    modelShader.SetMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+            }
             DrawEntity(entity, glm::mat4(1.0f));
         }
     }
@@ -299,6 +309,7 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
     auto &colliderShader = application.GetShader("Collider");
 
     modelShader.Use();
+
     modelShader.SetMat4("model", modelMatrix);
     modelComponent->Draw(modelShader);
 
