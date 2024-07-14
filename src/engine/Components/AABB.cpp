@@ -25,6 +25,20 @@ AABB::AABB(std::shared_ptr<Model> model)
     UpdateVertices();
 }
 
+AABB::AABB(AABB &&other)
+    : m_GlobalMin(other.m_GlobalMin)
+    , m_GlobalMax(other.m_GlobalMax)
+    , m_LocalMin(other.m_LocalMin)
+    , m_LocalMax(other.m_LocalMax)
+    , m_VAO(other.m_VAO)
+    , m_VBO(other.m_VBO)
+    , m_EBO(other.m_EBO)
+{
+    other.m_VAO = 0;
+    other.m_VBO = 0;
+    other.m_EBO = 0;
+}
+
 const glm::vec3 &AABB::Min() const
 {
     return m_GlobalMin;

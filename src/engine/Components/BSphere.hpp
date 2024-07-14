@@ -10,6 +10,8 @@ class BSphere
   public:
     BSphere(std::shared_ptr<Model>);
 
+    BSphere(BSphere &&);
+
     void Update(const std::vector<glm::vec3> &);
     void Translate(const glm::vec3 &);
 

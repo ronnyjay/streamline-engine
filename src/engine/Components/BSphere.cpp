@@ -52,6 +52,19 @@ BSphere::BSphere(std::shared_ptr<Model> model)
     UpdateVertices();
 }
 
+BSphere::BSphere(BSphere &&other)
+    : m_Radius(other.m_Radius)
+    , m_Center(other.m_Center)
+    , m_Translation(other.m_Translation)
+    , m_VAO(other.m_VAO)
+    , m_VBO(other.m_VBO)
+    , m_EBO(other.m_EBO)
+{
+    other.m_VAO = 0;
+    other.m_VBO = 0;
+    other.m_EBO = 0;
+}
+
 void BSphere::Update(const std::vector<glm::vec3> &vertices)
 {
     int vertexCount = 0;

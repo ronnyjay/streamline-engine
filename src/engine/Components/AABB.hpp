@@ -15,6 +15,8 @@ class AABB
   public:
     AABB(std::shared_ptr<Model>);
 
+    AABB(AABB &&);
+
     const glm::vec3 &Min() const;
     const glm::vec3 &Max() const;
 

@@ -6,6 +6,7 @@
 
 #include <engine/Components/AABB.hpp>
 #include <engine/Components/BSphere.hpp>
+#include <engine/Components/BVolume.hpp>
 #include <engine/Components/Children.hpp>
 #include <engine/Components/Identifier.hpp>
 #include <engine/Components/Light.hpp>
@@ -80,7 +81,7 @@ void Scene::Update(const float dt)
         }
     }
 
-    auto physicsView = m_Registry.view<AABB, RigidBody, Transform>();
+    auto physicsView = m_Registry.view<BoundingVolume, RigidBody, Transform>();
 
     for (auto entity : physicsView)
     {
@@ -105,8 +106,17 @@ void Scene::Update(const float dt)
     {
         for (auto b = std::next(a); b != physicsView.end(); ++b)
         {
-            auto &boxA = physicsView.get<AABB>(*a);
-            auto &boxB = physicsView.get<AABB>(*b);
+            auto &volumeA = physicsView.get<BoundingVolume>(*a);
+            auto &volumeB = physicsView.get<BoundingVolume>(*b);
+
+            // Temporarily handle collisions between AABB's only
+            if (!std::holds_alternative<AABB>(volumeA) || !std::holds_alternative<AABB>(volumeB))
+            {
+                continue;
+            }
+
+            auto &boxA = std::get<AABB>(volumeA);
+            auto &boxB = std::get<AABB>(volumeB);
 
             if (boxA.Intersects(boxB))
             {
@@ -225,74 +235,62 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
     auto *modelComponent = m_Registry.try_get<std::shared_ptr<Model>>(entity);
-    auto *boxComponent = m_Registry.try_get<AABB>(entity);
-    auto *sphereComponent = m_Registry.try_get<BSphere>(entity);
+    auto *boundingComponent = m_Registry.try_get<BoundingVolume>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
 
-    if (modelComponent)
+    if (modelComponent && boundingComponent && transformComponent.IsDirty())
     {
-        if (boxComponent)
+        // Get translation from transform
+        glm::vec3 translation = modelMatrix[3];
+
+        if (std::holds_alternative<AABB>(*boundingComponent))
         {
-            if (transformComponent.IsDirty())
+            if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
             {
-                // Isolate translation
-                glm::vec3 boundingTranslation(modelMatrix[3]);
+                // Remove translation from transform
+                glm::mat4 matrix(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
 
-                if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
+                // Apply transform to vertices
+                std::vector<glm::vec3> vertices;
+
+                for (const auto &mesh : modelComponent->get()->GetMeshes())
                 {
-                    // Remove translation from transform
-                    glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
-
-                    std::vector<glm::vec3> vertices;
-
-                    for (const auto &mesh : modelComponent->get()->GetMeshes())
+                    for (const auto &vertex : mesh.GetVertices())
                     {
-                        for (const auto &vertex : mesh.GetVertices())
-                        {
-                            vertices.push_back(glm::vec3(
-                                (boundingTransform *
-                                 glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
-                        }
+                        vertices.push_back(glm::vec3(
+                            matrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
                     }
-
-                    boxComponent->Update(vertices);
                 }
 
-                boxComponent->Translate(boundingTranslation);
+                std::visit([&vertices](auto &volume) { volume.Update(vertices); }, *boundingComponent);
             }
         }
 
-        if (sphereComponent)
+        if (std::holds_alternative<BSphere>(*boundingComponent))
         {
-            if (transformComponent.IsDirty())
+            if (transformComponent.IsScaleChanged())
             {
-                // Isolate translation
-                glm::vec3 boundingTranslation(modelMatrix[3]);
+                // Remove translation from transform
+                glm::mat4 matrix(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
 
-                if (transformComponent.IsScaleChanged())
+                // Apply transform to vertices
+                std::vector<glm::vec3> vertices;
+
+                for (const auto &mesh : modelComponent->get()->GetMeshes())
                 {
-                    // Remove translation from transform
-                    glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
-
-                    std::vector<glm::vec3> vertices;
-
-                    for (const auto &mesh : modelComponent->get()->GetMeshes())
+                    for (const auto &vertex : mesh.GetVertices())
                     {
-                        for (const auto &vertex : mesh.GetVertices())
-                        {
-                            vertices.push_back(glm::vec3(
-                                boundingTransform *
-                                glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
-                        }
+                        vertices.push_back(glm::vec3(
+                            matrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
                     }
-
-                    sphereComponent->Update(vertices);
                 }
 
-                sphereComponent->Translate(boundingTranslation);
+                std::visit([&vertices](auto &volume) { volume.Update(vertices); }, *boundingComponent);
             }
         }
+
+        std::visit([&translation](auto &volume) { volume.Translate(translation); }, *boundingComponent);
     }
 
     for (auto &child : childrenComponent.children)
@@ -422,6 +420,15 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
         {
             colliderShader.Use();
             boundingComponent->Draw();
+        }
+    }
+
+    if (auto *boundingComponent = m_Registry.try_get<BoundingVolume>(entity))
+    {
+        if (application.Flags().ShowCollisions)
+        {
+            colliderShader.Use();
+            std::visit([](auto &volume) { volume.Draw(); }, *boundingComponent);
         }
     }
 
