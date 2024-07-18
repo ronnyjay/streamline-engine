@@ -12,6 +12,11 @@ class BSphere
 
     BSphere(BSphere &&);
 
+    float Radius() const;
+
+    const glm::vec3 &Center() const;
+    const glm::vec3 &Translation() const;
+
     void Update(const std::vector<glm::vec3> &);
     void Translate(const glm::vec3 &);
 

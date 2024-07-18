@@ -174,9 +174,13 @@ Application::Application(const int width, const int height, const char *title)
     m_Shaders["Model"].AddShader("resources/shaders/model.fs", GL_FRAGMENT_SHADER);
     m_Shaders["Model"].Compile();
 
-    m_Shaders["Collider"].AddShader("resources/shaders/collider.vs", GL_VERTEX_SHADER);
-    m_Shaders["Collider"].AddShader("resources/shaders/collider.fs", GL_FRAGMENT_SHADER);
-    m_Shaders["Collider"].Compile();
+    m_Shaders["AABB"].AddShader("resources/shaders/AABB.vs", GL_VERTEX_SHADER);
+    m_Shaders["AABB"].AddShader("resources/shaders/AABB.fs", GL_FRAGMENT_SHADER);
+    m_Shaders["AABB"].Compile();
+
+    m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.vs", GL_VERTEX_SHADER);
+    m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.fs", GL_FRAGMENT_SHADER);
+    m_Shaders["BSphere"].Compile();
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);

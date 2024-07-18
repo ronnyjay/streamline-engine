@@ -65,6 +65,21 @@ BSphere::BSphere(BSphere &&other)
     other.m_EBO = 0;
 }
 
+float BSphere::Radius() const
+{
+    return m_Radius;
+}
+
+const glm::vec3 &BSphere::Center() const
+{
+    return m_Center;
+}
+
+const glm::vec3 &BSphere::Translation() const
+{
+    return m_Translation;
+}
+
 void BSphere::Update(const std::vector<glm::vec3> &vertices)
 {
     int vertexCount = 0;
@@ -100,9 +115,13 @@ void BSphere::Update(const std::vector<glm::vec3> &vertices)
 
 void BSphere::Translate(const glm::vec3 &translation)
 {
+    m_Center -= m_Translation;
+
     m_Translation = translation;
 
-    UpdateVertices();
+    m_Center += m_Translation;
+
+    // UpdateVertices();
 }
 
 bool BSphere::Intersects(const BSphere &other)

@@ -15,10 +15,15 @@
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
 
+#include <engine/Physics/Collision.hpp>
+
+#include <glm/ext/vector_float4.hpp>
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iterator>
+#include <variant>
 #include <vector>
 
 using namespace engine;
@@ -109,79 +114,28 @@ void Scene::Update(const float dt)
             auto &volumeA = physicsView.get<BoundingVolume>(*a);
             auto &volumeB = physicsView.get<BoundingVolume>(*b);
 
-            // Temporarily handle collisions between AABB's only
-            if (!std::holds_alternative<AABB>(volumeA) || !std::holds_alternative<AABB>(volumeB))
+            if (std::visit(IntersectionVisitor{}, volumeA, volumeB))
             {
-                continue;
-            }
+                CollisionResult collisionResult = std::visit(CollisionVisitor{}, volumeA, volumeB);
 
-            auto &boxA = std::get<AABB>(volumeA);
-            auto &boxB = std::get<AABB>(volumeB);
-
-            if (boxA.Intersects(boxB))
-            {
                 RigidBody &bodyA = physicsView.get<RigidBody>(*a);
                 RigidBody &bodyB = physicsView.get<RigidBody>(*b);
 
                 Transform &transformA = physicsView.get<Transform>(*a);
                 Transform &transformB = physicsView.get<Transform>(*b);
 
-                glm::vec3 minA = boxA.Min();
-                glm::vec3 maxA = boxA.Max();
-
-                glm::vec3 minB = boxB.Min();
-                glm::vec3 maxB = boxB.Max();
-
-                glm::vec3 halfWidthA = (maxA - minA) * 0.5f;
-                glm::vec3 halfWidthB = (maxB - minB) * 0.5f;
-
-                glm::vec3 centerA = (maxA + minA) * 0.5f;
-                glm::vec3 centerB = (maxB + minB) * 0.5f;
-
-                glm::vec3 difference = (centerB - centerA);
-                glm::vec3 overlap = halfWidthA + halfWidthB - glm::abs(difference);
-
-                glm::vec3 collisionNormal;
-                glm::vec3 collisionPosition;
-
-                if (overlap.x < overlap.y && overlap.y < overlap.z)
-                {
-                    collisionNormal = glm::vec3(1.0f, 0.0f, 0.0f);
-                    collisionPosition =
-                        glm::vec3(centerA.x + glm::sign(difference.x) * halfWidthA.x, centerB.y, centerB.z);
-                }
-                else if (overlap.y < overlap.z)
-                {
-                    collisionNormal = glm::vec3(0.0f, 1.0f, 0.0f);
-                    collisionPosition =
-                        glm::vec3(centerB.x, centerA.y + glm::sign(difference.y) * halfWidthA.y, centerB.z);
-                }
-                else
-                {
-                    collisionNormal = glm::vec3(0.0f, 0.0f, 1.0f);
-                    collisionPosition =
-                        glm::vec3(centerB.x, centerB.y, centerA.z + glm::sign(difference.z) * halfWidthA.z);
-                }
-
-                if (glm::dot(difference, collisionNormal) < 0.0f)
-                {
-                    collisionNormal = -collisionNormal;
-                }
-
-                float collisionPenetration = glm::min(overlap.x, glm::min(overlap.y, overlap.z));
-
                 float totalMass = bodyA.GetInverseMass() + bodyB.GetInverseMass();
 
                 transformA.SetPosition(
                     transformA.GetPosition() -
-                    collisionNormal * collisionPenetration * (bodyA.GetInverseMass() / totalMass));
+                    collisionResult.normal * collisionResult.penetration * (bodyA.GetInverseMass() / totalMass));
 
                 transformB.SetPosition(
                     transformB.GetPosition() +
-                    collisionNormal * collisionPenetration * (bodyB.GetInverseMass() / totalMass));
+                    collisionResult.normal * collisionResult.penetration * (bodyB.GetInverseMass() / totalMass));
 
-                glm::vec3 relativeA = collisionPosition - transformA.GetPosition();
-                glm::vec3 relativeB = collisionPosition - transformB.GetPosition();
+                glm::vec3 relativeA = collisionResult.position - transformA.GetPosition();
+                glm::vec3 relativeB = collisionResult.position - transformB.GetPosition();
 
                 glm::vec3 angularVelocityA = glm::cross(bodyA.GetAngularVelocity(), relativeA);
                 glm::vec3 angularVelocityB = glm::cross(bodyB.GetAngularVelocity(), relativeB);
@@ -192,18 +146,19 @@ void Scene::Update(const float dt)
                 glm::vec3 contactVelocity = fullVelocityB - fullVelocityA;
 
                 glm::vec3 inertiaA =
-                    glm::cross(bodyA.GetInertiaTensor() * glm::cross(relativeA, collisionNormal), relativeA);
+                    glm::cross(bodyA.GetInertiaTensor() * glm::cross(relativeA, collisionResult.normal), relativeA);
 
                 glm::vec3 inertiaB =
-                    glm::cross(bodyB.GetInertiaTensor() * glm::cross(relativeB, collisionNormal), relativeB);
+                    glm::cross(bodyB.GetInertiaTensor() * glm::cross(relativeB, collisionResult.normal), relativeB);
 
-                float angularEffect = glm::dot(inertiaA + inertiaB, collisionNormal);
+                float angularEffect = glm::dot(inertiaA + inertiaB, collisionResult.normal);
 
                 float e = (bodyA.GetElasticity() + bodyB.GetElasticity()) * 0.5f;
 
-                float j = (-(1.0f + e) * glm::dot(contactVelocity, collisionNormal)) / (totalMass + angularEffect);
+                float j =
+                    (-(1.0f + e) * glm::dot(contactVelocity, collisionResult.normal)) / (totalMass + angularEffect);
 
-                glm::vec3 fullImpulse = collisionNormal * j;
+                glm::vec3 fullImpulse = collisionResult.normal * j;
 
                 bodyA.ApplyLinearImpulse(-fullImpulse);
                 bodyB.ApplyLinearImpulse(fullImpulse);
@@ -365,24 +320,31 @@ void Scene::Draw()
         }
     }
 
+    auto camera = application.GetCurrentCamera();
+
+    auto projectionMatrix = camera->ProjectionMatrix();
+    auto viewMatrix = camera->ViewMatrix();
+    auto viewPos = camera->GetPosition();
+
     auto modelShader = application.GetShader("Model");
+
+    auto boxShader = application.GetShader("AABB");
+    auto sphereShader = application.GetShader("BSphere");
+
     modelShader.Use();
     modelShader.UpdateLights(selectedLights);
     modelShader.SetUInt("NumLights", numLightsInShader);
-
-    auto camera = application.GetCurrentCamera();
-    auto projectionMatrix = camera->ProjectionMatrix();
-    auto viewMatrix = camera->ViewMatrix();
-
     modelShader.SetMat4("projection", projectionMatrix);
     modelShader.SetMat4("view", viewMatrix);
-    modelShader.SetVec3("viewPos", camera->GetPosition());
+    modelShader.SetVec3("viewPos", viewPos);
 
-    auto colliderShader = application.GetShader("Collider");
-    colliderShader.Use();
+    boxShader.Use();
+    boxShader.SetMat4("projection", projectionMatrix);
+    boxShader.SetMat4("view", viewMatrix);
 
-    colliderShader.SetMat4("projection", projectionMatrix);
-    colliderShader.SetMat4("view", viewMatrix);
+    sphereShader.Use();
+    sphereShader.SetMat4("projection", projectionMatrix);
+    sphereShader.SetMat4("view", viewMatrix);
 
     for (auto entity : view)
     {
@@ -399,35 +361,29 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
     auto modelShader = application.GetShader("Model");
-    auto &colliderShader = application.GetShader("Collider");
+    auto boxShader = application.GetShader("AABB");
+    auto sphereShader = application.GetShader("BSphere");
 
     modelShader.Use();
     modelShader.SetMat4("model", modelMatrix);
+
     modelComponent->Draw(modelShader);
-
-    if (auto *boundingComponent = m_Registry.try_get<AABB>(entity))
-    {
-        if (application.Flags().ShowCollisions)
-        {
-            colliderShader.Use();
-            boundingComponent->Draw();
-        }
-    }
-
-    if (auto *boundingComponent = m_Registry.try_get<BSphere>(entity))
-    {
-        if (application.Flags().ShowCollisions)
-        {
-            colliderShader.Use();
-            boundingComponent->Draw();
-        }
-    }
 
     if (auto *boundingComponent = m_Registry.try_get<BoundingVolume>(entity))
     {
         if (application.Flags().ShowCollisions)
         {
-            colliderShader.Use();
+
+            if (std::holds_alternative<BSphere>(*boundingComponent))
+            {
+                sphereShader.Use();
+                sphereShader.SetVec3("translation", modelMatrix[3]);
+            }
+            else
+            {
+                boxShader.Use();
+            }
+
             std::visit([](auto &volume) { volume.Draw(); }, *boundingComponent);
         }
     }
