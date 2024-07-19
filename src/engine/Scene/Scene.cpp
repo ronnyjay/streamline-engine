@@ -124,6 +124,18 @@ void Scene::Update(const float dt)
                 Transform &transformA = physicsView.get<Transform>(*a);
                 Transform &transformB = physicsView.get<Transform>(*b);
 
+                bool isBoxA = std::holds_alternative<AABB>(volumeA);
+                bool isBoxB = std::holds_alternative<AABB>(volumeB);
+
+                // Box has been hit by sphere, negate normal
+                if ((!isBoxA || !isBoxB) && (isBoxA || isBoxB))
+                {
+                    if (isBoxA)
+                    {
+                        collisionResult.normal = -collisionResult.normal;
+                    }
+                }
+
                 float totalMass = bodyA.GetInverseMass() + bodyB.GetInverseMass();
 
                 transformA.SetPosition(

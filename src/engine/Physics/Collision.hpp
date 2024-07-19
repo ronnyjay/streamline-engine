@@ -4,6 +4,7 @@
 #include <engine/Components/AABB.hpp>
 #include <engine/Components/BSphere.hpp>
 
+#include <glm/ext/vector_float3.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
@@ -15,7 +16,6 @@ struct CollisionResult
 {
     glm::vec3 position;
     glm::vec3 normal;
-
     glm::float32 penetration;
 };
 
@@ -128,25 +128,17 @@ struct CollisionVisitor
 
         glm::vec3 delta = result.position - b.Center();
 
-        if (glm::length(delta) > 0.10f)
+        if (glm::dot(delta, delta) != 0.0f)
         {
             result.normal = glm::normalize(delta);
-            result.penetration = (b.Radius() - glm::length(delta));
         }
+        // Centers of each object are on top of eachother, NaN
         else
         {
-            result.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-            result.penetration = b.Radius();
+            result.normal = glm::vec3(1.0f, 0.0f, 0.0f);
         }
 
-        if (result.penetration > 0.10f)
-        {
-            result.position = b.Center() + result.normal * (result.penetration - 0.5f);
-        }
-        else
-        {
-            result.penetration = 0.0f;
-        }
+        result.penetration = b.Radius() - glm::length(delta);
 
         return result;
     }
