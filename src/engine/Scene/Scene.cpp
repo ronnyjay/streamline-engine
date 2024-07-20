@@ -1,3 +1,4 @@
+#include "imgui.h"
 #include <engine/Application/Application.hpp>
 
 #include <engine/Entity/Entity.hpp>
@@ -426,15 +427,14 @@ void Scene::DrawDebugInfo()
 
 void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 {
-    auto [identifierComponent, transformComponent, childrenComponent] =
-        m_Registry.get<Identifier, Transform, Children>(entity);
+    auto [identifier, transform, children] = m_Registry.get<Identifier, Transform, Children>(entity);
 
-    auto translation = transformComponent.GetPosition();
-    auto rotation = transformComponent.GetRotation();
-    auto scale = transformComponent.GetScale();
-
-    if (ImGui::TreeNode(identifierComponent.identifier.c_str()))
+    if (ImGui::TreeNode(identifier.identifier.c_str()))
     {
+        auto translation = transform.GetPosition();
+        auto rotation = transform.GetRotation();
+        auto scale = transform.GetScale();
+
         ImGui::DragFloat("Translation X", &translation.x);
         ImGui::DragFloat("Translation Y", &translation.y);
         ImGui::DragFloat("Translation Z", &translation.z);
@@ -445,9 +445,52 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::DragFloat("Scale Y", &scale.y);
         ImGui::DragFloat("Scale Z", &scale.z);
 
-        if (ImGui::TreeNode((identifierComponent.identifier + " Children").c_str()))
+        transform.SetPosition(translation);
+        transform.SetRotation(rotation);
+        transform.SetScale(scale);
+
+        if (auto *body = m_Registry.try_get<RigidBody>(entity))
         {
-            for (auto &child : childrenComponent.children)
+            auto mass = body->GetInverseMass();
+            auto elasticity = body->GetElasticity();
+            auto friction = body->GetFriction();
+            auto force = body->GetForce();
+            auto torque = body->GetTorque();
+            auto linearVelocity = body->GetLinearVelocity();
+            auto angularVelocity = body->GetAngularVelocity();
+
+            ImGui::DragFloat("Inverse Mass", &mass);
+            ImGui::DragFloat("Elasticity", &elasticity);
+            ImGui::DragFloat("Friction", &friction);
+            ImGui::DragFloat("Force X", &force.x);
+            ImGui::DragFloat("Force Y", &force.y);
+            ImGui::DragFloat("Force Z", &force.z);
+            ImGui::DragFloat("Torque X", &torque.x);
+            ImGui::DragFloat("Torque Y", &torque.y);
+            ImGui::DragFloat("Torque Z", &torque.z);
+            ImGui::DragFloat("Linear Velocity X", &linearVelocity.x);
+            ImGui::DragFloat("Linear Velocity Y", &linearVelocity.y);
+            ImGui::DragFloat("Linear Velocity Z", &linearVelocity.z);
+            ImGui::DragFloat("Angular Velocity X", &angularVelocity.x);
+            ImGui::DragFloat("Angular Velocity Y", &angularVelocity.y);
+            ImGui::DragFloat("Angular Velocity Z", &angularVelocity.z);
+
+            body->SetInverseMass(mass);
+            body->SetElasticity(elasticity);
+            body->SetFriction(friction);
+
+            body->ClearForces();
+
+            body->AddForce(force);
+            body->AddTorque(torque);
+
+            body->SetLinearVelocity(linearVelocity);
+            body->SetAngularVelocity(angularVelocity);
+        }
+
+        if (ImGui::TreeNode((identifier.identifier + " Children").c_str()))
+        {
+            for (auto &child : children.children)
             {
                 DrawEntityDebugInfo(child);
             }
@@ -457,8 +500,4 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 
         ImGui::TreePop();
     }
-
-    transformComponent.SetPosition(translation);
-    transformComponent.SetRotation(rotation);
-    transformComponent.SetScale(scale);
 }
