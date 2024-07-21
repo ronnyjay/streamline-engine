@@ -10,4 +10,4 @@ namespace engine
 
 typedef std::variant<AABB, BSphere> BoundingVolume;
 
-}
+} // namespace engine

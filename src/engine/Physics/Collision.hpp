@@ -1,9 +1,9 @@
 #pragma once
 
-#include <algorithm>
 #include <engine/Components/AABB.hpp>
 #include <engine/Components/BSphere.hpp>
 
+#include <glm/common.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -14,136 +14,127 @@ namespace engine
 
 struct CollisionResult
 {
-    glm::vec3 position;
     glm::vec3 normal;
-    glm::float32 penetration;
-};
 
-struct IntersectionVisitor
-{
-    bool operator()(const AABB &a, const AABB &b) const
-    {
-        bool intersectsX = a.Min().x <= b.Max().x && a.Max().x >= b.Min().x;
-        bool intersectsY = a.Min().y <= b.Max().y && a.Max().y >= b.Min().y;
-        bool intersectsZ = a.Min().z <= b.Max().z && a.Max().z >= b.Min().z;
+    // world coords.
+    glm::vec3 localA; // position a + collision point
+    glm::vec3 localB; // position b + collision point
 
-        return intersectsX && intersectsY && intersectsZ;
-    }
+    float penetration;
 
-    bool operator()(const BSphere &a, const BSphere &b) const
-    {
-        float radii = a.Radius() + b.Radius();
-        glm::vec3 delta = b.Center() - a.Center();
-
-        return glm::length(delta) < radii;
-    }
-
-    bool operator()(const AABB &a, const BSphere &b) const
-    {
-        glm::vec3 closestPoint;
-
-        closestPoint.x = std::max(a.Min().x, std::min(b.Center().x, a.Max().x));
-        closestPoint.y = std::max(a.Min().y, std::min(b.Center().y, a.Max().y));
-        closestPoint.z = std::max(a.Min().z, std::min(b.Center().z, a.Max().z));
-
-        glm::vec3 delta = closestPoint - b.Center();
-
-        return glm::length(delta) < b.Radius();
-    }
-
-    bool operator()(const BSphere &a, const AABB &b) const
-    {
-        return (*this)(b, a);
-    }
+    bool collided;
 };
 
 struct CollisionVisitor
 {
-    CollisionResult operator()(const AABB &a, const AABB &b)
+    CollisionResult operator()(const AABB &a, const AABB &b) const
     {
         CollisionResult result;
 
-        glm::vec3 minA = a.Min();
-        glm::vec3 minB = b.Min();
+        bool intersectsX = a.Min().x <= b.Max().x && a.Max().x >= b.Min().x;
+        bool intersectsY = a.Min().y <= b.Max().y && a.Max().y >= b.Min().y;
+        bool intersectsZ = a.Min().z <= b.Max().z && a.Max().z >= b.Min().z;
 
-        glm::vec3 maxA = a.Max();
-        glm::vec3 maxB = b.Max();
-
-        glm::vec3 halfWidthA = (maxA - minA) * 0.5f;
-        glm::vec3 halfWidthB = (maxB - minB) * 0.5f;
-
-        glm::vec3 centerA = (maxA + minA) * 0.5f;
-        glm::vec3 centerB = (maxB + minB) * 0.5f;
-
-        glm::vec3 difference = (centerB - centerA);
-        glm::vec3 overlap = halfWidthA + halfWidthB - glm::abs(difference);
-
-        if (overlap.x < overlap.y && overlap.y < overlap.z)
+        if (intersectsX && intersectsY && intersectsZ)
         {
-            result.normal = glm::vec3(1.0f, 0.0f, 0.0f);
-            result.position = glm::vec3(centerA.x + glm::sign(difference.x) * halfWidthA.x, centerB.y, centerB.z);
-        }
-        else if (overlap.y < overlap.z)
-        {
-            result.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-            result.position = glm::vec3(centerB.x, centerA.y + glm::sign(difference.y) * halfWidthA.y, centerB.z);
+            // clang-format off
+            static const glm::vec3 faces[6] = {
+                glm::vec3(-1.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, -1.0f, 0.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, -1.0f),
+                glm::vec3(0.0f, 0.0f, 1.0f)
+                
+            };
+
+            float distances[6] = {
+            (b.Max().x - a.Min().x),
+            (a.Max().x - b.Min().x),
+            (b.Max().y - a.Min().y),
+            (a.Max().y - b.Min().y),
+            (b.Max().z - a.Min().z),
+            (a.Max().z - b.Min().z)
+            };
+            // clang-format on
+
+            result.penetration = FLT_MAX;
+
+            for (int i = 0; i < 6; i++)
+            {
+                if (distances[i] < result.penetration)
+                {
+                    result.penetration = distances[i];
+                    result.normal = faces[i];
+                }
+            }
+
+            result.localA = (a.Max() + a.Min()) * 0.5f;
+            result.localB = (b.Max() + b.Min()) * 0.5f;
+            result.collided = true;
         }
         else
         {
-            result.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-            result.position = glm::vec3(centerB.x, centerB.y, centerA.z + glm::sign(difference.z) * halfWidthA.z);
+            result.collided = false;
         }
-
-        if (glm::dot(difference, result.normal) < 0.0f)
-        {
-            result.normal = -result.normal;
-        }
-
-        result.penetration = glm::min(overlap.x, glm::min(overlap.y, overlap.z));
 
         return result;
     }
 
-    CollisionResult operator()(const BSphere &a, const BSphere &b)
+    CollisionResult operator()(const BSphere &a, const BSphere &b) const
     {
         CollisionResult result;
 
         float radii = a.Radius() + b.Radius();
         glm::vec3 delta = b.Center() - a.Center();
 
-        result.normal = glm::normalize(delta);
-        result.penetration = radii - glm::length(delta);
-        result.position = a.Center() + result.normal * b.Radius() + result.normal;
+        if (glm::length(delta) < radii)
+        {
+            result.penetration = radii - glm::length(delta);
+            result.normal = glm::normalize(delta);
+            result.localA = a.Center() + result.normal * a.Radius();
+            result.localB = b.Center() - result.normal * b.Radius();
+            result.collided = true;
+        }
+        else
+        {
+            result.collided = false;
+        }
 
         return result;
     }
 
-    CollisionResult operator()(const AABB &a, const BSphere &b)
+    CollisionResult operator()(const AABB &a, const BSphere &b) const
     {
         CollisionResult result;
 
-        result.position.x = std::max(a.Min().x, std::min(b.Center().x, a.Max().x));
-        result.position.y = std::max(a.Min().y, std::min(b.Center().y, a.Max().y));
-        result.position.z = std::max(a.Min().z, std::min(b.Center().z, a.Max().z));
+        glm::vec3 boxExtents = (a.Max() - a.Min()) * 0.5f;
+        glm::vec3 boxCenter = (a.Max() + a.Min()) * 0.5f;
 
-        glm::vec3 delta = result.position - b.Center();
+        glm::vec3 delta = b.Center() - boxCenter;
 
-        if (glm::dot(delta, delta) != 0.0f)
+        glm::vec3 closestPoint = glm::clamp(delta, -boxExtents, boxExtents);
+        glm::vec3 localPoint = delta - closestPoint;
+
+        float distance = glm::length(localPoint);
+
+        if (distance < b.Radius())
         {
-            result.normal = glm::normalize(delta);
+            result.normal = glm::normalize(localPoint);
+            result.penetration = b.Radius() - distance;
+            result.localA = boxCenter;
+            result.localB = (b.Center());
+            result.collided = true;
         }
-        // Centers of each object are on top of eachother, NaN
         else
         {
-            result.normal = glm::vec3(1.0f, 0.0f, 0.0f);
+            result.collided = false;
         }
-
-        result.penetration = b.Radius() - glm::length(delta);
 
         return result;
     }
 
-    CollisionResult operator()(const BSphere &a, const AABB &b)
+    CollisionResult operator()(const BSphere &a, const AABB &b) const
     {
         return (*this)(b, a);
     }

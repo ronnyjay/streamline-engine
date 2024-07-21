@@ -115,40 +115,28 @@ void Scene::Update(const float dt)
             auto &volumeA = physicsView.get<BoundingVolume>(*a);
             auto &volumeB = physicsView.get<BoundingVolume>(*b);
 
-            if (std::visit(IntersectionVisitor{}, volumeA, volumeB))
-            {
-                CollisionResult collisionResult = std::visit(CollisionVisitor{}, volumeA, volumeB);
+            CollisionResult result = std::visit(CollisionVisitor{}, volumeA, volumeB);
 
+            if (result.collided)
+            {
                 RigidBody &bodyA = physicsView.get<RigidBody>(*a);
                 RigidBody &bodyB = physicsView.get<RigidBody>(*b);
 
                 Transform &transformA = physicsView.get<Transform>(*a);
                 Transform &transformB = physicsView.get<Transform>(*b);
 
-                bool isBoxA = std::holds_alternative<AABB>(volumeA);
-                bool isBoxB = std::holds_alternative<AABB>(volumeB);
-
-                // Box has been hit by sphere, negate normal
-                if ((!isBoxA || !isBoxB) && (isBoxA || isBoxB))
-                {
-                    if (isBoxA)
-                    {
-                        collisionResult.normal = -collisionResult.normal;
-                    }
-                }
-
                 float totalMass = bodyA.GetInverseMass() + bodyB.GetInverseMass();
 
                 transformA.SetPosition(
                     transformA.GetPosition() -
-                    collisionResult.normal * collisionResult.penetration * (bodyA.GetInverseMass() / totalMass));
+                    result.normal * result.penetration * (bodyA.GetInverseMass() / totalMass));
 
                 transformB.SetPosition(
                     transformB.GetPosition() +
-                    collisionResult.normal * collisionResult.penetration * (bodyB.GetInverseMass() / totalMass));
+                    result.normal * result.penetration * (bodyB.GetInverseMass() / totalMass));
 
-                glm::vec3 relativeA = collisionResult.position - transformA.GetPosition();
-                glm::vec3 relativeB = collisionResult.position - transformB.GetPosition();
+                glm::vec3 relativeA = result.localA - transformA.GetPosition();
+                glm::vec3 relativeB = result.localB - transformB.GetPosition();
 
                 glm::vec3 angularVelocityA = glm::cross(bodyA.GetAngularVelocity(), relativeA);
                 glm::vec3 angularVelocityB = glm::cross(bodyB.GetAngularVelocity(), relativeB);
@@ -159,19 +147,18 @@ void Scene::Update(const float dt)
                 glm::vec3 contactVelocity = fullVelocityB - fullVelocityA;
 
                 glm::vec3 inertiaA =
-                    glm::cross(bodyA.GetInertiaTensor() * glm::cross(relativeA, collisionResult.normal), relativeA);
+                    glm::cross(bodyA.GetInertiaTensor() * glm::cross(relativeA, result.normal), relativeA);
 
                 glm::vec3 inertiaB =
-                    glm::cross(bodyB.GetInertiaTensor() * glm::cross(relativeB, collisionResult.normal), relativeB);
+                    glm::cross(bodyB.GetInertiaTensor() * glm::cross(relativeB, result.normal), relativeB);
 
-                float angularEffect = glm::dot(inertiaA + inertiaB, collisionResult.normal);
+                float angularEffect = glm::dot(inertiaA + inertiaB, result.normal);
 
                 float e = (bodyA.GetElasticity() + bodyB.GetElasticity()) * 0.5f;
 
-                float j =
-                    (-(1.0f + e) * glm::dot(contactVelocity, collisionResult.normal)) / (totalMass + angularEffect);
+                float j = (-(1.0f + e) * glm::dot(contactVelocity, result.normal)) / (totalMass + angularEffect);
 
-                glm::vec3 fullImpulse = collisionResult.normal * j;
+                glm::vec3 fullImpulse = result.normal * j;
 
                 bodyA.ApplyLinearImpulse(-fullImpulse);
                 bodyB.ApplyLinearImpulse(fullImpulse);

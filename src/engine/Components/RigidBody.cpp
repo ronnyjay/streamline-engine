@@ -4,7 +4,7 @@ using namespace engine;
 
 RigidBody::RigidBody()
     : m_InverseMass(1.0f)
-    , m_Elasticity(0.8f)
+    , m_Elasticity(0.3f)
     , m_Friction(0.8f)
     , m_LinearVelocity(0.0f)
     , m_Force(0.0f)
