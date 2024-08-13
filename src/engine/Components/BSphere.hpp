@@ -9,7 +9,6 @@ class BSphere
 {
   public:
     BSphere(std::shared_ptr<Model>);
-
     BSphere(BSphere &&);
 
     float Radius() const;
@@ -19,8 +18,6 @@ class BSphere
 
     void Update(const std::vector<glm::vec3> &);
     void Translate(const glm::vec3 &);
-
-    bool Intersects(const BSphere &);
 
     void Draw();
 

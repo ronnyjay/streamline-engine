@@ -120,13 +120,6 @@ void BSphere::Translate(const glm::vec3 &translation)
     m_Translation = translation;
 
     m_Center += m_Translation;
-
-    // UpdateVertices();
-}
-
-bool BSphere::Intersects(const BSphere &other)
-{
-    return false;
 }
 
 void BSphere::Draw()

@@ -18,6 +18,9 @@ AABB::AABB(std::shared_ptr<Model> model)
     m_LocalMin = m_GlobalMin;
     m_LocalMax = m_GlobalMax;
 
+    m_Center = (m_GlobalMax + m_GlobalMin) * 0.5f;
+    m_HalfDimensions = (m_GlobalMax - m_GlobalMin) * 0.5f;
+
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_EBO);
@@ -49,6 +52,16 @@ const glm::vec3 &AABB::Max() const
     return m_GlobalMax;
 }
 
+const glm::vec3 &AABB::Center() const
+{
+    return m_Center;
+}
+
+const glm::vec3 &AABB::HalfDimensions() const
+{
+    return m_HalfDimensions;
+}
+
 void AABB::Update(const std::vector<glm::vec3> &vertices)
 {
     m_GlobalMin = glm::vec3(FLT_MAX);
@@ -63,6 +76,9 @@ void AABB::Update(const std::vector<glm::vec3> &vertices)
     m_LocalMin = m_GlobalMin;
     m_LocalMax = m_GlobalMax;
 
+    m_Center = (m_GlobalMax + m_GlobalMin) * 0.5f;
+    m_HalfDimensions = (m_GlobalMax - m_GlobalMin) * 0.5f;
+
     UpdateVertices();
 }
 
@@ -71,14 +87,10 @@ void AABB::Translate(const glm::vec3 &translation)
     m_GlobalMin = m_LocalMin + translation;
     m_GlobalMax = m_LocalMax + translation;
 
-    UpdateVertices();
-}
+    m_Center = (m_GlobalMax + m_GlobalMin) * 0.5f;
+    m_HalfDimensions = (m_GlobalMax - m_GlobalMin) * 0.5f;
 
-bool AABB::Intersects(const AABB &other)
-{
-    return (m_GlobalMin.x <= other.m_GlobalMax.x && m_GlobalMax.x >= other.m_GlobalMin.x) &&
-           (m_GlobalMin.y <= other.m_GlobalMax.y && m_GlobalMax.y >= other.m_GlobalMin.y) &&
-           (m_GlobalMin.z <= other.m_GlobalMax.z && m_GlobalMax.z >= other.m_GlobalMin.z);
+    UpdateVertices();
 }
 
 void AABB::Draw()

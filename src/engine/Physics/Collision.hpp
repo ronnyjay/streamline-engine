@@ -69,8 +69,8 @@ struct CollisionVisitor
                 }
             }
 
-            result.localA = (a.Max() + a.Min()) * 0.5f;
-            result.localB = (b.Max() + b.Min()) * 0.5f;
+            result.localA = a.Center();
+            result.localB = b.Center();
             result.collided = true;
         }
         else
@@ -108,12 +108,9 @@ struct CollisionVisitor
     {
         CollisionResult result;
 
-        glm::vec3 boxExtents = (a.Max() - a.Min()) * 0.5f;
-        glm::vec3 boxCenter = (a.Max() + a.Min()) * 0.5f;
+        glm::vec3 delta = b.Center() - a.Center();
 
-        glm::vec3 delta = b.Center() - boxCenter;
-
-        glm::vec3 closestPoint = glm::clamp(delta, -boxExtents, boxExtents);
+        glm::vec3 closestPoint = glm::clamp(delta, -a.HalfDimensions(), a.HalfDimensions());
         glm::vec3 localPoint = delta - closestPoint;
 
         float distance = glm::length(localPoint);
@@ -122,8 +119,8 @@ struct CollisionVisitor
         {
             result.normal = glm::normalize(localPoint);
             result.penetration = b.Radius() - distance;
-            result.localA = boxCenter;
-            result.localB = (b.Center());
+            result.localA = a.Center();
+            result.localB = b.Center();
             result.collided = true;
         }
         else
@@ -138,12 +135,9 @@ struct CollisionVisitor
     {
         CollisionResult result;
 
-        glm::vec3 boxExtents = (b.Max() - b.Min()) * 0.5f;
-        glm::vec3 boxCenter = (b.Max() + b.Min()) * 0.5f;
+        glm::vec3 delta = a.Center() - b.Center();
 
-        glm::vec3 delta = a.Center() - boxCenter;
-
-        glm::vec3 closestPoint = glm::clamp(delta, -boxExtents, boxExtents);
+        glm::vec3 closestPoint = glm::clamp(delta, -b.HalfDimensions(), b.HalfDimensions());
         glm::vec3 localPoint = delta - closestPoint;
 
         float distance = glm::length(localPoint);
@@ -152,8 +146,8 @@ struct CollisionVisitor
         {
             result.normal = glm::normalize(localPoint);
             result.penetration = distance - a.Radius();
-            result.localA = (a.Center());
-            result.localB = boxCenter;
+            result.localA = a.Center();
+            result.localB = b.Center();
             result.collided = true;
         }
         else

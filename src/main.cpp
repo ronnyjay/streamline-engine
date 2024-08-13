@@ -60,32 +60,35 @@ int main(int argc, char const *argv[])
     cube.AddComponent<std::shared_ptr<engine::Model>>(cubeModel);
     cube.AddComponent<engine::BoundingVolume>(engine::AABB(cubeModel));
     cube.AddComponent<engine::RigidBody>();
-    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 25.0f, 0.0f));
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(-5.0f, 25.0f, 0.0f));
     cube.GetComponent<engine::RigidBody>().InitCubeInertia(cube.GetComponent<engine::Transform>().GetScale());
 
-    // torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
-    // torus.AddComponent<engine::BoundingVolume>(engine::BSphere(torusModel));
-    // torus.AddComponent<engine::RigidBody>();
-    // torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 100.0f, 0.0f));
-    // torus.GetComponent<engine::RigidBody>().InitSphereInertia(torus.GetComponent<engine::Transform>().GetScale());
+    torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
+    torus.AddComponent<engine::BoundingVolume>(engine::BSphere(torusModel));
+    torus.AddComponent<engine::RigidBody>();
+    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 50.0f, 0.0f));
+    torus.GetComponent<engine::RigidBody>().InitSphereInertia(
+        torus.GetComponent<engine::Transform>().GetScale() / 100.0f);
 
-    // pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
-    // pyramid.AddComponent<engine::BoundingVolume>(engine::AABB(pyramidModel));
-    // pyramid.AddComponent<engine::RigidBody>();
-    // pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-5.0f, 25.0f, 0.0f));
-    // pyramid.GetComponent<engine::RigidBody>().InitCubeInertia(pyramid.GetComponent<engine::Transform>().GetScale());
+    pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
+    pyramid.AddComponent<engine::BoundingVolume>(engine::AABB(pyramidModel));
+    pyramid.AddComponent<engine::RigidBody>();
+    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-5.0f, 50.0f, 0.0f));
+    pyramid.GetComponent<engine::RigidBody>().InitCubeInertia(
+        pyramid.GetComponent<engine::Transform>().GetScale() * 100.0f);
 
     sphere.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     sphere.AddComponent<engine::BoundingVolume>(engine::BSphere(sphereModel));
     sphere.AddComponent<engine::RigidBody>();
-    sphere.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 35.0f, 0.0f));
-    sphere.GetComponent<engine::RigidBody>().InitSphereInertia(sphere.GetComponent<engine::Transform>().GetScale());
+    sphere.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 25.0f, 0.0f));
+    sphere.GetComponent<engine::RigidBody>().InitSphereInertia(
+        sphere.GetComponent<engine::Transform>().GetScale() / 500.0f);
 
-    plane.AddComponent<std::shared_ptr<engine::Model>>(cubeModel);
-    plane.AddComponent<engine::BoundingVolume>(engine::AABB(cubeModel));
+    plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
+    plane.AddComponent<engine::BoundingVolume>(engine::AABB(planeModel));
     plane.AddComponent<engine::RigidBody>();
     plane.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, -10.0f, 0.0f));
-    plane.GetComponent<engine::Transform>().SetScale(glm::vec3(10.0f, 1.0f, 10.0f));
+    plane.GetComponent<engine::Transform>().SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
     plane.GetComponent<engine::RigidBody>().SetInverseMass(0.0f);
     plane.GetComponent<engine::RigidBody>().InitCubeInertia(plane.GetComponent<engine::Transform>().GetScale());
 
@@ -103,9 +106,5 @@ int main(int argc, char const *argv[])
 
     perspectiveCamera.get()->SetPosition(glm::vec3(0.0f, 0.0f, -50.0f));
 
-    application.ShowCollisions(false);
-
     application.Run();
-
-    return 0;
 }

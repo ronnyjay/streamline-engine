@@ -14,16 +14,16 @@ class AABB
 {
   public:
     AABB(std::shared_ptr<Model>);
-
     AABB(AABB &&);
 
     const glm::vec3 &Min() const;
     const glm::vec3 &Max() const;
 
+    const glm::vec3 &Center() const;
+    const glm::vec3 &HalfDimensions() const;
+
     void Update(const std::vector<glm::vec3> &);
     void Translate(const glm::vec3 &);
-
-    bool Intersects(const AABB &);
 
     void Draw();
 
@@ -35,6 +35,9 @@ class AABB
 
     glm::vec3 m_LocalMin;
     glm::vec3 m_LocalMax;
+
+    glm::vec3 m_Center;
+    glm::vec3 m_HalfDimensions;
 
     unsigned int m_VAO;
     unsigned int m_VBO;
