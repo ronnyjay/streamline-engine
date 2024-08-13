@@ -49,12 +49,12 @@ struct CollisionVisitor
             };
 
             float distances[6] = {
-            (b.Max().x - a.Min().x),
-            (a.Max().x - b.Min().x),
-            (b.Max().y - a.Min().y),
-            (a.Max().y - b.Min().y),
-            (b.Max().z - a.Min().z),
-            (a.Max().z - b.Min().z)
+                (b.Max().x - a.Min().x),
+                (a.Max().x - b.Min().x),
+                (b.Max().y - a.Min().y),
+                (a.Max().y - b.Min().y),
+                (b.Max().z - a.Min().z),
+                (a.Max().z - b.Min().z)
             };
             // clang-format on
 
@@ -136,7 +136,32 @@ struct CollisionVisitor
 
     CollisionResult operator()(const BSphere &a, const AABB &b) const
     {
-        return (*this)(b, a);
+        CollisionResult result;
+
+        glm::vec3 boxExtents = (b.Max() - b.Min()) * 0.5f;
+        glm::vec3 boxCenter = (b.Max() + b.Min()) * 0.5f;
+
+        glm::vec3 delta = a.Center() - boxCenter;
+
+        glm::vec3 closestPoint = glm::clamp(delta, -boxExtents, boxExtents);
+        glm::vec3 localPoint = delta - closestPoint;
+
+        float distance = glm::length(localPoint);
+
+        if (distance < a.Radius())
+        {
+            result.normal = glm::normalize(localPoint);
+            result.penetration = distance - a.Radius();
+            result.localA = (a.Center());
+            result.localB = boxCenter;
+            result.collided = true;
+        }
+        else
+        {
+            result.collided = false;
+        }
+
+        return result;
     }
 };
 
