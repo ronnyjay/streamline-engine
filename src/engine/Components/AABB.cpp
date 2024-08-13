@@ -5,12 +5,7 @@ using namespace engine;
 AABB::AABB(std::shared_ptr<Model> model)
     : m_GlobalMin(FLT_MAX)
     , m_GlobalMax(-FLT_MAX)
-    , m_Colliding(false)
 {
-    glGenVertexArrays(1, &m_VAO);
-    glGenBuffers(1, &m_VBO);
-    glGenBuffers(1, &m_EBO);
-
     for (const auto &mesh : model.get()->GetMeshes())
     {
         for (const auto &vertex : mesh.GetVertices())
@@ -23,15 +18,48 @@ AABB::AABB(std::shared_ptr<Model> model)
     m_LocalMin = m_GlobalMin;
     m_LocalMax = m_GlobalMax;
 
+    m_Center = (m_GlobalMax + m_GlobalMin) * 0.5f;
+    m_HalfDimensions = (m_GlobalMax - m_GlobalMin) * 0.5f;
+
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_EBO);
+
     UpdateVertices();
 }
 
-void AABB::Translate(const glm::vec3 &translation)
+AABB::AABB(AABB &&other)
+    : m_GlobalMin(other.m_GlobalMin)
+    , m_GlobalMax(other.m_GlobalMax)
+    , m_LocalMin(other.m_LocalMin)
+    , m_LocalMax(other.m_LocalMax)
+    , m_VAO(other.m_VAO)
+    , m_VBO(other.m_VBO)
+    , m_EBO(other.m_EBO)
 {
-    m_GlobalMin = m_LocalMin + translation;
-    m_GlobalMax = m_LocalMax + translation;
+    other.m_VAO = 0;
+    other.m_VBO = 0;
+    other.m_EBO = 0;
+}
 
-    UpdateVertices();
+const glm::vec3 &AABB::Min() const
+{
+    return m_GlobalMin;
+}
+
+const glm::vec3 &AABB::Max() const
+{
+    return m_GlobalMax;
+}
+
+const glm::vec3 &AABB::Center() const
+{
+    return m_Center;
+}
+
+const glm::vec3 &AABB::HalfDimensions() const
+{
+    return m_HalfDimensions;
 }
 
 void AABB::Update(const std::vector<glm::vec3> &vertices)
@@ -48,6 +76,20 @@ void AABB::Update(const std::vector<glm::vec3> &vertices)
     m_LocalMin = m_GlobalMin;
     m_LocalMax = m_GlobalMax;
 
+    m_Center = (m_GlobalMax + m_GlobalMin) * 0.5f;
+    m_HalfDimensions = (m_GlobalMax - m_GlobalMin) * 0.5f;
+
+    UpdateVertices();
+}
+
+void AABB::Translate(const glm::vec3 &translation)
+{
+    m_GlobalMin = m_LocalMin + translation;
+    m_GlobalMax = m_LocalMax + translation;
+
+    m_Center = (m_GlobalMax + m_GlobalMin) * 0.5f;
+    m_HalfDimensions = (m_GlobalMax - m_GlobalMin) * 0.5f;
+
     UpdateVertices();
 }
 
@@ -56,23 +98,6 @@ void AABB::Draw()
     glBindVertexArray(m_VAO);
     glDrawElements(GL_LINES, 48, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-}
-
-bool AABB::Intersects(const AABB &other)
-{
-    return (m_GlobalMin.x <= other.m_GlobalMax.x && m_GlobalMax.x >= other.m_GlobalMin.x) &&
-           (m_GlobalMin.y <= other.m_GlobalMax.y && m_GlobalMax.y >= other.m_GlobalMin.y) &&
-           (m_GlobalMin.z <= other.m_GlobalMax.z && m_GlobalMax.z >= other.m_GlobalMin.z);
-}
-
-bool AABB::GetColliding() const
-{
-    return m_Colliding;
-}
-
-void AABB::SetColliding(const bool colliding)
-{
-    m_Colliding = colliding;
 }
 
 void AABB::UpdateVertices()

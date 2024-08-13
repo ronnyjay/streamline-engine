@@ -5,9 +5,14 @@
 #include <engine/ResourceManager/ResourceManager.hpp>
 
 #include <engine/Components/AABB.hpp>
+#include <engine/Components/BSphere.hpp>
+#include <engine/Components/BVolume.hpp>
 #include <engine/Components/Model.hpp>
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
+#include <memory>
+#include <string>
+#include <sys/types.h>
 
 engine::Application application(800, 600, "Streamline Engine");
 
@@ -46,31 +51,46 @@ int main(int argc, char const *argv[])
     auto cube = scene.get()->CreateEntity("Cube");
     auto torus = scene.get()->CreateEntity("Torus");
     auto pyramid = scene.get()->CreateEntity("Pyramid");
+    auto sphere = scene.get()->CreateEntity("Sphere");
     auto plane = scene.get()->CreateEntity("Plane");
     auto redLight = scene.get()->CreateEntity("Red Light Source");
     auto greenLight = scene.get()->CreateEntity("Green Light Source");
     auto blueLight = scene.get()->CreateEntity("Blue Light Source");
 
     cube.AddComponent<std::shared_ptr<engine::Model>>(cubeModel);
-    cube.AddComponent<engine::AABB>(cubeModel);
+    cube.AddComponent<engine::BoundingVolume>(engine::AABB(cubeModel));
     cube.AddComponent<engine::RigidBody>();
-    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
+    cube.GetComponent<engine::Transform>().SetPosition(glm::vec3(-5.0f, 25.0f, 0.0f));
+    cube.GetComponent<engine::RigidBody>().InitCubeInertia(cube.GetComponent<engine::Transform>().GetScale());
 
     torus.AddComponent<std::shared_ptr<engine::Model>>(torusModel);
-    torus.AddComponent<engine::AABB>(torusModel);
+    torus.AddComponent<engine::BoundingVolume>(engine::BSphere(torusModel));
     torus.AddComponent<engine::RigidBody>();
-    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    torus.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 50.0f, 0.0f));
+    torus.GetComponent<engine::RigidBody>().InitSphereInertia(
+        torus.GetComponent<engine::Transform>().GetScale() / 100.0f);
 
     pyramid.AddComponent<std::shared_ptr<engine::Model>>(pyramidModel);
-    pyramid.AddComponent<engine::AABB>(pyramidModel);
+    pyramid.AddComponent<engine::BoundingVolume>(engine::AABB(pyramidModel));
     pyramid.AddComponent<engine::RigidBody>();
-    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
+    pyramid.GetComponent<engine::Transform>().SetPosition(glm::vec3(-5.0f, 50.0f, 0.0f));
+    pyramid.GetComponent<engine::RigidBody>().InitCubeInertia(
+        pyramid.GetComponent<engine::Transform>().GetScale() * 100.0f);
+
+    sphere.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
+    sphere.AddComponent<engine::BoundingVolume>(engine::BSphere(sphereModel));
+    sphere.AddComponent<engine::RigidBody>();
+    sphere.GetComponent<engine::Transform>().SetPosition(glm::vec3(5.0f, 25.0f, 0.0f));
+    sphere.GetComponent<engine::RigidBody>().InitSphereInertia(
+        sphere.GetComponent<engine::Transform>().GetScale() / 500.0f);
 
     plane.AddComponent<std::shared_ptr<engine::Model>>(planeModel);
-    plane.AddComponent<engine::AABB>(planeModel);
+    plane.AddComponent<engine::BoundingVolume>(engine::AABB(planeModel));
     plane.AddComponent<engine::RigidBody>();
-    plane.GetComponent<engine::RigidBody>().SetInverseMass(0.0f);
     plane.GetComponent<engine::Transform>().SetPosition(glm::vec3(0.0f, -10.0f, 0.0f));
+    plane.GetComponent<engine::Transform>().SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    plane.GetComponent<engine::RigidBody>().SetInverseMass(0.0f);
+    plane.GetComponent<engine::RigidBody>().InitCubeInertia(plane.GetComponent<engine::Transform>().GetScale());
 
     redLight.AddComponent<std::shared_ptr<engine::Model>>(sphereModel);
     redLight.AddComponent<engine::Light>(glm::vec4(1.0, 0.0, 0.0, 1.0));
@@ -84,7 +104,7 @@ int main(int argc, char const *argv[])
     blueLight.AddComponent<engine::Light>(glm::vec4(0.0, 0.0, 1.0, 1.0));
     blueLight.GetComponent<engine::Transform>().SetPosition(glm::vec3(10.0f, 10.0f, 0.0f));
 
-    application.Run();
+    perspectiveCamera.get()->SetPosition(glm::vec3(0.0f, 0.0f, -50.0f));
 
-    return 0;
+    application.Run();
 }

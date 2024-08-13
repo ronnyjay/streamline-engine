@@ -6,6 +6,7 @@ target_sources(engine PRIVATE
   Camera/Orthographic.cpp
   Camera/Perspective.cpp
   Components/AABB.cpp
+  Components/BSphere.cpp
   Components/Mesh.cpp
   Components/Model.cpp
   Components/Transform.cpp

@@ -1,3 +1,4 @@
+#include "imgui.h"
 #include <engine/Application/Application.hpp>
 
 #include <engine/Entity/Entity.hpp>
@@ -5,6 +6,8 @@
 #include <engine/Scene/Scene.hpp>
 
 #include <engine/Components/AABB.hpp>
+#include <engine/Components/BSphere.hpp>
+#include <engine/Components/BVolume.hpp>
 #include <engine/Components/Children.hpp>
 #include <engine/Components/Identifier.hpp>
 #include <engine/Components/Light.hpp>
@@ -13,9 +16,15 @@
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
 
+#include <engine/Physics/Collision.hpp>
+
+#include <glm/ext/vector_float4.hpp>
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <iterator>
+#include <variant>
 #include <vector>
 
 using namespace engine;
@@ -68,74 +77,7 @@ void Scene::DestroyEntity(const Entity entity)
 
 void Scene::Update(const float dt)
 {
-    auto physicsView = m_Registry.view<RigidBody, Transform>();
-
-    // Integrate acceleration
-    for (auto entity : physicsView)
-    {
-        RigidBody &body = physicsView.get<RigidBody>(entity);
-        Transform &transform = physicsView.get<Transform>(entity);
-
-        glm::vec3 acceleration = body.GetForce() * body.GetInverseMass();
-
-        if (body.GetInverseMass() > 0)
-        {
-            acceleration += glm::vec3(0.0f, -9.81f, 0.0f);
-        }
-
-        glm::vec3 linearVelocity = body.GetLinearVelocity();
-
-        glm::vec3 k1 = dt * acceleration;
-        glm::vec3 k2 = dt * (acceleration + k1 * 0.5f);
-        glm::vec3 k3 = dt * (acceleration + k2 * 0.5f);
-        glm::vec3 k4 = dt * (acceleration + k3);
-
-        linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
-
-        body.SetLinearVelocity(linearVelocity);
-    }
-
-    // Detect collisions
-    auto collisionView = m_Registry.view<AABB>();
-
-    for (auto a = collisionView.begin(); a != collisionView.end(); ++a)
-    {
-        for (auto b = std::next(a); b != collisionView.end(); ++b)
-        {
-            auto &colliderA = collisionView.get<AABB>(*a);
-            auto &colliderB = collisionView.get<AABB>(*b);
-        }
-    }
-
-    // Integrate velocity
-    for (auto entity : physicsView)
-    {
-        RigidBody &body = physicsView.get<RigidBody>(entity);
-        Transform &transform = physicsView.get<Transform>(entity);
-
-        glm::vec3 linearVelocity = body.GetLinearVelocity();
-
-        glm::vec3 k1 = dt * linearVelocity;
-        glm::vec3 k2 = dt * (linearVelocity + k1 * 0.5f);
-        glm::vec3 k3 = dt * (linearVelocity + k2 * 0.5f);
-        glm::vec3 k4 = dt * (linearVelocity + k3);
-
-        linearVelocity += (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
-
-        body.SetLinearVelocity(linearVelocity);
-    }
-
-    // Integrate position
-    for (auto entity : physicsView)
-    {
-        RigidBody &rigidBody = physicsView.get<RigidBody>(entity);
-        Transform &transform = physicsView.get<Transform>(entity);
-
-        transform.SetPosition(transform.GetPosition() + rigidBody.GetLinearVelocity() * dt);
-    }
-
-    // Update transforms
-    auto transformView = m_Registry.view<Transform, Parent, Children>();
+    auto transformView = m_Registry.view<Parent, Children, Transform>();
 
     for (auto entity : transformView)
     {
@@ -143,6 +85,102 @@ void Scene::Update(const float dt)
         {
             UpdateEntity(entity, glm::mat4(1.0f));
         }
+    }
+
+    auto physicsView = m_Registry.view<BoundingVolume, RigidBody, Transform>();
+
+    for (auto entity : physicsView)
+    {
+        RigidBody &body = physicsView.get<RigidBody>(entity);
+        Transform &transform = physicsView.get<Transform>(entity);
+
+        body.UpdateInertiaTensor(transform.GetRotation());
+
+        glm::vec3 acceleration = body.GetForce() * body.GetInverseMass();
+        glm::vec3 angularAcceleration = body.GetInertiaTensor() * body.GetTorque();
+
+        if (body.GetInverseMass() > 0)
+        {
+            acceleration += glm::vec3(0.0f, -9.81f, 0.0f);
+        }
+
+        body.SetLinearVelocity(body.GetLinearVelocity() + acceleration * dt);
+        body.SetAngularVelocity(body.GetAngularVelocity() + angularAcceleration * dt);
+    }
+
+    for (auto a = physicsView.begin(); a != physicsView.end(); ++a)
+    {
+        for (auto b = std::next(a); b != physicsView.end(); ++b)
+        {
+            auto &volumeA = physicsView.get<BoundingVolume>(*a);
+            auto &volumeB = physicsView.get<BoundingVolume>(*b);
+
+            CollisionResult result = std::visit(CollisionVisitor{}, volumeA, volumeB);
+
+            if (result.collided)
+            {
+                RigidBody &bodyA = physicsView.get<RigidBody>(*a);
+                RigidBody &bodyB = physicsView.get<RigidBody>(*b);
+
+                Transform &transformA = physicsView.get<Transform>(*a);
+                Transform &transformB = physicsView.get<Transform>(*b);
+
+                float totalMass = bodyA.GetInverseMass() + bodyB.GetInverseMass();
+
+                transformA.SetPosition(
+                    transformA.GetPosition() -
+                    result.normal * result.penetration * (bodyA.GetInverseMass() / totalMass));
+
+                transformB.SetPosition(
+                    transformB.GetPosition() +
+                    result.normal * result.penetration * (bodyB.GetInverseMass() / totalMass));
+
+                glm::vec3 relativeA = result.localA - transformA.GetPosition();
+                glm::vec3 relativeB = result.localB - transformB.GetPosition();
+
+                glm::vec3 angularVelocityA = glm::cross(bodyA.GetAngularVelocity(), relativeA);
+                glm::vec3 angularVelocityB = glm::cross(bodyB.GetAngularVelocity(), relativeB);
+
+                glm::vec3 fullVelocityA = bodyA.GetLinearVelocity() + angularVelocityA;
+                glm::vec3 fullVelocityB = bodyB.GetLinearVelocity() + angularVelocityB;
+
+                glm::vec3 contactVelocity = fullVelocityB - fullVelocityA;
+
+                glm::vec3 inertiaA =
+                    glm::cross(bodyA.GetInertiaTensor() * glm::cross(relativeA, result.normal), relativeA);
+
+                glm::vec3 inertiaB =
+                    glm::cross(bodyB.GetInertiaTensor() * glm::cross(relativeB, result.normal), relativeB);
+
+                float angularEffect = glm::dot(inertiaA + inertiaB, result.normal);
+
+                float e = (bodyA.GetElasticity() + bodyB.GetElasticity()) * 0.5f;
+
+                float j = (-(1.0f + e) * glm::dot(contactVelocity, result.normal)) / (totalMass + angularEffect);
+
+                glm::vec3 fullImpulse = result.normal * j;
+
+                bodyA.ApplyLinearImpulse(-fullImpulse);
+                bodyB.ApplyLinearImpulse(fullImpulse);
+
+                bodyA.ApplyAngularImpulse(glm::cross(relativeA, -fullImpulse));
+                bodyB.ApplyAngularImpulse(glm::cross(relativeB, fullImpulse));
+            }
+        }
+    }
+
+    for (auto entity : physicsView)
+    {
+        RigidBody &body = physicsView.get<RigidBody>(entity);
+        Transform &transform = physicsView.get<Transform>(entity);
+
+        transform.SetPosition(transform.GetPosition() + body.GetLinearVelocity() * dt);
+        transform.SetRotation(transform.GetRotation() + body.GetAngularVelocity() * dt);
+
+        float dampingFactor = 1.0f - 0.95f;
+        float frameDamping = std::pow(dampingFactor, dt);
+
+        body.SetAngularVelocity(body.GetAngularVelocity() * frameDamping);
     }
 }
 
@@ -152,22 +190,23 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
     auto &childrenComponent = m_Registry.get<Children>(entity);
 
     auto *modelComponent = m_Registry.try_get<std::shared_ptr<Model>>(entity);
-    auto *boundingComponent = m_Registry.try_get<AABB>(entity);
+    auto *boundingComponent = m_Registry.try_get<BoundingVolume>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
 
-    if (modelComponent && boundingComponent)
+    if (modelComponent && boundingComponent && transformComponent.IsDirty())
     {
-        if (transformComponent.IsDirty())
-        {
-            // Isolate translation
-            glm::vec3 boundingTranslation(modelMatrix[3]);
+        // Get translation from transform
+        glm::vec3 translation = modelMatrix[3];
 
+        if (std::holds_alternative<AABB>(*boundingComponent))
+        {
             if (transformComponent.IsRotationChanged() || transformComponent.IsScaleChanged())
             {
                 // Remove translation from transform
-                glm::mat4 boundingTransform(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+                glm::mat4 matrix(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
 
+                // Apply transform to vertices
                 std::vector<glm::vec3> vertices;
 
                 for (const auto &mesh : modelComponent->get()->GetMeshes())
@@ -175,16 +214,38 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
                     for (const auto &vertex : mesh.GetVertices())
                     {
                         vertices.push_back(glm::vec3(
-                            (boundingTransform *
-                             glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f))));
+                            matrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
                     }
                 }
 
-                boundingComponent->Update(vertices);
+                std::visit([&vertices](auto &volume) { volume.Update(vertices); }, *boundingComponent);
             }
-
-            boundingComponent->Translate(boundingTranslation);
         }
+
+        if (std::holds_alternative<BSphere>(*boundingComponent))
+        {
+            if (transformComponent.IsScaleChanged())
+            {
+                // Remove translation from transform
+                glm::mat4 matrix(modelMatrix[0], modelMatrix[1], modelMatrix[2], glm::vec4(0, 0, 0, 1));
+
+                // Apply transform to vertices
+                std::vector<glm::vec3> vertices;
+
+                for (const auto &mesh : modelComponent->get()->GetMeshes())
+                {
+                    for (const auto &vertex : mesh.GetVertices())
+                    {
+                        vertices.push_back(glm::vec3(
+                            matrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
+                    }
+                }
+
+                std::visit([&vertices](auto &volume) { volume.Update(vertices); }, *boundingComponent);
+            }
+        }
+
+        std::visit([&translation](auto &volume) { volume.Translate(translation); }, *boundingComponent);
     }
 
     for (auto &child : childrenComponent.children)
@@ -245,8 +306,6 @@ void Scene::Draw()
 
     std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> selectedLights;
 
-    // TODO: get closest/strongest lights first, up to max size shader supports
-    // Currently just grabs first because it's easy
     auto it_lights = lights.begin();
     for (size_t i = 0; i < numLightsInShader; i++)
     {
@@ -257,29 +316,35 @@ void Scene::Draw()
 
             selectedLights[i].color = light.color;
             selectedLights[i].position = (glm::vec4(position.GetPosition(), 1.0f));
-            // selectedLights[i].properties = properties;
             it_lights++;
         }
     }
 
+    auto camera = application.GetCurrentCamera();
+
+    auto projectionMatrix = camera->ProjectionMatrix();
+    auto viewMatrix = camera->ViewMatrix();
+    auto viewPos = camera->GetPosition();
+
     auto modelShader = application.GetShader("Model");
+
+    auto boxShader = application.GetShader("AABB");
+    auto sphereShader = application.GetShader("BSphere");
+
     modelShader.Use();
     modelShader.UpdateLights(selectedLights);
     modelShader.SetUInt("NumLights", numLightsInShader);
-
-    auto camera = application.GetCurrentCamera();
-    auto projectionMatrix = camera->ProjectionMatrix();
-    auto viewMatrix = camera->ViewMatrix();
-
     modelShader.SetMat4("projection", projectionMatrix);
     modelShader.SetMat4("view", viewMatrix);
-    modelShader.SetVec3("viewPos", camera->GetPosition());
+    modelShader.SetVec3("viewPos", viewPos);
 
-    auto colliderShader = application.GetShader("Collider");
-    colliderShader.Use();
+    boxShader.Use();
+    boxShader.SetMat4("projection", projectionMatrix);
+    boxShader.SetMat4("view", viewMatrix);
 
-    colliderShader.SetMat4("projection", projectionMatrix);
-    colliderShader.SetMat4("view", viewMatrix);
+    sphereShader.Use();
+    sphereShader.SetMat4("projection", projectionMatrix);
+    sphereShader.SetMat4("view", viewMatrix);
 
     for (auto entity : view)
     {
@@ -296,20 +361,30 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
     auto modelShader = application.GetShader("Model");
-    auto &colliderShader = application.GetShader("Collider");
+    auto boxShader = application.GetShader("AABB");
+    auto sphereShader = application.GetShader("BSphere");
 
     modelShader.Use();
     modelShader.SetMat4("model", modelMatrix);
+
     modelComponent->Draw(modelShader);
 
-    if (auto *boundingComponent = m_Registry.try_get<AABB>(entity))
+    if (auto *boundingComponent = m_Registry.try_get<BoundingVolume>(entity))
     {
         if (application.Flags().ShowCollisions)
         {
-            colliderShader.Use();
-            colliderShader.SetBool("colliding", boundingComponent->GetColliding());
 
-            boundingComponent->Draw();
+            if (std::holds_alternative<BSphere>(*boundingComponent))
+            {
+                sphereShader.Use();
+                sphereShader.SetVec3("translation", modelMatrix[3]);
+            }
+            else
+            {
+                boxShader.Use();
+            }
+
+            std::visit([](auto &volume) { volume.Draw(); }, *boundingComponent);
         }
     }
 
@@ -339,15 +414,14 @@ void Scene::DrawDebugInfo()
 
 void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 {
-    auto [identifierComponent, transformComponent, childrenComponent] =
-        m_Registry.get<Identifier, Transform, Children>(entity);
+    auto [identifier, transform, children] = m_Registry.get<Identifier, Transform, Children>(entity);
 
-    auto translation = transformComponent.GetPosition();
-    auto rotation = transformComponent.GetRotation();
-    auto scale = transformComponent.GetScale();
-
-    if (ImGui::TreeNode(identifierComponent.identifier.c_str()))
+    if (ImGui::TreeNode(identifier.identifier.c_str()))
     {
+        auto translation = transform.GetPosition();
+        auto rotation = transform.GetRotation();
+        auto scale = transform.GetScale();
+
         ImGui::DragFloat("Translation X", &translation.x);
         ImGui::DragFloat("Translation Y", &translation.y);
         ImGui::DragFloat("Translation Z", &translation.z);
@@ -358,9 +432,52 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
         ImGui::DragFloat("Scale Y", &scale.y);
         ImGui::DragFloat("Scale Z", &scale.z);
 
-        if (ImGui::TreeNode((identifierComponent.identifier + " Children").c_str()))
+        transform.SetPosition(translation);
+        transform.SetRotation(rotation);
+        transform.SetScale(scale);
+
+        if (auto *body = m_Registry.try_get<RigidBody>(entity))
         {
-            for (auto &child : childrenComponent.children)
+            auto mass = body->GetInverseMass();
+            auto elasticity = body->GetElasticity();
+            auto friction = body->GetFriction();
+            auto force = body->GetForce();
+            auto torque = body->GetTorque();
+            auto linearVelocity = body->GetLinearVelocity();
+            auto angularVelocity = body->GetAngularVelocity();
+
+            ImGui::DragFloat("Inverse Mass", &mass);
+            ImGui::DragFloat("Elasticity", &elasticity);
+            ImGui::DragFloat("Friction", &friction);
+            ImGui::DragFloat("Force X", &force.x);
+            ImGui::DragFloat("Force Y", &force.y);
+            ImGui::DragFloat("Force Z", &force.z);
+            ImGui::DragFloat("Torque X", &torque.x);
+            ImGui::DragFloat("Torque Y", &torque.y);
+            ImGui::DragFloat("Torque Z", &torque.z);
+            ImGui::DragFloat("Linear Velocity X", &linearVelocity.x);
+            ImGui::DragFloat("Linear Velocity Y", &linearVelocity.y);
+            ImGui::DragFloat("Linear Velocity Z", &linearVelocity.z);
+            ImGui::DragFloat("Angular Velocity X", &angularVelocity.x);
+            ImGui::DragFloat("Angular Velocity Y", &angularVelocity.y);
+            ImGui::DragFloat("Angular Velocity Z", &angularVelocity.z);
+
+            body->SetInverseMass(mass);
+            body->SetElasticity(elasticity);
+            body->SetFriction(friction);
+
+            body->ClearForces();
+
+            body->AddForce(force);
+            body->AddTorque(torque);
+
+            body->SetLinearVelocity(linearVelocity);
+            body->SetAngularVelocity(angularVelocity);
+        }
+
+        if (ImGui::TreeNode((identifier.identifier + " Children").c_str()))
+        {
+            for (auto &child : children.children)
             {
                 DrawEntityDebugInfo(child);
             }
@@ -370,8 +487,4 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 
         ImGui::TreePop();
     }
-
-    transformComponent.SetPosition(translation);
-    transformComponent.SetRotation(rotation);
-    transformComponent.SetScale(scale);
 }

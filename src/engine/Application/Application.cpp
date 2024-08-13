@@ -174,9 +174,13 @@ Application::Application(const int width, const int height, const char *title)
     m_Shaders["Model"].AddShader("resources/shaders/model.fs", GL_FRAGMENT_SHADER);
     m_Shaders["Model"].Compile();
 
-    m_Shaders["Collider"].AddShader("resources/shaders/collider.vs", GL_VERTEX_SHADER);
-    m_Shaders["Collider"].AddShader("resources/shaders/collider.fs", GL_FRAGMENT_SHADER);
-    m_Shaders["Collider"].Compile();
+    m_Shaders["AABB"].AddShader("resources/shaders/AABB.vs", GL_VERTEX_SHADER);
+    m_Shaders["AABB"].AddShader("resources/shaders/AABB.fs", GL_FRAGMENT_SHADER);
+    m_Shaders["AABB"].Compile();
+
+    m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.vs", GL_VERTEX_SHADER);
+    m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.fs", GL_FRAGMENT_SHADER);
+    m_Shaders["BSphere"].Compile();
 
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
@@ -303,7 +307,7 @@ void Application::Run()
     double renderTimeStep;
     double renderAccumulator = 0.0;
 
-    double simulationTimeStep = 1.0 / 300.0;
+    double simulationTimeStep = 1.0 / 480.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();
@@ -335,7 +339,6 @@ void Application::Run()
 
         ProcessInput(deltaTime);
 
-        // Simulate physics at ~300hz
         while (simulationAccumulator >= simulationTimeStep)
         {
             m_CurrentScene->Update(simulationTimeStep);
