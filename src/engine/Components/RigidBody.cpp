@@ -118,6 +118,13 @@ void RigidBody::InitCubeInertia(const glm::vec3 &dimensions)
 
 void RigidBody::InitConeInertia(const glm::vec3 &dimensions)
 {
+    float a = dimensions.x;
+    float b = dimensions.z;
+    float h = dimensions.y;
+
+    m_InverseInertia.x = 1.0f / ((20.0f * m_InverseMass) * (b * b + 3 * h * h));
+    m_InverseInertia.y = 1.0f / ((10.0f * m_InverseMass) * (a * a + b * b));
+    m_InverseInertia.z = 1.0f / ((20.0f * m_InverseMass) * (a * a + 3 * h * h));
 }
 
 void RigidBody::InitSphereInertia(const glm::vec3 &dimensions)
