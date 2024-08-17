@@ -1,4 +1,3 @@
-#include "imgui.h"
 #include <engine/Application/Application.hpp>
 
 #include <engine/Entity/Entity.hpp>
@@ -9,6 +8,7 @@
 #include <engine/Components/BSphere.hpp>
 #include <engine/Components/BVolume.hpp>
 #include <engine/Components/Children.hpp>
+#include <engine/Components/Controllable.hpp>
 #include <engine/Components/Identifier.hpp>
 #include <engine/Components/Light.hpp>
 #include <engine/Components/Model.hpp>
@@ -18,6 +18,9 @@
 
 #include <engine/Physics/Collision.hpp>
 
+#include <engine/InputManager/InputManager.hpp>
+
+#include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
@@ -181,6 +184,61 @@ void Scene::Update(const float dt)
         float frameDamping = std::pow(dampingFactor, dt);
 
         body.SetAngularVelocity(body.GetAngularVelocity() * frameDamping);
+    }
+
+    auto controllerView = m_Registry.view<Controllable, Transform>();
+
+    for (auto entity : controllerView)
+    {
+        Controllable &controllable = controllerView.get<Controllable>(entity);
+        Transform &transform = controllerView.get<Transform>(entity);
+
+        auto &states = InputManager::Instance().KeyStates();
+
+        controllable.time_since_last_jump += dt;
+        if (controllable.time_since_last_jump >= controllable.jump_cooldown)
+        {
+            controllable.can_jump = true;
+        }
+
+        for (const auto &bind : controllable.keybinds)
+        {
+            auto &position = transform.GetPosition();
+
+            if (states[bind.first] == GLFW_PRESS)
+            {
+                glm::vec3 direction(0.0f);
+
+                switch (bind.second)
+                {
+                case MoveForward:
+                    direction += glm::vec3(0.0f, 0.0f, 1.0f);
+                    break;
+                case MoveBackward:
+                    direction -= glm::vec3(0.0f, 0.0f, 1.0f);
+                    break;
+                case MoveLeft:
+                    direction += glm::vec3(1.0f, 0.0f, 0.0f);
+                    break;
+                case MoveRight:
+                    direction -= glm::vec3(1.0f, 0.0f, 0.0f);
+                    break;
+                case Jump:
+
+                    if (!controllable.can_jump)
+                    {
+                        break;
+                    }
+
+                    controllable.can_jump = false;
+                    controllable.time_since_last_jump = 0.0f;
+
+                    transform.SetPosition(position + glm::vec3(0.0f, 1.0f, 0.0f) * controllable.jump_height * dt);
+                }
+
+                transform.SetPosition(position + direction * controllable.move_speed * dt);
+            }
+        }
     }
 }
 

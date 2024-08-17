@@ -14,6 +14,7 @@ target_sources(engine PRIVATE
   Config/Config.cpp
   Entity/Entity.cpp
   Framebuffer/Framebuffer.cpp
+  InputManager/InputManager.cpp
   Logger/Logger.cpp
   ResourceManager/ResourceManager.cpp 
   Scene/Scene.cpp

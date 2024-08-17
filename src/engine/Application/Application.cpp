@@ -1,4 +1,5 @@
 #include <engine/Application/Application.hpp>
+#include <engine/InputManager/InputManager.hpp>
 #include <engine/Logger/Logger.hpp>
 #include <engine/stb/stb_image.hpp>
 
@@ -656,10 +657,10 @@ void Application::ProcessInput(const double timeStep)
 {
     for (auto it = m_MovementBinds.begin(); it != m_MovementBinds.end(); ++it)
     {
-        if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
-        {
-            m_CurrentCamera->Move(Direction(it->second), timeStep);
-        }
+        // if (glfwGetKey(m_Window, it->first) == GLFW_PRESS)
+        // {
+        //     m_CurrentCamera->Move(Direction(it->second), timeStep);
+        // }
 
         if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
@@ -1025,6 +1026,8 @@ void Application::KeyCallback(GLFWwindow *window, int key, int scancode, int act
             }
         }
     }
+
+    InputManager::Instance().RegisterKeyState(key, scancode, action, mods);
 }
 
 void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yPosIn)
@@ -1057,6 +1060,7 @@ void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yP
 
     if (application->m_CurrentCamera)
     {
+
         application->m_CurrentCamera->Move(xOffset, yOffset);
     }
 }
