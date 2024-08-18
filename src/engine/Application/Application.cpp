@@ -1060,9 +1060,10 @@ void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yP
 
     if (application->m_CurrentCamera)
     {
-
         application->m_CurrentCamera->Move(xOffset, yOffset);
     }
+
+    InputManager::Instance().RegisterCursorEvent(xOffset, yOffset);
 }
 
 void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
@@ -1078,6 +1079,8 @@ void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOff
     {
         application->m_CurrentCamera->Move(yOffset);
     }
+
+    InputManager::Instance().RegisterScrollEvent(xOffset, yOffset);
 }
 
 void GLAPIENTRY Application::MessageCallback(

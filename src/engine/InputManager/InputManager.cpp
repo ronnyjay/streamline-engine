@@ -2,14 +2,14 @@
 
 using namespace engine;
 
-std::unique_ptr<InputManager> InputManager::m_instance = nullptr;
+std::unique_ptr<InputManager> InputManager::m_Instance = nullptr;
 
 InputManager &InputManager::Instance()
 {
-    if (m_instance == nullptr)
+    if (m_Instance == nullptr)
     {
-        m_instance = std::unique_ptr<InputManager>(new InputManager);
+        m_Instance = std::unique_ptr<InputManager>(new InputManager);
     }
 
-    return *m_instance;
+    return *m_Instance;
 }

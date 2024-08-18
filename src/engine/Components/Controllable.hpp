@@ -26,17 +26,18 @@ struct Controllable
         keybinds[key] = action;
     }
 
-    float move_speed = 10.0f;
+    float speed = 10.0f;
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float sensitivity = 0.005f;
 
-    float jump_height = 50.0f;
-    float jump_cooldown = 0.02224f;
-    float time_since_last_jump = 0.0f;
+    float jump_height = 5.0f;
+    float jump_time = 0.0f;
+    float jump_cooldown = 1.0f;
 
     bool can_jump = true;
 
     std::unordered_map<int, Action> keybinds;
-
-  private:
 };
 
 } // namespace engine

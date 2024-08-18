@@ -172,20 +172,6 @@ void Scene::Update(const float dt)
         }
     }
 
-    for (auto entity : physicsView)
-    {
-        RigidBody &body = physicsView.get<RigidBody>(entity);
-        Transform &transform = physicsView.get<Transform>(entity);
-
-        transform.SetPosition(transform.GetPosition() + body.GetLinearVelocity() * dt);
-        transform.SetRotation(transform.GetRotation() + body.GetAngularVelocity() * dt);
-
-        float dampingFactor = 1.0f - 0.95f;
-        float frameDamping = std::pow(dampingFactor, dt);
-
-        body.SetAngularVelocity(body.GetAngularVelocity() * frameDamping);
-    }
-
     auto controllerView = m_Registry.view<Controllable, Transform>();
 
     for (auto entity : controllerView)
@@ -193,19 +179,27 @@ void Scene::Update(const float dt)
         Controllable &controllable = controllerView.get<Controllable>(entity);
         Transform &transform = controllerView.get<Transform>(entity);
 
-        auto &states = InputManager::Instance().KeyStates();
+        auto key_states = InputManager::Instance().KeyStates();
 
-        controllable.time_since_last_jump += dt;
-        if (controllable.time_since_last_jump >= controllable.jump_cooldown)
+        // jump cooldown
+        controllable.jump_time += dt;
+
+        if (controllable.jump_time >= controllable.jump_cooldown)
         {
             controllable.can_jump = true;
         }
 
+        // key movement
         for (const auto &bind : controllable.keybinds)
         {
             auto &position = transform.GetPosition();
 
-            if (states[bind.first] == GLFW_PRESS)
+            if (!key_states.contains(bind.first))
+            {
+                continue;
+            }
+
+            if (key_states.at(bind.first) == GLFW_PRESS)
             {
                 glm::vec3 direction(0.0f);
 
@@ -225,20 +219,65 @@ void Scene::Update(const float dt)
                     break;
                 case Jump:
 
-                    if (!controllable.can_jump)
+                    if (controllable.can_jump)
                     {
-                        break;
+                        if (auto *body = m_Registry.try_get<RigidBody>(entity))
+                        {
+                            glm::vec3 velocity = body->GetLinearVelocity();
+
+                            float threshold = 2.0f * (1 + body->GetElasticity() * sqrt(body->GetInverseMass()));
+
+                            // we're probably falling
+                            if (velocity.y > -threshold && velocity.y < threshold)
+                            {
+                                body->ApplyLinearImpulse(glm::vec3(0.0f, 1.0f, 0.0f) * controllable.jump_height);
+                            }
+                        }
+
+                        controllable.can_jump = false;
+                        controllable.jump_time = 0.0f;
+
+                        // prevent jump holding (achieve a consistent jump height)
+                        InputManager::Instance().RegisterKeyState(bind.first, GL_NONE, GLFW_RELEASE, GL_NONE);
                     }
-
-                    controllable.can_jump = false;
-                    controllable.time_since_last_jump = 0.0f;
-
-                    transform.SetPosition(position + glm::vec3(0.0f, 1.0f, 0.0f) * controllable.jump_height * dt);
                 }
 
-                transform.SetPosition(position + direction * controllable.move_speed * dt);
+                transform.SetPosition(position + direction * controllable.speed * dt);
             }
         }
+
+        // mouse movement
+        auto last_cursor = InputManager::Instance().LastCursorEvent();
+        auto last_scroll = InputManager::Instance().LastScrollEvent();
+
+        controllable.yaw += last_cursor.x_offset * controllable.sensitivity;
+        controllable.pitch += last_cursor.y_offset * controllable.sensitivity;
+
+        if (controllable.pitch > 89.0f)
+        {
+            controllable.pitch = 89.0f;
+        }
+
+        if (controllable.pitch < -89.0f)
+        {
+            controllable.pitch = -89.0f;
+        }
+
+        transform.SetRotation(glm::vec3(controllable.pitch, controllable.yaw, transform.GetRotation().z));
+    }
+
+    for (auto entity : physicsView)
+    {
+        RigidBody &body = physicsView.get<RigidBody>(entity);
+        Transform &transform = physicsView.get<Transform>(entity);
+
+        transform.SetPosition(transform.GetPosition() + body.GetLinearVelocity() * dt);
+        transform.SetRotation(transform.GetRotation() + body.GetAngularVelocity() * dt);
+
+        float dampingFactor = 1.0f - 0.95f;
+        float frameDamping = std::pow(dampingFactor, dt);
+
+        body.SetAngularVelocity(body.GetAngularVelocity() * frameDamping);
     }
 }
 
