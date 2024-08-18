@@ -182,11 +182,14 @@ void Scene::Update(const float dt)
         auto key_states = InputManager::Instance().KeyStates();
 
         // jump cooldown
-        controllable.jump_time += dt;
-
-        if (controllable.jump_time >= controllable.jump_cooldown)
+        if (!controllable.can_jump)
         {
-            controllable.can_jump = true;
+            controllable.jump_time += dt;
+
+            if (controllable.jump_time >= controllable.jump_cooldown)
+            {
+                controllable.can_jump = true;
+            }
         }
 
         // key movement
@@ -225,10 +228,10 @@ void Scene::Update(const float dt)
                         {
                             glm::vec3 velocity = body->GetLinearVelocity();
 
-                            float threshold = 2.0f * (1 + body->GetElasticity() * sqrt(body->GetInverseMass()));
+                            float threshold = 1.5 * (1 + body->GetElasticity() * sqrt(body->GetInverseMass()));
 
-                            // we're probably falling
-                            if (velocity.y > -threshold && velocity.y < threshold)
+                            // we're probably on the ground
+                            if (velocity.y < threshold)
                             {
                                 body->ApplyLinearImpulse(glm::vec3(0.0f, 1.0f, 0.0f) * controllable.jump_height);
                             }
