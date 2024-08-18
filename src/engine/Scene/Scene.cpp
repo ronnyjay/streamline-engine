@@ -266,7 +266,8 @@ void Scene::Update(const float dt)
             controllable.pitch = -89.0f;
         }
 
-        transform.SetRotation(glm::vec3(controllable.pitch, controllable.yaw, transform.GetRotation().z));
+        // negate yaw to match move direction
+        transform.SetRotation(glm::vec3(controllable.pitch, -controllable.yaw, transform.GetRotation().z));
     }
 
     for (auto entity : physicsView)
