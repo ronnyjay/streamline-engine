@@ -29,6 +29,8 @@ class Window
         return window_;
     }
 
+    void refresh();
+
     void set_monitor(Monitor *);
     void set_resolution(Resolution);
     void set_display_mode(DisplayMode);

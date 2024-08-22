@@ -67,6 +67,25 @@ Window::Window(const int width, const int height, const char *title, Application
     }
 }
 
+void Window::refresh()
+{
+    int x, y;
+    glfwGetWindowPos(window_, &x, &y);
+
+    for (size_t i = 0; i < monitors_.size(); ++i)
+    {
+        auto monitor = monitors_.at(i);
+
+        bool overlap_x = x >= monitor->position_x && x < monitor->position_x + monitor->width;
+        bool overlap_y = y >= monitor->position_y && y < monitor->position_y + monitor->width;
+
+        if (overlap_x && overlap_y && monitor != current_monitor_)
+        {
+            current_monitor_ = monitor;
+        }
+    }
+}
+
 void Window::set_monitor(Monitor *monitor)
 {
     primary_monitor_ = monitor;
@@ -228,23 +247,7 @@ Monitor *const Window::primary_monitor() const
 
 Monitor *const Window::current_monitor() const
 {
-    int x, y;
-    glfwGetWindowPos(window_, &x, &y);
-
-    for (size_t i = 0; i < monitors_.size(); ++i)
-    {
-        auto monitor = monitors_.at(i);
-
-        bool overlap_x = x >= monitor->position_x && x < monitor->position_x + monitor->width;
-        bool overlap_y = y >= monitor->position_y && y < monitor->position_y + monitor->width;
-
-        if (overlap_x && overlap_y)
-        {
-            return monitor;
-        }
-    }
-
-    return primary_monitor_;
+    return current_monitor_;
 }
 
 void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
