@@ -15,6 +15,7 @@ target_sources(engine PRIVATE
   Entity/Entity.cpp
   Framebuffer/Framebuffer.cpp
   InputManager/InputManager.cpp
+  Json/json.cpp
   Logger/Logger.cpp
   Monitor/monitor.cpp
   Resolution/resolution.cpp
