@@ -114,9 +114,9 @@ void PerspectiveCamera::LockHorizontal(const bool lock)
     m_LockHorizontal = lock;
 }
 
-void PerspectiveCamera::DrawDebugInfo()
+void PerspectiveCamera::draw_debug_info()
 {
-    Camera::DrawDebugInfo();
+    Camera::draw_debug_info();
 
     ImGui::Text("Lock Horizontal");
     ImGui::SameLine();

@@ -1,3 +1,4 @@
+#include <engine/Logger/Logger.hpp>
 #include <engine/Monitor/monitor.hpp>
 
 #include <algorithm>
@@ -7,7 +8,7 @@ using namespace engine;
 Monitor::Monitor(GLFWmonitor *glfw_monitor)
     : monitor(glfw_monitor)
 {
-    title = glfwGetMonitorName(glfw_monitor);
+    title = glfwGetMonitorName(monitor);
 
     glfwGetMonitorWorkarea(glfw_monitor, &position_x, &position_y, &width, &height);
     glfwGetMonitorContentScale(glfw_monitor, &scale_x, &scale_y);

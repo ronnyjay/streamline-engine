@@ -13,6 +13,7 @@
 #include <engine/Components/Light.hpp>
 #include <engine/Components/Model.hpp>
 #include <engine/Components/Parent.hpp>
+#include <engine/Components/PlayerCamera.hpp>
 #include <engine/Components/RigidBody.hpp>
 #include <engine/Components/Transform.hpp>
 
@@ -421,7 +422,19 @@ void Scene::Draw()
         }
     }
 
-    auto camera = application.GetCurrentCamera();
+    auto camera_view = m_Registry.view<PlayerCamera>();
+
+    Camera *camera = nullptr;
+
+    for (const auto &entity : camera_view)
+    {
+        camera = camera_view.get<PlayerCamera>(entity).camera;
+    }
+
+    if (camera == nullptr)
+    {
+        camera = application.GetCurrentCamera();
+    }
 
     auto projectionMatrix = camera->ProjectionMatrix();
     auto viewMatrix = camera->ViewMatrix();
@@ -495,7 +508,7 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
     }
 }
 
-void Scene::DrawDebugInfo()
+void Scene::draw_debug_info()
 {
     if (ImGui::TreeNode("Entities"))
     {

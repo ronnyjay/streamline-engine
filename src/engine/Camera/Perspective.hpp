@@ -31,7 +31,7 @@ class PerspectiveCamera : public Camera
     virtual void Move(double, double) override;          // mouse position
     virtual void Move(double) override;                  // mouse scroll
 
-    virtual void DrawDebugInfo() override;
+    virtual void draw_debug_info() override;
 
     void LockHorizontal(const bool);
 

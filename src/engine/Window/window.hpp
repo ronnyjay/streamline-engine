@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+#include <engine/Debug/Debuggable.hpp>
 #include <engine/Monitor/monitor.hpp>
 #include <engine/Resolution/resolution.hpp>
 
@@ -19,7 +20,7 @@ typedef enum
     Borderless,
 } DisplayMode;
 
-class Window
+class Window : public Debuggable
 {
   public:
     Window(const int, const int, const char *, Application *const);
@@ -34,6 +35,8 @@ class Window
     void set_monitor(Monitor *);
     void set_resolution(Resolution);
     void set_display_mode(DisplayMode);
+
+    void draw_debug_info() override;
 
     int x();
     int y();
@@ -61,6 +64,8 @@ class Window
     Monitor *current_monitor_;
 
     std::vector<Monitor *> monitors_;
+
+    static const char *display_modes_[];
 
     static void key_callback(GLFWwindow *, int, int, int, int);
 

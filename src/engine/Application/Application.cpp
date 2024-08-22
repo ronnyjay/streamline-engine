@@ -1,5 +1,6 @@
 #include <engine/Application/Application.hpp>
 #include <engine/InputManager/InputManager.hpp>
+#include <engine/Json/json.hpp>
 #include <engine/Logger/Logger.hpp>
 #include <engine/stb/stb_image.hpp>
 
@@ -59,6 +60,8 @@ Application::Application(const int width, const int height, const char *title)
 #endif
 
     Logger::Info("Initialized GLFW.\n");
+
+    JSONObject json = JSON::parse("config/video.json");
 
     // Load monitors
     LoadMonitors();
@@ -127,8 +130,8 @@ Application::Application(const int width, const int height, const char *title)
     m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
     m_CurrentMonitor = GetCurrentMonitor();
 
-    SetMonitor(m_PrimaryMonitor);
-    SetResolution(Resolution(savedWidth, savedHeight));
+    // SetMonitor(m_PrimaryMonitor);
+    // SetResolution(Resolution(savedWidth, savedHeight));
 
     // Restore flags
     if (!m_Flags.ShowCursor)
@@ -311,14 +314,15 @@ void Application::Run()
         renderAccumulator += deltaTime;
         simulationAccumulator += deltaTime;
 
-        auto monitor = GetCurrentMonitor();
+        m_Window->refresh();
+        // auto monitor = m_Window->current_monitor();
 
-        if (monitor != m_CurrentMonitor)
-        {
-            m_CurrentMonitor = monitor;
+        // if (monitor != m_CurrentMonitor)
+        // {
+        //     m_CurrentMonitor = monitor;
 
-            Logger::Info("Current monitor detected: %s.\n", m_CurrentMonitor->title);
-        }
+        //     Logger::Info("Current monitor detected: %s.\n", m_CurrentMonitor->title);
+        // }
 
         ProcessInput(deltaTime);
 
@@ -395,6 +399,8 @@ void Application::Run()
 
                         ImGui::TreePop();
                     }
+
+                    m_Window->draw_debug_info();
 
                     if (ImGui::TreeNode("Video"))
                     {
@@ -547,7 +553,7 @@ void Application::Run()
                                 SetCameraNext();
                             }
 
-                            m_CurrentCamera->DrawDebugInfo();
+                            m_CurrentCamera->draw_debug_info();
                         }
                         else
                         {
@@ -578,7 +584,7 @@ void Application::Run()
                                 SetSceneNext();
                             }
 
-                            m_CurrentScene->DrawDebugInfo();
+                            m_CurrentScene->draw_debug_info();
                         }
                         else
                         {
@@ -617,6 +623,8 @@ Monitor *const Application::GetPrimaryMonitor() const
 
 Monitor *const Application::GetCurrentMonitor() const
 {
+    Logger::Info("Here\n");
+
     int windowX, windowY;
     glfwGetWindowPos(m_Window->window(), &windowX, &windowY);
 
@@ -624,12 +632,27 @@ Monitor *const Application::GetCurrentMonitor() const
     {
         auto monitor = m_Monitors[i];
 
+        Logger::Info(
+            "%d, %d, %d, %d, %d, %s\n",
+            windowX,
+            windowY,
+            monitor->position_x,
+            monitor->position_y,
+            monitor->width,
+            monitor->title);
+
         bool overlapX = windowX >= monitor->position_x && windowX < monitor->position_x + monitor->width;
         bool overlapY = windowY >= monitor->position_y && windowY < monitor->position_y + monitor->height;
 
         if (overlapX && overlapY)
         {
+            Logger::Info("FOUND\n");
+
             return m_Monitors[i];
+        }
+        else
+        {
+            Logger::Warn("Missed\n");
         }
     }
 

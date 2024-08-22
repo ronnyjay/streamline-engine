@@ -55,7 +55,7 @@ class Camera : public Debuggable
     virtual void Move(double, double) = 0;          // mouse position
     virtual void Move(double) = 0;                  // mouse scroll
 
-    virtual void DrawDebugInfo() override;
+    virtual void draw_debug_info() override;
 
     float GetYaw() const;
     void SetYaw(const float);

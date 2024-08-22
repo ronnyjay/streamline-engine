@@ -12,7 +12,7 @@ class Debuggable
     {
     }
 
-    virtual void DrawDebugInfo(){};
+    virtual void draw_debug_info(){};
 
     virtual ~Debuggable()
     {

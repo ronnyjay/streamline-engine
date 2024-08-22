@@ -66,7 +66,7 @@ void Camera::SetPosition(const glm::vec3 &position)
     Update();
 }
 
-void Camera::DrawDebugInfo()
+void Camera::draw_debug_info()
 {
     ImGui::DragFloat("Yaw", &m_Yaw);
     ImGui::DragFloat("Pitch", &m_Pitch);

@@ -6,6 +6,8 @@
 
 using namespace engine;
 
+const char *Window::display_modes_[] = {"Fullscreen", "Windowed", "Fullscreen Borderless"};
+
 Window::Window(const int width, const int height, const char *title, Application *const application)
     : width_(width)
     , height_(height)
@@ -22,22 +24,6 @@ Window::Window(const int width, const int height, const char *title, Application
         Logger::Err("failed to create window\n");
         std::exit(EXIT_FAILURE);
     }
-
-    // initialize monitors
-    int count;
-    GLFWmonitor **monitors = glfwGetMonitors(&count);
-
-    for (int i = 0; i < count; ++i)
-    {
-        monitors_.emplace_back(new Monitor(monitors[i]));
-    }
-
-    if (monitors)
-    {
-        primary_monitor_ = monitors_.at(0);
-    }
-
-    current_monitor_ = current_monitor();
 
     // make this window's context the current of the main thread
     glfwMakeContextCurrent(window_);
@@ -65,6 +51,22 @@ Window::Window(const int width, const int height, const char *title, Application
         Logger::Err("failed to initialize glad\n");
         std::exit(EXIT_FAILURE);
     }
+
+    // initialize monitors
+    int count;
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+    for (int i = 0; i < count; ++i)
+    {
+        monitors_.emplace_back(new Monitor(monitors[i]));
+    }
+
+    // set monitor & resolution
+    set_monitor(monitors_.at(0));
+
+    refresh();
+
+    set_resolution(Resolution(width, height));
 }
 
 void Window::refresh()
@@ -72,18 +74,20 @@ void Window::refresh()
     int x, y;
     glfwGetWindowPos(window_, &x, &y);
 
-    for (size_t i = 0; i < monitors_.size(); ++i)
+    for (size_t i = 0; i < monitors_.size(); i++)
     {
-        auto monitor = monitors_.at(i);
+        auto monitor = monitors_[i];
 
         bool overlap_x = x >= monitor->position_x && x < monitor->position_x + monitor->width;
-        bool overlap_y = y >= monitor->position_y && y < monitor->position_y + monitor->width;
+        bool overlap_y = y >= monitor->position_y && y < monitor->position_y + monitor->height;
 
-        if (overlap_x && overlap_y && monitor != current_monitor_)
+        if (overlap_x && overlap_y)
         {
-            current_monitor_ = monitor;
+            current_monitor_ = monitors_[i];
         }
     }
+
+    current_monitor_ = primary_monitor_;
 }
 
 void Window::set_monitor(Monitor *monitor)
@@ -213,6 +217,77 @@ void Window::set_display_mode(DisplayMode mode)
 
     // update last display mode
     last_display_mode_ = mode;
+}
+
+void Window::draw_debug_info()
+{
+    if (ImGui::TreeNode("Window"))
+    {
+        // draw monitor list
+        if (display_mode_ == Windowed)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        if (display_mode_ == Windowed)
+        {
+            ImGui::EndDisabled();
+        }
+
+        // draw resolution list
+        if (display_mode_ == Borderless)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        int *resolution_index;
+
+        switch (display_mode_)
+        {
+        case Fullscreen:
+            resolution_index = &current_monitor_->resolution_fullscreen;
+            break;
+        case Windowed:
+            resolution_index = &current_monitor_->resolution_windowed;
+            break;
+        case Borderless:
+            resolution_index = &current_monitor_->resolution_borderless;
+            break;
+        }
+
+        if (ImGui::Combo(
+                "Resolution",
+                resolution_index,
+                [](void *data, int index) -> const char *
+                {
+                    auto &list = *static_cast<std::vector<Resolution> *>(data);
+
+                    if (index < 0 || index >= static_cast<int>(list.size()))
+                    {
+                        return nullptr;
+                    }
+
+                    return list[index].c_str();
+                },
+                static_cast<void *>(&current_monitor_->resolutions),
+                current_monitor_->resolutions.size()))
+        {
+            set_resolution(current_monitor_->resolutions[*resolution_index]);
+        }
+
+        if (display_mode_ == Borderless)
+        {
+            ImGui::EndDisabled();
+        }
+
+        // draw display mode list
+        if (ImGui::Combo("Display Mode", (int *)(&display_mode_), display_modes_, IM_ARRAYSIZE(display_modes_)))
+        {
+            set_display_mode(static_cast<DisplayMode>(display_mode_));
+        }
+
+        ImGui::TreePop();
+    }
 }
 
 int Window::x()
@@ -366,6 +441,6 @@ void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height
 {
     auto *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
 
-    application->m_Width = width;
-    application->m_Height = height;
+    // application->m_Width = width;
+    // application->m_Height = height;
 }

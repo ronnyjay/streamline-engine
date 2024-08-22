@@ -37,7 +37,7 @@ class Scene : public Debuggable
     void Draw();
     void DrawEntity(const entt::entity &, const glm::mat4 &);
 
-    void DrawDebugInfo() override;
+    void draw_debug_info() override;
     void DrawEntityDebugInfo(const entt::entity &);
 };
 
