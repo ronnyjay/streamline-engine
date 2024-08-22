@@ -1,9 +1,12 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
-
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+
+#include <engine/Monitor/monitor.hpp>
+#include <engine/Resolution/resolution.hpp>
+#include <engine/Window/window.hpp>
 
 #include <engine/Camera/Camera.hpp>
 #include <engine/Config/Config.hpp>
@@ -26,107 +29,7 @@ typedef std::unordered_map<int, Direction> KeyMap;
 typedef std::unordered_map<std::string, ShaderProgram> ShaderMap;
 typedef std::unordered_map<std::string, Texture> TextureMap;
 
-struct Resolution
-{
-    Resolution(const int resWidth, const int resHeight)
-        : width(resWidth)
-        , height(resHeight)
-    {
-    }
-
-    bool operator==(const Resolution &other) const
-    {
-        return width == other.width && height == other.height;
-    }
-
-    bool operator<(const Resolution &other) const
-    {
-        if (width != other.width)
-        {
-            return width < other.width;
-        }
-
-        return height < other.height;
-    }
-
-    int width;
-    int height;
-
-    mutable char format[32];
-
-    const char *Format() const
-    {
-        std::snprintf(format, sizeof(format), "%dx%d", width, height);
-        return format;
-    }
-
-  private:
-};
-
-typedef std::vector<Resolution> ResolutionList;
-
-struct Monitor
-{
-    Monitor(GLFWmonitor *glMonitor)
-        : monitor(glMonitor)
-        , title(glfwGetMonitorName(glMonitor))
-        , resolutionWindowed(-1)
-    {
-        glfwGetMonitorWorkarea(glMonitor, &positionX, &positionY, &width, &height);
-        glfwGetMonitorContentScale(glMonitor, &scaleX, &scaleY);
-
-        int count;
-        const GLFWvidmode *modes = glfwGetVideoModes(glMonitor, &count);
-
-        for (int i = 0; i < count; i++)
-        {
-            resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
-        }
-
-        resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
-
-        resolutionFullscreen = resolutions.size() - 1;
-        resolutionBorderless = resolutions.size() - 1;
-    }
-
-    bool operator==(const Monitor &other)
-    {
-        return monitor == other.monitor;
-    }
-
-    bool operator!=(const Monitor &other)
-    {
-        return monitor != other.monitor;
-    }
-
-    GLFWmonitor *monitor;
-
-    int width;
-    int height;
-
-    int positionX;
-    int positionY;
-
-    float scaleX;
-    float scaleY;
-
-    const char *title;
-
-    int resolutionFullscreen;
-    int resolutionWindowed;
-    int resolutionBorderless;
-
-    ResolutionList resolutions;
-};
-
 typedef std::vector<Monitor *> MonitorList;
-
-typedef enum
-{
-    Fullscreen = 0,
-    Windowed = 1,
-    Borderless = 2
-} DisplayMode;
 
 typedef enum
 {
@@ -160,7 +63,7 @@ class Application
     int Width() const;
     int Height() const;
 
-    ApplicationFlags const &Flags() const;
+    ApplicationFlags &Flags();
 
     void AddCamera(const int, const std::shared_ptr<Camera>);
     void SetCamera(const int);
@@ -182,7 +85,8 @@ class Application
     ~Application();
 
   private:
-    GLFWwindow *m_Window;
+    friend class Window;
+    Window *m_Window;
 
     int m_Width;
     int m_Height;
@@ -247,12 +151,16 @@ class Application
     static const char *DisplayModes[];
     static const char *Framerates[];
 
-    static void FramebufferSizeCallback(GLFWwindow *, int, int);
-    static void MinimizeCallback(GLFWwindow *, int);
-    static void MaximizeCallback(GLFWwindow *, int);
-    static void KeyCallback(GLFWwindow *, int, int, int, int);
-    static void CursorPosCallback(GLFWwindow *, double, double);
-    static void ScrollCallback(GLFWwindow *, double, double);
+    static void framebuffer_size_callback(GLFWwindow *, int, int);
+
+    static void minimize_callback(GLFWwindow *, int);
+    static void maximize_callback(GLFWwindow *, int);
+
+    static void cursor_callback(GLFWwindow *, double, double);
+    static void scroll_callback(GLFWwindow *, double, double);
+
+    static void key_callback(GLFWwindow *, int, int, int, int);
+
     static void GLAPIENTRY MessageCallback(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *, const void *);
 };
 

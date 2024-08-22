@@ -11,15 +11,15 @@ class Framebuffer
   public:
     Framebuffer(const unsigned int, const unsigned int);
 
+    int Width() const;
+    int Height() const;
+
     void Bind();
     void Unbind();
 
     void Render();
 
     void Resize(const unsigned int, const unsigned int);
-
-    int Width() const;
-    int Height() const;
 
     ~Framebuffer();
 

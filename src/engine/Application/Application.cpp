@@ -97,29 +97,11 @@ Application::Application(const int width, const int height, const char *title)
     }
 
     // Initialize Window
-    m_Window = glfwCreateWindow(savedWidth, savedHeight, title, NULL, NULL);
+    m_Window = new Window(savedWidth, savedHeight, title, this);
 
     if (m_Window == NULL)
     {
         Logger::Err("Failed to create GLFW Window.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    glfwMakeContextCurrent(m_Window);
-    glfwSetWindowAspectRatio(m_Window, savedWidth, savedHeight);
-    glfwSetFramebufferSizeCallback(m_Window, Application::FramebufferSizeCallback);
-    glfwSetWindowIconifyCallback(m_Window, Application::MinimizeCallback);
-    glfwSetWindowMaximizeCallback(m_Window, Application::MaximizeCallback);
-    glfwSetKeyCallback(m_Window, Application::KeyCallback);
-    glfwSetCursorPosCallback(m_Window, Application::CursorPosCallback);
-    glfwSetScrollCallback(m_Window, Application::ScrollCallback);
-    glfwSetWindowUserPointer(m_Window, this); // Access this objects instance in glfw callbacks
-
-    Logger::Info("Initialized GLFW Window.\n");
-
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
-    {
-        Logger::Err("Failed to initialize GLAD.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -151,7 +133,7 @@ Application::Application(const int width, const int height, const char *title)
     // Restore flags
     if (!m_Flags.ShowCursor)
     {
-        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(m_Window->window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     // Initialize ImGui
@@ -165,7 +147,7 @@ Application::Application(const int width, const int height, const char *title)
 
     // Setup Platform/Renderer backend
     // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+    ImGui_ImplGlfw_InitForOpenGL(m_Window->window(), true);
     ImGui_ImplOpenGL3_Init(nullptr);
 
     Logger::Info("Initialized ImGui.\n");
@@ -199,7 +181,7 @@ int Application::Height() const
     return m_Height;
 }
 
-ApplicationFlags const &Application::Flags() const
+ApplicationFlags &Application::Flags()
 {
     return m_Flags;
 }
@@ -313,7 +295,7 @@ void Application::Run()
 
     lastTime = currentTime = glfwGetTime();
 
-    while (!glfwWindowShouldClose(m_Window))
+    while (!glfwWindowShouldClose(m_Window->window()))
     {
         deltaTime = (currentTime = glfwGetTime()) - lastTime;
 
@@ -371,7 +353,7 @@ void Application::Run()
             m_Framebuffer->Unbind();
 
             int width, height;
-            glfwGetFramebufferSize(m_Window, &width, &height);
+            glfwGetFramebufferSize(m_Window->window(), &width, &height);
 
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
@@ -457,13 +439,13 @@ void Application::Run()
                         switch (m_DisplayMode)
                         {
                         case Fullscreen:
-                            resolutionIndex = &m_CurrentMonitor->resolutionFullscreen;
+                            resolutionIndex = &m_CurrentMonitor->resolution_fullscreen;
                             break;
                         case Windowed:
-                            resolutionIndex = &m_CurrentMonitor->resolutionWindowed;
+                            resolutionIndex = &m_CurrentMonitor->resolution_windowed;
                             break;
                         case Borderless:
-                            resolutionIndex = &m_CurrentMonitor->resolutionBorderless;
+                            resolutionIndex = &m_CurrentMonitor->resolution_borderless;
                             break;
                         }
 
@@ -478,7 +460,8 @@ void Application::Run()
                                     {
                                         return false;
                                     }
-                                    *text = vector[index].Format();
+
+                                    *text = vector[index].c_str();
 
                                     return true;
                                 },
@@ -612,7 +595,7 @@ void Application::Run()
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-            glfwSwapBuffers(m_Window);
+            glfwSwapBuffers(m_Window->window());
             glfwPollEvents();
 
             renderAccumulator = 0.0;
@@ -624,7 +607,7 @@ void Application::Run()
 
 GLFWwindow *const Application::GetWindow() const
 {
-    return m_Window;
+    return m_Window->window();
 }
 
 Monitor *const Application::GetPrimaryMonitor() const
@@ -635,14 +618,14 @@ Monitor *const Application::GetPrimaryMonitor() const
 Monitor *const Application::GetCurrentMonitor() const
 {
     int windowX, windowY;
-    glfwGetWindowPos(m_Window, &windowX, &windowY);
+    glfwGetWindowPos(m_Window->window(), &windowX, &windowY);
 
     for (size_t i = 0; i < m_Monitors.size(); i++)
     {
         auto monitor = m_Monitors[i];
 
-        bool overlapX = windowX >= monitor->positionX && windowX < monitor->positionX + monitor->width;
-        bool overlapY = windowY >= monitor->positionY && windowY < monitor->positionY + monitor->height;
+        bool overlapX = windowX >= monitor->position_x && windowX < monitor->position_x + monitor->width;
+        bool overlapY = windowY >= monitor->position_y && windowY < monitor->position_y + monitor->height;
 
         if (overlapX && overlapY)
         {
@@ -662,9 +645,9 @@ void Application::ProcessInput(const double timeStep)
         //     m_CurrentCamera->Move(Direction(it->second), timeStep);
         // }
 
-        if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(m_Window->window(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(m_Window, true);
+            glfwSetWindowShouldClose(m_Window->window(), true);
         }
     }
 }
@@ -736,7 +719,7 @@ void Application::SetResolution(const Resolution resolution)
 
     if (m_DisplayMode == Fullscreen)
     {
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, width, height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_Window->window(), m_PrimaryMonitor->monitor, 0, 0, width, height, GLFW_DONT_CARE);
 
         bool found = false;
 
@@ -746,24 +729,24 @@ void Application::SetResolution(const Resolution resolution)
 
             if (width == res.width && height == res.height)
             {
-                m_PrimaryMonitor->resolutionFullscreen = i;
+                m_PrimaryMonitor->resolution_fullscreen = i;
                 found = true;
             }
         }
 
         if (!found)
         {
-            m_PrimaryMonitor->resolutionFullscreen = -1;
+            m_PrimaryMonitor->resolution_fullscreen = -1;
         }
     }
     else if (m_DisplayMode == Windowed)
     {
-        float scaleX = m_CurrentMonitor->scaleX;
-        float scaleY = m_CurrentMonitor->scaleY;
+        float scaleX = m_CurrentMonitor->scale_x;
+        float scaleY = m_CurrentMonitor->scale_y;
 
-        glfwSetWindowAspectRatio(m_Window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-        glfwSetWindowSize(m_Window, width / scaleX, height / scaleY);
-        glfwSetWindowAspectRatio(m_Window, width, height);
+        glfwSetWindowAspectRatio(m_Window->window(), GLFW_DONT_CARE, GLFW_DONT_CARE);
+        glfwSetWindowSize(m_Window->window(), width / scaleX, height / scaleY);
+        glfwSetWindowAspectRatio(m_Window->window(), width, height);
 
         bool found = false;
 
@@ -773,14 +756,14 @@ void Application::SetResolution(const Resolution resolution)
 
             if (width == res.width && height == res.height)
             {
-                m_CurrentMonitor->resolutionWindowed = i;
+                m_CurrentMonitor->resolution_windowed = i;
                 found = true;
             }
         }
 
         if (!found)
         {
-            m_CurrentMonitor->resolutionWindowed = -1;
+            m_CurrentMonitor->resolution_windowed = -1;
         }
     }
 
@@ -792,25 +775,26 @@ void Application::SetDisplayMode(const DisplayMode mode)
     // Store the window's position and size
     if (m_LastDisplayMode == Windowed)
     {
-        glfwGetWindowPos(m_Window, &m_WindowX, &m_WindowY);
-        glfwGetWindowSize(m_Window, &m_LastWidth, &m_LastHeight);
+        glfwGetWindowPos(m_Window->window(), &m_WindowX, &m_WindowY);
+        glfwGetWindowSize(m_Window->window(), &m_LastWidth, &m_LastHeight);
     }
 
     if (mode == Fullscreen)
     {
         // Get the primary monitor's current resolution
-        Resolution current = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolutionFullscreen];
+        Resolution current = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolution_fullscreen];
 
         // Set the window monitor to the primary monitor
         glfwSetWindowMonitor(
-            m_Window,
+            m_Window->window(),
             nullptr,
-            m_PrimaryMonitor->positionX,
-            m_PrimaryMonitor->positionY,
+            m_PrimaryMonitor->position_x,
+            m_PrimaryMonitor->position_y,
             m_PrimaryMonitor->width,
             m_PrimaryMonitor->height,
             0);
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(
+            m_Window->window(), m_PrimaryMonitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
 
         // Resize framebuffer
         m_Framebuffer->Resize(current.width, current.height);
@@ -819,28 +803,28 @@ void Application::SetDisplayMode(const DisplayMode mode)
     if (mode == Borderless)
     {
         // Set the correct window attributes
-        if (glfwGetWindowAttrib(m_Window, GLFW_DECORATED))
+        if (glfwGetWindowAttrib(m_Window->window(), GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_FALSE);
+            glfwSetWindowAttrib(m_Window->window(), GLFW_DECORATED, GL_FALSE);
         }
 
-        if (!glfwGetWindowAttrib(m_Window, GLFW_FLOATING))
+        if (!glfwGetWindowAttrib(m_Window->window(), GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_TRUE);
+            glfwSetWindowAttrib(m_Window->window(), GLFW_FLOATING, GL_TRUE);
         }
 
         // Set the window monitor to the primary monitor
         glfwSetWindowMonitor(
-            m_Window,
+            m_Window->window(),
             nullptr,
-            m_PrimaryMonitor->positionX,
-            m_PrimaryMonitor->positionY,
+            m_PrimaryMonitor->position_x,
+            m_PrimaryMonitor->position_y,
             m_PrimaryMonitor->width,
             m_PrimaryMonitor->height,
             0);
 
         // Use the primary monitor's highest resolution
-        Resolution highest = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolutionBorderless];
+        Resolution highest = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolution_borderless];
 
         // Resize framebuffer
         m_Framebuffer->Resize(highest.width, highest.height);
@@ -849,18 +833,18 @@ void Application::SetDisplayMode(const DisplayMode mode)
     if (mode == Windowed)
     {
         // Set the correct window attributes
-        if (!glfwGetWindowAttrib(m_Window, GLFW_DECORATED))
+        if (!glfwGetWindowAttrib(m_Window->window(), GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GL_TRUE);
+            glfwSetWindowAttrib(m_Window->window(), GLFW_DECORATED, GL_TRUE);
         }
 
-        if (glfwGetWindowAttrib(m_Window, GLFW_FLOATING))
+        if (glfwGetWindowAttrib(m_Window->window(), GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(m_Window, GLFW_FLOATING, GL_FALSE);
+            glfwSetWindowAttrib(m_Window->window(), GLFW_FLOATING, GL_FALSE);
         }
 
         // Restore window's last position and size
-        glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
+        glfwSetWindowMonitor(m_Window->window(), nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
 
         // Resize framebuffer
         m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
@@ -904,19 +888,19 @@ Application::~Application()
     switch (m_DisplayMode)
     {
     case Fullscreen:
-        resolutionIndex = m_PrimaryMonitor->resolutionFullscreen;
+        resolutionIndex = m_PrimaryMonitor->resolution_fullscreen;
         break;
     case Windowed:
-        resolutionIndex = m_PrimaryMonitor->resolutionWindowed;
+        resolutionIndex = m_PrimaryMonitor->resolution_windowed;
         break;
     case Borderless:
-        resolutionIndex = m_PrimaryMonitor->resolutionBorderless;
+        resolutionIndex = m_PrimaryMonitor->resolution_borderless;
         break;
     }
 
     if (resolutionIndex == -1)
     {
-        glfwGetWindowSize(m_Window, &width, &height);
+        glfwGetWindowSize(m_Window->window(), &width, &height);
     }
     else
     {
@@ -957,130 +941,6 @@ Application::~Application()
     ImGui_ImplGlfw_Shutdown();
 
     glfwTerminate();
-}
-
-void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
-{
-    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-
-    application->m_Width = width;
-    application->m_Height = height;
-}
-
-void Application::MinimizeCallback(GLFWwindow *window, int minimize)
-{
-    (minimize) ? glfwIconifyWindow(window) : glfwRestoreWindow(window);
-}
-
-void Application::MaximizeCallback(GLFWwindow *window, int maximize)
-{
-    (maximize) ? glfwMaximizeWindow(window) : glfwRestoreWindow(window);
-}
-
-void Application::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-
-    if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
-    {
-        if (mods == GLFW_MOD_SHIFT)
-        {
-            application->m_Flags.ShowCursor = !application->m_Flags.ShowCursor;
-
-            if (application->m_Flags.ShowCursor)
-            {
-                glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            }
-            else
-            {
-                glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            }
-
-            application->m_Flags.FirstMouse = true;
-        }
-        else
-        {
-            application->m_Flags.ShowDebugWindow = !application->m_Flags.ShowDebugWindow;
-
-            if (application->m_Flags.ShowDebugWindow)
-            {
-                application->m_Flags.CaptureMouse = false;
-
-                // Temporarily show cursor while debug window is open
-                if (!application->m_Flags.ShowCursor)
-                {
-                    glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                }
-
-                application->m_Flags.FirstMouse = true;
-            }
-            else
-            {
-                application->m_Flags.CaptureMouse = true;
-
-                // Restore cursor state
-                if (!application->m_Flags.ShowCursor)
-                {
-                    glfwSetInputMode(application->m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                }
-            }
-        }
-    }
-
-    InputManager::Instance().RegisterKeyState(key, scancode, action, mods);
-}
-
-void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yPosIn)
-{
-    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-
-    static float lastX = application->Width() / 2.0f;
-    static float lastY = application->Height() / 2.0f;
-
-    if (!application->m_Flags.CaptureMouse)
-    {
-        return;
-    }
-
-    if (application->m_Flags.FirstMouse)
-    {
-        lastX = xPosIn;
-        lastY = yPosIn;
-        application->m_Flags.FirstMouse = false;
-    }
-
-    float xPos = static_cast<float>(xPosIn);
-    float yPos = static_cast<float>(yPosIn);
-
-    float xOffset = xPos - lastX;
-    float yOffset = lastY - yPos;
-
-    lastX = xPos;
-    lastY = yPos;
-
-    if (application->m_CurrentCamera)
-    {
-        application->m_CurrentCamera->Move(xOffset, yOffset);
-    }
-
-    InputManager::Instance().RegisterCursorEvent(xOffset, yOffset);
-}
-
-void Application::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset)
-{
-    Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-
-    if (application->m_Flags.ShowDebugWindow)
-    {
-        return;
-    }
-
-    if (application->m_CurrentCamera)
-    {
-        application->m_CurrentCamera->Move(yOffset);
-    }
-
-    InputManager::Instance().RegisterScrollEvent(xOffset, yOffset);
 }
 
 void GLAPIENTRY Application::MessageCallback(

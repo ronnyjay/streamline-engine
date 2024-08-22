@@ -16,12 +16,15 @@ target_sources(engine PRIVATE
   Framebuffer/Framebuffer.cpp
   InputManager/InputManager.cpp
   Logger/Logger.cpp
+  Monitor/monitor.cpp
+  Resolution/resolution.cpp
   ResourceManager/ResourceManager.cpp 
   Scene/Scene.cpp
   Shader/Shader.cpp
   stb/stb_image.cpp
   Text/Text.cpp
   Texture/Texture.cpp
+  Window/window.cpp
 )
 
 target_link_libraries(engine PUBLIC glfw glm::glm glad imgui assimp::assimp)
