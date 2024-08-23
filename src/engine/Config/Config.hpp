@@ -1,10 +1,22 @@
 #pragma once
 
+#include <engine/Json/json.hpp>
 #include <engine/Logger/Logger.hpp>
 
-#include <filesystem>
-#include <map>
-#include <sstream>
+const int DEFAULTRES = 800;
+const int DEFAULTRESHEIGHT = 600;
+const int DISPLAYMODE = 1;
+const int MONITOR = 0;
+const int VSYNC = 1;
+
+const int FIRST_MOUSE = 1;
+const int CAPTURE_MOUSE = 1;
+
+const int SHOW_CURSOR = 0;
+const int SHOW_WIREFRAMES = 0;
+const int SHOW_COLLISIONS = 0;
+const int SHOW_DEBUG_WINDOW = 0;
+const int SHOW_DEBUG_METRICS = 0;
 
 namespace engine
 {
@@ -12,41 +24,24 @@ namespace engine
 class Config
 {
   public:
-    Config(std::filesystem::path);
+    Config();
 
-    void Load();
-    void Store();
+    int defaultres = DEFAULTRES;
+    int defaultresheight = DEFAULTRESHEIGHT;
+    int displaymode = DISPLAYMODE;
+    int monitor = MONITOR;
+    int vsync = VSYNC;
 
-    template <typename T> T Get(const std::string &key) const
-    {
-        T value;
+    int first_mouse = FIRST_MOUSE;
+    int capture_mouse = CAPTURE_MOUSE;
 
-        std::istringstream stream(m_Values.at(key));
+    int show_cursor = SHOW_CURSOR;
+    int show_wireframes = SHOW_WIREFRAMES;
+    int show_collisions = SHOW_COLLISIONS;
+    int show_debug_window = SHOW_DEBUG_WINDOW;
+    int show_debug_metrics = SHOW_DEBUG_METRICS;
 
-        if (!(stream >> value))
-        {
-            Logger::Err("Type conversion failed for key: \"%s\".\n", key.c_str());
-
-            return T{};
-        }
-
-        return value;
-    }
-
-    template <typename T> void Set(const std::string &key, T &value)
-    {
-        m_Values[key] = std::to_string(value);
-    }
-
-    bool Has(const std::string &key)
-    {
-        return m_Values.contains(key);
-    }
-
-  private:
-    std::filesystem::path m_Path;
-    std::filesystem::path m_Directory;
-    std::map<std::string, std::string> m_Values;
+    void from_json(const JSONObject &);
 };
 
 } // namespace engine

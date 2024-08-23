@@ -2,11 +2,37 @@
 
 #include <engine/Application/Application.hpp>
 #include <engine/InputManager/InputManager.hpp>
+#include <engine/Json/json.hpp>
 #include <engine/Logger/Logger.hpp>
 
 using namespace engine;
 
 const char *Window::display_modes_[] = {"Fullscreen", "Windowed", "Fullscreen Borderless"};
+
+Window::Window(const std::filesystem::path &config, Application *const application)
+{
+    JSONObject json = JSON::parse(config);
+
+    // if (json.contains("setting.defaultres"))
+    // {
+    //     settings_.defaultres = json.get<int>("setting.defaultres");
+    // }
+
+    // if (json.contains("setting.defaultresheight"))
+    // {
+    //     settings_.defaultresheight = json.get<int>("setting.defaultresheight");
+    // }
+
+    // if (json.contains("setting.displaymode"))
+    // {
+    //     settings_.displaymode = json.get<int>("setting.displaymode");
+    // }
+
+    // if (json.contains("setting.monitor"))
+    // {
+    //     settings_.monitor = json.get<int>("setting.monitor");
+    // }
+}
 
 Window::Window(const int width, const int height, const char *title, Application *const application)
     : width_(width)

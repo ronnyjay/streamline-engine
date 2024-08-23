@@ -7,6 +7,7 @@
 #include <engine/Monitor/monitor.hpp>
 #include <engine/Resolution/resolution.hpp>
 #include <engine/Window/window.hpp>
+#include <engine/setting/setting.hpp>
 
 #include <engine/Camera/Camera.hpp>
 #include <engine/Config/Config.hpp>
@@ -64,6 +65,7 @@ class Application
     int Height() const;
 
     ApplicationFlags &Flags();
+    static Setting &settings();
 
     void AddCamera(const int, const std::shared_ptr<Camera>);
     void SetCamera(const int);
@@ -125,7 +127,7 @@ class Application
 
     Framebuffer *m_Framebuffer;
 
-    Config m_VideoConfig;
+    Config config_;
 
     ApplicationFlags m_Flags;
 

@@ -41,137 +41,139 @@ Application::Application(const int width, const int height, const char *title)
     , m_LastDisplayMode(Windowed)
     , m_CurrentCamera(nullptr)
     , m_CurrentScene(nullptr)
-    , m_VideoConfig(std::filesystem::path(std::getenv("HOME")) / ".config/streamline/video.cfg")
+// , m_VideoConfig(std::filesystem::path(std::getenv("HOME")) / ".config/streamline/video.cfg")
 {
-    // Initialize GLFW
-    if (!glfwInit())
-    {
-        Logger::Err("Failed to initialize GLFW.\n");
-        exit(EXIT_FAILURE);
-    }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    // load config
+    config_.from_json(JSON::parse("config/video.json"));
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    //     // Initialize GLFW
+    //     if (!glfwInit())
+    //     {
+    //         Logger::Err("Failed to initialize GLFW.\n");
+    //         exit(EXIT_FAILURE);
+    //     }
 
-    Logger::Info("Initialized GLFW.\n");
+    //     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    //     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    //     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    JSONObject json = JSON::parse("config/video.json");
+    // #ifdef __APPLE__
+    //     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    // #endif
 
-    // Load monitors
-    LoadMonitors();
+    //     Logger::Info("Initialized GLFW.\n");
 
-    // Load video settings
-    m_VideoConfig.Load();
+    // // Load monitors
+    // LoadMonitors();
 
-    int savedWidth = width;
-    int savedHeight = height;
+    // // Load video settings
+    // m_VideoConfig.Load();
 
-    if (m_VideoConfig.Has("setting.defaultres") && m_VideoConfig.Has("setting.defaultresheight"))
-    {
-        savedWidth = m_VideoConfig.Get<int>("setting.defaultres");
-        savedHeight = m_VideoConfig.Get<int>("setting.defaultresheight");
-    }
+    // int savedWidth = width;
+    // int savedHeight = height;
 
-    if (m_VideoConfig.Has("setting.displaymode"))
-    {
-        m_DisplayMode = DisplayMode(m_VideoConfig.Get<int>("setting.displaymode"));
-        m_LastDisplayMode = m_DisplayMode;
-    }
+    // if (m_VideoConfig.Has("setting.defaultres") && m_VideoConfig.Has("setting.defaultresheight"))
+    // {
+    //     savedWidth = m_VideoConfig.Get<int>("setting.defaultres");
+    //     savedHeight = m_VideoConfig.Get<int>("setting.defaultresheight");
+    // }
 
-    if (m_VideoConfig.Has("setting.monitor"))
-    {
-        int monitorIndex = m_VideoConfig.Get<int>("setting.monitor");
+    // if (m_VideoConfig.Has("setting.displaymode"))
+    // {
+    //     m_DisplayMode = DisplayMode(m_VideoConfig.Get<int>("setting.displaymode"));
+    //     m_LastDisplayMode = m_DisplayMode;
+    // }
 
-        if (monitorIndex < (int)m_Monitors.size())
-        {
-            m_MonitorIndex = monitorIndex;
-        }
-    }
+    // if (m_VideoConfig.Has("setting.monitor"))
+    // {
+    //     int monitorIndex = m_VideoConfig.Get<int>("setting.monitor");
 
-    if (m_VideoConfig.Has("setting.vsync"))
-    {
-        m_Flags.VerticalSync = m_VideoConfig.Get<int>("setting.vsync");
-    }
+    //     if (monitorIndex < (int)m_Monitors.size())
+    //     {
+    //         m_MonitorIndex = monitorIndex;
+    //     }
+    // }
 
-    // Initialize Window
-    m_Window = new Window(savedWidth, savedHeight, title, this);
+    // if (m_VideoConfig.Has("setting.vsync"))
+    // {
+    //     m_Flags.VerticalSync = m_VideoConfig.Get<int>("setting.vsync");
+    // }
 
-    if (m_Window == NULL)
-    {
-        Logger::Err("Failed to create GLFW Window.\n");
-        exit(EXIT_FAILURE);
-    }
+    // // Initialize Window
+    // m_Window = new Window(savedWidth, savedHeight, title, this);
 
-    glEnable(GL_DEBUG_OUTPUT);
+    // if (m_Window == NULL)
+    // {
+    //     Logger::Err("Failed to create GLFW Window.\n");
+    //     exit(EXIT_FAILURE);
+    // }
 
-    if (glDebugMessageCallback)
-    {
-        glDebugMessageCallback(Application::MessageCallback, nullptr);
-    }
+    // glEnable(GL_DEBUG_OUTPUT);
 
-    // Initialize framebuffer
-    m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
+    // if (glDebugMessageCallback)
+    // {
+    //     glDebugMessageCallback(Application::MessageCallback, nullptr);
+    // }
 
-    if (!m_Framebuffer)
-    {
-        Logger::Err("Error initializing framebuffer.\n");
-        exit(EXIT_FAILURE);
-    }
+    // // Initialize framebuffer
+    // m_Framebuffer = new Framebuffer(savedWidth, savedHeight);
 
-    Logger::Info("Initialized framebuffer.\n");
+    // if (!m_Framebuffer)
+    // {
+    //     Logger::Err("Error initializing framebuffer.\n");
+    //     exit(EXIT_FAILURE);
+    // }
 
-    // Restore video settings
-    m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
-    m_CurrentMonitor = GetCurrentMonitor();
+    // Logger::Info("Initialized framebuffer.\n");
 
-    // SetMonitor(m_PrimaryMonitor);
-    // SetResolution(Resolution(savedWidth, savedHeight));
+    // // Restore video settings
+    // m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
+    // m_CurrentMonitor = GetCurrentMonitor();
 
-    // Restore flags
-    if (!m_Flags.ShowCursor)
-    {
-        glfwSetInputMode(m_Window->window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
+    // // SetMonitor(m_PrimaryMonitor);
+    // // SetResolution(Resolution(savedWidth, savedHeight));
 
-    // Initialize ImGui
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
+    // // Restore flags
+    // if (!m_Flags.ShowCursor)
+    // {
+    //     glfwSetInputMode(m_Window->window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // }
 
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+    // // Initialize ImGui
+    // IMGUI_CHECKVERSION();
+    // ImGui::CreateContext();
+    // ImGuiIO &io = ImGui::GetIO();
 
-    // Setup Platform/Renderer backend
-    // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-    ImGui_ImplGlfw_InitForOpenGL(m_Window->window(), true);
-    ImGui_ImplOpenGL3_Init(nullptr);
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
-    Logger::Info("Initialized ImGui.\n");
+    // // Setup Platform/Renderer backend
+    // // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    // ImGui_ImplGlfw_InitForOpenGL(m_Window->window(), true);
+    // ImGui_ImplOpenGL3_Init(nullptr);
 
-    // Load shaders
-    m_Shaders["Model"].AddShader("resources/shaders/model.vs", GL_VERTEX_SHADER);
-    m_Shaders["Model"].AddShader("resources/shaders/model.fs", GL_FRAGMENT_SHADER);
-    m_Shaders["Model"].Compile();
+    // Logger::Info("Initialized ImGui.\n");
 
-    m_Shaders["AABB"].AddShader("resources/shaders/AABB.vs", GL_VERTEX_SHADER);
-    m_Shaders["AABB"].AddShader("resources/shaders/AABB.fs", GL_FRAGMENT_SHADER);
-    m_Shaders["AABB"].Compile();
+    // // Load shaders
+    // m_Shaders["Model"].AddShader("resources/shaders/model.vs", GL_VERTEX_SHADER);
+    // m_Shaders["Model"].AddShader("resources/shaders/model.fs", GL_FRAGMENT_SHADER);
+    // m_Shaders["Model"].Compile();
 
-    m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.vs", GL_VERTEX_SHADER);
-    m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.fs", GL_FRAGMENT_SHADER);
-    m_Shaders["BSphere"].Compile();
+    // m_Shaders["AABB"].AddShader("resources/shaders/AABB.vs", GL_VERTEX_SHADER);
+    // m_Shaders["AABB"].AddShader("resources/shaders/AABB.fs", GL_FRAGMENT_SHADER);
+    // m_Shaders["AABB"].Compile();
 
-    // Flip textures on load
-    stbi_set_flip_vertically_on_load(true);
+    // m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.vs", GL_VERTEX_SHADER);
+    // m_Shaders["BSphere"].AddShader("resources/shaders/BSphere.fs", GL_FRAGMENT_SHADER);
+    // m_Shaders["BSphere"].Compile();
 
-    Logger::Info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, savedWidth, savedHeight);
+    // // Flip textures on load
+    // stbi_set_flip_vertically_on_load(true);
+
+    // Logger::Info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, savedWidth, savedHeight);
 }
 
 int Application::Width() const
@@ -903,65 +905,65 @@ void Application::LoadMonitors()
 
 Application::~Application()
 {
-    // Store video settings
-    int width;
-    int height;
-    int resolutionIndex;
+    // // Store video settings
+    // int width;
+    // int height;
+    // int resolutionIndex;
 
-    switch (m_DisplayMode)
-    {
-    case Fullscreen:
-        resolutionIndex = m_PrimaryMonitor->resolution_fullscreen;
-        break;
-    case Windowed:
-        resolutionIndex = m_PrimaryMonitor->resolution_windowed;
-        break;
-    case Borderless:
-        resolutionIndex = m_PrimaryMonitor->resolution_borderless;
-        break;
-    }
+    // switch (m_DisplayMode)
+    // {
+    // case Fullscreen:
+    //     resolutionIndex = m_PrimaryMonitor->resolution_fullscreen;
+    //     break;
+    // case Windowed:
+    //     resolutionIndex = m_PrimaryMonitor->resolution_windowed;
+    //     break;
+    // case Borderless:
+    //     resolutionIndex = m_PrimaryMonitor->resolution_borderless;
+    //     break;
+    // }
 
-    if (resolutionIndex == -1)
-    {
-        glfwGetWindowSize(m_Window->window(), &width, &height);
-    }
-    else
-    {
-        Resolution current = m_PrimaryMonitor->resolutions[resolutionIndex];
+    // if (resolutionIndex == -1)
+    // {
+    //     glfwGetWindowSize(m_Window->window(), &width, &height);
+    // }
+    // else
+    // {
+    //     Resolution current = m_PrimaryMonitor->resolutions[resolutionIndex];
 
-        width = current.width;
-        height = current.height;
-    }
+    //     width = current.width;
+    //     height = current.height;
+    // }
 
-    m_VideoConfig.Set("setting.defaultres", width);
-    m_VideoConfig.Set("setting.defaultresheight", height);
-    m_VideoConfig.Set("setting.displaymode", m_DisplayMode);
-    m_VideoConfig.Set("setting.monitor", m_MonitorIndex);
-    m_VideoConfig.Set("setting.vsync", m_Flags.VerticalSync);
+    // m_VideoConfig.Set("setting.defaultres", width);
+    // m_VideoConfig.Set("setting.defaultresheight", height);
+    // m_VideoConfig.Set("setting.displaymode", m_DisplayMode);
+    // m_VideoConfig.Set("setting.monitor", m_MonitorIndex);
+    // m_VideoConfig.Set("setting.vsync", m_Flags.VerticalSync);
 
-    m_VideoConfig.Store();
+    // m_VideoConfig.Store();
 
-    // De-allocate resources
-    delete m_Framebuffer;
+    // // De-allocate resources
+    // delete m_Framebuffer;
 
-    for (auto *monitor : m_Monitors)
-    {
-        delete monitor;
-    }
+    // for (auto *monitor : m_Monitors)
+    // {
+    //     delete monitor;
+    // }
 
-    for (auto it : m_Shaders)
-    {
-        glDeleteProgram(it.second);
-    }
+    // for (auto it : m_Shaders)
+    // {
+    //     glDeleteProgram(it.second);
+    // }
 
-    for (auto it : m_Textures)
-    {
-        glDeleteTextures(1, (unsigned int *)&it.second);
-    }
+    // for (auto it : m_Textures)
+    // {
+    //     glDeleteTextures(1, (unsigned int *)&it.second);
+    // }
 
     // Terminate
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
+    // ImGui_ImplOpenGL3_Shutdown();
+    // ImGui_ImplGlfw_Shutdown();
 
     glfwTerminate();
 }

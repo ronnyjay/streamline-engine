@@ -1,97 +1,35 @@
 #include <engine/Config/Config.hpp>
 
-#include <fstream>
-
 using namespace engine;
 
-Config::Config(std::filesystem::path path)
-    : m_Path(path)
-    , m_Directory(path.parent_path())
+Config::Config()
 {
 }
 
-void Config::Load()
+void Config::from_json(const JSONObject &json)
 {
-    Logger::Info("Loading configuration.\n");
-
-    if (!std::filesystem::exists(m_Directory))
+    if (json.contains("setting.defaultres"))
     {
-        Logger::Warn("Directory not found: \"%s\".\n", m_Directory.c_str());
-
-        if (std::filesystem::create_directories(m_Directory))
-        {
-            Logger::Info("Created directory: \"%s\".\n", m_Directory.c_str());
-        }
-        else
-        {
-            Logger::Err("Failed to create directory: \"%s\".\n", m_Directory.c_str());
-        }
+        defaultres = json.get<int>("setting.defaultres");
     }
 
-    if (!std::filesystem::exists(m_Path))
+    if (json.contains("setting.defaultresheight"))
     {
-        Logger::Warn("File not found: \"%s\".\n", m_Path.filename().c_str());
-
-        if (std::ofstream(m_Path))
-        {
-            Logger::Info("Created file: \"%s\".\n", m_Path.filename().c_str());
-        }
-        else
-        {
-            Logger::Err("Failed to create file: \"%s\".\n", m_Path.filename().c_str());
-        }
-
-        return;
+        defaultresheight = json.get<int>("setting.defaultresheight");
     }
 
-    std::ifstream file(m_Path);
-
-    if (!file.is_open())
+    if (json.contains("setting.displaymode"))
     {
-        Logger::Warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
-
-        return;
+        displaymode = json.get<int>("setting.displaymode");
     }
 
-    std::string line;
-    std::string key, value;
-    std::istringstream stream;
-
-    while (std::getline(file, line))
+    if (json.contains("setting.monitor"))
     {
-        stream = std::istringstream(line);
-
-        if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') && std::getline(stream, value, '\"') &&
-            std::getline(stream, value, '\"'))
-        {
-            m_Values[key] = value;
-        }
+        monitor = json.get<int>("setting.monitor");
     }
 
-    file.close();
-}
-
-void Config::Store()
-{
-    Logger::Info("Saving configuration.\n");
-
-    std::ofstream file(m_Path);
-
-    if (!file.is_open())
+    if (json.contains("setting.vsync"))
     {
-        Logger::Warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
-
-        return;
+        vsync = json.get<int>("setting.vsync");
     }
-
-    file << "{\n";
-
-    for (const auto &kv : m_Values)
-    {
-        file << "   \"" << kv.first << "\" \"" << kv.second << "\"\n";
-    }
-
-    file << "}\n";
-
-    file.close();
 }

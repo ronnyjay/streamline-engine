@@ -8,6 +8,8 @@
 #include <engine/Monitor/monitor.hpp>
 #include <engine/Resolution/resolution.hpp>
 
+#include <filesystem>
+
 namespace engine
 {
 
@@ -23,6 +25,7 @@ typedef enum
 class Window : public Debuggable
 {
   public:
+    Window(const std::filesystem::path &, Application *const);
     Window(const int, const int, const char *, Application *const);
 
     inline GLFWwindow *const window()
