@@ -7,7 +7,7 @@ monitor::monitor(GLFWmonitor *const m)
 {
     title = glfwGetMonitorName(glfw_monitor);
 
-    glfwGetMonitorWorkarea(glfw_monitor, &position_x, &position_y, &width, &height);
+    glfwGetMonitorWorkarea(glfw_monitor, &x, &y, &width, &height);
     glfwGetMonitorContentScale(glfw_monitor, &scale_x, &scale_y);
 
     int count;
@@ -20,9 +20,9 @@ monitor::monitor(GLFWmonitor *const m)
 
     resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
 
-    resolution_fullscreen = resolutions.size() - 1;
-    resolution_windowed = -1;
-    resolution_borderless = resolutions.size() - 1;
+    active_resolutions.fullscreen = resolutions.size() - 1;
+    active_resolutions.windowed = -1;
+    active_resolutions.borderless = resolutions.size() - 1;
 }
 
 const bool monitor::operator==(const monitor &other) const

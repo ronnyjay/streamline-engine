@@ -15,11 +15,11 @@ struct monitor
     const bool operator==(const monitor &) const;
     const bool operator!=(const monitor &) const;
 
+    int y;
+    int x;
+
     int width;
     int height;
-
-    int position_x;
-    int position_y;
 
     float scale_x;
     float scale_y;
@@ -28,14 +28,12 @@ struct monitor
 
     GLFWmonitor *glfw_monitor;
 
-    // index of the fullscreen resoltuion
-    int resolution_fullscreen;
-
-    // index of the windowed resolution
-    int resolution_windowed;
-
-    // index of the borderless resolution
-    int resolution_borderless;
+    struct
+    {
+        int fullscreen;
+        int windowed;
+        int borderless;
+    } active_resolutions;
 
     std::vector<resolution> resolutions;
 };
