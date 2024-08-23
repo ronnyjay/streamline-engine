@@ -43,8 +43,8 @@ void window::refresh()
     {
         auto monitor = monitors_[i];
 
-        bool overlap_x = x >= monitor->position_x && x < monitor->position_x + monitor->width;
-        bool overlap_y = y >= monitor->position_y && y < monitor->position_y + monitor->height;
+        bool overlap_x = x >= monitor->x && x < monitor->x + monitor->width;
+        bool overlap_y = y >= monitor->y && y < monitor->y + monitor->height;
 
         if (overlap_x && overlap_y)
         {
@@ -79,13 +79,13 @@ void window::set_resolution(resolution res)
             {
                 found = true;
 
-                primary_monitor_->resolution_fullscreen = i;
+                primary_monitor_->active_resolutions.fullscreen = i;
             }
         }
 
         if (!found)
         {
-            primary_monitor_->resolution_fullscreen = -1;
+            primary_monitor_->active_resolutions.fullscreen = -1;
         }
     }
     else if (display_mode_ == WINDOWED)
@@ -102,13 +102,13 @@ void window::set_resolution(resolution res)
             {
                 found = true;
 
-                current_monitor_->resolution_windowed = i;
+                current_monitor_->active_resolutions.windowed = i;
             }
         }
 
         if (!found)
         {
-            current_monitor_->resolution_windowed = -1;
+            current_monitor_->active_resolutions.windowed = -1;
         }
     }
 }
@@ -125,14 +125,14 @@ void window::set_display_mode(display_mode mode)
     if (mode == FULLSCREEN)
     {
         // get the primary monitor's current fullscreen resolution
-        resolution current = primary_monitor_->resolutions[primary_monitor_->resolution_fullscreen];
+        resolution current = primary_monitor_->resolutions[primary_monitor_->active_resolutions.fullscreen];
 
         // reset the window monitor
         glfwSetWindowMonitor(
             window_,
             nullptr,
-            primary_monitor_->position_x,
-            primary_monitor_->position_y,
+            primary_monitor_->x,
+            primary_monitor_->y,
             primary_monitor_->width,
             primary_monitor_->height,
             GLFW_DONT_CARE);
@@ -174,8 +174,8 @@ void window::set_display_mode(display_mode mode)
         glfwSetWindowMonitor(
             window_,
             nullptr,
-            primary_monitor_->position_x,
-            primary_monitor_->position_y,
+            primary_monitor_->x,
+            primary_monitor_->y,
             primary_monitor_->width,
             primary_monitor_->height,
             GLFW_DONT_CARE);
