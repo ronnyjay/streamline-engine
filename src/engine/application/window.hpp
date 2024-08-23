@@ -10,14 +10,24 @@
 #include "monitor.hpp"
 #include "resolution.hpp"
 
-class Application;
-
 typedef enum
 {
     FULLSCREEN,
     WINDOWED,
     BORDERLESS
-} display_mode_e;
+} display_mode;
+
+typedef enum
+{
+    FPS_30 = 30,
+    FPS_60 = 60,
+    FPS_120 = 120,
+    FPS_144 = 144,
+    FPS_165 = 165,
+    FPS_240 = 240,
+    FPS_360 = 360,
+    FPS_UNLIMITED
+} framerate;
 
 class window
 {
@@ -33,9 +43,7 @@ class window
 
     void set_monitor(monitor *);
     void set_resolution(resolution);
-    void set_display_mode(display_mode_e);
-
-    // void draw_debug_info() override;
+    void set_display_mode(display_mode);
 
     int get_x();
     int get_y();
@@ -48,28 +56,6 @@ class window
 
   private:
     GLFWwindow *window_;
-
-    static const std::string display_modes_strings[];
-
-    enum display_mode_e
-    {
-        Fullscreen = 0,
-        Windowed,
-        Borderless,
-    } last_display_mode,
-        display_mode;
-
-    typedef enum
-    {
-        FPS_30 = 30,
-        FPS_60 = 60,
-        FPS_120 = 120,
-        FPS_144 = 144,
-        FPS_165 = 165,
-        FPS_240 = 240,
-        FPS_360 = 360,
-        FPS_UNLIMITED
-    } framerate;
 
     int x_;
     int y_;
@@ -86,7 +72,7 @@ class window
 
     std::vector<monitor *> monitors_;
 
-    static const char *display_modes_[];
+    static const std::string display_modes_strings[];
 
     static void key_callback(GLFWwindow *, int, int, int, int);
 

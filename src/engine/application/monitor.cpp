@@ -3,15 +3,15 @@
 #include <algorithm>
 
 monitor::monitor(GLFWmonitor *const m)
-    : gl_monitor(m)
+    : glfw_monitor(m)
 {
-    title = glfwGetMonitorName(gl_monitor);
+    title = glfwGetMonitorName(glfw_monitor);
 
-    glfwGetMonitorWorkarea(gl_monitor, &position_x, &position_y, &width, &height);
-    glfwGetMonitorContentScale(gl_monitor, &scale_x, &scale_y);
+    glfwGetMonitorWorkarea(glfw_monitor, &position_x, &position_y, &width, &height);
+    glfwGetMonitorContentScale(glfw_monitor, &scale_x, &scale_y);
 
     int count;
-    const GLFWvidmode *modes = glfwGetVideoModes(gl_monitor, &count);
+    const GLFWvidmode *modes = glfwGetVideoModes(glfw_monitor, &count);
 
     for (int i = 0; i < count; i++)
     {
@@ -27,10 +27,10 @@ monitor::monitor(GLFWmonitor *const m)
 
 const bool monitor::operator==(const monitor &other) const
 {
-    return gl_monitor == other.gl_monitor;
+    return glfw_monitor == other.glfw_monitor;
 }
 
 const bool monitor::operator!=(const monitor &other) const
 {
-    return gl_monitor != other.gl_monitor;
+    return glfw_monitor != other.glfw_monitor;
 }

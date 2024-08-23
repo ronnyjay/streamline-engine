@@ -26,7 +26,7 @@ struct monitor
 
     const char *title;
 
-    GLFWmonitor *gl_monitor;
+    GLFWmonitor *glfw_monitor;
 
     // index of the fullscreen resoltuion
     int resolution_fullscreen;

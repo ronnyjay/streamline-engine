@@ -19,6 +19,7 @@ const int SHOW_DEBUG_METRICS = 0;
 
 class config
 {
+  public:
     config();
 
     int defaultres = DEFAULTRES;
