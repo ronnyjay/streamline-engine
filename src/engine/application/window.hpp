@@ -16,7 +16,7 @@ typedef enum
     FULLSCREEN,
     WINDOWED,
     BORDERLESS
-} display_mode;
+} display_mode_e;
 
 typedef enum
 {
@@ -28,7 +28,7 @@ typedef enum
     FPS_240 = 240,
     FPS_360 = 360,
     FPS_UNLIMITED
-} framerate;
+} framerate_e;
 
 class window
 {
@@ -44,13 +44,13 @@ class window
 
     void set_monitor(monitor *);
     void set_resolution(resolution);
-    void set_display_mode(display_mode);
+    void set_display_mode(display_mode_e);
 
-    int get_x();
-    int get_y();
-    int get_width();
-    int get_height();
-    int get_display_mode();
+    int x();
+    int y();
+    int width();
+    int height();
+    int display_mode();
 
     monitor *const primary_monitor() const;
     monitor *const current_monitor() const;

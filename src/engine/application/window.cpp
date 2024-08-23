@@ -1,4 +1,7 @@
 #include "window.hpp"
+#include "application.hpp"
+
+#include "engine/event/event.hpp" // IWYU pragma: keep
 
 const std::string window::display_modes_strings[] = {"Fullscreen", "Windowed", "Fullscreen Borderless"};
 
@@ -61,7 +64,7 @@ void window::set_monitor(monitor *monitor)
 
     if (display_mode_ == FULLSCREEN || display_mode_ == BORDERLESS)
     {
-        set_display_mode(static_cast<display_mode>(display_mode_));
+        set_display_mode(static_cast<display_mode_e>(display_mode_));
     }
 }
 
@@ -113,9 +116,9 @@ void window::set_resolution(resolution res)
     }
 }
 
-void window::set_display_mode(display_mode mode)
+void window::set_display_mode(display_mode_e mode)
 {
-    // store the window's position and size
+    // store window's position and size
     if (last_display_mode_ == WINDOWED)
     {
         glfwGetWindowPos(window_, &x_, &y_);
@@ -124,10 +127,10 @@ void window::set_display_mode(display_mode mode)
 
     if (mode == FULLSCREEN)
     {
-        // get the primary monitor's current fullscreen resolution
         resolution current = primary_monitor_->resolutions[primary_monitor_->active_resolutions.fullscreen];
 
-        // reset the window monitor
+        // set monitor null before setting to primary
+        // ... fixes issues with linux
         glfwSetWindowMonitor(
             window_,
             nullptr,
@@ -137,13 +140,11 @@ void window::set_display_mode(display_mode mode)
             primary_monitor_->height,
             GLFW_DONT_CARE);
 
-        // set the window monitor to the primary monitor
         glfwSetWindowMonitor(
             window_, primary_monitor_->glfw_monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
     }
     else if (mode == WINDOWED)
     {
-        // set window attributes
         if (!glfwGetWindowAttrib(window_, GLFW_DECORATED))
         {
             glfwSetWindowAttrib(window_, GLFW_DECORATED, GL_TRUE);
@@ -159,7 +160,6 @@ void window::set_display_mode(display_mode mode)
     }
     else if (mode == BORDERLESS)
     {
-        // set window attributes
         if (glfwGetWindowAttrib(window_, GLFW_DECORATED))
         {
             glfwSetWindowAttrib(window_, GLFW_DECORATED, GL_FALSE);
@@ -170,7 +170,6 @@ void window::set_display_mode(display_mode mode)
             glfwSetWindowAttrib(window_, GLFW_FLOATING, GL_TRUE);
         }
 
-        // set the window monitor
         glfwSetWindowMonitor(
             window_,
             nullptr,
@@ -181,6 +180,34 @@ void window::set_display_mode(display_mode mode)
             GLFW_DONT_CARE);
     }
 
-    // update last display mode
     last_display_mode_ = mode;
+}
+
+void window::key_callback(GLFWwindow *, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        application::get().on_event(window_close_event());
+    }
+}
+
+void window::cursor_callback(GLFWwindow *, double xpos_in, double ypos_in)
+{
+}
+
+void window::scroll_callback(GLFWwindow *, double x_offset, double y_offset)
+{
+}
+
+static void minimize_callback(GLFWwindow *, int minimize)
+{
+}
+
+static void maximize_callback(GLFWwindow *, int maximize)
+{
+}
+
+static void framebuffer_size_callback(GLFWwindow *, int width, int height)
+{
+    application::get().on_event(window_resize_event(width, height));
 }

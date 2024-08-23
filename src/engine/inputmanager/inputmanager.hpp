@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <engine/Logger/Logger.hpp>
+#include <engine/logger/logger.hpp>
 
 #include <memory>
 #include <unordered_map>
