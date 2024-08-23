@@ -6,9 +6,10 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
-#include "config.hpp"
 #include "monitor.hpp"
 #include "resolution.hpp"
+
+#include <libstreamline/config/config.hpp>
 
 typedef enum
 {

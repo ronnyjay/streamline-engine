@@ -1,5 +1,4 @@
-#include "engine/json/json.hpp"
-#include "engine/logger/logger.hpp"
+#include "json.hpp"
 
 #include <fstream>
 
@@ -45,8 +44,6 @@ json_object json::parse(const std::filesystem::path &path)
         {
             value = value.substr(1, value.size() - 2);
         }
-
-        logger::info("Got Key: %s, Got Value: %s\n", key.c_str(), value.c_str());
 
         obj[key] = value;
     }

@@ -38,7 +38,7 @@ class json_object
 class json
 {
   public:
-    static json_object parse(const std::filesystem::path &path);
+    static json_object parse(const std::filesystem::path &);
 
   private:
     static std::string read(const std::filesystem::path &);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/json/json.hpp"
+#include "json/json.hpp"
 
 const int DEFAULTRES = 800;
 const int DEFAULTRESHEIGHT = 600;
