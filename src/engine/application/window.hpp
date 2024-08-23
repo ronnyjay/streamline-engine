@@ -1,0 +1,100 @@
+#pragma once
+
+#pragma once
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <glad/gl.h>
+
+#include "config.hpp"
+#include "monitor.hpp"
+#include "resolution.hpp"
+
+class Application;
+
+typedef enum
+{
+    FULLSCREEN,
+    WINDOWED,
+    BORDERLESS
+} display_mode_e;
+
+class window
+{
+  public:
+    window(const config &);
+
+    inline GLFWwindow *const glfw_window()
+    {
+        return window_;
+    }
+
+    void refresh();
+
+    void set_monitor(monitor *);
+    void set_resolution(resolution);
+    void set_display_mode(display_mode_e);
+
+    // void draw_debug_info() override;
+
+    int get_x();
+    int get_y();
+    int get_width();
+    int get_height();
+    int get_display_mode();
+
+    monitor *const primary_monitor() const;
+    monitor *const current_monitor() const;
+
+  private:
+    GLFWwindow *window_;
+
+    static const std::string display_modes_strings[];
+
+    enum display_mode_e
+    {
+        Fullscreen = 0,
+        Windowed,
+        Borderless,
+    } last_display_mode,
+        display_mode;
+
+    typedef enum
+    {
+        FPS_30 = 30,
+        FPS_60 = 60,
+        FPS_120 = 120,
+        FPS_144 = 144,
+        FPS_165 = 165,
+        FPS_240 = 240,
+        FPS_360 = 360,
+        FPS_UNLIMITED
+    } framerate;
+
+    int x_;
+    int y_;
+    int width_;
+    int height_;
+    int display_mode_;
+
+    int last_width_;
+    int last_height_;
+    int last_display_mode_;
+
+    monitor *primary_monitor_;
+    monitor *current_monitor_;
+
+    std::vector<monitor *> monitors_;
+
+    static const char *display_modes_[];
+
+    static void key_callback(GLFWwindow *, int, int, int, int);
+
+    static void cursor_callback(GLFWwindow *, double, double);
+    static void scroll_callback(GLFWwindow *, double, double);
+
+    static void minimize_callback(GLFWwindow *, int);
+    static void maximize_callback(GLFWwindow *, int);
+
+    static void framebuffer_size_callback(GLFWwindow *, int, int);
+};
