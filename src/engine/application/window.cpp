@@ -4,12 +4,14 @@
 
 const std::string window::display_modes_strings[] = {"Fullscreen", "Windowed", "Fullscreen Borderless"};
 
-void window::initialize(const config &cfg)
+void window::initialize(const window_config &cfg)
 {
+    m_cfg = cfg;
+
     // initialize glfw
     if (!glfwInit())
     {
-        logger::err("failed to initialize glfw");
+        m_log.err("failed to initialize glfw");
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -22,21 +24,21 @@ void window::initialize(const config &cfg)
 #endif
 
     // initialize window
-    m_window = glfwCreateWindow(cfg.defaultres, cfg.defaultresheight, "Streamline Engine", NULL, NULL);
+    m_window = glfwCreateWindow(cfg.width, cfg.height, "Streamline Engine", NULL, NULL);
 
     if (!m_window)
     {
-        logger::err("failed to initialize window");
+        m_log.err("failed to initialize window");
     }
 
     glfwMakeContextCurrent(m_window);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
-        logger::err("failed to initialize glad");
+        m_log.err("failed to initialize glad");
     }
 
-    logger::info("initialized window");
+    m_log.info("initialized window");
 }
 
 void window::refresh()
@@ -65,15 +67,15 @@ void window::set_monitor(monitor *monitor)
 {
     m_primary_monitor = monitor;
 
-    if (m_display_mode == FULLSCREEN || m_display_mode == BORDERLESS)
+    if (m_cfg.display_mode == FULLSCREEN || m_cfg.display_mode == BORDERLESS)
     {
-        set_display_mode(static_cast<display_mode_e>(m_display_mode));
+        set_display_mode(static_cast<display_mode_e>(m_cfg.display_mode));
     }
 }
 
 void window::set_resolution(resolution res)
 {
-    if (m_display_mode == FULLSCREEN)
+    if (m_cfg.display_mode == FULLSCREEN)
     {
         glfwSetWindowMonitor(m_window, m_primary_monitor->glfw_monitor, 0, 0, res.width, res.height, GLFW_DONT_CARE);
 
@@ -94,7 +96,7 @@ void window::set_resolution(resolution res)
             m_primary_monitor->active_resolutions.fullscreen = -1;
         }
     }
-    else if (m_display_mode == WINDOWED)
+    else if (m_cfg.display_mode == WINDOWED)
     {
         glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE); // remove aspect ratio lock
         glfwSetWindowSize(m_window, res.width / m_current_monitor->scale_x, res.height / m_current_monitor->scale_y);

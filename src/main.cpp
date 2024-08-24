@@ -2,5 +2,7 @@
 
 int main(int argc, char const *argv[])
 {
-    application::get().run();
+    application app;
+    app.initialize();
+    app.run();
 }

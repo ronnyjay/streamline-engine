@@ -1,15 +1,16 @@
 #pragma once
 
-#pragma once
+#include <libstreamline/exception/exception.hpp>
+#include <libstreamline/json/json.hpp>
+#include <source_location>
 
+#include "libstreamline/debug/logger.hpp"
 #include "monitor.hpp"
 #include "resolution.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
-
-#include <libstreamline/config/config.hpp>
 
 typedef enum
 {
@@ -30,12 +31,57 @@ typedef enum
     FPS_UNLIMITED
 } framerate_e;
 
+struct window_config
+{
+    int width = DEFAULT_WIDTH;
+    int height = DEFAULT_HEIGHT;
+    int display_mode = DEFAULT_DISPLAYMODE;
+    int monitor = DEFAULT_MONITOR;
+    int vsync = DEFAULT_VSYNC;
+
+    int first_mouse = DEFAULT_FIRST_MOUSE;
+    int capture_mouse = DEFAULT_CAPTURE_MOUSE;
+
+    int show_cursor = DEFAULT_SHOW_CURSOR;
+    int show_wireframes = DEFAULT_SHOW_WIREFRAMES;
+    int show_collisions = DEFAULT_SHOW_COLLISIONS;
+    int show_debug_window = DEFAULT_SHOW_DEBUG_WINDOW;
+    int show_debug_metrics = DEFAULT_SHOW_DEBUG_METRICS;
+
+    void export_to_file()
+    {
+        throw unimplemented_exception(std::source_location::current());
+    }
+
+    void load(const json_object &)
+    {
+        throw unimplemented_exception(std::source_location::current());
+    }
+
+  private:
+    static constexpr int DEFAULT_WIDTH = 800;
+    static constexpr int DEFAULT_HEIGHT = 600;
+    static constexpr int DEFAULT_DISPLAYMODE = display_mode_e::WINDOWED;
+    static constexpr int DEFAULT_MONITOR = 0;
+    static constexpr bool DEFAULT_VSYNC = true;
+
+    static constexpr bool DEFAULT_FIRST_MOUSE = true;
+    static constexpr bool DEFAULT_CAPTURE_MOUSE = true;
+
+    static constexpr bool DEFAULT_SHOW_CURSOR = false;
+    static constexpr bool DEFAULT_SHOW_WIREFRAMES = false;
+    static constexpr bool DEFAULT_SHOW_COLLISIONS = false;
+    static constexpr bool DEFAULT_SHOW_DEBUG_WINDOW = false;
+    static constexpr bool DEFAULT_SHOW_DEBUG_METRICS = false;
+};
+
 class window
 {
   public:
-    window() = default;
+    window()
+      : m_log("Window") {}
 
-    void initialize(const config &);
+    void initialize(const window_config &cfg);
 
     void set_monitor(monitor *);
     void set_resolution(resolution);
@@ -60,17 +106,17 @@ class window
 
     int width()
     {
-        return m_width;
+        return m_cfg.width;
     }
 
     int height()
     {
-        return m_height;
+        return m_cfg.height;
     }
 
     int display_mode()
     {
-        return m_display_mode;
+        return m_cfg.display_mode;
     }
 
     monitor *const primary_monitor() const
@@ -83,14 +129,18 @@ class window
         return m_current_monitor;
     }
 
+    bool is_vsync_enabled() const
+    {
+        return m_cfg.vsync;
+    }
+
   private:
+    logger m_log;
+    window_config m_cfg;
     GLFWwindow *m_window;
 
     int m_x;
     int m_y;
-    int m_width;
-    int m_height;
-    int m_display_mode;
 
     int m_last_width;
     int m_last_height;

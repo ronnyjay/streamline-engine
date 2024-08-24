@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 set(PROJECT_NAME "streamline-engine")
 project(${PROJECT_NAME})
@@ -57,6 +57,7 @@ add_library(imgui STATIC
 )
 
 target_link_libraries(imgui PRIVATE glfw)
-
 add_subdirectory(extern/entt)
+
+add_executable(${PROJECT_NAME} src/main.cpp)
 add_subdirectory(src)

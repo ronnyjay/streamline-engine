@@ -11,7 +11,15 @@
 
 struct logger
 {
-    static void info(const std::basic_string<char>, ...);
-    static void warn(const std::basic_string<char>, ...);
-    static void err(const std::basic_string<char>, ...);
+    explicit logger(const std::basic_string<char> &name)
+        : component_name(name)
+    {
+    }
+
+    void info(const std::basic_string<char>, ...);
+    void warn(const std::basic_string<char>, ...);
+    void err(const std::basic_string<char>, ...);
+
+  private:
+    const std::basic_string<char> component_name;
 };

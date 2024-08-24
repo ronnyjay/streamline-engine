@@ -1,23 +1,31 @@
 #include "application.hpp"
-#include "window.hpp"
 
-#include <libstreamline/config/config.hpp>
+#include <libstreamline/json/json.hpp>
 #include <libstreamline/debug/logger.hpp>
 
-application *application::ref = nullptr;
+#include "window.hpp"
 
-application::application()
+void application::initialize()
 {
-    // load configuration
-    m_config.load(json::parse("config/video.json"));
+    std::filesystem::path config_path("config/video.json");
+    window_config window_cfg;
 
-    // initialize window
-    m_window.initialize(m_config);
+    if (!std::filesystem::exists(config_path))
+    {
+        m_log.info("No config found. Creating default.\n");
+        window_cfg.export_to_file();
+    }
+    else
+    {
+        window_cfg.load(json::parse(config_path));
+    }
+
+    m_window.initialize(window_cfg);
 }
 
 void application::run()
 {
-    glfwSwapInterval(m_config.vsync);
+    glfwSwapInterval(m_window.is_vsync_enabled());
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);

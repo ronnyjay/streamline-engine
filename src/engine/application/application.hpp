@@ -2,28 +2,21 @@
 
 #include "window.hpp"
 
-#include <libstreamline/config/config.hpp>
+#include <libstreamline/debug/logger.hpp>
 
+/*
+  A wrapper around an opengl/glfw instance
+*/
 class application
 {
   public:
-    application();
-
-    static application &get()
+    application()
+        : m_log("application")
     {
-        if (!ref)
-            ref = new application;
-
-        return *ref;
     }
 
+    void initialize();
     void run();
-
-    static void reset()
-    {
-        delete ref;
-        ref = nullptr;
-    }
 
     ~application() = default;
 
@@ -34,8 +27,7 @@ class application
     application &operator=(application &&) = delete;
 
   private:
-    config m_config;
     window m_window;
 
-    static application *ref;
+    logger m_log;
 };
