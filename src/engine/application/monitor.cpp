@@ -8,7 +8,7 @@ monitor::monitor(GLFWmonitor *const m)
     title = glfwGetMonitorName(glfw_monitor);
 
     glfwGetMonitorWorkarea(glfw_monitor, &x, &y, &width, &height);
-    glfwGetMonitorContentScale(glfw_monitor, &scale_x, &scale_y);
+    glfwGetMonitorContentScale(glfw_monitor, &scale.x, &scale.y);
 
     int count;
     const GLFWvidmode *modes = glfwGetVideoModes(glfw_monitor, &count);

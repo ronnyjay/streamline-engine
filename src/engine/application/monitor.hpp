@@ -21,8 +21,11 @@ struct monitor
     int width;
     int height;
 
-    float scale_x;
-    float scale_y;
+    struct
+    {
+        float x;
+        float y;
+    } scale;
 
     const char *title;
 

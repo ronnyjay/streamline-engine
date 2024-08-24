@@ -1,12 +1,12 @@
 #pragma once
 
+#include <libstreamline/debug/logger.hpp>
 #include <libstreamline/exception/exception.hpp>
 #include <libstreamline/json/json.hpp>
-#include <libstreamline/debug/logger.hpp>
 
-#include "window_config.hpp"
 #include "monitor.hpp"
 #include "resolution.hpp"
+#include "window_config.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -16,7 +16,9 @@ class window
 {
   public:
     window()
-      : m_log("window") {}
+        : m_log("window")
+    {
+    }
 
     void initialize(const window_config &cfg);
 
@@ -87,6 +89,11 @@ class window
     monitor *m_current_monitor;
 
     std::vector<monitor *> m_monitors;
+
+    void load_monitors();
+
+    void detect_primary_monitor();
+    void detect_current_monitor();
 
     static void key_callback(GLFWwindow *, int, int, int, int);
 

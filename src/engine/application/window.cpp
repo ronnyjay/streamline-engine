@@ -36,29 +36,17 @@ void window::initialize(const window_config &cfg)
         m_log.err("failed to initialize glad");
     }
 
+    load_monitors();
+
+    detect_primary_monitor();
+    detect_current_monitor();
+
     m_log.info("initialized window");
 }
 
 void window::refresh()
 {
-    glfwGetWindowPos(m_window, &m_x, &m_y);
-
-    for (size_t i = 0; i < m_monitors.size(); i++)
-    {
-        auto monitor = m_monitors[i];
-
-        bool overlap_x = m_x >= monitor->x && m_x < monitor->x + monitor->width;
-        bool overlap_y = m_y >= monitor->y && m_y < monitor->y + monitor->height;
-
-        if (overlap_x && overlap_y)
-        {
-            m_current_monitor = m_monitors[i];
-
-            return;
-        }
-    }
-
-    m_current_monitor = m_primary_monitor;
+    detect_current_monitor();
 }
 
 void window::set_monitor(monitor *monitor)
@@ -97,7 +85,7 @@ void window::set_resolution(resolution res)
     else if (m_cfg.display_mode == WINDOWED)
     {
         glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE); // remove aspect ratio lock
-        glfwSetWindowSize(m_window, res.width / m_current_monitor->scale_x, res.height / m_current_monitor->scale_y);
+        glfwSetWindowSize(m_window, res.width / m_current_monitor->scale.x, res.height / m_current_monitor->scale.y);
         glfwSetWindowAspectRatio(m_window, res.width, res.height);
 
         bool found = false;
@@ -184,6 +172,76 @@ void window::set_display_mode(display_mode_e mode)
     }
 
     m_last_display_mode = mode;
+}
+
+void window::load_monitors()
+{
+    int count;
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+    for (int i = 0; i < count; i++)
+    {
+        m_monitors.emplace_back(new monitor(monitors[i]));
+    }
+}
+
+void window::detect_primary_monitor()
+{
+    bool found = false;
+
+    for (auto *monitor : m_monitors)
+    {
+        if (monitor->title == m_cfg.monitor)
+        {
+            found = true;
+
+            m_primary_monitor = monitor;
+
+            m_log.info("detected primary monitor: %s", m_primary_monitor->title);
+        }
+    }
+
+    if (!found)
+    {
+        m_log.info("specified primary monitor not found: %s", m_cfg.monitor.c_str());
+
+        m_primary_monitor = m_monitors.at(0);
+
+        m_log.info("reverting to default monitor for primary monitor: %s", m_primary_monitor->title);
+    }
+}
+
+void window::detect_current_monitor()
+{
+    bool found = false;
+
+    glfwGetWindowPos(m_window, &m_x, &m_y);
+
+    for (size_t i = 0; i < m_monitors.size(); i++)
+    {
+        auto monitor = m_monitors[i];
+
+        bool overlap_x = m_x >= monitor->x && m_x < monitor->x + monitor->width;
+        bool overlap_y = m_y >= monitor->y && m_y < monitor->y + monitor->height;
+
+        if (overlap_x && overlap_y)
+        {
+            found = true;
+
+            m_current_monitor = m_monitors[i];
+
+            m_log.info("detected current monitor: %s", m_current_monitor->title);
+        }
+    }
+
+    if (!found)
+    {
+        m_log.info("unable to detect current monintor");
+
+        m_current_monitor = m_primary_monitor;
+
+        m_log.info("reverting to default monitor for current monitor: %s", m_primary_monitor->title);
+    }
 }
 
 void window::key_callback(GLFWwindow *, int key, int scancode, int action, int mods)

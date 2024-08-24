@@ -1,7 +1,6 @@
 #pragma once
 
 #include "libstreamline/debug/logger.hpp"
-#include <cstring>
 #include <source_location>
 
 #include <libstreamline/exception/exception.hpp>
