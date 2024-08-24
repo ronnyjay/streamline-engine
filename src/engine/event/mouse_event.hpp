@@ -9,6 +9,6 @@ class mouse_event : public event
     {
     }
 
-  private:
-    double xpos_in_, ypos_in_;
+    double x_offset;
+    double y_offset;
 };

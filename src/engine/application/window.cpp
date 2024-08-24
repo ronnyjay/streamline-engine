@@ -1,19 +1,15 @@
 #include "window.hpp"
-#include "application.hpp"
 
-#include "engine/event/event.hpp" // IWYU pragma: keep
+#include <libstreamline/debug/logger.hpp>
 
 const std::string window::display_modes_strings[] = {"Fullscreen", "Windowed", "Fullscreen Borderless"};
 
-window::window(const config &cfg) // todo: potentially change this
-    : width_(cfg.defaultres)
-    , height_(cfg.defaultresheight)
-    , display_mode_(cfg.displaymode)
+void window::initialize(const config &cfg)
 {
     // initialize glfw
     if (!glfwInit())
     {
-        std::exit(EXIT_FAILURE);
+        logger::err("failed to initialize glfw");
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -26,92 +22,97 @@ window::window(const config &cfg) // todo: potentially change this
 #endif
 
     // initialize window
-    window_ = glfwCreateWindow(width_, height_, "Streamline Engine", NULL, NULL);
+    m_window = glfwCreateWindow(cfg.defaultres, cfg.defaultresheight, "Streamline Engine", NULL, NULL);
 
-    if (!window_)
+    if (!m_window)
     {
-        std::exit(EXIT_FAILURE);
+        logger::err("failed to initialize window");
     }
 
-    // make this window's context the current of the main thread
-    glfwMakeContextCurrent(window_);
+    glfwMakeContextCurrent(m_window);
+
+    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+    {
+        logger::err("failed to initialize glad");
+    }
+
+    logger::info("initialized window");
 }
 
 void window::refresh()
 {
-    int x, y;
-    glfwGetWindowPos(window_, &x, &y);
+    glfwGetWindowPos(m_window, &m_x, &m_y);
 
-    for (size_t i = 0; i < monitors_.size(); i++)
+    for (size_t i = 0; i < m_monitors.size(); i++)
     {
-        auto monitor = monitors_[i];
+        auto monitor = m_monitors[i];
 
-        bool overlap_x = x >= monitor->x && x < monitor->x + monitor->width;
-        bool overlap_y = y >= monitor->y && y < monitor->y + monitor->height;
+        bool overlap_x = m_x >= monitor->x && m_x < monitor->x + monitor->width;
+        bool overlap_y = m_y >= monitor->y && m_y < monitor->y + monitor->height;
 
         if (overlap_x && overlap_y)
         {
-            current_monitor_ = monitors_[i];
+            m_current_monitor = m_monitors[i];
         }
     }
 
-    current_monitor_ = primary_monitor_;
+    m_current_monitor = m_primary_monitor;
 }
 
 void window::set_monitor(monitor *monitor)
 {
-    primary_monitor_ = monitor;
+    m_primary_monitor = monitor;
 
-    if (display_mode_ == FULLSCREEN || display_mode_ == BORDERLESS)
+    if (m_display_mode == FULLSCREEN || m_display_mode == BORDERLESS)
     {
-        set_display_mode(static_cast<display_mode_e>(display_mode_));
+        set_display_mode(static_cast<display_mode_e>(m_display_mode));
     }
 }
 
 void window::set_resolution(resolution res)
 {
-    if (display_mode_ == FULLSCREEN)
+    if (m_display_mode == FULLSCREEN)
     {
-        glfwSetWindowMonitor(window_, primary_monitor_->glfw_monitor, 0, 0, res.width, res.height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_window, m_primary_monitor->glfw_monitor, 0, 0, res.width, res.height, GLFW_DONT_CARE);
 
         bool found = false;
 
-        for (size_t i = 0; i < primary_monitor_->resolutions.size(); ++i)
+        for (size_t i = 0; i < m_primary_monitor->resolutions.size(); ++i)
         {
-            if (primary_monitor_->resolutions.at(i) == res)
+            if (m_primary_monitor->resolutions.at(i) == res)
             {
                 found = true;
 
-                primary_monitor_->active_resolutions.fullscreen = i;
+                m_primary_monitor->active_resolutions.fullscreen = i;
             }
         }
 
         if (!found)
         {
-            primary_monitor_->active_resolutions.fullscreen = -1;
+            m_primary_monitor->active_resolutions.fullscreen = -1;
         }
     }
-    else if (display_mode_ == WINDOWED)
+    else if (m_display_mode == WINDOWED)
     {
-        glfwSetWindowAspectRatio(window_, GLFW_DONT_CARE, GLFW_DONT_CARE); // remove aspect ratio lock
-        glfwSetWindowSize(window_, res.width / current_monitor_->scale_x, res.height / current_monitor_->scale_y);
-        glfwSetWindowAspectRatio(window_, res.width, res.height);
+        glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE); // remove aspect ratio lock
+        glfwSetWindowSize(m_window, res.width / m_current_monitor->scale_x, res.height / m_current_monitor->scale_y);
+        glfwSetWindowAspectRatio(m_window, res.width, res.height);
 
         bool found = false;
 
-        for (size_t i = 0; i < current_monitor_->resolutions.size(); ++i)
+        for (size_t i = 0; i < m_current_monitor->resolutions.size(); ++i)
         {
-            if (current_monitor_->resolutions[i] == res)
+            if (m_current_monitor->resolutions[i] == res)
             {
                 found = true;
 
-                current_monitor_->active_resolutions.windowed = i;
+                m_current_monitor->active_resolutions.windowed = i;
             }
         }
 
         if (!found)
         {
-            current_monitor_->active_resolutions.windowed = -1;
+            m_current_monitor->active_resolutions.windowed = -1;
         }
     }
 }
@@ -119,75 +120,74 @@ void window::set_resolution(resolution res)
 void window::set_display_mode(display_mode_e mode)
 {
     // store window's position and size
-    if (last_display_mode_ == WINDOWED)
+    if (m_last_display_mode == WINDOWED)
     {
-        glfwGetWindowPos(window_, &x_, &y_);
-        glfwGetWindowSize(window_, &last_width_, &last_height_);
+        glfwGetWindowPos(m_window, &m_x, &m_y);
+        glfwGetWindowSize(m_window, &m_last_width, &m_last_height);
     }
 
     if (mode == FULLSCREEN)
     {
-        resolution current = primary_monitor_->resolutions[primary_monitor_->active_resolutions.fullscreen];
+        resolution current = m_primary_monitor->resolutions[m_primary_monitor->active_resolutions.fullscreen];
 
         // set monitor null before setting to primary
         // ... fixes issues with linux
         glfwSetWindowMonitor(
-            window_,
+            m_window,
             nullptr,
-            primary_monitor_->x,
-            primary_monitor_->y,
-            primary_monitor_->width,
-            primary_monitor_->height,
+            m_primary_monitor->x,
+            m_primary_monitor->y,
+            m_primary_monitor->width,
+            m_primary_monitor->height,
             GLFW_DONT_CARE);
 
         glfwSetWindowMonitor(
-            window_, primary_monitor_->glfw_monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
+            m_window, m_primary_monitor->glfw_monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
     }
     else if (mode == WINDOWED)
     {
-        if (!glfwGetWindowAttrib(window_, GLFW_DECORATED))
+        if (!glfwGetWindowAttrib(m_window, GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(window_, GLFW_DECORATED, GL_TRUE);
+            glfwSetWindowAttrib(m_window, GLFW_DECORATED, GL_TRUE);
         }
 
-        if (glfwGetWindowAttrib(window_, GLFW_FLOATING))
+        if (glfwGetWindowAttrib(m_window, GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(window_, GLFW_FLOATING, GL_FALSE);
+            glfwSetWindowAttrib(m_window, GLFW_FLOATING, GL_FALSE);
         }
 
         // restore window's last position and size
-        glfwSetWindowMonitor(window_, nullptr, x_, y_, last_width_, last_height_, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_window, nullptr, m_x, m_y, m_last_width, m_last_height, GLFW_DONT_CARE);
     }
     else if (mode == BORDERLESS)
     {
-        if (glfwGetWindowAttrib(window_, GLFW_DECORATED))
+        if (glfwGetWindowAttrib(m_window, GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(window_, GLFW_DECORATED, GL_FALSE);
+            glfwSetWindowAttrib(m_window, GLFW_DECORATED, GL_FALSE);
         }
 
-        if (!glfwGetWindowAttrib(window_, GLFW_FLOATING))
+        if (!glfwGetWindowAttrib(m_window, GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(window_, GLFW_FLOATING, GL_TRUE);
+            glfwSetWindowAttrib(m_window, GLFW_FLOATING, GL_TRUE);
         }
 
         glfwSetWindowMonitor(
-            window_,
+            m_window,
             nullptr,
-            primary_monitor_->x,
-            primary_monitor_->y,
-            primary_monitor_->width,
-            primary_monitor_->height,
+            m_primary_monitor->x,
+            m_primary_monitor->y,
+            m_primary_monitor->width,
+            m_primary_monitor->height,
             GLFW_DONT_CARE);
     }
 
-    last_display_mode_ = mode;
+    m_last_display_mode = mode;
 }
 
 void window::key_callback(GLFWwindow *, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
-        application::get().on_event(window_close_event());
     }
 }
 
@@ -209,5 +209,4 @@ static void maximize_callback(GLFWwindow *, int maximize)
 
 static void framebuffer_size_callback(GLFWwindow *, int width, int height)
 {
-    application::get().on_event(window_resize_event(width, height));
 }

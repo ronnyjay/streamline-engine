@@ -5,38 +5,17 @@
 class key_event : public event
 {
   public:
-    key_event(unsigned int key, unsigned int scancode, unsigned int action, unsigned int mods)
-        : key_(key)
-        , scancode_(scancode)
-        , action_(action)
-        , mods_(mods)
+    key_event(unsigned int gl_key, unsigned int gl_scancode, unsigned int gl_action, unsigned int gl_mods)
+        : key(gl_key)
+        , scancode(gl_scancode)
+        , action(gl_action)
+        , mods(gl_mods)
     {
         type_ = KeyEvent;
     }
 
-    inline unsigned int key() const
-    {
-        return key_;
-    }
-
-    inline unsigned int scancode() const
-    {
-        return scancode_;
-    }
-
-    inline unsigned int action() const
-    {
-        return action_;
-    }
-
-    inline unsigned int mods() const
-    {
-        return mods_;
-    }
-
-  private:
-    unsigned int key_;
-    unsigned int scancode_;
-    unsigned int action_;
-    unsigned int mods_;
+    unsigned int key;
+    unsigned int scancode;
+    unsigned int action;
+    unsigned int mods;
 };

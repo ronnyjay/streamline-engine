@@ -1,7 +1,8 @@
 #pragma once
 
-#include "engine/event/event.hpp"
-#include "engine/event/window_event.hpp"
+#include "window.hpp"
+
+#include <libstreamline/config/config.hpp>
 
 class application
 {
@@ -16,7 +17,7 @@ class application
         return *ref;
     }
 
-    void on_event(const event &e);
+    void run();
 
     static void reset()
     {
@@ -33,8 +34,8 @@ class application
     application &operator=(application &&) = delete;
 
   private:
-    static application *ref;
+    config m_config;
+    window m_window;
 
-    void on_window_close(window_close_event &e);
-    void on_window_resize(window_resize_event &e);
+    static application *ref;
 };

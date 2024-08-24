@@ -37,5 +37,5 @@ class config
     int show_debug_window = SHOW_DEBUG_WINDOW;
     int show_debug_metrics = SHOW_DEBUG_METRICS;
 
-    void from_json(const json_object &);
+    void load(const json_object &);
 };

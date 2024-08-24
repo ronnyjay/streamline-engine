@@ -4,6 +4,6 @@ config::config()
 {
 }
 
-void config::from_json(const json_object &json)
+void config::load(const json_object &json)
 {
 }

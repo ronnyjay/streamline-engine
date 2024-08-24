@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include "monitor.hpp"
+#include "resolution.hpp"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
-
-#include "monitor.hpp"
-#include "resolution.hpp"
 
 #include <libstreamline/config/config.hpp>
 
@@ -33,45 +33,73 @@ typedef enum
 class window
 {
   public:
-    window(const config &);
+    window() = default;
 
-    inline GLFWwindow *const glfw_window()
-    {
-        return window_;
-    }
-
-    void refresh();
+    void initialize(const config &);
 
     void set_monitor(monitor *);
     void set_resolution(resolution);
     void set_display_mode(display_mode_e);
 
-    int x();
-    int y();
-    int width();
-    int height();
-    int display_mode();
+    void refresh();
 
-    monitor *const primary_monitor() const;
-    monitor *const current_monitor() const;
+    inline GLFWwindow *const glfw_window()
+    {
+        return m_window;
+    }
+
+    int x()
+    {
+        return m_x;
+    }
+
+    int y()
+    {
+        return m_y;
+    }
+
+    int width()
+    {
+        return m_width;
+    }
+
+    int height()
+    {
+        return m_height;
+    }
+
+    int display_mode()
+    {
+        return m_display_mode;
+    }
+
+    monitor *const primary_monitor() const
+    {
+        return m_primary_monitor;
+    }
+
+    monitor *const current_monitor() const
+    {
+        return m_current_monitor;
+    }
 
   private:
-    GLFWwindow *window_;
+    GLFWwindow *m_window;
 
-    int x_;
-    int y_;
-    int width_;
-    int height_;
-    int display_mode_;
+    int m_x;
+    int m_y;
+    int m_width;
+    int m_height;
+    int m_display_mode;
 
-    int last_width_;
-    int last_height_;
-    int last_display_mode_;
+    int m_last_width;
+    int m_last_height;
+    int m_last_display_mode;
 
-    monitor *primary_monitor_;
-    monitor *current_monitor_;
+    monitor *m_primary_monitor;
+    monitor *m_current_monitor;
 
-    std::vector<monitor *> monitors_;
+    std::vector<monitor *> m_monitors;
 
     static const std::string display_modes_strings[];
 

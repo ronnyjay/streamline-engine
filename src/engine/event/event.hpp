@@ -1,18 +1,18 @@
 #pragma once
 
 // clang-format off
-enum event_type
+enum event_type_e
 { 
   None, 
   KeyEvent, MouseEvent, 
-  WindowCloseEvent, WindowResizeEvent 
+  WindowResizeEvent, WindowCloseEvent
 };
 // clang-format on
 
 class event
 {
   public:
-    inline const event_type type() const
+    inline const event_type_e type() const
     {
         return type_;
     }
@@ -20,5 +20,5 @@ class event
     virtual ~event() = default;
 
   protected:
-    event_type type_ = None;
+    event_type_e type_ = None;
 };

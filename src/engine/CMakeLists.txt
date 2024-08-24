@@ -2,6 +2,9 @@ add_library(engine STATIC)
 
 target_sources(engine PRIVATE
   application/application.cpp
+  application/monitor.cpp
+  application/resolution.cpp
+  application/window.cpp
   # Camera/Camera.cpp
   # Camera/Orthographic.cpp
   # Camera/Perspective.cpp
