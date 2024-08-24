@@ -53,6 +53,8 @@ void window::refresh()
         if (overlap_x && overlap_y)
         {
             m_current_monitor = m_monitors[i];
+
+            return;
         }
     }
 
