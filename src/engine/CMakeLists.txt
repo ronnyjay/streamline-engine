@@ -5,6 +5,7 @@ target_sources(engine PRIVATE
   application/monitor.cpp
   application/resolution.cpp
   application/window.cpp
+  application/window_config.cpp
   # Camera/Camera.cpp
   # Camera/Orthographic.cpp
   # Camera/Perspective.cpp

@@ -2,8 +2,6 @@
 
 #include <libstreamline/debug/logger.hpp>
 
-const std::string window::display_modes_strings[] = {"Fullscreen", "Windowed", "Fullscreen Borderless"};
-
 void window::initialize(const window_config &cfg)
 {
     m_cfg = cfg;
