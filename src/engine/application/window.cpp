@@ -41,6 +41,8 @@ void window::initialize(const window_config &cfg)
     detect_primary_monitor();
     detect_current_monitor();
 
+    set_monitor(m_primary_monitor);
+
     m_log.info("initialized window");
 }
 
