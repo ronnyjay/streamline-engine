@@ -50,7 +50,7 @@ framebuffer::framebuffer(const unsigned int width, const unsigned int height)
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        m_log.warn("Failed to initialize framebuffer.\n");
+        m_log.warn("Failed to initialize framebuffer.");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -78,7 +78,7 @@ void framebuffer::render()
 
 void framebuffer::resize(const unsigned int width, const unsigned int height)
 {
-    m_log.info("Resizing framebuffer: %dx%d.\n", width, height);
+    m_log.info("Resizing framebuffer: %dx%d.", width, height);
 
     m_texture.generate(width, height, nullptr);
 
@@ -88,7 +88,7 @@ void framebuffer::resize(const unsigned int width, const unsigned int height)
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        m_log.warn("Failed to initialize framebuffer.\n");
+        m_log.warn("Failed to initialize framebuffer.");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

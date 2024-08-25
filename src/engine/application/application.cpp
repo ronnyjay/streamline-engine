@@ -15,7 +15,7 @@ void application::initialize(game &g)
 
     if (!std::filesystem::exists(config_path))
     {
-        m_log.info("No config found. Creating default.\n");
+        m_log.info("No config found. Creating default.");
         window_cfg.export_to_file();
     }
     else

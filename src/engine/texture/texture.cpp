@@ -38,7 +38,7 @@ void texture::generate(const unsigned int width, const unsigned int height, cons
 
 void texture::load(const std::basic_string<char> &path)
 {
-    m_log.info("Loading texture from file: %s\n", path.c_str());
+    m_log.info("Loading texture from file: %s", path.c_str());
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
@@ -68,10 +68,10 @@ void texture::load(const std::basic_string<char> &path)
         // Free image data
         stbi_image_free(data);
 
-        m_log.info("Texture loaded successfully.\n");
+        m_log.info("Texture loaded successfully.");
     }
     else
     {
-        m_log.warn("Failed to load texture from file: %s\n", path.c_str());
+        m_log.warn("Failed to load texture from file: %s", path.c_str());
     }
 }
