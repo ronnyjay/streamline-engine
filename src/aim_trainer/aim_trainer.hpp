@@ -16,6 +16,9 @@ class aim_trainer : public engine::game
         , m_text_shader()
         , m_menu(m_text_shader)
     {
+      m_text_shader.add_shader("resources/shaders/text.vs", GL_VERTEX_SHADER);
+      m_text_shader.add_shader("resources/shaders/text.fs", GL_FRAGMENT_SHADER);
+      m_text_shader.compile();
     }
 
     ~aim_trainer() = default;

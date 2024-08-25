@@ -1,7 +1,8 @@
 #pragma once
 
-#include "engine/shader/shader.hpp"
-#include "engine/texture/texture.hpp"
+#include "libstreamline/debug/logger.hpp"
+#include <engine/shader/shader.hpp>
+#include <engine/texture/texture.hpp>
 
 namespace engine
 {
@@ -9,16 +10,18 @@ namespace engine
 class framebuffer
 {
   public:
-    framebuffer(const unsigned int, const unsigned int);
+    framebuffer(const unsigned int width, const unsigned int height);
 
+    void deinit();
     void bind();
     void unbind();
-
     void render();
-
     void resize(const unsigned int, const unsigned int);
 
-    ~framebuffer();
+    ~framebuffer() = default;
+
+    unsigned int m_width;
+    unsigned int m_height;
 
   private:
     unsigned int m_vao;
@@ -26,9 +29,9 @@ class framebuffer
     unsigned int m_rbo;
     unsigned int m_fbo;
 
-    shader_program m_shader;
-    texture m_texture;
     logger m_log;
+    shader_program m_shader;
+    unsigned int m_texture;
 };
 
-} // namespace engine
+}; // namespace engine

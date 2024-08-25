@@ -4,6 +4,7 @@
 #include <libstreamline/debug/logger.hpp>
 #include <libstreamline/json/json.hpp>
 
+#include "engine/shader/shader.hpp"
 #include "window.hpp"
 
 using namespace engine;
@@ -23,30 +24,28 @@ void application::initialize(game &g)
         window_cfg.load(json::parse(config_path));
     }
 
-    m_window.set_framebuffer_size_callback([&](int w, int h){
-        m_framebuffer.resize(w, h);
-        g.window_size_changed(w, h);
-    });
+    m_window.set_framebuffer_size_callback(
+        [&](int w, int h)
+        {
+            glViewport(0, 0, w, h);
+            m_framebuffer.resize(w, h);
+            g.window_size_changed(w, h);
+        });
 
     m_window.initialize(window_cfg);
 }
 
 void application::run(game &g)
 {
-    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
-
-    glViewport(0, 0, m_window.width(), m_window.height());
 
     double previous = glfwGetTime();
     double lag = 0.0;
 
     while (!glfwWindowShouldClose(m_window.glfw_window()))
     {
-        glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double current = glfwGetTime();
@@ -64,9 +63,21 @@ void application::run(game &g)
 
         // render to our framebuffer
         m_framebuffer.bind();
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+
+        glClearColor(0.30f, 0.10f, 0.10f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         g.render(lag / SECONDS_PER_UPDATE);
+
+        // done rendering to our framebuffer
         m_framebuffer.unbind();
 
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        // render the framebuffer to the default framebuffer
         m_framebuffer.render();
 
         glfwSwapBuffers(m_window.glfw_window());

@@ -150,6 +150,7 @@ class text_element : public ui_element
     virtual void render() override
     {
         m_shader.bind();
+        m_shader.set_vec3("color", glm::vec3(0.0f, 0.0f, 0.0f));
         m_texture->bind();
 
         glBindVertexArray(m_vao);

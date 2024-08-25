@@ -2,21 +2,20 @@
 
 in vec2 Pos;
 in vec2 TexCoords;
-in vec3 Color;
 
-out vec4 color;
-
-out vec4 FragCoord;
+out vec4 FragColor;
 
 uniform sampler2D text;
+uniform vec3 color;
 
 void main()
 {
     vec4 c = texture(text, TexCoords);
-    if (c.r < 0.1)
+    if (c.r < 0.2)
     {
         discard;
     }
 
-    color = vec4(Color * c.r, 1);
+    // FragColor = vec4(Color.r, c.r, c.r, 1);
+    FragColor = vec4(color.r, color.g, color.b, 1);
 }
