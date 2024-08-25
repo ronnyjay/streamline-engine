@@ -20,11 +20,6 @@ texture::texture()
     glGenTextures(1, &m_ID);
 }
 
-void texture::bind()
-{
-    glBindTexture(GL_TEXTURE_2D, m_ID);
-}
-
 void texture::generate(const unsigned int width, const unsigned int height, const unsigned char *data)
 {
     m_width = width;

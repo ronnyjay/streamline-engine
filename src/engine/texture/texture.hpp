@@ -19,7 +19,15 @@ class texture : public loadable
         return m_ID;
     }
 
-    void bind();
+    void bind()
+    {
+        glBindTexture(GL_TEXTURE_2D, m_ID);
+    }
+
+    void unbind()
+    {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
     void generate(const unsigned int, const unsigned int, const unsigned char *);
 

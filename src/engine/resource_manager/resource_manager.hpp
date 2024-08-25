@@ -32,7 +32,7 @@ class resource_manager
         if (it == m_loadables.cend())
         {
             std::shared_ptr<T> l = std::make_shared<T>();
-            l->Load(path);
+            l->load(path);
             it = m_loadables.emplace(path, l).first;
         }
 

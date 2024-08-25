@@ -10,6 +10,8 @@ target_sources(engine PRIVATE
   shader/shader.cpp
   texture/texture.cpp
   resource_manager/resource_manager.cpp 
+  user_interface/ui_element.cpp
+  user_interface/user_interface.cpp
   # Camera/Camera.cpp
   # Camera/Orthographic.cpp
   # Camera/Perspective.cpp

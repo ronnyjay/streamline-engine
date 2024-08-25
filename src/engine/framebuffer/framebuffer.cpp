@@ -68,7 +68,7 @@ void framebuffer::unbind()
 
 void framebuffer::render()
 {
-    m_shader.use();
+    m_shader.bind();
     m_texture.bind();
 
     glBindVertexArray(m_vao);
