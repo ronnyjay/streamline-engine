@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/framebuffer/framebuffer.hpp"
 #include "engine/game/game.hpp"
 #include "window.hpp"
 
@@ -15,7 +16,8 @@ class application
 {
   public:
     application()
-        : m_log("application")
+        : m_framebuffer(1280, 720)
+        , m_log("application")
     {
     }
 
@@ -32,6 +34,7 @@ class application
 
   private:
     window m_window;
+    framebuffer m_framebuffer;
 
     logger m_log;
 

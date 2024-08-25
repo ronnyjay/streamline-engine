@@ -23,8 +23,10 @@ void application::initialize(game &g)
         window_cfg.load(json::parse(config_path));
     }
 
-    m_window.set_framebuffer_size_callback(
-        std::bind(&game::window_size_changed, &g, std::placeholders::_1, std::placeholders::_2));
+    m_window.set_framebuffer_size_callback([&](int w, int h){
+        m_framebuffer.resize(w, h);
+        g.window_size_changed(w, h);
+    });
 
     m_window.initialize(window_cfg);
 }
@@ -60,8 +62,13 @@ void application::run(game &g)
             lag -= SECONDS_PER_UPDATE;
         }
 
-        // render
+        // render to our framebuffer
+        m_framebuffer.bind();
         g.render(lag / SECONDS_PER_UPDATE);
+        m_framebuffer.unbind();
+
+        m_framebuffer.render();
+
         glfwSwapBuffers(m_window.glfw_window());
     }
 }
