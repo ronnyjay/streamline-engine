@@ -15,15 +15,17 @@ class game
     game &operator=(const game &) = delete;
     game &operator=(game &&) = delete;
 
-    /*
-        Called every SECONDS_PER_UPDATE seconds.
-        Generally used to update the physics of objects.
-    */
-    virtual void update() = 0;
+    /**
+      Generally used to update the physics of objects.
+      Called as many times in a row as necessary to keep
+      up with real time before a render occurs.
+
+      @param dt The engine's SECONDS_PER_UPDATE
+    **/
+    virtual void update(double dt) = 0;
 
     /**
-      Called as often as possible, as long as a call to update
-      has occurred in the last SECONDS_PER_UPDATE seconds.
+      Called after update has caught up with real time.
 
       @param dt Because the render can happen on an uneven schedule,
       dt is passed as an interpolation between the previous

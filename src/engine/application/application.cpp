@@ -55,7 +55,7 @@ void application::run()
 
         while (lag >= SECONDS_PER_UPDATE)
         {
-            m_game.update();
+            m_game.update(SECONDS_PER_UPDATE);
             lag -= SECONDS_PER_UPDATE;
         }
 
