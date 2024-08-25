@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <libstreamline/debug/logger.hpp>
 #include <libstreamline/exception/exception.hpp>
 #include <libstreamline/json/json.hpp>
@@ -9,7 +10,7 @@
 #include "window_config.hpp"
 
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include <engine/glfw3.h>
 #include <glad/gl.h>
 
 class window
@@ -18,13 +19,43 @@ class window
     window()
         : m_log("window")
     {
+        // initialize glfw
+        if (!glfwInit())
+        {
+            m_log.err("failed to initialize glfw");
+        }
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+#ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+        // initialize window
+        m_window = glfwCreateWindow(1280, 720, "Streamline Engine", NULL, NULL);
+
+        if (!m_window)
+        {
+            m_log.err("failed to initialize window");
+        }
+
+        glfwMakeContextCurrent(m_window);
+
+        if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
+        {
+            m_log.err("failed to initialize glad");
+        }
     }
 
     void initialize(const window_config &cfg);
 
     void set_monitor(monitor *);
-    void set_resolution(resolution);
-    void set_display_mode(display_mode_e);
+    void set_resolution(const resolution &);
+    void set_display_mode(const display_mode_e &);
+    void set_framebuffer_size_callback(const std::function<void(int, int)> &);
 
     void refresh();
 
@@ -104,4 +135,5 @@ class window
     static void maximize_callback(GLFWwindow *, int);
 
     static void framebuffer_size_callback(GLFWwindow *, int, int);
+    std::function<void(int, int)> m_app_framebuffer_cb;
 };

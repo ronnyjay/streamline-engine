@@ -3,8 +3,9 @@
 
 int main(int argc, char const *argv[])
 {
+    engine::application app;
     aim_trainer game;
-    engine::application app(game);
-    app.initialize();
-    app.run();
+
+    app.initialize(game);
+    app.run(game);
 }

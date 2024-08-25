@@ -33,6 +33,14 @@ class game
       be used to approximate the position on screen.
     **/
     virtual void render(double dt) = 0;
+
+    /**
+      Called when the window dimensions change
+
+      @param width New window width
+      @param height New window height
+    **/
+    virtual void window_size_changed(const unsigned int width, const unsigned int height) = 0;
 };
 
 } // namespace engine

@@ -14,14 +14,13 @@ namespace engine
 class application
 {
   public:
-    application(game &g)
+    application()
         : m_log("application")
-        , m_game(g)
     {
     }
 
-    void initialize();
-    void run();
+    void initialize(game &m_game);
+    void run(game &m_game);
 
     ~application() = default;
 
@@ -35,8 +34,6 @@ class application
     window m_window;
 
     logger m_log;
-
-    game &m_game;
 
     static constexpr double MILLISECONDS_PER_UPDATE = 50;
     static constexpr double SECONDS_PER_UPDATE = MILLISECONDS_PER_UPDATE / 1000.0;

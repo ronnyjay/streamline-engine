@@ -1,6 +1,6 @@
 #include "application.hpp"
 
-#include <GLFW/glfw3.h>
+#include <engine/glfw3.h>
 #include <libstreamline/debug/logger.hpp>
 #include <libstreamline/json/json.hpp>
 
@@ -8,7 +8,7 @@
 
 using namespace engine;
 
-void application::initialize()
+void application::initialize(game &g)
 {
     std::filesystem::path config_path("config/video.json");
     window_config window_cfg;
@@ -23,13 +23,14 @@ void application::initialize()
         window_cfg.load(json::parse(config_path));
     }
 
+    m_window.set_framebuffer_size_callback(
+        std::bind(&game::window_size_changed, &g, std::placeholders::_1, std::placeholders::_2));
+
     m_window.initialize(window_cfg);
 }
 
-void application::run()
+void application::run(game &g)
 {
-    glfwSwapInterval(m_window.is_vsync_enabled());
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -55,12 +56,12 @@ void application::run()
 
         while (lag >= SECONDS_PER_UPDATE)
         {
-            m_game.update(SECONDS_PER_UPDATE);
+            g.update(SECONDS_PER_UPDATE);
             lag -= SECONDS_PER_UPDATE;
         }
 
         // render
-        m_game.render(lag / SECONDS_PER_UPDATE);
+        g.render(lag / SECONDS_PER_UPDATE);
         glfwSwapBuffers(m_window.glfw_window());
     }
 }

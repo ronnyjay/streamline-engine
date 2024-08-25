@@ -1,40 +1,15 @@
 #include "window.hpp"
 
+#include <GLFW/glfw3.h>
+#include <functional>
 #include <libstreamline/debug/logger.hpp>
 
 void window::initialize(const window_config &cfg)
 {
     m_cfg = cfg;
 
-    // initialize glfw
-    if (!glfwInit())
-    {
-        m_log.err("failed to initialize glfw");
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-    // initialize window
-    m_window = glfwCreateWindow(cfg.width, cfg.height, "Streamline Engine", NULL, NULL);
-
-    if (!m_window)
-    {
-        m_log.err("failed to initialize window");
-    }
-
-    glfwMakeContextCurrent(m_window);
-
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
-    {
-        m_log.err("failed to initialize glad");
-    }
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetFramebufferSizeCallback(m_window, window::framebuffer_size_callback);
 
     load_monitors();
 
@@ -42,6 +17,7 @@ void window::initialize(const window_config &cfg)
     detect_current_monitor();
 
     set_monitor(m_primary_monitor);
+    glfwSwapInterval(cfg.vsync);
 
     m_log.info("initialized window");
 }
@@ -61,7 +37,7 @@ void window::set_monitor(monitor *monitor)
     }
 }
 
-void window::set_resolution(resolution res)
+void window::set_resolution(const resolution &res)
 {
     if (m_cfg.display_mode == FULLSCREEN)
     {
@@ -109,7 +85,7 @@ void window::set_resolution(resolution res)
     }
 }
 
-void window::set_display_mode(display_mode_e mode)
+void window::set_display_mode(const display_mode_e &mode)
 {
     // store window's position and size
     if (m_last_display_mode == WINDOWED)
@@ -261,14 +237,21 @@ void window::scroll_callback(GLFWwindow *, double x_offset, double y_offset)
 {
 }
 
-static void minimize_callback(GLFWwindow *, int minimize)
+void window::minimize_callback(GLFWwindow *, int minimize)
 {
 }
 
-static void maximize_callback(GLFWwindow *, int maximize)
+void window::maximize_callback(GLFWwindow *, int maximize)
 {
 }
 
-static void framebuffer_size_callback(GLFWwindow *, int width, int height)
+void window::set_framebuffer_size_callback(const std::function<void(int,int)> &cb)
 {
+    m_app_framebuffer_cb = cb;
+}
+
+void window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int height)
+{
+    window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
+    w->m_app_framebuffer_cb(width, height);
 }

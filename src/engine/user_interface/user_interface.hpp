@@ -1,9 +1,10 @@
 #pragma once
 
-#include "engine/shader/shader.hpp"
-#include <engine/user_interface/ui_element.hpp>
-
 #include <set>
+
+#include <glm/ext/matrix_clip_space.hpp>
+
+#include <engine/user_interface/ui_element.hpp>
 
 namespace engine
 {
@@ -55,12 +56,12 @@ class user_interface
 
     void set_dimensions(const unsigned int width, const unsigned int height)
     {
-        // float ar = float(width) / float(height);
-        // auto o = glm::ortho(-ar, ar, -1.0f, 1.0f, 0.1f, 100.0f);
-        // for (auto &elmnt : m_elements)
-        // {
-        //     elmnt->set_projection(o);
-        // }
+        float ar = float(width) / float(height);
+        auto o = glm::ortho(-ar, ar, -1.0f, 1.0f, 0.1f, 100.0f);
+        for (auto &elmnt : m_elements)
+        {
+            elmnt->set_projection(o);
+        }
     }
 
   protected:
