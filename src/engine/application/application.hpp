@@ -1,8 +1,12 @@
 #pragma once
 
+#include "engine/game/game.hpp"
 #include "window.hpp"
 
 #include <libstreamline/debug/logger.hpp>
+
+namespace engine
+{
 
 /*
   A wrapper around an opengl/glfw instance
@@ -10,8 +14,9 @@
 class application
 {
   public:
-    application()
+    application(game &g)
         : m_log("application")
+        , m_game(g)
     {
     }
 
@@ -30,4 +35,11 @@ class application
     window m_window;
 
     logger m_log;
+
+    game &m_game;
+
+    static constexpr double MILLISECONDS_PER_UPDATE = 50;
+    static constexpr double SECONDS_PER_UPDATE = MILLISECONDS_PER_UPDATE / 1000.0;
+};
+
 };

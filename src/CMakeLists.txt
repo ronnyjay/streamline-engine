@@ -7,3 +7,7 @@ target_link_libraries(${PROJECT_NAME}
     engine
     libstreamline
 )
+
+target_sources(${PROJECT_NAME} PUBLIC
+    aim_trainer/aim_trainer.cpp
+)

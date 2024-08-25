@@ -43,7 +43,12 @@ include_directories(
     extern/imgui
     extern/imgui/backends
     extern/entt/src
+    extern
     ${ASSIMP_INCLUDE_DIRS}
+)
+
+add_library(stb STATIC
+    extern/stb/stb_image.cpp
 )
 
 add_library(imgui STATIC

@@ -6,6 +6,10 @@ target_sources(engine PRIVATE
   application/resolution.cpp
   application/window.cpp
   application/window_config.cpp
+  framebuffer/framebuffer.cpp
+  shader/shader.cpp
+  texture/texture.cpp
+  resource_manager/resource_manager.cpp 
   # Camera/Camera.cpp
   # Camera/Orthographic.cpp
   # Camera/Perspective.cpp
@@ -20,12 +24,9 @@ target_sources(engine PRIVATE
   # Framebuffer/Framebuffer.cpp
   # InputManager/InputManager.cpp
   # Logger/Logger.cpp
-  # ResourceManager/ResourceManager.cpp 
   # Scene/Scene.cpp
-  # Shader/Shader.cpp
   # stb/stb_image.cpp
   # Text/Text.cpp
-  # Texture/Texture.cpp
 )
 
-target_link_libraries(engine PUBLIC glfw glm::glm glad imgui assimp::assimp)
+target_link_libraries(engine PUBLIC glfw glm::glm glad imgui assimp::assimp stb)

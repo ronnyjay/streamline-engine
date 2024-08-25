@@ -1,34 +1,33 @@
 #pragma once
 
 #include <glad/gl.h>
-
-#include <engine/Components/Light.hpp>
-
 #include <glm/glm.hpp>
 
-#include <array>
+#include "libstreamline/debug/logger.hpp"
+
 #include <string>
 
 namespace engine
 {
 
-class ShaderProgram
+class shader_program
 {
   public:
     static constexpr size_t MAX_NUM_LIGHTS = 10;
 
-    ShaderProgram()
+    shader_program()
+      : m_log("shader_program")
     {
         m_ID = glCreateProgram();
     }
 
     operator unsigned int() const;
 
-    void Use();
+    void use();
 
-    bool AddShader(const std::string &path, GLint type);
+    bool add_shader(const std::string &path, GLint type);
 
-    bool Compile();
+    bool compile();
 
     void SetBool(const std::string &, bool) const;
     void SetInt(const std::string &, int) const;
@@ -43,15 +42,10 @@ class ShaderProgram
     void SetMat2(const std::string &, const glm::mat2 &) const;
     void SetMat3(const std::string &, const glm::mat3 &) const;
     void SetMat4(const std::string &, const glm::mat4 &) const;
-    void UpdateLights(const std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> &lights);
-
-    std::array<Light, ShaderProgram::MAX_NUM_LIGHTS> m_Lights;
 
   private:
     unsigned int m_ID;
-
-    GLuint m_LightUBO;
-    GLuint m_LightBlockBinding;
+    logger m_log;
 
     bool CheckCompileErrors(unsigned int);
 };

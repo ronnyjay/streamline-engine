@@ -1,9 +1,12 @@
 #include "application.hpp"
 
-#include <libstreamline/json/json.hpp>
+#include <GLFW/glfw3.h>
 #include <libstreamline/debug/logger.hpp>
+#include <libstreamline/json/json.hpp>
 
 #include "window.hpp"
+
+using namespace engine;
 
 void application::initialize()
 {
@@ -35,12 +38,29 @@ void application::run()
 
     glViewport(0, 0, m_window.width(), m_window.height());
 
+    double previous = glfwGetTime();
+    double lag = 0.0;
+
     while (!glfwWindowShouldClose(m_window.glfw_window()))
     {
         glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glfwSwapBuffers(m_window.glfw_window());
+        double current = glfwGetTime();
+        double elapsed = current - previous;
+        previous = current;
+        lag += elapsed;
+
         glfwPollEvents();
+
+        while (lag >= SECONDS_PER_UPDATE)
+        {
+            m_game.update();
+            lag -= SECONDS_PER_UPDATE;
+        }
+
+        // render
+        m_game.render(lag / SECONDS_PER_UPDATE);
+        glfwSwapBuffers(m_window.glfw_window());
     }
 }

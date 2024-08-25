@@ -1,6 +1,7 @@
 #pragma once
 
-#include <engine/ResourceManager/ResourceManager.hpp>
+#include "libstreamline/debug/logger.hpp"
+#include <engine/resource_manager/resource_manager.hpp>
 #include <glad/gl.h>
 
 #include <string>
@@ -8,37 +9,38 @@
 namespace engine
 {
 
-class Texture : public Loadable
+class texture : public loadable
 {
   public:
-    Texture();
+    texture();
 
     operator unsigned int() const
     {
         return m_ID;
     }
 
-    void Bind();
+    void bind();
 
-    void Generate(const unsigned int, const unsigned int, const unsigned char *);
+    void generate(const unsigned int, const unsigned int, const unsigned char *);
 
-    unsigned int m_Width;
-    unsigned int m_Height;
+    unsigned int m_width;
+    unsigned int m_height;
 
-    unsigned int m_InternalFormat;
-    unsigned int m_ImageFormat;
+    unsigned int m_internal_format;
+    unsigned int m_image_format;
 
-    unsigned int m_Wrap_S;
-    unsigned int m_Wrap_T;
-    unsigned int m_FilterMin;
-    unsigned int m_FilterMax;
+    unsigned int m_wrap_s;
+    unsigned int m_wrap_t;
+    unsigned int m_filter_min;
+    unsigned int m_filter_max;
 
     std::string m_Type;
 
-    void Load(const std::basic_string<char> &path) override;
+    void load(const std::basic_string<char> &path) override;
 
   private:
     unsigned int m_ID;
+    logger m_log;
 };
 
 } // namespace engine
