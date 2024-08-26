@@ -4,6 +4,21 @@
 #include <functional>
 #include <libstreamline/debug/logger.hpp>
 
+void window::on_resize(resize_event::callback callback)
+{
+    m_on_resize = callback;
+}
+
+void window::on_minimize(minimize_event::callback callback)
+{
+    m_on_minimize = callback;
+}
+
+void window::on_maximize(maximize_event::callback callback)
+{
+    m_on_maximize = callback;
+}
+
 void window::initialize(const window_config &cfg)
 {
     m_cfg = cfg;
@@ -224,48 +239,88 @@ void window::detect_current_monitor()
     }
 }
 
-void window::key_callback(GLFWwindow *, int key, int scancode, int action, int mods)
+void window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
+
+    if (w->m_on_key_press)
     {
+        w->m_on_key_press(key_press_event(key, scancode, action, mods));
     }
 }
 
-void window::cursor_callback(GLFWwindow *, double xpos_in, double ypos_in)
+void window::cursor_callback(GLFWwindow *glfw_window, double xpos_in, double ypos_in)
 {
+    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
 }
 
-void window::scroll_callback(GLFWwindow *, double x_offset, double y_offset)
+void window::scroll_callback(GLFWwindow *glfw_window, double x_offset, double y_offset)
 {
+    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
 }
 
-void window::minimize_callback(GLFWwindow *, int minimize)
+void window::minimize_callback(GLFWwindow *glfw_window, int minimize)
 {
+    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
+
+    // glfw logic
+    // the window should do this automatically
+    if (minimize)
+    {
+        glfwIconifyWindow(glfw_window);
+    }
+    else
+    {
+        glfwRestoreWindow(glfw_window);
+    }
+
+    if (w->m_on_minimize)
+    {
+        w->m_on_minimize(minimize_event(minimize));
+    }
 }
 
-void window::maximize_callback(GLFWwindow *, int maximize)
+void window::maximize_callback(GLFWwindow *glfw_window, int maximize)
 {
+    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
+
+    // glfw logic
+    // the window should do this automatically
+    if (maximize)
+    {
+        glfwMaximizeWindow(glfw_window);
+    }
+    else
+    {
+        glfwRestoreWindow(glfw_window);
+    }
+
+    if (w->m_on_maximize)
+    {
+        w->m_on_maximize(maximize_event(maximize));
+    }
 }
 
-void window::set_framebuffer_size_callback(const std::function<void(int,int)> &cb)
+void window::framebuffer_size_callback(GLFWwindow *glfw_window, int width, int height)
 {
-    m_app_framebuffer_cb = cb;
+    glViewport(0, 0, width, height);
+
+    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
+
+    if (w->m_on_resize)
+    {
+        w->m_on_resize(resize_event(width, height));
+    }
 }
 
-void window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int height)
-{
-    window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
-    w->m_app_framebuffer_cb(width, height);
-}
-
-void window::set_mouse_press_callback(const std::function<void(int,int,int)> &cb)
+void window::set_mouse_press_callback(const std::function<void(int, int, int)> &cb)
 {
     m_app_mouse_press_cb = cb;
 }
 
-void window::mouse_press_callback(GLFWwindow* glfwWindow, int button, int action, int mods)
+void window::mouse_press_callback(GLFWwindow *glfwWindow, int button, int action, int mods)
 {
-    window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
+    window *w = static_cast<class window *>(glfwGetWindowUserPointer(glfwWindow));
     w->m_app_mouse_press_cb(button, action, mods);
 }
 
@@ -274,8 +329,8 @@ void window::set_mouse_pos_callback(const std::function<void(double, double)> &c
     m_app_mouse_pos_cb = cb;
 }
 
-void window::mouse_pos_callback(GLFWwindow* glfwWindow, double x, double y)
+void window::mouse_pos_callback(GLFWwindow *glfwWindow, double x, double y)
 {
-    window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
+    window *w = static_cast<class window *>(glfwGetWindowUserPointer(glfwWindow));
     w->m_app_mouse_pos_cb(x, y);
 }

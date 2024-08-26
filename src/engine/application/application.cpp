@@ -24,19 +24,17 @@ void application::initialize(game &g)
         window_cfg.load(json::parse(config_path));
     }
 
-    m_window.set_framebuffer_size_callback(
-        [&](int w, int h)
+    m_window.on_resize(
+        [&](resize_event e)
         {
-            glViewport(0, 0, w, h);
-            m_framebuffer.resize(w, h);
-            g.window_size_changed(w, h);
+            m_framebuffer.resize(e.width(), e.height());
+            g.window_size_changed(e.width(), e.height());
         });
 
-    m_window.set_mouse_press_callback(
-        [&](int button, int action, int mods)
-        {
-            g.mouse_press(button, action, mods);
-        });
+    m_window.on_minimize([&](minimize_event e) { m_log.info(e.to_string()); });
+    m_window.on_maximize([&](maximize_event e) { m_log.info(e.to_string()); });
+
+    m_window.set_mouse_press_callback([&](int button, int action, int mods) { g.mouse_press(button, action, mods); });
 
     m_window.set_mouse_pos_callback(
         [&](double x, double y)
@@ -70,7 +68,7 @@ void application::run(game &g)
 
         glfwPollEvents();
 
-        m_log.info("LAG: %f", lag);
+        // m_log.info("LAG: %f", lag);
         while (lag >= SECONDS_PER_UPDATE)
         {
             g.update(SECONDS_PER_UPDATE);

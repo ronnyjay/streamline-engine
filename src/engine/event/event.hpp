@@ -1,24 +1,19 @@
 #pragma once
 
-// clang-format off
-enum event_type_e
-{ 
-  None, 
-  KeyEvent, MouseEvent, 
-  WindowResizeEvent, WindowCloseEvent
-};
-// clang-format on
+#include <string>
+
+#include <functional> // IWYU pragma: keep
+#include <sstream>    // IWYU pragma: keep
+
+#include <libstreamline/exception/exception.hpp>
+
+#define STREAMLINE_MAKE_CALLBACK(type) typedef std::function<void(type)> callback
+#define STREAMLINE_MAKE_CALLBACK_EXPLICIT(type) typedef std::function<void(type)> type##_callback
 
 class event
 {
   public:
-    inline const event_type_e type() const
-    {
-        return type_;
-    }
-
     virtual ~event() = default;
 
-  protected:
-    event_type_e type_ = None;
+    virtual std::string to_string() const = 0;
 };

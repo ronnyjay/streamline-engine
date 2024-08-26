@@ -9,6 +9,10 @@
 #include "resolution.hpp"
 #include "window_config.hpp"
 
+#include "engine/event/key_event.hpp"
+#include "engine/event/mouse_event.hpp"
+#include "engine/event/window_event.hpp"
+
 #define GLFW_INCLUDE_NONE
 #include <engine/glfw3.h>
 #include <glad/gl.h>
@@ -50,16 +54,25 @@ class window
         }
     }
 
+    // pre init
+    void on_resize(resize_event::callback);
+    void on_minimize(minimize_event::callback);
+    void on_maximize(maximize_event::callback);
+    void on_key_press(key_press_event::callback);
+    void on_mouse_move(mouse_move_event::callback);
+    void on_mouse_click(mouse_click_event::callback);
+    void on_mouse_scroll(mouse_scroll_event::callback);
+
     void initialize(const window_config &cfg);
 
     void set_monitor(monitor *);
     void set_resolution(const resolution &);
     void set_display_mode(const display_mode_e &);
 
-    void set_framebuffer_size_callback(const std::function<void(int, int)> &);
     void set_mouse_press_callback(const std::function<void(int, int, int)> &);
     void set_mouse_pos_callback(const std::function<void(double, double)> &);
 
+    // post init
     void refresh();
 
     inline GLFWwindow *const glfw_window()
@@ -124,21 +137,57 @@ class window
 
     std::vector<monitor *> m_monitors;
 
+    resize_event::callback m_on_resize;
+    minimize_event::callback m_on_minimize;
+    maximize_event::callback m_on_maximize;
+    key_press_event::callback m_on_key_press;
+    mouse_move_event::callback m_on_mouse_move;
+    mouse_click_event::callback m_on_mouse_click;
+    mouse_scroll_event::callback m_on_mouse_scroll;
+
     void load_monitors();
 
     void detect_primary_monitor();
     void detect_current_monitor();
 
+    /**
+     * @brief GLFW callback for keyboard input
+     * @details Handles key logic, emits key event
+     * @param window The GLFWwindow pointer
+     * @param key The key's integer value
+     * @param scancode The key's scancode
+     * @param action (pressed, released, repeat)
+     * @param mods The modifier keys
+     */
     static void key_callback(GLFWwindow *, int, int, int, int);
 
     static void cursor_callback(GLFWwindow *, double, double);
     static void scroll_callback(GLFWwindow *, double, double);
 
+    /**
+     * @brief GLFW callback on window iconify
+     * @details Handles minimize logic, emits minimize event
+     * @param window The GLFWwindow pointer
+     * @param minimize The state of the window (minimized, restored)
+     */
     static void minimize_callback(GLFWwindow *, int);
+
+    /**
+     * @brief GLFW callback on window maximize
+     * @details Handles maximize logic, emits maximize event
+     * @param window The GLFWwindow pointer
+     * @param maximize The state of the window (maximized, restored)
+     */
     static void maximize_callback(GLFWwindow *, int);
 
+    /**
+     * @brief GLFW callback on window resize
+     * @details Handles viewport logic, emits resize event
+     * @param window The GLFWwindow pointer
+     * @param width The width of the window (in px)
+     * @param height The height of the window (in px)
+     */
     static void framebuffer_size_callback(GLFWwindow *, int, int);
-    std::function<void(int, int)> m_app_framebuffer_cb;
 
     static void mouse_press_callback(GLFWwindow *, int, int, int);
     std::function<void(int, int, int)> m_app_mouse_press_cb;
