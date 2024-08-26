@@ -10,7 +10,7 @@ format:
 	clang-format -i `find src -name "*.cpp"` `find src -name "*.hpp"`
 
 run: streamline-engine
-	build/src/streamline-engine
+	build/streamline-engine
 
 .PHONY: clean
 clean:
