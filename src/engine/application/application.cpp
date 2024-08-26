@@ -32,6 +32,21 @@ void application::initialize(game &g)
             g.window_size_changed(w, h);
         });
 
+    m_window.set_mouse_press_callback(
+        [&](int button, int action, int mods)
+        {
+            g.mouse_press(button, action, mods);
+        });
+
+    m_window.set_mouse_pos_callback(
+        [&](double x, double y)
+        {
+            float cx, cy;
+            cx = 2.0f * (x / m_framebuffer.m_width) - 1.0f;
+            cy = -2.0f * (y / m_framebuffer.m_height) + 1.0f;
+            g.mouse_pos(cx, cy);
+        });
+
     m_window.initialize(window_cfg);
 }
 
@@ -55,6 +70,7 @@ void application::run(game &g)
 
         glfwPollEvents();
 
+        m_log.info("LAG: %f", lag);
         while (lag >= SECONDS_PER_UPDATE)
         {
             g.update(SECONDS_PER_UPDATE);

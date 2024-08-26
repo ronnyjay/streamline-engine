@@ -1,12 +1,14 @@
 #pragma once
 
 #include <glm/fwd.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <functional>
 
 #include <engine/resource_manager/resource_manager.hpp>
 #include <engine/shader/shader.hpp>
 #include <engine/texture/texture.hpp>
+#include <engine/glfw3.h>
 
 namespace engine
 {
@@ -40,11 +42,11 @@ class ui_element
     {
         m_proj = proj;
 
-        // auto view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        auto view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        // m_shader.set_mat4("projection", m_proj);
-        // m_shader.set_mat4("view", view);
-        // m_shader.set_mat4("model", glm::mat4(1.0f));
+        m_shader.set_mat4("projection", m_proj);
+        m_shader.set_mat4("view", view);
+        m_shader.set_mat4("model", glm::mat4(1.0f));
     }
 
     virtual bool is_point_inside(const float x, const float y) const
@@ -117,6 +119,7 @@ class text_element : public ui_element
     text_element(shader_program &text_shader)
         : ui_element(text_shader)
         , m_text("O")
+        , m_color(0.0f, 0.0f, 0.0f)
         , m_wrap(false)
     {
         m_texture =
@@ -150,7 +153,7 @@ class text_element : public ui_element
     virtual void render() override
     {
         m_shader.bind();
-        m_shader.set_vec3("color", glm::vec3(0.0f, 0.0f, 0.0f));
+        m_shader.set_vec3("color", m_color); // TODO: make this an option in the text creation
         m_texture->bind();
 
         glBindVertexArray(m_vao);
@@ -187,23 +190,24 @@ class text_element : public ui_element
 
     void update_data();
 
-    // virtual void click(int button, int action) override
-    // {
-    //     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    //     {
-    //         set_text("-");
-    //     }
-    //     else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-    //     {
-    //         set_text("+");
-    //     }
-    // }
+    virtual void click(int button, int action) override
+    {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        {
+            set_text("-");
+        }
+        else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+        {
+            set_text("+");
+        }
+    }
 
   private:
     unsigned int m_vao, m_vbo;
     std::shared_ptr<engine::texture> m_texture;
     std::vector<float> m_data;
     std::string m_text;
+    glm::vec3 m_color;
 
     bool m_wrap;
 };

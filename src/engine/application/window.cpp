@@ -10,6 +10,8 @@ void window::initialize(const window_config &cfg)
 
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, window::framebuffer_size_callback);
+    glfwSetMouseButtonCallback(m_window, window::mouse_press_callback);
+    glfwSetCursorPosCallback(m_window, window::mouse_pos_callback);
 
     load_monitors();
 
@@ -254,4 +256,26 @@ void window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int he
 {
     window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
     w->m_app_framebuffer_cb(width, height);
+}
+
+void window::set_mouse_press_callback(const std::function<void(int,int,int)> &cb)
+{
+    m_app_mouse_press_cb = cb;
+}
+
+void window::mouse_press_callback(GLFWwindow* glfwWindow, int button, int action, int mods)
+{
+    window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
+    w->m_app_mouse_press_cb(button, action, mods);
+}
+
+void window::set_mouse_pos_callback(const std::function<void(double, double)> &cb)
+{
+    m_app_mouse_pos_cb = cb;
+}
+
+void window::mouse_pos_callback(GLFWwindow* glfwWindow, double x, double y)
+{
+    window *w= static_cast<class window*>(glfwGetWindowUserPointer(glfwWindow));
+    w->m_app_mouse_pos_cb(x, y);
 }

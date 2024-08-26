@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace engine
 {
 
@@ -41,6 +43,23 @@ class game
       @param height New window height
     **/
     virtual void window_size_changed(const unsigned int width, const unsigned int height) = 0;
+
+    /**
+      Called when a mouse press event occurs
+    **/
+    virtual void mouse_press(const int button, const int action, const int mods) = 0;
+
+    /**
+      Called when a cursor event occurs
+    **/
+    virtual void mouse_pos(const double x, const double y)
+    {
+      m_mouse_pos.x = x;
+      m_mouse_pos.y = y;
+    }
+
+  protected:
+    glm::vec3 m_mouse_pos;
 };
 
 } // namespace engine

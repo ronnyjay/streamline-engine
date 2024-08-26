@@ -55,7 +55,10 @@ class window
     void set_monitor(monitor *);
     void set_resolution(const resolution &);
     void set_display_mode(const display_mode_e &);
+
     void set_framebuffer_size_callback(const std::function<void(int, int)> &);
+    void set_mouse_press_callback(const std::function<void(int, int, int)> &);
+    void set_mouse_pos_callback(const std::function<void(double, double)> &);
 
     void refresh();
 
@@ -136,4 +139,10 @@ class window
 
     static void framebuffer_size_callback(GLFWwindow *, int, int);
     std::function<void(int, int)> m_app_framebuffer_cb;
+
+    static void mouse_press_callback(GLFWwindow *, int, int, int);
+    std::function<void(int, int, int)> m_app_mouse_press_cb;
+
+    static void mouse_pos_callback(GLFWwindow *, double, double);
+    std::function<void(double, double)> m_app_mouse_pos_cb;
 };

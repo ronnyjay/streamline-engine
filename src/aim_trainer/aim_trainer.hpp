@@ -26,6 +26,8 @@ class aim_trainer : public engine::game
     void update(double) override;
     void render(double) override;
     void window_size_changed(const unsigned int width, const unsigned int height) override;
+    void mouse_press(const int button, const int action, const int mods) override;
+    void mouse_pos(const double x, const double y) override;
 
   private:
     logger m_log;
