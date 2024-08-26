@@ -2,12 +2,12 @@
 #include "engine/game/game.hpp"
 
 #include <engine/glfw3.h>
-#include <chrono>
-#include <thread>
 
 void aim_trainer::update(double dt)
 {
     // std::this_thread::sleep_for(std::chrono::milliseconds(15));
+    if (m_menu.should_quit())
+       m_should_quit = true;
 }
 
 void aim_trainer::render(double dt)

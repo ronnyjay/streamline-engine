@@ -58,7 +58,24 @@ class game
       m_mouse_pos.y = y;
     }
 
+    /*
+      Should quit?
+    */
+    bool should_quit() const
+    {
+      return m_should_quit;
+    }
+
+    /*
+      Gracefully stop the game
+    */
+    void quit()
+    {
+
+    }
+
   protected:
+    bool m_should_quit = false;
     glm::vec3 m_mouse_pos;
 };
 

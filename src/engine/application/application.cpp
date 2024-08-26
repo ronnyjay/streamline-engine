@@ -97,5 +97,11 @@ void application::run(game &g)
         m_framebuffer.render();
 
         glfwSwapBuffers(m_window.glfw_window());
+
+        if (g.should_quit())
+        {
+            g.quit();
+            break;
+        }
     }
 }

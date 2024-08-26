@@ -192,6 +192,7 @@ class text_element : public ui_element
 
     virtual void click(int button, int action) override
     {
+        ui_element::click(button, action);
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         {
             set_text("-");
