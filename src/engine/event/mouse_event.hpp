@@ -2,30 +2,10 @@
 
 #include "event.hpp"
 
-class mouse_move_event : public event
+class mouse_button_pressed_event : public event
 {
   public:
-    STREAMLINE_MAKE_CALLBACK(mouse_move_event);
-
-    mouse_move_event(double xpos_in, double ypos_in)
-    {
-    }
-
-    double x_offset;
-    double y_offset;
-
-    std::string to_string() const override
-    {
-        throw unimplemented_exception(std::source_location::current());
-    }
-};
-
-class mouse_click_event : public event
-{
-  public:
-    STREAMLINE_MAKE_CALLBACK(mouse_click_event);
-
-    mouse_click_event(int button, int action, int mods)
+    mouse_button_pressed_event(int button, int action, int mods)
         : m_button(button)
         , m_action(action)
         , m_mods(mods)
@@ -49,7 +29,7 @@ class mouse_click_event : public event
 
     std::string to_string() const override
     {
-        throw unimplemented_exception(std::source_location::current());
+        return (std::stringstream() << "Mouse Pressed: " << m_button << ", " << m_action << ", " << m_mods).str();
     }
 
   private:
@@ -58,12 +38,28 @@ class mouse_click_event : public event
     int m_mods;
 };
 
-class mouse_scroll_event : public event
+class mouse_moved_event : public event
 {
   public:
-    STREAMLINE_MAKE_CALLBACK(mouse_scroll_event);
+    mouse_moved_event(double xpos_in, double ypos_in)
+    {
+        x_offset = xpos_in;
+        y_offset = ypos_in;
+    }
 
-    mouse_scroll_event(double yoffset)
+    double x_offset;
+    double y_offset;
+
+    std::string to_string() const override
+    {
+        return (std::stringstream() << "Mouse moved: " << x_offset << ", " << y_offset).str();
+    }
+};
+
+class mouse_scrolled_event : public event
+{
+  public:
+    mouse_scrolled_event(double yoffset)
     {
     }
 

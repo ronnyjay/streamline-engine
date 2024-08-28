@@ -54,8 +54,8 @@ class game
     **/
     virtual void mouse_pos(const double x, const double y)
     {
-      m_mouse_pos.x = x;
-      m_mouse_pos.y = y;
+        m_mouse_pos.x = x;
+        m_mouse_pos.y = y;
     }
 
     /*
@@ -63,7 +63,7 @@ class game
     */
     bool should_quit() const
     {
-      return m_should_quit;
+        return m_should_quit;
     }
 
     /*
@@ -71,7 +71,6 @@ class game
     */
     void quit()
     {
-
     }
 
   protected:

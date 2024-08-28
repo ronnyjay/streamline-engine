@@ -11,6 +11,7 @@ using namespace engine;
 
 void application::initialize(game &g)
 {
+
     std::filesystem::path config_path("config/video.json");
     window_config window_cfg;
 
@@ -24,26 +25,62 @@ void application::initialize(game &g)
         window_cfg.load(json::parse(config_path));
     }
 
-    m_window.on_resize(
-        [&](resize_event e)
+    m_window.on_event<window_resize_event>(
+        WindowResize,
+        [&](window_resize_event &e)
         {
             m_framebuffer.resize(e.width(), e.height());
             g.window_size_changed(e.width(), e.height());
         });
 
-    m_window.on_minimize([&](minimize_event e) { m_log.info(e.to_string()); });
-    m_window.on_maximize([&](maximize_event e) { m_log.info(e.to_string()); });
+    m_window.on_event<window_minimize_event>(
+        WindowMinimize,
+        [&](window_minimize_event &e) {
 
-    m_window.set_mouse_press_callback([&](int button, int action, int mods) { g.mouse_press(button, action, mods); });
+        });
 
-    m_window.set_mouse_pos_callback(
-        [&](double x, double y)
+    m_window.on_event<window_maximize_event>(
+        WindowMaximize,
+        [&](window_maximize_event &e) {
+
+        });
+
+    m_window.on_event<key_pressed_event>(
+        KeyPressed,
+        [&](key_pressed_event &e) {
+
+        });
+
+    m_window.on_event<mouse_moved_event>(
+        MouseMoved,
+        [&](mouse_moved_event &e)
         {
             float cx, cy;
-            cx = 2.0f * (x / m_framebuffer.m_width) - 1.0f;
-            cy = -2.0f * (y / m_framebuffer.m_height) + 1.0f;
+            cx = 2.0f * (e.x_offset / m_framebuffer.m_width) - 1.0f;
+            cy = -2.0f * (e.y_offset / m_framebuffer.m_height) + 1.0f;
             g.mouse_pos(cx, cy);
         });
+
+    m_window.on_event<mouse_scrolled_event>(
+        MouseScrolled,
+        [&](mouse_scrolled_event &e) {
+
+        });
+
+    m_window.on_event<mouse_button_pressed_event>(
+        MouseButtonPressed, [&](mouse_button_pressed_event &e) { g.mouse_press(e.button(), e.action(), e.mods()); });
+
+    // m_window.set_mouse_press_callback([&](int button, int action, int mods) { g.mouse_press(button, action, mods);
+    // });
+
+    // m_window.set_mouse_pos_callback(
+    //     [&](double x, double y)
+    //     {
+    //         float cx, cy;
+    //         cx = 2.0f * (x / m_framebuffer.m_width) - 1.0f;
+    //         cy = -2.0f * (y / m_framebuffer.m_height) + 1.0f;
+    //         g.mouse_pos(cx, cy);
+    //     });
 
     m_window.initialize(window_cfg);
 }

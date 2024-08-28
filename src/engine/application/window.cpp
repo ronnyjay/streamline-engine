@@ -4,24 +4,9 @@
 #include <functional>
 #include <libstreamline/debug/logger.hpp>
 
-void window::on_resize(resize_event::callback callback)
-{
-    m_on_resize = callback;
-}
-
-void window::on_minimize(minimize_event::callback callback)
-{
-    m_on_minimize = callback;
-}
-
-void window::on_maximize(maximize_event::callback callback)
-{
-    m_on_maximize = callback;
-}
-
 void window::initialize(const window_config &cfg)
 {
-    m_cfg = cfg;
+    m_config = cfg;
 
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, window::framebuffer_size_callback);
@@ -36,7 +21,17 @@ void window::initialize(const window_config &cfg)
     set_monitor(m_primary_monitor);
     glfwSwapInterval(cfg.vsync);
 
-    m_log.info("initialized window");
+    m_logger.info("initialized window");
+}
+
+void window::dispatch_event(event_type t, event &&e)
+{
+    auto it = m_events.find(t);
+
+    if (it != m_events.end())
+    {
+        it->second(e);
+    }
 }
 
 void window::refresh()
@@ -48,15 +43,15 @@ void window::set_monitor(monitor *monitor)
 {
     m_primary_monitor = monitor;
 
-    if (m_cfg.display_mode == FULLSCREEN || m_cfg.display_mode == BORDERLESS)
+    if (m_config.display_mode == FULLSCREEN || m_config.display_mode == BORDERLESS)
     {
-        set_display_mode(static_cast<display_mode_e>(m_cfg.display_mode));
+        set_display_mode(static_cast<display_mode_e>(m_config.display_mode));
     }
 }
 
 void window::set_resolution(const resolution &res)
 {
-    if (m_cfg.display_mode == FULLSCREEN)
+    if (m_config.display_mode == FULLSCREEN)
     {
         glfwSetWindowMonitor(m_window, m_primary_monitor->glfw_monitor, 0, 0, res.width, res.height, GLFW_DONT_CARE);
 
@@ -77,7 +72,7 @@ void window::set_resolution(const resolution &res)
             m_primary_monitor->active_resolutions.fullscreen = -1;
         }
     }
-    else if (m_cfg.display_mode == WINDOWED)
+    else if (m_config.display_mode == WINDOWED)
     {
         glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE); // remove aspect ratio lock
         glfwSetWindowSize(m_window, res.width / m_current_monitor->scale.x, res.height / m_current_monitor->scale.y);
@@ -186,23 +181,23 @@ void window::detect_primary_monitor()
 
     for (auto *monitor : m_monitors)
     {
-        if (monitor->title == m_cfg.monitor)
+        if (monitor->title == m_config.monitor)
         {
             found = true;
 
             m_primary_monitor = monitor;
 
-            m_log.info("detected primary monitor: %s", m_primary_monitor->title);
+            m_logger.info("detected primary monitor: %s", m_primary_monitor->title);
         }
     }
 
     if (!found)
     {
-        m_log.info("specified primary monitor not found: %s", m_cfg.monitor.c_str());
+        m_logger.info("specified primary monitor not found: %s", m_config.monitor.c_str());
 
         m_primary_monitor = m_monitors.at(0);
 
-        m_log.info("reverting to default monitor for primary monitor: %s", m_primary_monitor->title);
+        m_logger.info("reverting to default monitor for primary monitor: %s", m_primary_monitor->title);
     }
 }
 
@@ -225,28 +220,23 @@ void window::detect_current_monitor()
 
             m_current_monitor = m_monitors[i];
 
-            m_log.info("detected current monitor: %s", m_current_monitor->title);
+            m_logger.info("detected current monitor: %s", m_current_monitor->title);
         }
     }
 
     if (!found)
     {
-        m_log.info("unable to detect current monintor");
+        m_logger.info("unable to detect current monintor");
 
         m_current_monitor = m_primary_monitor;
 
-        m_log.info("reverting to default monitor for current monitor: %s", m_primary_monitor->title);
+        m_logger.info("reverting to default monitor for current monitor: %s", m_primary_monitor->title);
     }
 }
 
 void window::key_callback(GLFWwindow *glfw_window, int key, int scancode, int action, int mods)
 {
     window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
-
-    if (w->m_on_key_press)
-    {
-        w->m_on_key_press(key_press_event(key, scancode, action, mods));
-    }
 }
 
 void window::cursor_callback(GLFWwindow *glfw_window, double xpos_in, double ypos_in)
@@ -263,8 +253,7 @@ void window::minimize_callback(GLFWwindow *glfw_window, int minimize)
 {
     window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
 
-    // glfw logic
-    // the window should do this automatically
+    // default window response - should happen automatically
     if (minimize)
     {
         glfwIconifyWindow(glfw_window);
@@ -274,18 +263,14 @@ void window::minimize_callback(GLFWwindow *glfw_window, int minimize)
         glfwRestoreWindow(glfw_window);
     }
 
-    if (w->m_on_minimize)
-    {
-        w->m_on_minimize(minimize_event(minimize));
-    }
+    w->dispatch_event(WindowMinimize, window_minimize_event(minimize));
 }
 
 void window::maximize_callback(GLFWwindow *glfw_window, int maximize)
 {
     window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
 
-    // glfw logic
-    // the window should do this automatically
+    // default window response - should happen automatically
     if (maximize)
     {
         glfwMaximizeWindow(glfw_window);
@@ -295,42 +280,29 @@ void window::maximize_callback(GLFWwindow *glfw_window, int maximize)
         glfwRestoreWindow(glfw_window);
     }
 
-    if (w->m_on_maximize)
-    {
-        w->m_on_maximize(maximize_event(maximize));
-    }
+    w->dispatch_event(WindowMaximize, window_maximize_event(maximize));
 }
 
 void window::framebuffer_size_callback(GLFWwindow *glfw_window, int width, int height)
 {
-    glViewport(0, 0, width, height);
-
     window *w = static_cast<window *>(glfwGetWindowUserPointer(glfw_window));
 
-    if (w->m_on_resize)
-    {
-        w->m_on_resize(resize_event(width, height));
-    }
-}
+    // default window response - should happen automatically
+    glViewport(0, 0, width, height);
 
-void window::set_mouse_press_callback(const std::function<void(int, int, int)> &cb)
-{
-    m_app_mouse_press_cb = cb;
+    w->dispatch_event(WindowResize, window_resize_event(width, height));
 }
 
 void window::mouse_press_callback(GLFWwindow *glfwWindow, int button, int action, int mods)
 {
     window *w = static_cast<class window *>(glfwGetWindowUserPointer(glfwWindow));
-    w->m_app_mouse_press_cb(button, action, mods);
-}
 
-void window::set_mouse_pos_callback(const std::function<void(double, double)> &cb)
-{
-    m_app_mouse_pos_cb = cb;
+    w->dispatch_event(MouseButtonPressed, mouse_button_pressed_event(button, action, mods));
 }
 
 void window::mouse_pos_callback(GLFWwindow *glfwWindow, double x, double y)
 {
     window *w = static_cast<class window *>(glfwGetWindowUserPointer(glfwWindow));
-    w->m_app_mouse_pos_cb(x, y);
+
+    w->dispatch_event(MouseMoved, mouse_moved_event(x, y));
 }

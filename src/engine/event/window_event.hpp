@@ -4,12 +4,10 @@
 
 #include <libstreamline/exception/exception.hpp>
 
-class resize_event : public event
+class window_resize_event : public event
 {
   public:
-    STREAMLINE_MAKE_CALLBACK(resize_event);
-
-    resize_event(const int width, const int height)
+    window_resize_event(const int width, const int height)
         : m_width(width)
         , m_height(height)
     {
@@ -35,12 +33,10 @@ class resize_event : public event
     int m_height;
 };
 
-class minimize_event : public event
+class window_minimize_event : public event
 {
   public:
-    STREAMLINE_MAKE_CALLBACK(minimize_event);
-
-    minimize_event(int minimized)
+    window_minimize_event(int minimized)
         : m_minimized(minimized)
     {
     }
@@ -59,12 +55,10 @@ class minimize_event : public event
     int m_minimized;
 };
 
-class maximize_event : public event
+class window_maximize_event : public event
 {
   public:
-    STREAMLINE_MAKE_CALLBACK(maximize_event);
-
-    maximize_event(int maximized)
+    window_maximize_event(int maximized)
         : m_maximized(maximized)
     {
     }

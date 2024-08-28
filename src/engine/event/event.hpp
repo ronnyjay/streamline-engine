@@ -1,14 +1,18 @@
 #pragma once
 
+#include <sstream> // IWYU pragma: keep
 #include <string>
-
-#include <functional> // IWYU pragma: keep
-#include <sstream>    // IWYU pragma: keep
 
 #include <libstreamline/exception/exception.hpp>
 
-#define STREAMLINE_MAKE_CALLBACK(type) typedef std::function<void(type)> callback
-#define STREAMLINE_MAKE_CALLBACK_EXPLICIT(type) typedef std::function<void(type)> type##_callback
+// clang-format off
+typedef enum 
+{
+    WindowResize, WindowMinimize, WindowMaximize,
+    KeyPressed, KeyReleased, KeyRepeated,
+    MouseButtonPressed, MouseMoved, MouseScrolled,
+} event_type;
+// clang-format on
 
 class event
 {

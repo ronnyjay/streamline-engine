@@ -1,17 +1,18 @@
 #pragma once
 
 #include <functional>
+
 #include <libstreamline/debug/logger.hpp>
 #include <libstreamline/exception/exception.hpp>
 #include <libstreamline/json/json.hpp>
 
+#include "engine/event/key_event.hpp"    // IWYU pragma: keep
+#include "engine/event/mouse_event.hpp"  // IWYU pragma: keep
+#include "engine/event/window_event.hpp" // IWYU pragma: keep
+
 #include "monitor.hpp"
 #include "resolution.hpp"
 #include "window_config.hpp"
-
-#include "engine/event/key_event.hpp"
-#include "engine/event/mouse_event.hpp"
-#include "engine/event/window_event.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <engine/glfw3.h>
@@ -21,12 +22,12 @@ class window
 {
   public:
     window()
-        : m_log("window")
+        : m_logger("window")
     {
         // initialize glfw
         if (!glfwInit())
         {
-            m_log.err("failed to initialize glfw");
+            m_logger.err("failed to initialize glfw");
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -43,34 +44,27 @@ class window
 
         if (!m_window)
         {
-            m_log.err("failed to initialize window");
+            m_logger.err("failed to initialize window");
         }
 
         glfwMakeContextCurrent(m_window);
 
         if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
         {
-            m_log.err("failed to initialize glad");
+            m_logger.err("failed to initialize glad");
         }
     }
 
-    // pre init
-    void on_resize(resize_event::callback);
-    void on_minimize(minimize_event::callback);
-    void on_maximize(maximize_event::callback);
-    void on_key_press(key_press_event::callback);
-    void on_mouse_move(mouse_move_event::callback);
-    void on_mouse_click(mouse_click_event::callback);
-    void on_mouse_scroll(mouse_scroll_event::callback);
+    template <typename T> void on_event(event_type t, std::function<void(T &)> fn)
+    {
+        m_events[t] = [fn](event &e) { fn(static_cast<T &>(e)); };
+    }
 
     void initialize(const window_config &cfg);
 
     void set_monitor(monitor *);
     void set_resolution(const resolution &);
     void set_display_mode(const display_mode_e &);
-
-    void set_mouse_press_callback(const std::function<void(int, int, int)> &);
-    void set_mouse_pos_callback(const std::function<void(double, double)> &);
 
     // post init
     void refresh();
@@ -92,17 +86,17 @@ class window
 
     int width()
     {
-        return m_cfg.width;
+        return m_config.width;
     }
 
     int height()
     {
-        return m_cfg.height;
+        return m_config.height;
     }
 
     int display_mode()
     {
-        return m_cfg.display_mode;
+        return m_config.display_mode;
     }
 
     monitor *const primary_monitor() const
@@ -117,13 +111,12 @@ class window
 
     bool is_vsync_enabled() const
     {
-        return m_cfg.vsync;
+        return m_config.vsync;
     }
 
   private:
-    logger m_log;
-    window_config m_cfg;
     GLFWwindow *m_window;
+    window_config m_config;
 
     int m_x;
     int m_y;
@@ -137,18 +130,16 @@ class window
 
     std::vector<monitor *> m_monitors;
 
-    resize_event::callback m_on_resize;
-    minimize_event::callback m_on_minimize;
-    maximize_event::callback m_on_maximize;
-    key_press_event::callback m_on_key_press;
-    mouse_move_event::callback m_on_mouse_move;
-    mouse_click_event::callback m_on_mouse_click;
-    mouse_scroll_event::callback m_on_mouse_scroll;
+    std::unordered_map<event_type, std::function<void(event &)>> m_events;
+
+    logger m_logger;
 
     void load_monitors();
 
     void detect_primary_monitor();
     void detect_current_monitor();
+
+    void dispatch_event(event_type, event &&);
 
     /**
      * @brief GLFW callback for keyboard input
@@ -190,8 +181,6 @@ class window
     static void framebuffer_size_callback(GLFWwindow *, int, int);
 
     static void mouse_press_callback(GLFWwindow *, int, int, int);
-    std::function<void(int, int, int)> m_app_mouse_press_cb;
 
     static void mouse_pos_callback(GLFWwindow *, double, double);
-    std::function<void(double, double)> m_app_mouse_pos_cb;
 };

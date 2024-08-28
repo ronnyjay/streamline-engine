@@ -2,16 +2,14 @@
 
 #include "event.hpp"
 
-class key_press_event : public event
+class key_pressed_event : public event
 {
   public:
-    STREAMLINE_MAKE_CALLBACK(key_press_event);
-
-    key_press_event(unsigned int gl_key, unsigned int gl_scancode, unsigned int gl_action, unsigned int gl_mods)
-        : key(gl_key)
-        , scancode(gl_scancode)
-        , action(gl_action)
-        , mods(gl_mods)
+    key_pressed_event(unsigned int k, unsigned int s, unsigned int a, unsigned int m)
+        : key(k)
+        , scancode(s)
+        , action(a)
+        , mods(m)
     {
     }
 
