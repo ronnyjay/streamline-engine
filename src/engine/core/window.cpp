@@ -91,7 +91,7 @@ Window::Window(int width, int height, const char *title)
     m_mode = WINDOWED;
 }
 
-void Window::SetMonitor(int monitor)
+void Window::set_monitor(int monitor)
 {
     if (monitor < 0 || static_cast<size_t>(monitor) >= m_monitors.size())
     {
@@ -101,9 +101,9 @@ void Window::SetMonitor(int monitor)
     m_primary_monitor = &m_monitors.at(monitor);
 }
 
-void Window::SetResolution(Resolution res)
+void Window::set_resolution(int width, int height)
 {
-    Logger::Info("Here\n");
+    Resolution res(width, height);
 
     if (m_mode == FULLSCREEN)
     {
@@ -122,8 +122,6 @@ void Window::SetResolution(Resolution res)
     }
     else if (m_mode == WINDOWED)
     {
-        Logger::Info("%dx%d\n", res.width, res.height);
-
         glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
         glfwSetWindowSize(
@@ -147,7 +145,7 @@ void Window::SetResolution(Resolution res)
     Logger::Info("Here\n");
 }
 
-void Window::SetDisplayMode(DisplayMode mode)
+void Window::set_display_mode(DisplayMode mode)
 {
     if (m_mode == WINDOWED)
     {
@@ -219,7 +217,7 @@ Window::~Window()
 void Window::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.Dispatch(WINDOW_RESIZED, WindowResizeEvent(width, height));
+        ->m_event_register.dispatch_event(WINDOW_RESIZED, WindowResizeEvent(width, height));
 }
 
 void Window::MinimizeCallback(GLFWwindow *window, int minimized)
@@ -235,23 +233,23 @@ void Window::MaximizeCallback(GLFWwindow *window, int maximized)
 void Window::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.Dispatch(KEY_PRESSED, KeyPressedEvent(key, scancode, action, mods));
+        ->m_event_register.dispatch_event(KEY_PRESSED, KeyPressedEvent(key, scancode, action, mods));
 }
 
 void Window::MouseCallback(GLFWwindow *window, int button, int action, int mods)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.Dispatch(MOUSE_PRESSED, MousePressedEvent(button, action, mods));
+        ->m_event_register.dispatch_event(MOUSE_PRESSED, MousePressedEvent(button, action, mods));
 }
 
 void Window::CursorPosCallback(GLFWwindow *window, double xpos, double ypos)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.Dispatch(MOUSE_MOVED, MouseMovedEvent(xpos, ypos));
+        ->m_event_register.dispatch_event(MOUSE_MOVED, MouseMovedEvent(xpos, ypos));
 }
 
 void Window::ScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.Dispatch(MOUSE_SCROLLED, MouseScrolledEvent(xoffset, yoffset));
+        ->m_event_register.dispatch_event(MOUSE_SCROLLED, MouseScrolledEvent(xoffset, yoffset));
 }

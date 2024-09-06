@@ -30,7 +30,7 @@ struct WindowResizeEvent : public Event
     int width;
     int height;
 
-    static EventType Type()
+    static EventType type()
     {
         return WINDOW_RESIZED;
     }
@@ -51,7 +51,7 @@ struct KeyPressedEvent : public Event
     int action;
     int mods;
 
-    static EventType Type()
+    static EventType type()
     {
         return KEY_PRESSED;
     }
@@ -70,7 +70,7 @@ struct MousePressedEvent : public Event
     int action;
     int mods;
 
-    static EventType Type()
+    static EventType type()
     {
         return MOUSE_PRESSED;
     }
@@ -87,7 +87,7 @@ struct MouseMovedEvent : public Event
     double xpos;
     double ypos;
 
-    static EventType Type()
+    static EventType type()
     {
         return MOUSE_MOVED;
     }
@@ -104,7 +104,7 @@ struct MouseScrolledEvent : public Event
     double xoffset;
     double yoffset;
 
-    static EventType Type()
+    static EventType type()
     {
         return MOUSE_SCROLLED;
     }
@@ -118,12 +118,15 @@ class EventRegister
     EventRegister() = default;
 
     template <typename T>
-    void Register(std::function<void(T &)> fn)
+    void register_event(std::function<void(T &)> fn)
     {
-        m_events[T::Type()] = [fn](Event &e) { fn(static_cast<T &>(e)); };
+        m_events[T::type()] = [fn](Event &e)
+        {
+            fn(static_cast<T &>(e));
+        };
     }
 
-    void Dispatch(EventType type, Event &&e)
+    void dispatch_event(EventType type, Event &&e)
     {
         auto it = m_events.find(type);
 

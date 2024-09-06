@@ -104,46 +104,52 @@ class Window
         return m_window;
     }
 
-    void Refresh();
+    void refresh();
 
-    void SetMonitor(int);
+    void set_monitor(int);
+    void set_resolution(int, int);
 
-    void SetResolution(Resolution);
-    void SetDisplayMode(DisplayMode);
+    void set_display_mode(DisplayMode);
 
-    int X() const
+    int x() const
     {
         return m_x;
     }
 
-    int Y() const
+    int y() const
     {
         return m_y;
     }
 
-    int Width() const
+    int width() const
     {
         return m_width;
     }
 
-    int Height() const
+    int height() const
     {
         return m_height;
     }
 
-    DisplayMode Mode() const
+    int display_mode() const
     {
         return m_mode;
     }
 
-    const Monitor *const CurrentMonitor() const
+    const Monitor *const current_monitor() const
     {
         return m_current_monitor;
     }
 
-    const Monitor *const PrimaryMonitor() const
+    const Monitor *const primary_monitor() const
     {
         return m_primary_monitor;
+    }
+
+    template <typename T>
+    void on(std::function<void(T &)> fn)
+    {
+        m_event_register.register_event(fn);
     }
 
     ~Window();
@@ -153,12 +159,6 @@ class Window
 
     Window operator=(const Window &)  = delete;
     Window operator=(const Window &&) = delete;
-
-    template <typename T>
-    void on(std::function<void(T &)> fn)
-    {
-        m_event_register.Register(fn);
-    }
 
   private:
     GLFWwindow *m_window;
@@ -173,16 +173,11 @@ class Window
     DisplayMode m_mode;
     // window attr's
 
-    // available monitors
     MonitorList m_monitors;
 
-    // window defaults to this monitor
     Monitor *m_primary_monitor;
-
-    // window is currently on this monitor
     Monitor *m_current_monitor;
 
-    // window callback register/dispatcher
     EventRegister m_event_register;
 
   private:

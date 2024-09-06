@@ -36,11 +36,11 @@ int main(int argc, char const *argv[])
             return;
         });
 
-    window.SetMonitor(0);
+    window.set_monitor(0);
 
-    window.SetDisplayMode(WINDOWED);
+    window.set_resolution(800, 600);
 
-    window.SetResolution(Resolution(1920, 1080));
+    window.set_display_mode(engine::WINDOWED);
 
     while (!glfwWindowShouldClose(window))
     {
