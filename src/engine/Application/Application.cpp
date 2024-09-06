@@ -66,18 +66,18 @@ Application::Application(const int width, const int height, const char *title)
     // Load video settings
     m_VideoConfig.Load();
 
-    int savedWidth = width;
+    int savedWidth  = width;
     int savedHeight = height;
 
     if (m_VideoConfig.Has("setting.defaultres") && m_VideoConfig.Has("setting.defaultresheight"))
     {
-        savedWidth = m_VideoConfig.Get<int>("setting.defaultres");
+        savedWidth  = m_VideoConfig.Get<int>("setting.defaultres");
         savedHeight = m_VideoConfig.Get<int>("setting.defaultresheight");
     }
 
     if (m_VideoConfig.Has("setting.displaymode"))
     {
-        m_DisplayMode = DisplayMode(m_VideoConfig.Get<int>("setting.displaymode"));
+        m_DisplayMode     = DisplayMode(m_VideoConfig.Get<int>("setting.displaymode"));
         m_LastDisplayMode = m_DisplayMode;
     }
 
@@ -210,7 +210,7 @@ void Application::AddCamera(const int key, const std::shared_ptr<Camera> camera)
 
     if (m_CurrentCamera == nullptr)
     {
-        m_CurrentCamera = camera.get();
+        m_CurrentCamera      = camera.get();
         m_CurrentCameraIndex = key;
     }
 }
@@ -225,7 +225,7 @@ void Application::SetCamera(int key)
         exit(EXIT_FAILURE);
     }
 
-    m_CurrentCamera = it->second.get();
+    m_CurrentCamera      = it->second.get();
     m_CurrentCameraIndex = it->first;
 }
 
@@ -240,7 +240,7 @@ void Application::AddScene(const int key, const std::shared_ptr<Scene> scene)
 
     if (m_CurrentScene == nullptr)
     {
-        m_CurrentScene = scene.get();
+        m_CurrentScene      = scene.get();
         m_CurrentSceneIndex = key;
     }
 }
@@ -255,7 +255,7 @@ void Application::SetScene(int key)
         exit(EXIT_FAILURE);
     }
 
-    m_CurrentScene = it->second.get();
+    m_CurrentScene      = it->second.get();
     m_CurrentSceneIndex = it->first;
 }
 
@@ -308,7 +308,7 @@ void Application::Run()
     double renderTimeStep;
     double renderAccumulator = 0.0;
 
-    double simulationTimeStep = 1.0 / 480.0;
+    double simulationTimeStep    = 1.0 / 480.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();
@@ -678,7 +678,7 @@ void Application::SetCameraNext()
         it = m_Cameras.begin();
     }
 
-    m_CurrentCamera = it->second.get();
+    m_CurrentCamera      = it->second.get();
     m_CurrentCameraIndex = it->first;
 }
 
@@ -695,7 +695,7 @@ void Application::SetCameraPrev()
         it = std::prev(it);
     }
 
-    m_CurrentCamera = it->second.get();
+    m_CurrentCamera      = it->second.get();
     m_CurrentCameraIndex = it->first;
 }
 
@@ -708,7 +708,7 @@ void Application::SetSceneNext()
         it = m_Scenes.begin();
     }
 
-    m_CurrentScene = it->second.get();
+    m_CurrentScene      = it->second.get();
     m_CurrentSceneIndex = it->first;
 }
 
@@ -725,13 +725,13 @@ void Application::SetScenePrev()
         it = std::prev(it);
     }
 
-    m_CurrentScene = it->second.get();
+    m_CurrentScene      = it->second.get();
     m_CurrentSceneIndex = it->first;
 }
 
 void Application::SetResolution(const Resolution resolution)
 {
-    int width = resolution.width;
+    int width  = resolution.width;
     int height = resolution.height;
 
     if (m_DisplayMode == Fullscreen)
@@ -747,7 +747,7 @@ void Application::SetResolution(const Resolution resolution)
             if (width == res.width && height == res.height)
             {
                 m_PrimaryMonitor->resolutionFullscreen = i;
-                found = true;
+                found                                  = true;
             }
         }
 
@@ -774,7 +774,7 @@ void Application::SetResolution(const Resolution resolution)
             if (width == res.width && height == res.height)
             {
                 m_CurrentMonitor->resolutionWindowed = i;
-                found = true;
+                found                                = true;
             }
         }
 
@@ -784,7 +784,7 @@ void Application::SetResolution(const Resolution resolution)
         }
     }
 
-    m_Framebuffer->Resize(width, height);
+    m_Framebuffer->resize(width, height);
 }
 
 void Application::SetDisplayMode(const DisplayMode mode)
@@ -813,7 +813,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
         glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
 
         // Resize framebuffer
-        m_Framebuffer->Resize(current.width, current.height);
+        m_Framebuffer->resize(current.width, current.height);
     }
 
     if (mode == Borderless)
@@ -843,7 +843,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
         Resolution highest = m_PrimaryMonitor->resolutions[m_PrimaryMonitor->resolutionBorderless];
 
         // Resize framebuffer
-        m_Framebuffer->Resize(highest.width, highest.height);
+        m_Framebuffer->resize(highest.width, highest.height);
     }
 
     if (mode == Windowed)
@@ -863,7 +863,7 @@ void Application::SetDisplayMode(const DisplayMode mode)
         glfwSetWindowMonitor(m_Window, nullptr, m_WindowX, m_WindowY, m_LastWidth, m_LastHeight, 0);
 
         // Resize framebuffer
-        m_Framebuffer->Resize(m_LastWidth, m_LastHeight);
+        m_Framebuffer->resize(m_LastWidth, m_LastHeight);
     }
 
     m_LastDisplayMode = mode;
@@ -922,7 +922,7 @@ Application::~Application()
     {
         Resolution current = m_PrimaryMonitor->resolutions[resolutionIndex];
 
-        width = current.width;
+        width  = current.width;
         height = current.height;
     }
 
@@ -963,7 +963,7 @@ void Application::FramebufferSizeCallback(GLFWwindow *window, int width, int hei
 {
     Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
 
-    application->m_Width = width;
+    application->m_Width  = width;
     application->m_Height = height;
 }
 
@@ -1044,8 +1044,8 @@ void Application::CursorPosCallback(GLFWwindow *window, double xPosIn, double yP
 
     if (application->m_Flags.FirstMouse)
     {
-        lastX = xPosIn;
-        lastY = yPosIn;
+        lastX                           = xPosIn;
+        lastY                           = yPosIn;
         application->m_Flags.FirstMouse = false;
     }
 

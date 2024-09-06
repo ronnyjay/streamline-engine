@@ -1,6 +1,7 @@
 add_library(engine STATIC)
 
 target_sources(engine PRIVATE
+  core/window.cpp
   Application/Application.cpp
   Camera/Camera.cpp
   Camera/Orthographic.cpp

@@ -16,7 +16,7 @@ class Framebuffer
 
     void Render();
 
-    void Resize(const unsigned int, const unsigned int);
+    void resize(const unsigned int, const unsigned int);
 
     int Width() const;
     int Height() const;

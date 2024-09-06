@@ -8,7 +8,7 @@ using namespace engine;
 
 Framebuffer::Framebuffer(const unsigned int width, const unsigned int height)
 {
-    m_Width = width;
+    m_Width  = width;
     m_Height = height;
 
     m_Shader.AddShader("resources/shaders/framebuffer.vs", GL_VERTEX_SHADER);
@@ -82,7 +82,7 @@ void Framebuffer::Render()
     glBindVertexArray(0);
 }
 
-void Framebuffer::Resize(const unsigned int width, const unsigned int height)
+void Framebuffer::resize(const unsigned int width, const unsigned int height)
 {
     Logger::Info("Resizing framebuffer: %dx%d.\n", width, height);
 
@@ -91,7 +91,7 @@ void Framebuffer::Resize(const unsigned int width, const unsigned int height)
         return;
     }
 
-    m_Width = width;
+    m_Width  = width;
     m_Height = height;
 
     m_Texture.Generate(width, height, nullptr);

@@ -1,0 +1,7 @@
+{
+    "setting.defaultres": 800,
+    "setting.defaultresheight": 600,
+    "setting.displaymode": "Fullscreen",
+    "setting.monitor": "DP-0",
+    "setting.vsync": false
+}
