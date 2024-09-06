@@ -141,8 +141,6 @@ void Window::set_resolution(int width, int height)
 
         m_current_monitor->active_resolutions.windowed = -1;
     }
-
-    Logger::Info("Here\n");
 }
 
 void Window::set_display_mode(DisplayMode mode)
