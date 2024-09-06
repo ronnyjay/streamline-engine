@@ -39,7 +39,7 @@ struct Resolution
     int width;
     int height;
 
-    const std::string ToString() const
+    const std::string to_string() const
     {
         return std::format("{}x{}", width, height);
     }
@@ -85,8 +85,6 @@ struct Monitor
     std::vector<Resolution> resolutions;
 };
 
-typedef std::vector<Monitor> MonitorList;
-
 typedef enum
 {
     FULLSCREEN = 0,
@@ -94,7 +92,7 @@ typedef enum
     BORDERLESS = 2
 } DisplayMode;
 
-class Window
+class Window : public EventDispatcher
 {
   public:
     Window(int, int, const char *);
@@ -146,12 +144,6 @@ class Window
         return m_primary_monitor;
     }
 
-    template <typename T>
-    void on(std::function<void(T &)> fn)
-    {
-        m_event_register.register_event(fn);
-    }
-
     ~Window();
 
     Window(const Window &)  = delete;
@@ -163,7 +155,6 @@ class Window
   private:
     GLFWwindow *m_window;
 
-    // window attr's
     int m_x;
     int m_y;
 
@@ -171,14 +162,11 @@ class Window
     int m_height;
 
     DisplayMode m_mode;
-    // window attr's
-
-    MonitorList m_monitors;
 
     Monitor *m_primary_monitor;
     Monitor *m_current_monitor;
 
-    EventRegister m_event_register;
+    std::vector<Monitor> m_monitors;
 
   private:
     static void FramebufferSizeCallback(GLFWwindow *, int, int);

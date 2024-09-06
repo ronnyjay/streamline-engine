@@ -217,7 +217,7 @@ Window::~Window()
 void Window::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.dispatch_event(WINDOW_RESIZED, WindowResizeEvent(width, height));
+        ->dispatch(WINDOW_RESIZED, WindowResizeEvent(width, height));
 }
 
 void Window::MinimizeCallback(GLFWwindow *window, int minimized)
@@ -233,23 +233,23 @@ void Window::MaximizeCallback(GLFWwindow *window, int maximized)
 void Window::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.dispatch_event(KEY_PRESSED, KeyPressedEvent(key, scancode, action, mods));
+        ->dispatch(KEY_PRESSED, KeyPressedEvent(key, scancode, action, mods));
 }
 
 void Window::MouseCallback(GLFWwindow *window, int button, int action, int mods)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.dispatch_event(MOUSE_PRESSED, MousePressedEvent(button, action, mods));
+        ->dispatch(MOUSE_PRESSED, MousePressedEvent(button, action, mods));
 }
 
 void Window::CursorPosCallback(GLFWwindow *window, double xpos, double ypos)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.dispatch_event(MOUSE_MOVED, MouseMovedEvent(xpos, ypos));
+        ->dispatch(MOUSE_MOVED, MouseMovedEvent(xpos, ypos));
 }
 
 void Window::ScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->m_event_register.dispatch_event(MOUSE_SCROLLED, MouseScrolledEvent(xoffset, yoffset));
+        ->dispatch(MOUSE_SCROLLED, MouseScrolledEvent(xoffset, yoffset));
 }

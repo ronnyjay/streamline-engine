@@ -112,13 +112,13 @@ struct MouseScrolledEvent : public Event
 
 typedef std::function<void(Event &)> EventCallback;
 
-class EventRegister
+class EventDispatcher
 {
   public:
-    EventRegister() = default;
+    ~EventDispatcher() = default;
 
     template <typename T>
-    void register_event(std::function<void(T &)> fn)
+    void on(std::function<void(T &)> fn)
     {
         m_events[T::type()] = [fn](Event &e)
         {
@@ -126,7 +126,8 @@ class EventRegister
         };
     }
 
-    void dispatch_event(EventType type, Event &&e)
+  protected:
+    void dispatch(EventType type, Event &&e)
     {
         auto it = m_events.find(type);
 
