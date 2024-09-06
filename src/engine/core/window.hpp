@@ -94,14 +94,6 @@ typedef enum
     BORDERLESS = 2
 } DisplayMode;
 
-typedef enum
-{
-    VISIBLE   = GLFW_VISIBLE,
-    FLOATING  = GLFW_FLOATING,
-    DECORATED = GLFW_DECORATED,
-    RESIZABLE = GLFW_RESIZABLE
-} Attribute;
-
 class Window
 {
   public:
