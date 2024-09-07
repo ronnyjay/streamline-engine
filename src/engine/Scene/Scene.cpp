@@ -43,7 +43,7 @@ Entity Scene::CreateEntity(const std::string &identifier)
     entity.AddComponent<Children>();
     entity.AddComponent<Transform>();
 
-    Logger::Info("Entity created: \"%s\".\n", identifier.c_str());
+    Logger::info("Entity created: \"%s\".\n", identifier.c_str());
 
     return entity;
 }
@@ -53,12 +53,12 @@ Entity Scene::CreateChildEntity(const Entity &parent, const std::string &identif
     Entity child = CreateEntity(identifier);
 
     auto &childrenComponent = m_Registry.get<Children>(parent);
-    auto &parentComponent = m_Registry.get<Parent>(child);
+    auto &parentComponent   = m_Registry.get<Parent>(child);
 
     childrenComponent.children.emplace_back(child);
     parentComponent.parent = parent;
 
-    Logger::Info("Entity created as child: \"%s\".\n", identifier.c_str());
+    Logger::info("Entity created as child: \"%s\".\n", identifier.c_str());
 
     return child;
 }
@@ -66,7 +66,7 @@ Entity Scene::CreateChildEntity(const Entity &parent, const std::string &identif
 void Scene::DestroyEntity(const Entity entity)
 {
     auto &identifierComponent = m_Registry.get<Identifier>(entity);
-    auto &childrenComponent = m_Registry.get<Children>(entity);
+    auto &childrenComponent   = m_Registry.get<Children>(entity);
 
     for (auto child : childrenComponent.children)
     {
@@ -75,7 +75,7 @@ void Scene::DestroyEntity(const Entity entity)
 
     m_Registry.destroy(entity);
 
-    Logger::Info("Entity destroyed: \"%s\".\n", identifierComponent.identifier.c_str());
+    Logger::info("Entity destroyed: \"%s\".\n", identifierComponent.identifier.c_str());
 }
 
 void Scene::Update(const float dt)
@@ -94,12 +94,12 @@ void Scene::Update(const float dt)
 
     for (auto entity : physicsView)
     {
-        RigidBody &body = physicsView.get<RigidBody>(entity);
+        RigidBody &body      = physicsView.get<RigidBody>(entity);
         Transform &transform = physicsView.get<Transform>(entity);
 
         body.UpdateInertiaTensor(transform.GetRotation());
 
-        glm::vec3 acceleration = body.GetForce() * body.GetInverseMass();
+        glm::vec3 acceleration        = body.GetForce() * body.GetInverseMass();
         glm::vec3 angularAcceleration = body.GetInertiaTensor() * body.GetTorque();
 
         if (body.GetInverseMass() > 0)
@@ -159,7 +159,8 @@ void Scene::Update(const float dt)
 
                 float e = (bodyA.GetElasticity() + bodyB.GetElasticity()) * 0.5f;
 
-                float j = (-(1.0f + e) * glm::dot(contactVelocity, result.normal)) / (totalMass + angularEffect);
+                float j =
+                    (-(1.0f + e) * glm::dot(contactVelocity, result.normal)) / (totalMass + angularEffect);
 
                 glm::vec3 fullImpulse = result.normal * j;
 
@@ -177,7 +178,7 @@ void Scene::Update(const float dt)
     for (auto entity : controllerView)
     {
         Controllable &controllable = controllerView.get<Controllable>(entity);
-        Transform &transform = controllerView.get<Transform>(entity);
+        Transform &transform       = controllerView.get<Transform>(entity);
 
         auto key_states = InputManager::Instance().KeyStates();
 
@@ -228,16 +229,18 @@ void Scene::Update(const float dt)
                         {
                             glm::vec3 velocity = body->GetLinearVelocity();
 
-                            float threshold = 1.5 * (1 + body->GetElasticity() * sqrt(body->GetInverseMass()));
+                            float threshold =
+                                1.5 * (1 + body->GetElasticity() * sqrt(body->GetInverseMass()));
 
                             // we're probably on the ground
                             if (velocity.y < threshold)
                             {
-                                body->ApplyLinearImpulse(glm::vec3(0.0f, 1.0f, 0.0f) * controllable.jump_height);
+                                body->ApplyLinearImpulse(
+                                    glm::vec3(0.0f, 1.0f, 0.0f) * controllable.jump_height);
                             }
                         }
 
-                        controllable.can_jump = false;
+                        controllable.can_jump  = false;
                         controllable.jump_time = 0.0f;
 
                         // prevent jump holding (achieve a consistent jump height)
@@ -272,14 +275,14 @@ void Scene::Update(const float dt)
 
     for (auto entity : physicsView)
     {
-        RigidBody &body = physicsView.get<RigidBody>(entity);
+        RigidBody &body      = physicsView.get<RigidBody>(entity);
         Transform &transform = physicsView.get<Transform>(entity);
 
         transform.SetPosition(transform.GetPosition() + body.GetLinearVelocity() * dt);
         transform.SetRotation(transform.GetRotation() + body.GetAngularVelocity() * dt);
 
         float dampingFactor = 1.0f - 0.95f;
-        float frameDamping = std::pow(dampingFactor, dt);
+        float frameDamping  = std::pow(dampingFactor, dt);
 
         body.SetAngularVelocity(body.GetAngularVelocity() * frameDamping);
     }
@@ -288,9 +291,9 @@ void Scene::Update(const float dt)
 void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 {
     auto &transformComponent = m_Registry.get<Transform>(entity);
-    auto &childrenComponent = m_Registry.get<Children>(entity);
+    auto &childrenComponent  = m_Registry.get<Children>(entity);
 
-    auto *modelComponent = m_Registry.try_get<std::shared_ptr<Model>>(entity);
+    auto *modelComponent    = m_Registry.try_get<std::shared_ptr<Model>>(entity);
     auto *boundingComponent = m_Registry.try_get<BoundingVolume>(entity);
 
     auto modelMatrix = transformComponent.GetTransform() * transform;
@@ -315,11 +318,17 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
                     for (const auto &vertex : mesh.GetVertices())
                     {
                         vertices.push_back(glm::vec3(
-                            matrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
+                            matrix *
+                            glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
                     }
                 }
 
-                std::visit([&vertices](auto &volume) { volume.Update(vertices); }, *boundingComponent);
+                std::visit(
+                    [&vertices](auto &volume)
+                    {
+                        volume.Update(vertices);
+                    },
+                    *boundingComponent);
             }
         }
 
@@ -338,15 +347,26 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
                     for (const auto &vertex : mesh.GetVertices())
                     {
                         vertices.push_back(glm::vec3(
-                            matrix * glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
+                            matrix *
+                            glm::vec4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f)));
                     }
                 }
 
-                std::visit([&vertices](auto &volume) { volume.Update(vertices); }, *boundingComponent);
+                std::visit(
+                    [&vertices](auto &volume)
+                    {
+                        volume.Update(vertices);
+                    },
+                    *boundingComponent);
             }
         }
 
-        std::visit([&translation](auto &volume) { volume.Translate(translation); }, *boundingComponent);
+        std::visit(
+            [&translation](auto &volume)
+            {
+                volume.Translate(translation);
+            },
+            *boundingComponent);
     }
 
     for (auto &child : childrenComponent.children)
@@ -400,7 +420,7 @@ void Scene::UpdateEntity(const entt::entity &entity, const glm::mat4 &transform)
 
 void Scene::Draw()
 {
-    auto view = m_Registry.view<std::shared_ptr<Model>, Transform, Parent, Children>();
+    auto view   = m_Registry.view<std::shared_ptr<Model>, Transform, Parent, Children>();
     auto lights = m_Registry.view<Light, Transform>();
 
     auto numLightsInShader = std::min(lights.size_hint(), ShaderProgram::MAX_NUM_LIGHTS);
@@ -413,9 +433,9 @@ void Scene::Draw()
         if (it_lights != lights.end())
         {
             auto &position = m_Registry.get<Transform>(*it_lights);
-            auto &light = m_Registry.get<Light>(*it_lights);
+            auto &light    = m_Registry.get<Light>(*it_lights);
 
-            selectedLights[i].color = light.color;
+            selectedLights[i].color    = light.color;
             selectedLights[i].position = (glm::vec4(position.GetPosition(), 1.0f));
             it_lights++;
         }
@@ -424,12 +444,12 @@ void Scene::Draw()
     auto camera = application.GetCurrentCamera();
 
     auto projectionMatrix = camera->ProjectionMatrix();
-    auto viewMatrix = camera->ViewMatrix();
-    auto viewPos = camera->GetPosition();
+    auto viewMatrix       = camera->ViewMatrix();
+    auto viewPos          = camera->GetPosition();
 
     auto modelShader = application.GetShader("Model");
 
-    auto boxShader = application.GetShader("AABB");
+    auto boxShader    = application.GetShader("AABB");
     auto sphereShader = application.GetShader("BSphere");
 
     modelShader.Use();
@@ -460,9 +480,9 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
 {
     auto [modelComponent, transformComponent] = m_Registry.get<std::shared_ptr<Model>, Transform>(entity);
 
-    auto modelMatrix = transformComponent.GetTransform() * transform;
-    auto modelShader = application.GetShader("Model");
-    auto boxShader = application.GetShader("AABB");
+    auto modelMatrix  = transformComponent.GetTransform() * transform;
+    auto modelShader  = application.GetShader("Model");
+    auto boxShader    = application.GetShader("AABB");
     auto sphereShader = application.GetShader("BSphere");
 
     modelShader.Use();
@@ -485,7 +505,12 @@ void Scene::DrawEntity(const entt::entity &entity, const glm::mat4 &transform)
                 boxShader.Use();
             }
 
-            std::visit([](auto &volume) { volume.Draw(); }, *boundingComponent);
+            std::visit(
+                [](auto &volume)
+                {
+                    volume.Draw();
+                },
+                *boundingComponent);
         }
     }
 
@@ -520,8 +545,8 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
     if (ImGui::TreeNode(identifier.identifier.c_str()))
     {
         auto translation = transform.GetPosition();
-        auto rotation = transform.GetRotation();
-        auto scale = transform.GetScale();
+        auto rotation    = transform.GetRotation();
+        auto scale       = transform.GetScale();
 
         ImGui::DragFloat("Translation X", &translation.x);
         ImGui::DragFloat("Translation Y", &translation.y);
@@ -539,12 +564,12 @@ void Scene::DrawEntityDebugInfo(const entt::entity &entity)
 
         if (auto *body = m_Registry.try_get<RigidBody>(entity))
         {
-            auto mass = body->GetInverseMass();
-            auto elasticity = body->GetElasticity();
-            auto friction = body->GetFriction();
-            auto force = body->GetForce();
-            auto torque = body->GetTorque();
-            auto linearVelocity = body->GetLinearVelocity();
+            auto mass            = body->GetInverseMass();
+            auto elasticity      = body->GetElasticity();
+            auto friction        = body->GetFriction();
+            auto force           = body->GetForce();
+            auto torque          = body->GetTorque();
+            auto linearVelocity  = body->GetLinearVelocity();
             auto angularVelocity = body->GetAngularVelocity();
 
             ImGui::DragFloat("Inverse Mass", &mass);

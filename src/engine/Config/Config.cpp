@@ -12,33 +12,33 @@ Config::Config(std::filesystem::path path)
 
 void Config::Load()
 {
-    Logger::Info("Loading configuration.\n");
+    Logger::info("Loading configuration.\n");
 
     if (!std::filesystem::exists(m_Directory))
     {
-        Logger::Warn("Directory not found: \"%s\".\n", m_Directory.c_str());
+        Logger::warn("Directory not found: \"%s\".\n", m_Directory.c_str());
 
         if (std::filesystem::create_directories(m_Directory))
         {
-            Logger::Info("Created directory: \"%s\".\n", m_Directory.c_str());
+            Logger::info("Created directory: \"%s\".\n", m_Directory.c_str());
         }
         else
         {
-            Logger::Err("Failed to create directory: \"%s\".\n", m_Directory.c_str());
+            Logger::err("Failed to create directory: \"%s\".\n", m_Directory.c_str());
         }
     }
 
     if (!std::filesystem::exists(m_Path))
     {
-        Logger::Warn("File not found: \"%s\".\n", m_Path.filename().c_str());
+        Logger::warn("File not found: \"%s\".\n", m_Path.filename().c_str());
 
         if (std::ofstream(m_Path))
         {
-            Logger::Info("Created file: \"%s\".\n", m_Path.filename().c_str());
+            Logger::info("Created file: \"%s\".\n", m_Path.filename().c_str());
         }
         else
         {
-            Logger::Err("Failed to create file: \"%s\".\n", m_Path.filename().c_str());
+            Logger::err("Failed to create file: \"%s\".\n", m_Path.filename().c_str());
         }
 
         return;
@@ -48,7 +48,7 @@ void Config::Load()
 
     if (!file.is_open())
     {
-        Logger::Warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
+        Logger::warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
 
         return;
     }
@@ -61,8 +61,8 @@ void Config::Load()
     {
         stream = std::istringstream(line);
 
-        if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') && std::getline(stream, value, '\"') &&
-            std::getline(stream, value, '\"'))
+        if (std::getline(stream, key, '\"') && std::getline(stream, key, '\"') &&
+            std::getline(stream, value, '\"') && std::getline(stream, value, '\"'))
         {
             m_Values[key] = value;
         }
@@ -73,13 +73,13 @@ void Config::Load()
 
 void Config::Store()
 {
-    Logger::Info("Saving configuration.\n");
+    Logger::info("Saving configuration.\n");
 
     std::ofstream file(m_Path);
 
     if (!file.is_open())
     {
-        Logger::Warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
+        Logger::warn("Failed to open file: \"%s\".\n", m_Path.filename().c_str());
 
         return;
     }

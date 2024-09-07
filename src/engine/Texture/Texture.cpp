@@ -26,7 +26,7 @@ void Texture::Bind()
 
 void Texture::Generate(const unsigned int width, const unsigned int height, const unsigned char *data)
 {
-    m_Width = width;
+    m_Width  = width;
     m_Height = height;
 
     glBindTexture(GL_TEXTURE_2D, m_ID);
@@ -42,7 +42,7 @@ void Texture::Generate(const unsigned int width, const unsigned int height, cons
 
 void Texture::Load(const std::basic_string<char> &path)
 {
-    Logger::Info("Loading texture from file: %s\n", path.c_str());
+    Logger::info("Loading texture from file: %s\n", path.c_str());
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
@@ -53,15 +53,15 @@ void Texture::Load(const std::basic_string<char> &path)
         {
         case 1:
             m_InternalFormat = GL_RED;
-            m_ImageFormat = GL_RED;
+            m_ImageFormat    = GL_RED;
             break;
         case 3:
             m_InternalFormat = GL_RGB;
-            m_ImageFormat = GL_RGB;
+            m_ImageFormat    = GL_RGB;
             break;
         case 4:
             m_InternalFormat = GL_RGBA;
-            m_ImageFormat = GL_RGBA;
+            m_ImageFormat    = GL_RGBA;
             break;
         default:
             break;
@@ -72,10 +72,10 @@ void Texture::Load(const std::basic_string<char> &path)
         // Free image data
         stbi_image_free(data);
 
-        Logger::Info("Texture loaded successfully.\n");
+        Logger::info("Texture loaded successfully.\n");
     }
     else
     {
-        Logger::Warn("Failed to load texture from file: %s\n", path.c_str());
+        Logger::warn("Failed to load texture from file: %s\n", path.c_str());
     }
 }

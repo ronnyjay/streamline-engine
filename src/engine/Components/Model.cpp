@@ -9,22 +9,23 @@ using namespace engine;
 
 void Model::Load(const std::basic_string<char> &path)
 {
-    Logger::Info("Loading model: %s\n", path.c_str());
+    Logger::info("Loading model: %s\n", path.c_str());
     m_Path = path;
 
     Assimp::Importer importer;
 
     const aiScene *scene = importer.ReadFile(
-        path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        path,
+        aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        Logger::Warn("Error loading model: %s\n", importer.GetErrorString());
+        Logger::warn("Error loading model: %s\n", importer.GetErrorString());
     }
 
     ProcessNode(scene->mRootNode, scene);
 
-    Logger::Info("Model loaded successfully.\n");
+    Logger::info("Model loaded successfully.\n");
 }
 
 Model::~Model()
@@ -80,26 +81,26 @@ Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 
         if (mesh->HasNormals())
         {
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
+            vector.x      = mesh->mNormals[i].x;
+            vector.y      = mesh->mNormals[i].y;
+            vector.z      = mesh->mNormals[i].z;
             vertex.Normal = vector;
         }
 
         if (mesh->mTextureCoords[0])
         {
-            vector.x = mesh->mTextureCoords[0][i].x;
-            vector.y = mesh->mTextureCoords[0][i].y;
+            vector.x         = mesh->mTextureCoords[0][i].x;
+            vector.y         = mesh->mTextureCoords[0][i].y;
             vertex.TexCoords = vector;
 
-            vector.x = mesh->mTangents[i].x;
-            vector.y = mesh->mTangents[i].y;
-            vector.z = mesh->mTangents[i].z;
+            vector.x       = mesh->mTangents[i].x;
+            vector.y       = mesh->mTangents[i].y;
+            vector.z       = mesh->mTangents[i].z;
             vertex.Tangent = vector;
 
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
+            vector.x         = mesh->mBitangents[i].x;
+            vector.y         = mesh->mBitangents[i].y;
+            vector.z         = mesh->mBitangents[i].z;
             vertex.Bitangent = vector;
         }
         else
@@ -185,7 +186,7 @@ Model::LoadMaterialTextures(aiMaterial *material, aiTextureType type, std::strin
         std::filesystem::path texturePath(directory.C_Str());
         texturePath.append(path.C_Str());
 
-        auto texture = ResourceManager::GetReference().Get<Texture>(texturePath);
+        auto texture    = ResourceManager::GetReference().Get<Texture>(texturePath);
         texture->m_Type = typeName;
         textures.push_back(texture);
     }

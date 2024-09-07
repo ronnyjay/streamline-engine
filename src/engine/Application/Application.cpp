@@ -45,7 +45,7 @@ Application::Application(const int width, const int height, const char *title)
     // Initialize GLFW
     if (!glfwInit())
     {
-        Logger::Err("Failed to initialize GLFW.\n");
+        Logger::err("Failed to initialize GLFW.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -58,7 +58,7 @@ Application::Application(const int width, const int height, const char *title)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    Logger::Info("Initialized GLFW.\n");
+    Logger::info("Initialized GLFW.\n");
 
     // Load monitors
     LoadMonitors();
@@ -101,7 +101,7 @@ Application::Application(const int width, const int height, const char *title)
 
     if (m_Window == NULL)
     {
-        Logger::Err("Failed to create GLFW Window.\n");
+        Logger::err("Failed to create GLFW Window.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -115,11 +115,11 @@ Application::Application(const int width, const int height, const char *title)
     glfwSetScrollCallback(m_Window, Application::ScrollCallback);
     glfwSetWindowUserPointer(m_Window, this); // Access this objects instance in glfw callbacks
 
-    Logger::Info("Initialized GLFW Window.\n");
+    Logger::info("Initialized GLFW Window.\n");
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
-        Logger::Err("Failed to initialize GLAD.\n");
+        Logger::err("Failed to initialize GLAD.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -135,11 +135,11 @@ Application::Application(const int width, const int height, const char *title)
 
     if (!m_Framebuffer)
     {
-        Logger::Err("Error initializing framebuffer.\n");
+        Logger::err("Error initializing framebuffer.\n");
         exit(EXIT_FAILURE);
     }
 
-    Logger::Info("Initialized framebuffer.\n");
+    Logger::info("Initialized framebuffer.\n");
 
     // Restore video settings
     m_PrimaryMonitor = m_Monitors.at(m_MonitorIndex);
@@ -168,7 +168,7 @@ Application::Application(const int width, const int height, const char *title)
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     ImGui_ImplOpenGL3_Init(nullptr);
 
-    Logger::Info("Initialized ImGui.\n");
+    Logger::info("Initialized ImGui.\n");
 
     // Load shaders
     m_Shaders["Model"].AddShader("resources/shaders/model.vs", GL_VERTEX_SHADER);
@@ -186,7 +186,7 @@ Application::Application(const int width, const int height, const char *title)
     // Flip textures on load
     stbi_set_flip_vertically_on_load(true);
 
-    Logger::Info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, savedWidth, savedHeight);
+    Logger::info("Application initialized: \"%s\", Dimensions: %dx%d.\n", title, savedWidth, savedHeight);
 }
 
 int Application::Width() const
@@ -221,7 +221,7 @@ void Application::SetCamera(int key)
 
     if (it == m_Cameras.end())
     {
-        Logger::Err("Camera not found.\n");
+        Logger::err("Camera not found.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -251,7 +251,7 @@ void Application::SetScene(int key)
 
     if (it == m_Scenes.end())
     {
-        Logger::Err("Scene not found.\n");
+        Logger::err("Scene not found.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -270,7 +270,7 @@ ShaderProgram &Application::GetShader(const char *name)
 
     if (it == m_Shaders.end())
     {
-        Logger::Err("Shader not found.\n");
+        Logger::err("Shader not found.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -335,7 +335,7 @@ void Application::Run()
         {
             m_CurrentMonitor = monitor;
 
-            Logger::Info("Current monitor detected: %s.\n", m_CurrentMonitor->title);
+            Logger::info("Current monitor detected: %s.\n", m_CurrentMonitor->title);
         }
 
         ProcessInput(deltaTime);
@@ -494,12 +494,16 @@ void Application::Run()
                         }
 
                         if (ImGui::Combo(
-                                "Display Mode", (int *)&m_DisplayMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
+                                "Display Mode",
+                                (int *)&m_DisplayMode,
+                                DisplayModes,
+                                IM_ARRAYSIZE(DisplayModes)))
                         {
                             SetDisplayMode(m_DisplayMode);
                         }
 
-                        if (ImGui::Combo("Frame Rate Limit", &m_FramerateIndex, Framerates, IM_ARRAYSIZE(Framerates)))
+                        if (ImGui::Combo(
+                                "Frame Rate Limit", &m_FramerateIndex, Framerates, IM_ARRAYSIZE(Framerates)))
                         {
                             switch (m_FramerateIndex)
                             {
@@ -531,13 +535,13 @@ void Application::Run()
                                 break;
                             }
 
-                            Logger::Info("Frame Rate Limit Set: %s.\n", Framerates[m_FramerateIndex]);
+                            Logger::info("Frame Rate Limit Set: %s.\n", Framerates[m_FramerateIndex]);
                         }
 
                         if (ImGui::Checkbox("Vertical Sync", &m_Flags.VerticalSync))
                         {
                             glfwSwapInterval(m_Flags.VerticalSync);
-                            Logger::Info("Vertical Sync Set: %d.\n", m_Flags.VerticalSync);
+                            Logger::info("Vertical Sync Set: %d.\n", m_Flags.VerticalSync);
                         }
 
                         ImGui::TreePop();
@@ -810,7 +814,8 @@ void Application::SetDisplayMode(const DisplayMode mode)
             m_PrimaryMonitor->width,
             m_PrimaryMonitor->height,
             0);
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(
+            m_Window, m_PrimaryMonitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
 
         // Resize framebuffer
         m_Framebuffer->resize(current.width, current.height);
@@ -881,7 +886,7 @@ void Application::SetMonitor(Monitor *monitor)
 
 void Application::LoadMonitors()
 {
-    Logger::Info("Loading available monitors.\n");
+    Logger::info("Loading available monitors.\n");
 
     int count;
     GLFWmonitor **monitors = glfwGetMonitors(&count);
@@ -1095,5 +1100,5 @@ void GLAPIENTRY Application::MessageCallback(
     if (type != GL_DEBUG_TYPE_ERROR)
         return;
 
-    Logger::Err("GL ERROR CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n", type, severity, message);
+    Logger::err("GL ERROR CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n", type, severity, message);
 }

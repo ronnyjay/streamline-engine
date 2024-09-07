@@ -34,7 +34,7 @@ Window::Window(int width, int height, const char *title)
 {
     if (!glfwInit())
     {
-        Logger::Err("Failed to intialize glfw\n");
+        Logger::err("Failed to intialize glfw");
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -64,7 +64,7 @@ Window::Window(int width, int height, const char *title)
 
     if (m_window == nullptr)
     {
-        Logger::Err("Failed to intialize window\n");
+        Logger::err("Failed to intialize window");
     }
 
     glfwMakeContextCurrent(m_window);
@@ -85,7 +85,7 @@ Window::Window(int width, int height, const char *title)
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
-        Logger::Err("Failed to initialize glad\n");
+        Logger::err("Failed to initialize glad");
     }
 
     m_mode = WINDOWED;
@@ -99,20 +99,30 @@ void Window::set_monitor(int monitor)
     }
 
     m_primary_monitor = &m_monitors.at(monitor);
+
+    if (m_mode != WINDOWED)
+    {
+        set_display_mode(m_mode);
+    }
 }
 
 void Window::set_resolution(int width, int height)
 {
-    Resolution res(width, height);
+    if (m_mode == BORDERLESS)
+    {
+        return;
+    }
+
+    m_width  = width;
+    m_height = height;
 
     if (m_mode == FULLSCREEN)
     {
-
-        glfwSetWindowMonitor(m_window, m_primary_monitor->monitor, 0, 0, res.width, res.height, 0);
+        glfwSetWindowMonitor(m_window, m_primary_monitor->monitor, 0, 0, width, height, 0);
 
         for (size_t i = 0; i < m_primary_monitor->resolutions.size(); i++)
         {
-            if (res == m_primary_monitor->resolutions.at(i))
+            if (Resolution(width, height) == m_primary_monitor->resolutions.at(i))
             {
                 m_primary_monitor->active_resolutions.fullscreen = i;
             }
@@ -120,18 +130,18 @@ void Window::set_resolution(int width, int height)
 
         m_primary_monitor->active_resolutions.fullscreen = -1;
     }
-    else if (m_mode == WINDOWED)
+
+    if (m_mode == WINDOWED)
     {
+        auto monitor_scale = m_current_monitor->scale;
+
         glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-
-        glfwSetWindowSize(
-            m_window, res.width / m_current_monitor->scale.x, res.height / m_current_monitor->scale.y);
-
-        glfwSetWindowAspectRatio(m_window, res.width, res.height);
+        glfwSetWindowSize(m_window, width / monitor_scale.x, height / monitor_scale.y);
+        glfwSetWindowAspectRatio(m_window, width, height);
 
         for (size_t i = 0; i < m_current_monitor->resolutions.size(); i++)
         {
-            if (res == m_current_monitor->resolutions.at(i))
+            if (Resolution(width, height) == m_current_monitor->resolutions.at(i))
             {
                 m_current_monitor->active_resolutions.windowed = i;
 
@@ -145,12 +155,6 @@ void Window::set_resolution(int width, int height)
 
 void Window::set_display_mode(DisplayMode mode)
 {
-    if (m_mode == WINDOWED)
-    {
-        glfwGetWindowPos(m_window, &m_x, &m_y);
-        glfwGetWindowSize(m_window, &m_width, &m_height);
-    }
-
     if (mode == FULLSCREEN)
     {
         Resolution current = m_primary_monitor->resolutions[m_primary_monitor->active_resolutions.fullscreen];
@@ -215,7 +219,7 @@ Window::~Window()
 void Window::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(window))
-        ->dispatch(WINDOW_RESIZED, WindowResizeEvent(width, height));
+        ->dispatch(WINDOW_RESIZED, WindowResizedEvent(width, height));
 }
 
 void Window::MinimizeCallback(GLFWwindow *window, int minimized)

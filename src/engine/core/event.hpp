@@ -19,9 +19,9 @@ struct Event
     virtual ~Event() = default;
 };
 
-struct WindowResizeEvent : public Event
+struct WindowResizedEvent : public Event
 {
-    WindowResizeEvent(int _width, int _height)
+    WindowResizedEvent(int _width, int _height)
         : width(_width)
         , height(_height)
     {

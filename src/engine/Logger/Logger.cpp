@@ -4,40 +4,40 @@
 
 using namespace engine;
 
-void Logger::Info(const std::basic_string<char> format, ...)
+void Logger::info(const std::basic_string<char> format, ...)
 {
     va_list args;
     va_start(args, format);
 
     const char *prefix = BWHT "[" BGRN "  OK  " BWHT "] " COLOR_RESET;
 
-    printf("%s", prefix);
+    printf("%s\n", prefix);
     vprintf(format.c_str(), args);
 
     va_end(args);
 }
 
-void Logger::Warn(const std::basic_string<char> format, ...)
+void Logger::warn(const std::basic_string<char> format, ...)
 {
     va_list args;
     va_start(args, format);
 
     const char *prefix = BWHT "[" BYEL " WARN " BWHT "] " COLOR_RESET;
 
-    printf("%s", prefix);
+    printf("%s\n", prefix);
     vprintf(format.c_str(), args);
 
     va_end(args);
 }
 
-void Logger::Err(const std::basic_string<char> format, ...)
+void Logger::err(const std::basic_string<char> format, ...)
 {
     va_list args;
     va_start(args, format);
 
     const char *prefix = BWHT "[" BRED "FAILED" BWHT "] " COLOR_RESET;
 
-    printf("%s", prefix);
+    printf("%s\n", prefix);
     vprintf(format.c_str(), args);
     va_end(args);
 }

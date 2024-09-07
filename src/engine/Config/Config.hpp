@@ -17,7 +17,8 @@ class Config
     void Load();
     void Store();
 
-    template <typename T> T Get(const std::string &key) const
+    template <typename T>
+    T Get(const std::string &key) const
     {
         T value;
 
@@ -25,7 +26,7 @@ class Config
 
         if (!(stream >> value))
         {
-            Logger::Err("Type conversion failed for key: \"%s\".\n", key.c_str());
+            Logger::err("Type conversion failed for key: \"%s\".\n", key.c_str());
 
             return T{};
         }
@@ -33,7 +34,8 @@ class Config
         return value;
     }
 
-    template <typename T> void Set(const std::string &key, T &value)
+    template <typename T>
+    void Set(const std::string &key, T &value)
     {
         m_Values[key] = std::to_string(value);
     }
