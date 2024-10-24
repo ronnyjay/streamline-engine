@@ -21,6 +21,25 @@ struct Actor
      * @brief
      *
      */
+    virtual void begin() {};
+
+    /**
+     * @brief
+     *
+     * @param dt
+     */
+    virtual void tick(float dt) {};
+
+    /**
+     * @brief
+     *
+     */
+    virtual void end() {};
+
+    /**
+     * @brief
+     *
+     */
     virtual ~Actor()
     {
     }

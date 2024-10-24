@@ -1,8 +1,9 @@
 #pragma once
 
-#include "core/exception.hpp"
+#include "actor.hpp"
 
-#include "actor.hpp" // IWYU pragma: keep
+#include <memory>
+#include <vector>
 
 namespace engine
 {
@@ -24,8 +25,11 @@ class World
      */
     virtual void begin()
     {
-        throw unimplemented_exception(std::source_location::current());
-    };
+        for (auto &actor : m_actors)
+        {
+            actor->begin();
+        }
+    }
 
     /**
      * @brief
@@ -34,8 +38,10 @@ class World
      */
     virtual void update(float dt)
     {
-        throw unimplemented_exception(std::source_location::current());
-    };
+        // Perform updates on all actors
+        //
+        // I.e. input, physics, etc.
+    }
 
     /**
      * @brief
@@ -43,8 +49,17 @@ class World
      */
     virtual void end()
     {
-        throw unimplemented_exception(std::source_location::current());
-    };
+        for (auto &actor : m_actors)
+        {
+            actor->end();
+        }
+    }
+
+    template <typename T, typename... Args> std::shared_ptr<T> spawn_actor(Args &&...args)
+    {
+        // TODO: Potentially begin play here if actor is spawned after world start
+        return m_actors.emplace_back(std::make_shared<T>(std::forward<Args>(args))...);
+    }
 
     /**
      * @brief Default destructor
@@ -55,6 +70,7 @@ class World
     }
 
   private:
+    std::vector<std::shared_ptr<Actor>> m_actors;
 };
 
 } // namespace engine
