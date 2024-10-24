@@ -7,10 +7,9 @@ void text_element::update_data()
     m_data.clear();
 
     float padding = 0.005f;
-    // float padding = 0.0f;
 
-    float dx = 2.0f / 32.0f;
-    float dy = 2.0f / 32.0f;
+    float dx = 1.0f / 32.0f;
+    float dy = 1.0f / 16.0f;
 
     float du = 1.0f / 32.0f;
     float dv = -1.0f / 4.0f;
