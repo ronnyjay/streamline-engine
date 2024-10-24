@@ -4,8 +4,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_STANDARD 23)
 
-set(PROJECT_NAME "streamline-engine")
-project(${PROJECT_NAME})
+project(streamline-engine)
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(glm REQUIRED)
@@ -40,11 +39,18 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 include_directories(
     src
+    extern
+    extern/entt/src
+    extern/glad
+    extern/stb
     extern/imgui
     extern/imgui/backends
-    extern/entt/src
-    extern
-    ${ASSIMP_INCLUDE_DIRS}
+)
+
+add_subdirectory(extern/entt)
+
+add_library(glad STATIC
+    extern/glad/gl.c
 )
 
 add_library(stb STATIC
@@ -62,7 +68,27 @@ add_library(imgui STATIC
 )
 
 target_link_libraries(imgui PRIVATE glfw)
-add_subdirectory(extern/entt)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
-add_subdirectory(src)
+add_executable(streamline-engine src/main.cpp)
+
+target_sources(streamline-engine PRIVATE
+    src/core/application.cpp
+    src/core/config.cpp
+    src/core/debug.cpp
+    src/core/logger.cpp
+    src/core/resource_manager.cpp
+    src/core/window.cpp
+    src/renderer/framebuffer.cpp
+    src/renderer/mesh.cpp
+    src/renderer/model.cpp
+    src/renderer/renderer.cpp
+    src/renderer/shader.cpp
+    src/renderer/texture.cpp
+    src/scene/components/camera.cpp
+    src/scene/components/input.cpp
+    src/scene/entity.cpp
+    src/scene/scene.cpp
+    src/util/input_manager.cpp
+)
+
+target_link_libraries(streamline-engine PUBLIC glfw glm::glm glad stb imgui assimp::assimp)
