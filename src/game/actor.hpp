@@ -5,6 +5,10 @@
 namespace engine
 {
 
+/**
+ * @brief Base class for any object that can be placed in a level
+ *
+ */
 struct Actor
 {
     /**
