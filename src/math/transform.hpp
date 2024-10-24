@@ -1,12 +1,13 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 /**
  * @brief
  *
  */
-enum class SAxis
+enum class Axis
 {
     X,
     Y,
@@ -17,22 +18,22 @@ enum class SAxis
  * @brief
  *
  */
-struct STransform
+struct Transform
 {
     /**
      * @brief
      *
      */
-    STransform()
+    Transform()
         : position(0.0f)
         , scale(0.0f)
-        , rotation(0.0f)
     {
+        rotation = glm::quat(1.0f, glm::vec3(0.0f));
     }
 
     glm::vec3 position;
     glm::vec3 scale;
-    glm::vec3 rotation;
+    glm::quat rotation;
 
     /**
      * @brief
@@ -40,7 +41,7 @@ struct STransform
      * @param axis
      * @return glm::vec3
      */
-    glm::vec3 get_scaled_axis(SAxis axis) const;
+    glm::vec3 get_scaled_axis(Axis axis) const;
 
     /**
      * @brief
