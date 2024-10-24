@@ -1,12 +1,34 @@
 #pragma once
 
-#include "axis.hpp"
-
 #include <glm/glm.hpp>
 
+/**
+ * @brief
+ *
+ */
+enum class SAxis
+{
+    X,
+    Y,
+    Z
+};
+
+/**
+ * @brief
+ *
+ */
 struct STransform
 {
-    STransform();
+    /**
+     * @brief
+     *
+     */
+    STransform()
+        : position(0.0f)
+        , scale(0.0f)
+        , rotation(0.0f)
+    {
+    }
 
     glm::vec3 position;
     glm::vec3 scale;
@@ -16,7 +38,7 @@ struct STransform
      * @brief
      *
      * @param axis
-     * @return
+     * @return glm::vec3
      */
     glm::vec3 get_scaled_axis(SAxis axis) const;
 

@@ -3,13 +3,6 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-STransform::STransform()
-    : position(0.0f)
-    , scale(0.0f)
-    , rotation(0.0f)
-{
-}
-
 glm::vec3 STransform::get_scaled_axis(SAxis axis) const
 {
     glm::mat4 pitch = glm::rotate(glm::mat4(1.0f), glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));

@@ -29,7 +29,6 @@ typedef enum
 
 struct Event
 {
-
     /**
      * @brief
      *
@@ -288,10 +287,7 @@ class EventDispatcher
 
     template <typename T> void on(std::function<void(T &)> fn)
     {
-        m_events[T::get_static_type()] = [fn](Event &e)
-        {
-            fn(static_cast<T &>(e));
-        };
+        m_events[T::get_static_type()] = [fn](Event &e) { fn(static_cast<T &>(e)); };
     }
 
   protected:
