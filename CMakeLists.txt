@@ -78,6 +78,7 @@ target_sources(streamline-engine PRIVATE
     src/core/logger.cpp
     src/core/resource_manager.cpp
     src/core/window.cpp
+    src/math/transform.cpp
     src/renderer/framebuffer.cpp
     src/renderer/mesh.cpp
     src/renderer/model.cpp
