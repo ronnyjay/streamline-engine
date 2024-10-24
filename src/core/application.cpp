@@ -50,33 +50,13 @@ Application::Application()
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);
     ImGui_ImplOpenGL3_Init(nullptr);
 
-    m_window.on<WindowResizeEvent>(
-        [this](WindowResizeEvent &e)
-        {
-            on_window_resize(e);
-        });
+    m_window.on<WindowResizeEvent>([this](WindowResizeEvent &e) { on_window_resize(e); });
 
-    m_window.on<KeyPressEvent>(
-        [this](KeyPressEvent &e)
-        {
-            on_key_press(e);
-        });
+    m_window.on<KeyPressEvent>([this](KeyPressEvent &e) { on_key_press(e); });
 
-    m_window.on<MouseMoveEvent>(
-        [this](MouseMoveEvent &e)
-        {
-            on_mouse_move(e);
-        });
+    m_window.on<MouseMoveEvent>([this](MouseMoveEvent &e) { on_mouse_move(e); });
 
-    m_window.on<MouseScrollEvent>(
-        [this](MouseScrollEvent &e)
-        {
-            on_mouse_scroll(e);
-        });
-
-    ResourceManager::load_shader("model", "resources/shaders/model.vs", "resources/shaders/model.fs");
-    ResourceManager::load_shader("aabb", "resources/shaders/aabb.vs", "resources/shaders/aabb.fs");
-    ResourceManager::load_shader("bsphere", "resources/shaders/bsphere.vs", "resources/shaders/bsphere.fs");
+    m_window.on<MouseScrollEvent>([this](MouseScrollEvent &e) { on_mouse_scroll(e); });
 }
 
 void Application::run()
@@ -198,7 +178,7 @@ void Application::on_key_press(KeyPressEvent &e)
                 if (m_debug_flags.show_debug_metrics)
                 {
                     m_debug_flags.show_debug_metrics = false;
-                    m_debug_flags.show_debug_window  = true;
+                    m_debug_flags.show_debug_window = true;
                 }
                 else
                 {
@@ -233,19 +213,19 @@ void Application::on_mouse_move(MouseMoveEvent &e)
 
     if (m_window_flags.first_mouse)
     {
-        last_x                     = e.x_pos;
-        last_y                     = e.y_pos;
+        last_x = e.x_pos;
+        last_y = e.y_pos;
         m_window_flags.first_mouse = false;
     }
 
-    float x_pos    = static_cast<float>(e.x_pos);
-    float y_pos    = static_cast<float>(e.y_pos);
+    float x_pos = static_cast<float>(e.x_pos);
+    float y_pos = static_cast<float>(e.y_pos);
 
     float x_offset = x_pos - last_x;
     float y_offset = last_y - y_pos;
 
-    last_x         = x_pos;
-    last_y         = y_pos;
+    last_x = x_pos;
+    last_y = y_pos;
 
     InputManager::instance().register_cursor_event(x_offset, y_offset);
 }
