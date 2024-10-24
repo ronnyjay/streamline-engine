@@ -1,8 +1,8 @@
 #pragma once
 
 #include <engine/glfw3.h>
-#include <engine/user_interface/user_interface.hpp>
 #include <engine/user_interface/ui_element.hpp>
+#include <engine/user_interface/user_interface.hpp>
 #include <functional>
 
 class main_menu : public engine::user_interface
@@ -18,13 +18,11 @@ class main_menu : public engine::user_interface
         m_title.set_pos(0.0f, 0.5f);
         m_title.set_text("Aim Trainer");
 
+        m_on_play = [] {};
+
         m_play_button.set_text("Play");
         m_play_button.set_pos(0.0f, 0.0f);
-        m_play_button.on_click(
-            [&](engine::click_data c)
-            {
-                m_on_play();
-            });
+        m_play_button.on_click([&](engine::click_data c) { m_on_play(); });
 
         m_play_button.on_hover(
             [&](bool hovering)
@@ -67,7 +65,9 @@ class main_menu : public engine::user_interface
         m_on_play = f;
     }
 
-    virtual ~main_menu() {}
+    virtual ~main_menu()
+    {
+    }
 
   private:
     engine::text_element m_title;
