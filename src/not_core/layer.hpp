@@ -41,7 +41,7 @@ class Layer
      *
      * @param e
      */
-    virtual void on_window_resize(const WindowResizeEvent &e) {};
+    virtual void on_window_resize(const FramebufferResizeEvent &e) {};
 
     /**
      * @brief Utility function for handling KeyPressedEvent's

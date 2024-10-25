@@ -19,7 +19,7 @@ struct Actor
     {
     }
 
-    STransform transform;
+    Transform transform;
 
     /**
      * @brief

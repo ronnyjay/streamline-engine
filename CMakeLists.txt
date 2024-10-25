@@ -39,6 +39,7 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 include_directories(
     src
+    ${CMAKE_SOURCE_DIR}/include
     extern
     extern/entt/src
     extern/glad

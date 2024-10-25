@@ -7,7 +7,8 @@ namespace engine
 
 struct RigidBody
 {
-    RigidBody()
+    RigidBody(float mass = 1.0f)
+
     {
     }
 

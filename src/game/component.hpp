@@ -15,13 +15,20 @@ struct Component
     {
     }
 
-    STransform transform;
+    Transform transform;
 
     /**
      * @brief Default destructor
      *
      */
     virtual ~Component()
+    {
+    }
+};
+
+struct PlayerInputComponent : Component
+{
+    PlayerInputComponent()
     {
     }
 };

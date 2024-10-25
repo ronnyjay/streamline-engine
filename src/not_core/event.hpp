@@ -58,7 +58,7 @@ struct Event
     }
 };
 
-struct WindowResizeEvent : public Event
+struct FramebufferResizeEvent : public Event
 {
     /**
      * @brief Construct a new Window Resized Event object
@@ -66,7 +66,7 @@ struct WindowResizeEvent : public Event
      * @param width
      * @param height
      */
-    WindowResizeEvent(int width, int height)
+    FramebufferResizeEvent(int width, int height)
         : width(width)
         , height(height)
     {
@@ -287,22 +287,22 @@ class EventDispatcher
 
     template <typename T> void on(std::function<void(T &)> fn)
     {
-        m_events[T::get_static_type()] = [fn](Event &e) { fn(static_cast<T &>(e)); };
+        events[T::get_static_type()] = [fn](Event &e) { fn(static_cast<T &>(e)); };
     }
 
   protected:
     void dispatch(EventType type, Event &&e)
     {
-        auto it = m_events.find(type);
+        auto it = events.find(type);
 
-        if (it != m_events.end())
+        if (it != events.end())
         {
             it->second(e);
         }
     }
 
   private:
-    std::unordered_map<EventType, std::function<void(Event &)>> m_events;
+    std::unordered_map<EventType, std::function<void(Event &)>> events;
 };
 
 } // namespace engine

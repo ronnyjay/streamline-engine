@@ -2,8 +2,6 @@
 
 #include "pawn.hpp"
 
-#include <memory>
-
 namespace engine
 {
 
@@ -21,13 +19,16 @@ struct PlayerController
     {
     }
 
-    void posses(std::shared_ptr<Pawn> context)
+    void posses(Pawn *handle)
     {
-        m_pawn_context = context;
+        if (handle != nullptr)
+        {
+            m_handle = handle;
+        }
     }
 
   private:
-    std::shared_ptr<Pawn> m_pawn_context;
+    Pawn *m_handle;
 };
 
 /**

@@ -1,11 +1,10 @@
 #pragma once
 
 #include "actor.hpp"
+#include "component.hpp"
 
 namespace engine
 {
-
-struct PlayerController;
 
 /**
  * @brief Designed to be possesed and controlled by a controller (Player, AI)
@@ -20,6 +19,24 @@ struct Pawn : public Actor
     Pawn()
     {
     }
+
+    PlayerInputComponent *InputComponent;
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    virtual void move_forward(float value)
+    {
+    }
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    virtual void move_right(float value) {};
 
     /**
      * @brief
@@ -42,15 +59,6 @@ struct Pawn : public Actor
      * @param value
      */
     virtual void add_movement_input(const glm::vec3 &direction, float value) {};
-
-    /**
-     * @brief
-     *
-     */
-    virtual void set_controller_input_component(/** PlayerInputComponent */){};
-
-  private:
-    PlayerController *m_controller = nullptr;
 };
 
 } // namespace engine

@@ -53,10 +53,10 @@ class Application : public Debuggable
         ImGui_ImplGlfw_Shutdown();
     }
 
-    Application(const Application &)             = delete;
-    Application(const Application &&)            = delete;
+    Application(const Application &) = delete;
+    Application(const Application &&) = delete;
 
-    Application &operator=(const Application &)  = delete;
+    Application &operator=(const Application &) = delete;
     Application &operator=(const Application &&) = delete;
 
   private:
@@ -67,20 +67,20 @@ class Application : public Debuggable
 
     struct
     {
-        int vsync     = 0;
+        int vsync = 0;
         int framerate = 0;
     } m_settings;
 
     struct
     {
-        bool first_mouse   = true;
-        bool show_mouse    = true;
+        bool first_mouse = true;
+        bool show_mouse = true;
         bool capture_mouse = true;
     } m_window_flags;
 
     struct
     {
-        bool show_debug_window  = false;
+        bool show_debug_window = false;
         bool show_debug_metrics = false;
     } m_debug_flags;
 
@@ -90,7 +90,7 @@ class Application : public Debuggable
     static const char *FRAME_RATE_OPTIONS[];
 
   private:
-    void on_window_resize(WindowResizeEvent &);
+    void on_window_resize(FramebufferResizeEvent &);
     void on_key_press(KeyPressEvent &);
     void on_mouse_move(MouseMoveEvent &);
     void on_mouse_scroll(MouseScrollEvent &);
