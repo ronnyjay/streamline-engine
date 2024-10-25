@@ -19,4 +19,22 @@ struct WindowResizeEvent : public Event
     EVENT_TYPE(WindowResize)
 };
 
+struct KeyEvent : public Event
+{
+    KeyEvent(int key, int scancode, int action, int mods)
+        : key(key)
+        , scancode(scancode)
+        , action(action)
+        , mods(mods)
+    {
+    }
+
+    int key;
+    int scancode;
+    int action;
+    int mods;
+
+    EVENT_TYPE(KeyPress)
+};
+
 } // namespace engine

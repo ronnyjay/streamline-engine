@@ -73,11 +73,13 @@ target_link_libraries(imgui PRIVATE glfw)
 add_executable(streamline-engine src/main.cpp)
 
 target_sources(streamline-engine PRIVATE
-    src/core/application.cpp
-    src/core/config.cpp
+    # src/core/application.cpp
+    # src/core/config.cpp
     src/core/debug.cpp
     src/core/logger.cpp
     src/core/resource_manager.cpp
+    # src/core/window.cpp
+    src/core/application.cpp
     src/core/window.cpp
     src/math/transform.cpp
     src/renderer/framebuffer.cpp

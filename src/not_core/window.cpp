@@ -36,8 +36,8 @@ const char *Window::DISPLAY_MODE_OPTIONS[] = {
 // clang-format on
 
 Window::Window(int width, int height, const char *title)
-    : m_width(width)
-    , m_height(height)
+    : m_Width(width)
+    , mHeight(height)
 {
     if (!glfwInit())
     {
@@ -76,29 +76,29 @@ Window::Window(int width, int height, const char *title)
     m_primary_monitor = &m_monitors.at(0);
     m_current_monitor = &m_monitors.at(0);
 
-    m_window = glfwCreateWindow(width, height, title, NULL, NULL);
+    mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
 
-    if (m_window == nullptr)
+    if (mWindow == nullptr)
     {
         logger::err("Failed to intialize window");
     }
     logger::info("Initialized window");
 
-    glfwMakeContextCurrent(m_window);
+    glfwMakeContextCurrent(mWindow);
 
-    glfwGetWindowPos(m_window, &m_x, &m_y);
-    glfwGetWindowSize(m_window, &m_width, &m_height);
+    glfwGetWindowPos(mWindow, &m_x, &m_y);
+    glfwGetWindowSize(mWindow, &m_Width, &mHeight);
 
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetWindowAspectRatio(m_window, width, height);
+    glfwSetWindowUserPointer(mWindow, this);
+    glfwSetWindowAspectRatio(mWindow, width, height);
 
-    glfwSetFramebufferSizeCallback(m_window, Window::framebuffer_size_callback);
-    glfwSetWindowIconifyCallback(m_window, Window::minimize_callback);
-    glfwSetWindowMaximizeCallback(m_window, Window::maximize_callback);
-    glfwSetKeyCallback(m_window, Window::key_callback);
-    glfwSetMouseButtonCallback(m_window, Window::mouse_callback);
-    glfwSetCursorPosCallback(m_window, Window::cursor_pos_callback);
-    glfwSetScrollCallback(m_window, Window::scroll_callback);
+    glfwSetFramebufferSizeCallback(mWindow, Window::framebuffer_size_callback);
+    glfwSetWindowIconifyCallback(mWindow, Window::minimize_callback);
+    glfwSetWindowMaximizeCallback(mWindow, Window::maximize_callback);
+    glfwSetKeyCallback(mWindow, Window::key_callback);
+    glfwSetMouseButtonCallback(mWindow, Window::mouse_callback);
+    glfwSetCursorPosCallback(mWindow, Window::cursor_pos_callback);
+    glfwSetScrollCallback(mWindow, Window::scroll_callback);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
@@ -117,7 +117,7 @@ Window::Window(int width, int height, const char *title)
 void Window::refresh()
 {
     int x, y;
-    glfwGetWindowPos(m_window, &x, &y);
+    glfwGetWindowPos(mWindow, &x, &y);
 
     for (auto &monitor : m_monitors)
     {
@@ -160,7 +160,7 @@ void Window::set_resolution(int width, int height)
 
     if (m_display_mode == FULLSCREEN)
     {
-        glfwSetWindowMonitor(m_window, m_primary_monitor->monitor, 0, 0, width, height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(mWindow, m_primary_monitor->monitor, 0, 0, width, height, GLFW_DONT_CARE);
 
         for (size_t i = 0; i < m_primary_monitor->resolutions.size(); i++)
         {
@@ -177,14 +177,14 @@ void Window::set_resolution(int width, int height)
 
     if (m_display_mode == WINDOWED)
     {
-        m_width = width;
-        m_height = height;
+        m_Width = width;
+        mHeight = height;
 
         auto monitor_scale = m_current_monitor->scale;
 
-        glfwSetWindowAspectRatio(m_window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-        glfwSetWindowSize(m_window, width / monitor_scale.x, height / monitor_scale.y);
-        glfwSetWindowAspectRatio(m_window, width, height);
+        glfwSetWindowAspectRatio(mWindow, GLFW_DONT_CARE, GLFW_DONT_CARE);
+        glfwSetWindowSize(mWindow, width / monitor_scale.x, height / monitor_scale.y);
+        glfwSetWindowAspectRatio(mWindow, width, height);
 
         for (size_t i = 0; i < m_current_monitor->resolutions.size(); i++)
         {
@@ -204,7 +204,7 @@ void Window::set_display_mode(DisplayMode mode)
 {
     if (m_display_mode == WINDOWED)
     {
-        glfwGetWindowPos(m_window, &m_x, &m_y);
+        glfwGetWindowPos(mWindow, &m_x, &m_y);
     }
 
     if (mode == FULLSCREEN)
@@ -212,7 +212,7 @@ void Window::set_display_mode(DisplayMode mode)
         Resolution current = m_primary_monitor->resolutions[m_primary_monitor->resolution.fullscreen];
 
         glfwSetWindowMonitor(
-            m_window,
+            mWindow,
             nullptr,
             m_primary_monitor->x,
             m_primary_monitor->y,
@@ -220,23 +220,23 @@ void Window::set_display_mode(DisplayMode mode)
             m_primary_monitor->height,
             0);
 
-        glfwSetWindowMonitor(m_window, m_primary_monitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(mWindow, m_primary_monitor->monitor, 0, 0, current.width, current.height, GLFW_DONT_CARE);
     }
 
     if (mode == BORDERLESS)
     {
-        if (glfwGetWindowAttrib(m_window, GLFW_DECORATED))
+        if (glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(m_window, GLFW_DECORATED, GL_FALSE);
+            glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GL_FALSE);
         }
 
-        if (!glfwGetWindowAttrib(m_window, GLFW_FLOATING))
+        if (!glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(m_window, GLFW_FLOATING, GL_TRUE);
+            glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GL_TRUE);
         }
 
         glfwSetWindowMonitor(
-            m_window,
+            mWindow,
             nullptr,
             m_primary_monitor->x,
             m_primary_monitor->y,
@@ -247,17 +247,17 @@ void Window::set_display_mode(DisplayMode mode)
 
     if (mode == WINDOWED)
     {
-        if (!glfwGetWindowAttrib(m_window, GLFW_DECORATED))
+        if (!glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(m_window, GLFW_DECORATED, GL_TRUE);
+            glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GL_TRUE);
         }
 
-        if (glfwGetWindowAttrib(m_window, GLFW_FLOATING))
+        if (glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(m_window, GLFW_FLOATING, GL_FALSE);
+            glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GL_FALSE);
         }
 
-        glfwSetWindowMonitor(m_window, nullptr, m_x, m_y, m_width, m_height, 0);
+        glfwSetWindowMonitor(mWindow, nullptr, m_x, m_y, m_width, m_height, 0);
     }
 
     m_display_mode = mode;
@@ -407,7 +407,7 @@ void Window::on_debug()
         ImGui::Separator();
 
         int x, y;
-        glfwGetWindowPos(m_window, &x, &y);
+        glfwGetWindowPos(mWindow, &x, &y);
 
         ImGui::Text("X: %d", x);
         ImGui::Text("Y: %d", y);

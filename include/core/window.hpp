@@ -15,35 +15,18 @@ namespace engine
 class Window : public EventDispatcher
 {
   public:
-    /**
-     * @brief Default constructor
-     *
-     */
-    Window();
+    Window(int width = 800, int height = 600, const char *title = "");
 
-    /**
-     * @brief
-     *
-     * @return GLFWwindow *
-     */
     operator GLFWwindow *()
     {
-        return m_window;
+        return mWindow;
     }
 
-    /**
-     * @brief
-     *
-     * @param width
-     * @param height
-     * @param title
-     */
-    void create(int width, int height, const char *title);
+    bool bFirstMouse = true;
 
-    /**
-     * @brief Default destructor
-     *
-     */
+    bool bShowMouse = false;
+    bool bCaptureMouse = false;
+
     ~Window() {};
 
     Window(const Window &) = delete;
@@ -53,7 +36,20 @@ class Window : public EventDispatcher
     Window operator=(const Window &&) = delete;
 
   private:
-    GLFWwindow *m_window;
+    GLFWwindow *mWindow;
+
+    int         mWidth;
+    int         mHeight;
+
+    static void FramebufferSizeCallback(GLFWwindow *, int, int);
+
+    static void WindowMinimizeCallback(GLFWwindow *, int);
+    static void WindowMaximizeCallback(GLFWwindow *, int);
+
+    static void CursorCallback(GLFWwindow *, double, double);
+    static void ScrollCallback(GLFWwindow *, double, double);
+
+    static void KeyCallback(GLFWwindow *, int, int, int, int);
 };
 
 } // namespace engine

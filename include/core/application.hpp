@@ -8,9 +8,9 @@ namespace engine
 class Application
 {
   public:
-    Application()
-    {
-    }
+    Application();
+
+    void run();
 
     ~Application() = default;
 

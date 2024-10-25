@@ -9,7 +9,8 @@ namespace engine
 enum class EventType
 {
     None,
-    WindowResize
+    KeyPress,
+    WindowResize,
 };
 
 #define EVENT_TYPE(type)                                                                                               \
