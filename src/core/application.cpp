@@ -5,39 +5,39 @@
 using namespace engine;
 
 Application::Application()
-    : m_window(800, 600, "Streamline Engine")
+    : mWindow(800, 600, "Streamline Engine")
 {
-    m_window.on<WindowResizeEvent>(
+    mWindow.on<WindowResizeEvent>(
         [this](WindowResizeEvent &e) {
 
         });
 
-    m_window.on<KeyPressEvent>(
+    mWindow.on<KeyPressEvent>(
         [this](KeyPressEvent &e) {
 
         });
 
-    m_window.on<KeyReleaseEvent>(
+    mWindow.on<KeyReleaseEvent>(
         [this](KeyReleaseEvent &e) {
 
         });
 
-    m_window.on<MouseMoveEvent>(
+    mWindow.on<MouseMoveEvent>(
         [this](MouseMoveEvent &e) {
 
         });
 
-    m_window.on<MouseScrollEvent>(
+    mWindow.on<MouseScrollEvent>(
         [this](MouseScrollEvent &e) {
 
         });
 
-    m_window.on<MouseButtonPressEvent>(
+    mWindow.on<MouseButtonPressEvent>(
         [this](MouseButtonPressEvent &e) {
 
         });
 
-    m_window.on<MouseButtonReleaseEvent>(
+    mWindow.on<MouseButtonReleaseEvent>(
         [this](MouseButtonReleaseEvent &e) {
 
         });
@@ -45,9 +45,9 @@ Application::Application()
 
 void Application::run()
 {
-    while (!glfwWindowShouldClose(m_window))
+    while (!glfwWindowShouldClose(mWindow))
     {
-        glfwSwapBuffers(m_window);
+        glfwSwapBuffers(mWindow);
         glfwPollEvents();
     }
 }

@@ -21,7 +21,7 @@ class Application
     Application &operator=(const Application &&) = delete;
 
   private:
-    Window m_window;
+    Window mWindow;
 };
 
 } // namespace engine

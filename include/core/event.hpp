@@ -79,7 +79,7 @@ class EventDispatcher
      */
     template <typename T> void on(std::function<void(T &)> fn)
     {
-        events[T::GetStaticType()] = [fn](Event &e) { fn(static_cast<T &>(e)); };
+        mEvents[T::GetStaticType()] = [fn](Event &e) { fn(static_cast<T &>(e)); };
     }
 
   protected:
@@ -91,16 +91,16 @@ class EventDispatcher
      */
     void dispatch(EventType type, Event &&e)
     {
-        auto it = events.find(type);
+        auto it = mEvents.find(type);
 
-        if (it != events.end())
+        if (it != mEvents.end())
         {
             it->second(e);
         }
     }
 
   private:
-    std::map<EventType, std::function<void(Event &)>> events;
+    std::map<EventType, std::function<void(Event &)>> mEvents;
 };
 
 } // namespace engine
