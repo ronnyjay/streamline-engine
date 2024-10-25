@@ -16,12 +16,12 @@ struct WindowResizeEvent : public Event
     int width;
     int height;
 
-    EVENT_TYPE(WindowResize)
+    EVENT_TYPE(WindowResized)
 };
 
-struct KeyEvent : public Event
+struct KeyPressEvent : public Event
 {
-    KeyEvent(int key, int scancode, int action, int mods)
+    KeyPressEvent(int key, int scancode, int action, int mods)
         : key(key)
         , scancode(scancode)
         , action(action)
@@ -34,7 +34,21 @@ struct KeyEvent : public Event
     int action;
     int mods;
 
-    EVENT_TYPE(KeyPress)
+    EVENT_TYPE(KeyPressed)
+};
+
+struct MouseMoveEvent : public Event
+{
+    MouseMoveEvent(double xOffset, double yOffset)
+        : xOffset(xOffset)
+        , yOffset(yOffset)
+    {
+    }
+
+    double xOffset;
+    double yOffset;
+
+    EVENT_TYPE(MouseMoved);
 };
 
 } // namespace engine

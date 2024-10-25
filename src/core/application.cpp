@@ -10,8 +10,8 @@ Application::Application()
 
         });
 
-    m_window.on<KeyEvent>(
-        [this](KeyEvent &e)
+    m_window.on<KeyPressEvent>(
+        [this](KeyPressEvent &e)
         {
             if (e.key == GLFW_KEY_ESCAPE)
             {

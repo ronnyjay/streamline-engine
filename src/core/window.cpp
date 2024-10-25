@@ -33,9 +33,10 @@ Window::Window(int width, int height, const char *title)
     glfwSetFramebufferSizeCallback(mWindow, Window::FramebufferSizeCallback);
     glfwSetWindowIconifyCallback(mWindow, Window::WindowMinimizeCallback);
     glfwSetWindowMaximizeCallback(mWindow, Window::WindowMaximizeCallback);
-    glfwSetCursorPosCallback(mWindow, Window::CursorCallback);
-    glfwSetScrollCallback(mWindow, Window::ScrollCallback);
     glfwSetKeyCallback(mWindow, Window::KeyCallback);
+    glfwSetMouseButtonCallback(mWindow, Window::MouseCallback);
+    glfwSetScrollCallback(mWindow, Window::ScrollCallback);
+    glfwSetCursorPosCallback(mWindow, Window::CursorPosCallback);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
@@ -47,17 +48,41 @@ Window::Window(int width, int height, const char *title)
 
 void Window::FramebufferSizeCallback(GLFWwindow *glfwWindow, int width, int height)
 {
+    static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow))
+        ->dispatch(EventType::WindowResized, WindowResizeEvent(width, height));
 }
 
 void Window::WindowMaximizeCallback(GLFWwindow *glfwWindow, int maximize)
 {
+    maximize ? glfwMaximizeWindow(glfwWindow) : glfwRestoreWindow(glfwWindow);
 }
 
 void Window::WindowMinimizeCallback(GLFWwindow *glfwWindow, int minimize)
 {
+    minimize ? glfwIconifyWindow(glfwWindow) : glfwRestoreWindow(glfwWindow);
 }
 
-void Window::CursorCallback(GLFWwindow *glfwWindow, double xPosIn, double yPosIn)
+void Window::KeyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
+{
+    // TODO:
+    // KeyPressed
+    // KeyReleased
+}
+
+void Window::MouseCallback(GLFWwindow *glfwWindow, int button, int action, int mods)
+{
+    // TODO:
+    // MouseButtonPressed
+    // MouseButtonReleased
+}
+
+void Window::ScrollCallback(GLFWwindow *glfwWindow, double x, double y)
+{
+    // TODO:
+    // MouseScroll
+}
+
+void Window::CursorPosCallback(GLFWwindow *glfwWindow, double xPosIn, double yPosIn)
 {
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
@@ -86,13 +111,5 @@ void Window::CursorCallback(GLFWwindow *glfwWindow, double xPosIn, double yPosIn
     lastX = xPos;
     lastY = yPos;
 
-    // TODO: Dispatch event with xOffset, yOffset
-}
-
-void Window::ScrollCallback(GLFWwindow *window, double x, double y)
-{
-}
-
-void Window::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
+    window->dispatch(EventType::MouseMoved, MouseMoveEvent(xOffset, yOffset));
 }

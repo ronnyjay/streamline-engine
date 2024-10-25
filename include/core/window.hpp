@@ -22,17 +22,16 @@ class Window : public EventDispatcher
         return mWindow;
     }
 
-    bool bFirstMouse = true;
-
-    bool bShowMouse = false;
+    bool bFirstMouse   = true;
+    bool bShowMouse    = false;
     bool bCaptureMouse = false;
 
     ~Window() {};
 
-    Window(const Window &) = delete;
+    Window(const Window &)  = delete;
     Window(const Window &&) = delete;
 
-    Window operator=(const Window &) = delete;
+    Window operator=(const Window &)  = delete;
     Window operator=(const Window &&) = delete;
 
   private:
@@ -46,10 +45,11 @@ class Window : public EventDispatcher
     static void WindowMinimizeCallback(GLFWwindow *, int);
     static void WindowMaximizeCallback(GLFWwindow *, int);
 
-    static void CursorCallback(GLFWwindow *, double, double);
-    static void ScrollCallback(GLFWwindow *, double, double);
-
     static void KeyCallback(GLFWwindow *, int, int, int, int);
+    static void MouseCallback(GLFWwindow *, int, int, int);
+
+    static void ScrollCallback(GLFWwindow *, double, double);
+    static void CursorPosCallback(GLFWwindow *, double, double);
 };
 
 } // namespace engine

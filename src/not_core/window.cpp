@@ -25,7 +25,7 @@ Monitor::Monitor(GLFWmonitor *monitor, int number)
     resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
 
     resolution.fullscreen = resolutions.size() - 1;
-    resolution.windowed = -1;
+    resolution.windowed   = -1;
     resolution.borderless = resolutions.size() - 1;
 }
 

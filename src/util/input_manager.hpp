@@ -10,9 +10,9 @@ namespace engine
 {
 
 // TODO: Replace KeyEvent, MouseEvent with events from core
-struct KeyEvent
+struct KeyPressEvent
 {
-    KeyEvent()
+    KeyPressEvent()
         : key(0)
         , scancode(0)
         , action(0)
@@ -20,7 +20,7 @@ struct KeyEvent
     {
     }
 
-    KeyEvent(const KeyEvent &) = default;
+    KeyPressEvent(const KeyPressEvent &) = default;
 
     int key;
     int scancode;
@@ -118,7 +118,7 @@ class InputManager
      */
     inline const MouseEvent last_cursor_event()
     {
-        MouseEvent event             = m_last_cursor_event;
+        MouseEvent event = m_last_cursor_event;
 
         m_last_cursor_event.x_offset = 0.0;
         m_last_cursor_event.y_offset = 0.0;
@@ -133,7 +133,7 @@ class InputManager
      */
     inline const MouseEvent last_scroll_event()
     {
-        MouseEvent event             = m_last_scroll_event;
+        MouseEvent event = m_last_scroll_event;
 
         m_last_scroll_event.x_offset = 0.0;
         m_last_scroll_event.y_offset = 0.0;
