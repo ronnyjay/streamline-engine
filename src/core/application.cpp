@@ -1,5 +1,7 @@
 #include "core/application.hpp"
 
+#include <cstdio>
+
 using namespace engine;
 
 Application::Application()
@@ -11,12 +13,33 @@ Application::Application()
         });
 
     m_window.on<KeyPressEvent>(
-        [this](KeyPressEvent &e)
-        {
-            if (e.key == GLFW_KEY_ESCAPE)
-            {
-                glfwSetWindowShouldClose(m_window, true);
-            }
+        [this](KeyPressEvent &e) {
+
+        });
+
+    m_window.on<KeyReleaseEvent>(
+        [this](KeyReleaseEvent &e) {
+
+        });
+
+    m_window.on<MouseMoveEvent>(
+        [this](MouseMoveEvent &e) {
+
+        });
+
+    m_window.on<MouseScrollEvent>(
+        [this](MouseScrollEvent &e) {
+
+        });
+
+    m_window.on<MouseButtonPressEvent>(
+        [this](MouseButtonPressEvent &e) {
+
+        });
+
+    m_window.on<MouseButtonReleaseEvent>(
+        [this](MouseButtonReleaseEvent &e) {
+
         });
 }
 

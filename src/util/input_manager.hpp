@@ -16,7 +16,7 @@ struct KeyPressEvent
         : key(0)
         , scancode(0)
         , action(0)
-        , mods(0)
+        , Mods(0)
     {
     }
 
@@ -25,7 +25,7 @@ struct KeyPressEvent
     int key;
     int scancode;
     int action;
-    int mods;
+    int Mods;
 };
 
 struct MouseEvent

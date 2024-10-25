@@ -22,7 +22,6 @@ class Window : public EventDispatcher
         return mWindow;
     }
 
-    bool bFirstMouse   = true;
     bool bShowMouse    = false;
     bool bCaptureMouse = false;
 
@@ -40,16 +39,18 @@ class Window : public EventDispatcher
     int         mWidth;
     int         mHeight;
 
+    bool        mFirstMouse;
+
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
 
-    static void WindowMinimizeCallback(GLFWwindow *, int);
     static void WindowMaximizeCallback(GLFWwindow *, int);
+    static void WindowMinimizeCallback(GLFWwindow *, int);
 
     static void KeyCallback(GLFWwindow *, int, int, int, int);
-    static void MouseCallback(GLFWwindow *, int, int, int);
+    static void MouseButtonCallback(GLFWwindow *, int, int, int);
 
-    static void ScrollCallback(GLFWwindow *, double, double);
     static void CursorPosCallback(GLFWwindow *, double, double);
+    static void ScrollCallback(GLFWwindow *, double, double);
 };
 
 } // namespace engine

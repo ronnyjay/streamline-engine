@@ -6,13 +6,15 @@
 namespace engine
 {
 
+// clang-format off
 enum class EventType
 {
     None,
-    KeyPressed,
-    MouseMoved,
     WindowResized,
+    KeyPressed, KeyReleased,
+    MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 };
+// clang-format on
 
 #define EVENT_TYPE(type)                                                                                               \
     static EventType GetStaticType()                                                                                   \

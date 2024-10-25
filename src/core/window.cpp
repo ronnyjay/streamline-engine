@@ -5,6 +5,7 @@
 using namespace engine;
 
 Window::Window(int width, int height, const char *title)
+    : mFirstMouse(true)
 {
     if (!glfwInit())
     {
@@ -28,15 +29,15 @@ Window::Window(int width, int height, const char *title)
 
     glfwMakeContextCurrent(mWindow);
 
-    glfwSetWindowUserPointer(mWindow, this);
-
     glfwSetFramebufferSizeCallback(mWindow, Window::FramebufferSizeCallback);
-    glfwSetWindowIconifyCallback(mWindow, Window::WindowMinimizeCallback);
     glfwSetWindowMaximizeCallback(mWindow, Window::WindowMaximizeCallback);
+    glfwSetWindowIconifyCallback(mWindow, Window::WindowMinimizeCallback);
     glfwSetKeyCallback(mWindow, Window::KeyCallback);
-    glfwSetMouseButtonCallback(mWindow, Window::MouseCallback);
-    glfwSetScrollCallback(mWindow, Window::ScrollCallback);
+    glfwSetMouseButtonCallback(mWindow, Window::MouseButtonCallback);
     glfwSetCursorPosCallback(mWindow, Window::CursorPosCallback);
+    glfwSetScrollCallback(mWindow, Window::ScrollCallback);
+
+    glfwSetWindowUserPointer(mWindow, this);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
@@ -64,22 +65,30 @@ void Window::WindowMinimizeCallback(GLFWwindow *glfwWindow, int minimize)
 
 void Window::KeyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
 {
-    // TODO:
-    // KeyPressed
-    // KeyReleased
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+
+    if (action == GLFW_RELEASE)
+    {
+        window->dispatch(EventType::KeyReleased, KeyReleaseEvent(key));
+    }
+    else
+    {
+        window->dispatch(EventType::KeyPressed, KeyPressEvent(key, mods, action == GLFW_REPEAT ? 1 : 0));
+    }
 }
 
-void Window::MouseCallback(GLFWwindow *glfwWindow, int button, int action, int mods)
+void Window::MouseButtonCallback(GLFWwindow *glfwWindow, int button, int action, int mods)
 {
-    // TODO:
-    // MouseButtonPressed
-    // MouseButtonReleased
-}
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-void Window::ScrollCallback(GLFWwindow *glfwWindow, double x, double y)
-{
-    // TODO:
-    // MouseScroll
+    if (action == GLFW_RELEASE)
+    {
+        window->dispatch(EventType::MouseButtonReleased, MouseButtonReleaseEvent(button));
+    }
+    else
+    {
+        window->dispatch(EventType::MouseButtonPressed, MouseButtonPressEvent(button, mods));
+    }
 }
 
 void Window::CursorPosCallback(GLFWwindow *glfwWindow, double xPosIn, double yPosIn)
@@ -94,12 +103,12 @@ void Window::CursorPosCallback(GLFWwindow *glfwWindow, double xPosIn, double yPo
     static float lastY = window->mWidth / 2.0f;
     static float lastX = window->mHeight / 2.0f;
 
-    if (window->bFirstMouse)
+    if (window->mFirstMouse)
     {
         lastX = xPosIn;
         lastY = yPosIn;
 
-        window->bFirstMouse = false;
+        window->mFirstMouse = false;
     }
 
     float xPos = static_cast<float>(xPosIn);
@@ -112,4 +121,10 @@ void Window::CursorPosCallback(GLFWwindow *glfwWindow, double xPosIn, double yPo
     lastY = yPos;
 
     window->dispatch(EventType::MouseMoved, MouseMoveEvent(xOffset, yOffset));
+}
+
+void Window::ScrollCallback(GLFWwindow *glfwWindow, double xOffset, double yOffset)
+{
+    static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow))
+        ->dispatch(EventType::MouseScrolled, MouseScrollEvent(xOffset));
 }
