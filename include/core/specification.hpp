@@ -3,8 +3,12 @@
 namespace engine
 {
 
-class Application;
+class Application; // Forward Declaration
 
+/**
+ * @brief
+ *
+ */
 class Specification
 {
   public:
@@ -13,14 +17,14 @@ class Specification
      *
      * @param application
      */
-    virtual void OnInit(Application *const application) const {};
+    virtual void OnInit(Application *const application) const;
 
     /**
      * @brief
      *
      * @param application
      */
-    virtual void OnExit(Application *const application) const {};
+    virtual void OnExit(Application *const application) const;
 
     /**
      * @brief

@@ -16,12 +16,22 @@ class Application
   public:
     Application(Specification &&);
 
-    void     Run();
+    void          Run();
 
-    Window  *GetWindow() const;
+    Window *const GetWindow() const
+    {
+        return mWindow;
+    }
 
-    Monitor *GetPrimaryMonitor() const;
-    Monitor *GetCurrentMonitor() const;
+    Monitor *const GetPrimaryMonitor() const
+    {
+        return mPrimaryMonitor;
+    }
+
+    Monitor *const GetCurrentMonitor() const
+    {
+        return mCurrentMonitor;
+    }
 
     ~Application();
 

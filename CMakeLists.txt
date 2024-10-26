@@ -80,6 +80,7 @@ target_sources(streamline-engine PRIVATE
     src/core/resource_manager.cpp
     # src/core/window.cpp
     src/core/application.cpp
+    src/core/specification.cpp
     src/core/window.cpp
     src/core/monitor.cpp
     src/math/transform.cpp
