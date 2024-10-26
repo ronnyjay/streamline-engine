@@ -12,6 +12,13 @@
 namespace engine
 {
 
+enum class DisplayMode
+{
+    Windowed,
+    Fullscreen,
+    FullscreenBorderless
+};
+
 /**
  * @brief Wrapper for a GLFWwindow
  *
@@ -39,6 +46,12 @@ class Window : public EventDispatcher
      *
      */
     void Refresh();
+
+    /**
+     * @brief
+     *
+     */
+    void SwapBuffers();
 
     /**
      * @brief
@@ -74,6 +87,14 @@ class Window : public EventDispatcher
      * @param value
      */
     void SetResizable(bool value);
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool IsRunning() const;
 
     ~Window() {};
 

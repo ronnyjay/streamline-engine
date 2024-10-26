@@ -6,13 +6,13 @@
 using namespace engine;
 
 Monitor::Monitor(GLFWmonitor *monitor, int number)
-    : monitor(monitor)
+    : glfwMonitor(monitor)
     , m_monitor_number(number)
 {
     title = glfwGetMonitorName(monitor);
 
-    glfwGetMonitorWorkarea(monitor, &x, &y, &width, &height);
-    glfwGetMonitorContentScale(monitor, &scale.x, &scale.y);
+    glfwGetMonitorWorkarea(monitor, &StartX, &StartY, &Width, &H);
+    glfwGetMonitorContentScale(monitor, &Scale.x, &Scale.y);
 
     int                count;
     const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
@@ -76,7 +76,7 @@ Window::Window(int width, int height, const char *title)
     m_primary_monitor = &m_monitors.at(0);
     m_current_monitor = &m_monitors.at(0);
 
-    mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
+    mWindow           = glfwCreateWindow(width, height, title, NULL, NULL);
 
     if (mWindow == nullptr)
     {
@@ -177,10 +177,10 @@ void Window::set_resolution(int width, int height)
 
     if (m_display_mode == WINDOWED)
     {
-        m_Width = width;
-        mHeight = height;
+        m_Width            = width;
+        mHeight            = height;
 
-        auto monitor_scale = m_current_monitor->scale;
+        auto monitor_scale = m_current_monitor->Scale;
 
         glfwSetWindowAspectRatio(mWindow, GLFW_DONT_CARE, GLFW_DONT_CARE);
         glfwSetWindowSize(mWindow, width / monitor_scale.x, height / monitor_scale.y);

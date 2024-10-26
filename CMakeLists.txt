@@ -81,6 +81,7 @@ target_sources(streamline-engine PRIVATE
     # src/core/window.cpp
     src/core/application.cpp
     src/core/window.cpp
+    src/core/monitor.cpp
     src/math/transform.cpp
     src/renderer/framebuffer.cpp
     src/renderer/mesh.cpp

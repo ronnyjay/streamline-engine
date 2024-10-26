@@ -50,6 +50,11 @@ void Window::Refresh()
 {
 }
 
+void Window::SwapBuffers()
+{
+    glfwSwapBuffers(mWindow);
+}
+
 void Window::ShowMouse(bool value)
 {
     if ((mShowMouse = value))
@@ -80,6 +85,11 @@ void Window::SetFloating(bool value)
 void Window::SetResizable(bool value)
 {
     glfwSetWindowAttrib(mWindow, GLFW_RESIZABLE, (mResizable = value));
+}
+
+bool Window::IsRunning() const
+{
+    return !glfwWindowShouldClose(mWindow);
 }
 
 void Window::FramebufferSizeCallback(GLFWwindow *glfwWindow, int width, int height)

@@ -45,9 +45,8 @@ Application::Application()
 
 void Application::run()
 {
-    while (!glfwWindowShouldClose(mWindow))
+    while (mWindow.IsRunning())
     {
-        glfwSwapBuffers(mWindow);
-        glfwPollEvents();
+        mWindow.SwapBuffers();
     }
 }

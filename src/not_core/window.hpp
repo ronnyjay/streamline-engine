@@ -55,12 +55,12 @@ struct Monitor
 
     bool operator==(const Monitor &other)
     {
-        return monitor == other.monitor;
+        return glfwMonitor == other.glfwMonitor;
     }
 
     bool operator!=(const Monitor &other)
     {
-        return monitor != other.monitor;
+        return glfwMonitor != other.glfwMonitor;
     }
 
     int number() const
@@ -68,21 +68,21 @@ struct Monitor
         return m_monitor_number;
     }
 
-    GLFWmonitor *monitor;
+    GLFWmonitor *glfwMonitor;
 
-    int          x;
-    int          y;
+    int          StartX;
+    int          StartY;
 
-    int          width;
-    int          height;
+    int          W;
+    int          H;
 
     struct
     {
         float x;
         float y;
-    } scale;
+    } Scale;
 
-    const char *title;
+    const char *Title;
 
     struct
     {
@@ -91,7 +91,7 @@ struct Monitor
         int borderless;
     } resolution;
 
-    std::vector<Resolution> resolutions;
+    std::vector<Resolution> Resolutions;
 
   private:
     int m_monitor_number;
@@ -104,7 +104,9 @@ typedef enum
     BORDERLESS = 2
 } DisplayMode;
 
-class Window : public EventDispatcher, public Debuggable
+class Window
+    : public EventDispatcher
+    , public Debuggable
 {
   public:
     /**
