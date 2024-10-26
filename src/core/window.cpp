@@ -46,6 +46,11 @@ Window::Window(int width, int height, const char *title)
     glfwGetWindowSize(mWindow, &mWidth, &mHeight);
 }
 
+bool Window::IsRunning() const
+{
+    return !glfwWindowShouldClose(mWindow);
+}
+
 void Window::Refresh()
 {
 }
@@ -85,11 +90,6 @@ void Window::SetFloating(bool value)
 void Window::SetResizable(bool value)
 {
     glfwSetWindowAttrib(mWindow, GLFW_RESIZABLE, (mResizable = value));
-}
-
-bool Window::IsRunning() const
-{
-    return !glfwWindowShouldClose(mWindow);
 }
 
 void Window::FramebufferSizeCallback(GLFWwindow *glfwWindow, int width, int height)

@@ -5,48 +5,28 @@
 using namespace engine;
 
 Application::Application()
-    : mWindow(800, 600, "Streamline Engine")
 {
-    mWindow.on<WindowResizeEvent>(
-        [this](WindowResizeEvent &e) {
+    if (!glfwInit())
+    {
+        std::exit(1);
+    }
 
-        });
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    mWindow.on<KeyPressEvent>(
-        [this](KeyPressEvent &e) {
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
-        });
-
-    mWindow.on<KeyReleaseEvent>(
-        [this](KeyReleaseEvent &e) {
-
-        });
-
-    mWindow.on<MouseMoveEvent>(
-        [this](MouseMoveEvent &e) {
-
-        });
-
-    mWindow.on<MouseScrollEvent>(
-        [this](MouseScrollEvent &e) {
-
-        });
-
-    mWindow.on<MouseButtonPressEvent>(
-        [this](MouseButtonPressEvent &e) {
-
-        });
-
-    mWindow.on<MouseButtonReleaseEvent>(
-        [this](MouseButtonReleaseEvent &e) {
-
-        });
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 }
 
 void Application::run()
 {
-    while (mWindow.IsRunning())
-    {
-        mWindow.SwapBuffers();
-    }
+}
+
+Application::~Application()
+{
+    glfwTerminate();
 }

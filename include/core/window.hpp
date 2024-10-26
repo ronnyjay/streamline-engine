@@ -44,6 +44,13 @@ class Window : public EventDispatcher
     /**
      * @brief
      *
+     * @return
+     */
+    bool IsRunning() const;
+
+    /**
+     * @brief
+     *
      */
     void Refresh();
 
@@ -87,14 +94,6 @@ class Window : public EventDispatcher
      * @param value
      */
     void SetResizable(bool value);
-
-    /**
-     * @brief
-     *
-     * @return true
-     * @return false
-     */
-    bool IsRunning() const;
 
     ~Window() {};
 
