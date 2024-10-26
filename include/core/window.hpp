@@ -22,8 +22,9 @@ class Window : public EventDispatcher
         return mWindow;
     }
 
-    bool bShowMouse    = false;
-    bool bCaptureMouse = false;
+    const bool &bFirstMouse   = mFirstMouse;
+    const bool &bShowMouse    = mShowMouse;
+    const bool &bCaptureMouse = mCaptureMouse;
 
     ~Window() {};
 
@@ -40,6 +41,8 @@ class Window : public EventDispatcher
     int         mHeight;
 
     bool        mFirstMouse;
+    bool        mShowMouse;
+    bool        mCaptureMouse;
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
 

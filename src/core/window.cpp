@@ -5,7 +5,6 @@
 using namespace engine;
 
 Window::Window(int width, int height, const char *title)
-    : mFirstMouse(true)
 {
     if (!glfwInit())
     {
@@ -95,7 +94,7 @@ void Window::CursorPosCallback(GLFWwindow *glfwWindow, double xPosIn, double yPo
 {
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (!window->bCaptureMouse)
+    if (!window->mCaptureMouse)
     {
         return;
     }
