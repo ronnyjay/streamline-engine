@@ -26,7 +26,7 @@ enum class DisplayMode
 class Window : public EventDispatcher
 {
   public:
-    Window(int width = 800, int height = 600, const char *title = "");
+    Window(int width, int height, const char *title);
 
     const bool &bFirstMouse   = mFirstMouse;
     const bool &bShowMouse    = mShowMouse;
@@ -47,12 +47,6 @@ class Window : public EventDispatcher
      * @return
      */
     bool IsRunning() const;
-
-    /**
-     * @brief
-     *
-     */
-    void Refresh();
 
     /**
      * @brief
@@ -94,6 +88,16 @@ class Window : public EventDispatcher
      * @param value
      */
     void SetResizable(bool value);
+
+    /**
+     * @brief
+     *
+     * @param width
+     * @param height
+     * @param title
+     * @return Window*
+     */
+    static Window *Create(int width, int height, const char *title);
 
     ~Window() {};
 

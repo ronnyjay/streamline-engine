@@ -6,6 +6,7 @@ using namespace engine;
 
 Application::Application()
 {
+    // Initialize GLFW
     if (!glfwInit())
     {
         std::exit(1);
@@ -20,10 +21,26 @@ Application::Application()
 #endif
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    // Load Monitors
+    int           count;
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+    for (int i = 0; i < count; i++)
+    {
+        mMonitors.emplace_back(Monitor(monitors[i]));
+    }
+
+    // Initialize Window
+    mWindow = Window::Create(800, 600, "Streamline Engine");
 }
 
 void Application::Run()
 {
+    while (mWindow->IsRunning())
+    {
+        mWindow->SwapBuffers();
+    }
 }
 
 Application::~Application()

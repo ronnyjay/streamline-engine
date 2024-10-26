@@ -6,21 +6,6 @@ using namespace engine;
 
 Window::Window(int width, int height, const char *title)
 {
-    if (!glfwInit())
-    {
-        std::exit(1);
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
     if (!(mWindow = glfwCreateWindow(width, height, title, NULL, NULL)))
     {
         std::exit(1);
@@ -28,31 +13,25 @@ Window::Window(int width, int height, const char *title)
 
     glfwMakeContextCurrent(mWindow);
 
+    glfwSetWindowUserPointer(mWindow, this);
+
     glfwSetFramebufferSizeCallback(mWindow, Window::FramebufferSizeCallback);
     glfwSetWindowMaximizeCallback(mWindow, Window::WindowMaximizeCallback);
     glfwSetWindowIconifyCallback(mWindow, Window::WindowMinimizeCallback);
-    glfwSetKeyCallback(mWindow, Window::KeyCallback);
     glfwSetMouseButtonCallback(mWindow, Window::MouseButtonCallback);
     glfwSetCursorPosCallback(mWindow, Window::CursorPosCallback);
     glfwSetScrollCallback(mWindow, Window::ScrollCallback);
-
-    glfwSetWindowUserPointer(mWindow, this);
+    glfwSetKeyCallback(mWindow, Window::KeyCallback);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
         std::exit(1);
     }
-
-    glfwGetWindowSize(mWindow, &mWidth, &mHeight);
 }
 
 bool Window::IsRunning() const
 {
     return !glfwWindowShouldClose(mWindow);
-}
-
-void Window::Refresh()
-{
 }
 
 void Window::SwapBuffers()
@@ -90,6 +69,11 @@ void Window::SetFloating(bool value)
 void Window::SetResizable(bool value)
 {
     glfwSetWindowAttrib(mWindow, GLFW_RESIZABLE, (mResizable = value));
+}
+
+Window *Window::Create(int width, int height, const char *title)
+{
+    return new Window(width, height, title);
 }
 
 void Window::FramebufferSizeCallback(GLFWwindow *glfwWindow, int width, int height)
