@@ -12,13 +12,6 @@
 namespace engine
 {
 
-enum class DisplayMode
-{
-    Windowed,
-    Fullscreen,
-    FullscreenBorderless
-};
-
 /**
  * @brief Wrapper for a GLFWwindow
  *
@@ -92,23 +85,19 @@ class Window : public EventDispatcher
     /**
      * @brief
      *
+     * @param window
+     */
+    static void Destroy(Window *window);
+
+    /**
+     * @brief
+     *
      * @param width
      * @param height
      * @param title
      * @return Window*
      */
     static Window *Create(int width, int height, const char *title);
-
-    /**
-     * @brief
-     *
-     * @param window
-     */
-    static void Destroy(Window *window)
-    {
-        delete window;
-        window = nullptr;
-    }
 
     ~Window() {};
 

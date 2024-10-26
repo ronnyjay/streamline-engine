@@ -71,6 +71,12 @@ void Window::SetResizable(bool value)
     glfwSetWindowAttrib(mWindow, GLFW_RESIZABLE, (mResizable = value));
 }
 
+void Window::Destroy(Window *window)
+{
+    delete window;
+    window = nullptr;
+}
+
 Window *Window::Create(int width, int height, const char *title)
 {
     return new Window(width, height, title);
