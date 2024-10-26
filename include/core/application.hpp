@@ -13,7 +13,7 @@ class Application
   public:
     Application();
 
-    void     run();
+    void     Run();
 
     Window  *GetWindow() const;
 

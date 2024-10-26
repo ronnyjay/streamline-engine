@@ -6,5 +6,5 @@ int main(int argc, char const *argv[])
 {
     Application application;
 
-    application.run();
+    application.Run();
 }

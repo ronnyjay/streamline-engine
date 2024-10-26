@@ -22,7 +22,7 @@ Application::Application()
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 }
 
-void Application::run()
+void Application::Run()
 {
 }
 
