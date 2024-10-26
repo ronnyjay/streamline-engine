@@ -1,8 +1,10 @@
 #include "core/application.hpp"
+#include "core/specification.hpp"
 
 using namespace engine;
 
-Application::Application()
+Application::Application(Specification &&specification)
+    : mSpecification(specification)
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -20,6 +22,9 @@ Application::Application()
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
+    // Initialize Window
+    mWindow = Window::Create(800, 600, "Streamline Engine");
+
     // Load Monitors
     int           count;
     GLFWmonitor **monitors = glfwGetMonitors(&count);
@@ -29,8 +34,8 @@ Application::Application()
         mMonitors.emplace_back(Monitor(monitors[i]));
     }
 
-    // Initialize Window
-    mWindow = Window::Create(800, 600, "Streamline Engine");
+    // Pass to specification
+    mSpecification.OnInit(this);
 }
 
 void Application::Run()
@@ -43,6 +48,9 @@ void Application::Run()
 
 Application::~Application()
 {
+    // Pass to specification
+    mSpecification.OnExit(this);
+
     // Destroy window
     Window::Destroy(mWindow);
 

@@ -4,7 +4,7 @@ using namespace engine;
 
 int main(int argc, char const *argv[])
 {
-    Application application;
+    Application application(Specification{});
 
     application.Run();
 }

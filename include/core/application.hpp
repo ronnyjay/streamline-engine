@@ -3,15 +3,18 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include "specification.hpp"
 #include "window.hpp"
 
 namespace engine
 {
 
+class Specification;
+
 class Application
 {
   public:
-    Application();
+    Application(Specification &&);
 
     void     Run();
 
@@ -29,10 +32,12 @@ class Application
     Application &operator=(const Application &&) = delete;
 
   private:
-    Window  *mWindow         = nullptr;
+    Specification &mSpecification;
 
-    Monitor *mPrimaryMonitor = nullptr;
-    Monitor *mCurrentMonitor = nullptr;
+    Window        *mWindow         = nullptr;
+
+    Monitor       *mPrimaryMonitor = nullptr;
+    Monitor       *mCurrentMonitor = nullptr;
 
   private:
     std::vector<Monitor> mMonitors;
