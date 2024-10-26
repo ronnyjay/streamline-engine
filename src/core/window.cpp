@@ -46,6 +46,42 @@ Window::Window(int width, int height, const char *title)
     glfwGetWindowSize(mWindow, &mWidth, &mHeight);
 }
 
+void Window::Refresh()
+{
+}
+
+void Window::ShowMouse(bool value)
+{
+    if ((mShowMouse = value))
+    {
+        glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    else
+    {
+        glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+}
+
+void Window::CaptureMouse(bool value)
+{
+    mCaptureMouse = value;
+}
+
+void Window::SetDecorated(bool value)
+{
+    glfwSetWindowAttrib(mWindow, GLFW_DECORATED, (mDecorated = value));
+}
+
+void Window::SetFloating(bool value)
+{
+    glfwSetWindowAttrib(mWindow, GLFW_FLOATING, (mFloating = value));
+}
+
+void Window::SetResizable(bool value)
+{
+    glfwSetWindowAttrib(mWindow, GLFW_RESIZABLE, (mResizable = value));
+}
+
 void Window::FramebufferSizeCallback(GLFWwindow *glfwWindow, int width, int height)
 {
     static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow))
@@ -104,20 +140,20 @@ void Window::CursorPosCallback(GLFWwindow *glfwWindow, double xPosIn, double yPo
 
     if (window->mFirstMouse)
     {
-        lastX = xPosIn;
-        lastY = yPosIn;
+        lastX               = xPosIn;
+        lastY               = yPosIn;
 
         window->mFirstMouse = false;
     }
 
-    float xPos = static_cast<float>(xPosIn);
-    float yPos = static_cast<float>(yPosIn);
+    float xPos    = static_cast<float>(xPosIn);
+    float yPos    = static_cast<float>(yPosIn);
 
     float xOffset = xPos - lastX;
     float yOffset = lastY - yPos;
 
-    lastX = xPos;
-    lastY = yPos;
+    lastX         = xPos;
+    lastY         = yPos;
 
     window->dispatch(EventType::MouseMoved, MouseMoveEvent(xOffset, yOffset));
 }

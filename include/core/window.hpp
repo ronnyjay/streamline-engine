@@ -12,24 +12,73 @@
 namespace engine
 {
 
+/**
+ * @brief Wrapper for a GLFWwindow
+ *
+ */
 class Window : public EventDispatcher
 {
   public:
     Window(int width = 800, int height = 600, const char *title = "");
+
+    const bool &bFirstMouse   = mFirstMouse;
+    const bool &bShowMouse    = mShowMouse;
+    const bool &bCaptureMouse = mCaptureMouse;
+
+    const bool &bDecorated    = mDecorated;
+    const bool &bFloating     = mFloating;
+    const bool &bResizable    = mResizable;
 
     operator GLFWwindow *()
     {
         return mWindow;
     }
 
-    const bool &bFirstMouse   = mFirstMouse;
-    const bool &bShowMouse    = mShowMouse;
-    const bool &bCaptureMouse = mCaptureMouse;
+    /**
+     * @brief
+     *
+     */
+    void Refresh();
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    void ShowMouse(bool value);
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    void CaptureMouse(bool value);
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    void SetDecorated(bool value);
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    void SetFloating(bool value);
+
+    /**
+     * @brief
+     *
+     * @param value
+     */
+    void SetResizable(bool value);
 
     ~Window() {};
 
-    Window(const Window &)  = delete;
-    Window(const Window &&) = delete;
+    Window(const Window &)            = delete;
+    Window(const Window &&)           = delete;
 
     Window operator=(const Window &)  = delete;
     Window operator=(const Window &&) = delete;
@@ -40,9 +89,13 @@ class Window : public EventDispatcher
     int         mWidth;
     int         mHeight;
 
-    bool        mFirstMouse;
-    bool        mShowMouse;
-    bool        mCaptureMouse;
+    bool        mFirstMouse   = true;
+    bool        mShowMouse    = true;
+    bool        mCaptureMouse = false;
+
+    bool        mDecorated    = true;
+    bool        mFloating     = false;
+    bool        mResizable    = false;
 
     static void FramebufferSizeCallback(GLFWwindow *, int, int);
 
