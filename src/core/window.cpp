@@ -13,8 +13,6 @@ Window::Window(int width, int height, const char *title)
 
     glfwMakeContextCurrent(mWindow);
 
-    glfwSetWindowUserPointer(mWindow, this);
-
     glfwSetFramebufferSizeCallback(mWindow, Window::FramebufferSizeCallback);
     glfwSetWindowMaximizeCallback(mWindow, Window::WindowMaximizeCallback);
     glfwSetWindowIconifyCallback(mWindow, Window::WindowMinimizeCallback);
@@ -27,9 +25,11 @@ Window::Window(int width, int height, const char *title)
     {
         std::exit(1);
     }
+
+    glfwSetWindowUserPointer(mWindow, this);
 }
 
-bool Window::IsRunning() const
+bool Window::IsOpen() const
 {
     return !glfwWindowShouldClose(mWindow);
 }

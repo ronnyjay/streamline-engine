@@ -1,7 +1,5 @@
 #include "core/application.hpp"
 
-#include <cstdio>
-
 using namespace engine;
 
 Application::Application()
@@ -37,7 +35,7 @@ Application::Application()
 
 void Application::Run()
 {
-    while (mWindow->IsRunning())
+    while (mWindow->IsOpen())
     {
         mWindow->SwapBuffers();
     }
@@ -45,5 +43,9 @@ void Application::Run()
 
 Application::~Application()
 {
+    // Destroy window
+    Window::Destroy(mWindow);
+
+    // Terminate GLFW
     glfwTerminate();
 }

@@ -46,7 +46,7 @@ class Window : public EventDispatcher
      *
      * @return
      */
-    bool IsRunning() const;
+    bool IsOpen() const;
 
     /**
      * @brief
@@ -98,6 +98,17 @@ class Window : public EventDispatcher
      * @return Window*
      */
     static Window *Create(int width, int height, const char *title);
+
+    /**
+     * @brief
+     *
+     * @param window
+     */
+    static void Destroy(Window *window)
+    {
+        delete window;
+        window = nullptr;
+    }
 
     ~Window() {};
 
