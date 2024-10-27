@@ -16,22 +16,7 @@ class Application
   public:
     Application(Specification &&);
 
-    void          Run();
-
-    Window *const GetWindow() const
-    {
-        return mWindow;
-    }
-
-    Monitor *const GetPrimaryMonitor() const
-    {
-        return mPrimaryMonitor;
-    }
-
-    Monitor *const GetCurrentMonitor() const
-    {
-        return mCurrentMonitor;
-    }
+    void Run();
 
     ~Application();
 
@@ -44,13 +29,7 @@ class Application
   private:
     Specification &mSpecification;
 
-    Window        *mWindow         = nullptr;
-
-    Monitor       *mPrimaryMonitor = nullptr;
-    Monitor       *mCurrentMonitor = nullptr;
-
-  private:
-    std::vector<Monitor> mMonitors;
+    Window        *mWindow;
 };
 
 } // namespace engine

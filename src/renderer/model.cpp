@@ -165,7 +165,7 @@ Model::load_material_textures(aiMaterial *material, aiTextureType type, std::str
 
         std::filesystem::path texture_path = std::string(directory.C_Str()) + "/" + path.C_Str();
 
-        Texture              &texture      = ResourceManager::load_texture(texture_path, texture_path);
+        Texture              &texture      = ResourceManager::LoadTexture(texture_path, texture_path);
         texture.type                       = type_name;
 
         textures.push_back(texture);

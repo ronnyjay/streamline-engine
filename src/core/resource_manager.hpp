@@ -53,7 +53,7 @@ class ResourceManager
      * @param path The path to the texture
      * @return Texture& The generated texture
      */
-    static Texture &load_texture(std::string id, std::string path);
+    static Texture &LoadTexture(std::string id, std::string path);
 
     /**
      * @brief Retrieves a stored texture
@@ -61,7 +61,7 @@ class ResourceManager
      * @param id The texture's unique identifier
      * @return Texture& The stored texture
      */
-    static Texture &get_texture(std::string id);
+    static Texture &GetTexture(std::string id);
 
     /**
      * @brief Loads and generates a shader from vertex and fragment shader files
@@ -71,7 +71,7 @@ class ResourceManager
      * @param fragment_path The path to the fragment shader's source
      * @return Shader& The generated shader
      */
-    static Shader &load_shader(std::string id, std::string vertex_path, std::string fragment_path);
+    static Shader &LoadShader(std::string id, std::string vertex_path, std::string fragment_path);
 
     /**
      * @brief Retrieves a stored shader
@@ -79,7 +79,7 @@ class ResourceManager
      * @param id The shader's unique identifier
      * @return Shader& The stored shader
      */
-    static Shader &get_shader(std::string id);
+    static Shader &GetShader(std::string id);
 
     /**
      * @brief Loads and generates a model from a specified filepath
@@ -88,7 +88,7 @@ class ResourceManager
      * @param path The path to the model
      * @return Model& The generated model
      */
-    static Model &load_model(std::string id, std::string path);
+    static Model &LoadModel(std::string id, std::string path);
 
     /**
      * @brief Retrieves a stored model
@@ -96,7 +96,7 @@ class ResourceManager
      * @param id The model's unique identifier
      * @return Model& The stored model
      */
-    static Model &get_model(std::string id);
+    static Model &GetModel(std::string id);
 
   private:
     /**
@@ -107,9 +107,9 @@ class ResourceManager
     {
     }
 
-    static std::map<std::string, Texture> textures;
-    static std::map<std::string, Shader>  shaders;
-    static std::map<std::string, Model>   models;
+    static std::map<std::string, Shader>  mShaders;
+    static std::map<std::string, Model>   mModels;
+    static std::map<std::string, Texture> mTextures;
 };
 
 } // namespace engine

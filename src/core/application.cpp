@@ -23,27 +23,11 @@ Application::Application(Specification &&specification)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // Initialize Window
-    mWindow = Window::Create(800, 600, "Streamline Engine");
-
-    // Load Monitors
-    int           count;
-    GLFWmonitor **monitors = glfwGetMonitors(&count);
-
-    for (int i = 0; i < count; i++)
-    {
-        mMonitors.emplace_back(Monitor(monitors[i]));
-    }
-
-    // Pass to specification
-    mSpecification.OnInit(this);
+    mWindow = new Window(800, 600, "Streamline Engine");
 }
 
 void Application::Run()
 {
-    while (mWindow->IsOpen())
-    {
-        mWindow->SwapBuffers();
-    }
 }
 
 Application::~Application()
@@ -52,7 +36,8 @@ Application::~Application()
     mSpecification.OnExit(this);
 
     // Destroy window
-    Window::Destroy(mWindow);
+    delete mWindow;
+    mWindow = nullptr;
 
     // Terminate GLFW
     glfwTerminate();

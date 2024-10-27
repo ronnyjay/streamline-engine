@@ -6,6 +6,19 @@ using namespace engine;
 
 Window::Window(int width, int height, const char *title)
 {
+    // Load monitors
+    int           count;
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+    for (int i = 0; i < count; i++)
+    {
+        mMonitors.emplace_back(Monitor(monitors[i]));
+    }
+
+    mPrimaryMonitor = &mMonitors[0];
+    mCurrentMonitor = &mMonitors[0];
+
+    // Initialize window
     if (!(mWindow = glfwCreateWindow(width, height, title, NULL, NULL)))
     {
         std::exit(1);
@@ -16,10 +29,10 @@ Window::Window(int width, int height, const char *title)
     glfwSetFramebufferSizeCallback(mWindow, Window::FramebufferSizeCallback);
     glfwSetWindowMaximizeCallback(mWindow, Window::WindowMaximizeCallback);
     glfwSetWindowIconifyCallback(mWindow, Window::WindowMinimizeCallback);
+    glfwSetKeyCallback(mWindow, Window::KeyCallback);
     glfwSetMouseButtonCallback(mWindow, Window::MouseButtonCallback);
     glfwSetCursorPosCallback(mWindow, Window::CursorPosCallback);
     glfwSetScrollCallback(mWindow, Window::ScrollCallback);
-    glfwSetKeyCallback(mWindow, Window::KeyCallback);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
@@ -27,16 +40,6 @@ Window::Window(int width, int height, const char *title)
     }
 
     glfwSetWindowUserPointer(mWindow, this);
-}
-
-bool Window::IsOpen() const
-{
-    return !glfwWindowShouldClose(mWindow);
-}
-
-void Window::SwapBuffers()
-{
-    glfwSwapBuffers(mWindow);
 }
 
 void Window::ShowMouse(bool value)
@@ -71,15 +74,24 @@ void Window::SetResizable(bool value)
     glfwSetWindowAttrib(mWindow, GLFW_RESIZABLE, (mResizable = value));
 }
 
-void Window::Destroy(Window *window)
+void Window::SetDisplayMode(DisplayMode mode)
 {
-    delete window;
-    window = nullptr;
 }
 
-Window *Window::Create(int width, int height, const char *title)
+void Window::SetMonitor(Monitor &monitor)
 {
-    return new Window(width, height, title);
+    if ((GLFWmonitor *)monitor != nullptr)
+    {
+        mPrimaryMonitor = &monitor;
+    }
+}
+
+void Window::SetResolution(Resolution &resolution)
+{
+    if (mDisplayMode == DisplayMode::Windowed)
+    {
+        glfwGetWindowPos(mWindow, &mPosX, &mPosY);
+    }
 }
 
 void Window::FramebufferSizeCallback(GLFWwindow *glfwWindow, int width, int height)

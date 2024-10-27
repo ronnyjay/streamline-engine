@@ -20,7 +20,7 @@ struct ModelComponent
     ModelComponent(Model &model)
         : model(model)
     {
-        m_shader = ResourceManager::get_shader("model");
+        m_shader = ResourceManager::GetShader("model");
     }
 
     /**

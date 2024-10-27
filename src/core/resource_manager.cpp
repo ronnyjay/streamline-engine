@@ -9,17 +9,17 @@
 
 using namespace engine;
 
-std::map<std::string, Texture> ResourceManager::textures;
-std::map<std::string, Shader>  ResourceManager::shaders;
-std::map<std::string, Model>   ResourceManager::models;
+std::map<std::string, Texture> ResourceManager::mTextures;
+std::map<std::string, Shader>  ResourceManager::mShaders;
+std::map<std::string, Model>   ResourceManager::mModels;
 
 //
 
-Model &ResourceManager::load_model(std::string id, std::string path)
+Model &ResourceManager::LoadModel(std::string id, std::string path)
 {
-    if (!models.contains(id))
+    if (!mModels.contains(id))
     {
-        if (models[id].load(path) == 0)
+        if (mModels[id].load(path) == 0)
         {
             logger::info("ResourceManager - Loaded model: " + path);
         }
@@ -29,24 +29,24 @@ Model &ResourceManager::load_model(std::string id, std::string path)
         }
     }
 
-    return models[id];
+    return mModels[id];
 }
 
-Model &ResourceManager::get_model(std::string id)
+Model &ResourceManager::GetModel(std::string id)
 {
-    if (!models.contains(id))
+    if (!mModels.contains(id))
     {
         throw missing_resource_exception(id, std::source_location::current());
     }
 
-    return models[id];
+    return mModels[id];
 }
 
-Shader &ResourceManager::load_shader(std::string id, std::string vertex_path, std::string fragment_path)
+Shader &ResourceManager::LoadShader(std::string id, std::string vertex_path, std::string fragment_path)
 {
-    if (!shaders.contains(id))
+    if (!mShaders.contains(id))
     {
-        bool vertex = shaders[id].add_shader(vertex_path, GL_VERTEX_SHADER);
+        bool vertex = mShaders[id].add_shader(vertex_path, GL_VERTEX_SHADER);
 
         if (!vertex)
         {
@@ -57,7 +57,7 @@ Shader &ResourceManager::load_shader(std::string id, std::string vertex_path, st
             logger::info("ResourceManager - Loaded vertex shader: " + vertex_path);
         }
 
-        bool fragment = shaders[id].add_shader(fragment_path, GL_FRAGMENT_SHADER);
+        bool fragment = mShaders[id].add_shader(fragment_path, GL_FRAGMENT_SHADER);
 
         if (!fragment)
         {
@@ -68,7 +68,7 @@ Shader &ResourceManager::load_shader(std::string id, std::string vertex_path, st
             logger::info("ResourceManager - Loaded fragment shader: " + fragment_path);
         }
 
-        bool compile = shaders[id].compile();
+        bool compile = mShaders[id].compile();
 
         if (!compile)
         {
@@ -80,24 +80,24 @@ Shader &ResourceManager::load_shader(std::string id, std::string vertex_path, st
         }
     }
 
-    return shaders[id];
+    return mShaders[id];
 }
 
-Shader &ResourceManager::get_shader(std::string id)
+Shader &ResourceManager::GetShader(std::string id)
 {
-    if (!shaders.contains(id))
+    if (!mShaders.contains(id))
     {
         throw missing_resource_exception(id, std::source_location::current());
     }
 
-    return shaders[id];
+    return mShaders[id];
 }
 
-Texture &ResourceManager::load_texture(std::string id, std::string path)
+Texture &ResourceManager::LoadTexture(std::string id, std::string path)
 {
-    if (!textures.contains(id))
+    if (!mTextures.contains(id))
     {
-        if (textures[id].load(path) == 0)
+        if (mTextures[id].load(path) == 0)
         {
             logger::info("ResourceManager - Loaded texture: " + path);
         }
@@ -106,18 +106,18 @@ Texture &ResourceManager::load_texture(std::string id, std::string path)
             logger::warn("ResourceManager - Failed to load texture: " + path);
         }
 
-        textures[id].load(path);
+        mTextures[id].load(path);
     }
 
-    return textures[id];
+    return mTextures[id];
 }
 
-Texture &ResourceManager::get_texture(std::string id)
+Texture &ResourceManager::GetTexture(std::string id)
 {
-    if (!textures.contains(id))
+    if (!mTextures.contains(id))
     {
         throw missing_resource_exception(id, std::source_location::current());
     }
 
-    return textures[id];
+    return mTextures[id];
 }

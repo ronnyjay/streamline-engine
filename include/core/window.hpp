@@ -12,10 +12,13 @@
 namespace engine
 {
 
-/**
- * @brief Wrapper for a GLFWwindow
- *
- */
+enum class DisplayMode
+{
+    Windowed,
+    Fullscreen,
+    FullscreenBorderless,
+};
+
 class Window : public EventDispatcher
 {
   public:
@@ -33,19 +36,6 @@ class Window : public EventDispatcher
     {
         return mWindow;
     }
-
-    /**
-     * @brief
-     *
-     * @return
-     */
-    bool IsOpen() const;
-
-    /**
-     * @brief
-     *
-     */
-    void SwapBuffers();
 
     /**
      * @brief
@@ -85,19 +75,23 @@ class Window : public EventDispatcher
     /**
      * @brief
      *
-     * @param window
+     * @param mode
      */
-    static void Destroy(Window *window);
+    void SetDisplayMode(DisplayMode mode);
 
     /**
      * @brief
      *
-     * @param width
-     * @param height
-     * @param title
-     * @return Window*
+     * @param monitor
      */
-    static Window *Create(int width, int height, const char *title);
+    void SetMonitor(Monitor &monitor);
+
+    /**
+     * @brief
+     *
+     * @param resolution
+     */
+    void SetResolution(Resolution &resolution);
 
     ~Window() {};
 
@@ -108,29 +102,41 @@ class Window : public EventDispatcher
     Window operator=(const Window &&) = delete;
 
   private:
-    GLFWwindow *mWindow;
+    GLFWwindow          *mWindow;
 
-    int         mWidth;
-    int         mHeight;
+    int                  mPosX;
+    int                  mPosY;
 
-    bool        mFirstMouse   = true;
-    bool        mShowMouse    = true;
-    bool        mCaptureMouse = false;
+    int                  mWidth;
+    int                  mHeight;
 
-    bool        mDecorated    = true;
-    bool        mFloating     = false;
-    bool        mResizable    = false;
+    bool                 mFirstMouse;
+    bool                 mShowMouse;
+    bool                 mCaptureMouse;
 
-    static void FramebufferSizeCallback(GLFWwindow *, int, int);
+    bool                 mDecorated;
+    bool                 mFloating;
+    bool                 mResizable;
 
-    static void WindowMaximizeCallback(GLFWwindow *, int);
-    static void WindowMinimizeCallback(GLFWwindow *, int);
+    DisplayMode          mDisplayMode;
 
-    static void KeyCallback(GLFWwindow *, int, int, int, int);
-    static void MouseButtonCallback(GLFWwindow *, int, int, int);
+    Monitor             *mPrimaryMonitor;
+    Monitor             *mCurrentMonitor;
 
-    static void CursorPosCallback(GLFWwindow *, double, double);
-    static void ScrollCallback(GLFWwindow *, double, double);
+    std::vector<Monitor> mMonitors;
+
+    static void          FramebufferSizeCallback(GLFWwindow *, int, int);
+
+    static void          WindowMaximizeCallback(GLFWwindow *, int);
+    static void          WindowMinimizeCallback(GLFWwindow *, int);
+
+    static void          WindowPosCallback(GLFWwindow *, int, int);
+
+    static void          KeyCallback(GLFWwindow *, int, int, int, int);
+    static void          MouseButtonCallback(GLFWwindow *, int, int, int);
+
+    static void          CursorPosCallback(GLFWwindow *, double, double);
+    static void          ScrollCallback(GLFWwindow *, double, double);
 };
 
 } // namespace engine

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace engine
 {
 
@@ -12,6 +14,9 @@ class Application; // Forward Declaration
 class Specification
 {
   public:
+    static constexpr int DEFAULT_WINDOW_WIDTH  = 800;
+    static constexpr int DEFAULT_WINDOW_HEIGHT = 600;
+
     /**
      * @brief
      *
