@@ -5,13 +5,6 @@
 namespace engine
 {
 
-enum class Level
-{
-    Info,
-    Warn,
-    Error
-};
-
 class Application
 {
   public:
@@ -26,8 +19,6 @@ class Application
     }
 
     void Run();
-
-    void AddDebugMessage(Level, const std::string &);
 
     ~Application();
 
