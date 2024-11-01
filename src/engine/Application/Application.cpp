@@ -348,6 +348,12 @@ void Application::Run()
 
         if (renderAccumulator >= renderTimeStep)
         {
+            int width, height;
+            glfwGetFramebufferSize(m_Window, &width, &height);
+
+            float screen_aspect = (float)width / (float)height;
+            float frame_aspect = (float)m_Framebuffer->Width() / (float)m_Framebuffer->Height();
+
             // Begin rendering to framebuffer
             m_Framebuffer->Bind();
 
@@ -356,6 +362,18 @@ void Application::Run()
 
             glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            if (frame_aspect < screen_aspect)
+            {
+                int viewportHeight = height;
+                int viewportWidth = static_cast<int>(height * frame_aspect);
+                int viewportX = (width - viewportWidth) / 2;
+                glViewport(viewportX / 2, 0, viewportWidth, viewportHeight);
+            }
+            else
+            {
+                glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
+            }
             glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
 
             if (m_Flags.ShowWireframes)
@@ -369,14 +387,22 @@ void Application::Run()
             // End rendering to framebuffer
             m_Framebuffer->Unbind();
 
-            int width, height;
-            glfwGetFramebufferSize(m_Window, &width, &height);
-
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
-            glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glViewport(0, 0, width, height);
+
+            if (frame_aspect < screen_aspect)
+            {
+                int viewportHeight = height;
+                int viewportWidth = static_cast<int>(height * frame_aspect);
+                int viewportX = (width - viewportWidth) / 2;
+                glViewport(viewportX, 0, viewportWidth, viewportHeight);
+            }
+            else
+            {
+                glViewport(0, 0, m_Framebuffer->Width(), m_Framebuffer->Height());
+            }
 
             if (m_Flags.ShowWireframes)
             {
@@ -735,8 +761,6 @@ void Application::SetResolution(const Resolution resolution)
 
     if (m_DisplayMode == Fullscreen)
     {
-        glfwSetWindowMonitor(m_Window, m_PrimaryMonitor->monitor, 0, 0, width, height, GLFW_DONT_CARE);
-
         bool found = false;
 
         for (size_t i = 0; i < m_PrimaryMonitor->resolutions.size(); i++)
