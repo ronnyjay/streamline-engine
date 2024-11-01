@@ -26,8 +26,8 @@ AlignConsecutiveDeclarations:
   AlignFunctionPointers: false
   PadOperators: false
 AlignConsecutiveMacros:
-  Enabled: false
-  AcrossEmptyLines: false
+  Enabled: true
+  AcrossEmptyLines: true
   AcrossComments: false
   AlignCompound: false
   AlignFunctionPointers: false
@@ -41,7 +41,7 @@ AlignEscapedNewlines: Right
 AlignOperands: Align
 AlignTrailingComments:
   Kind: Always
-  OverEmptyLines: 0
+  OverEmptyLines: 2
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowBreakBeforeNoexceptSpecifier: Never

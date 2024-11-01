@@ -4,17 +4,16 @@ using namespace engine;
 
 std::unique_ptr<Application> Application::kInstance = nullptr;
 
-Application &Application::get()
+Application::Application()
 {
-    if (!kInstance)
-    {
-        kInstance = std::unique_ptr<Application>(new Application);
-    }
-
-    return *kInstance;
+    mWindow = Window::Create(800, 600, "Streamline Engine");
 }
 
-void Application::run()
+void Application::Run()
 {
     return;
+}
+
+Application::~Application()
+{
 }

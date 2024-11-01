@@ -4,9 +4,9 @@ using namespace engine;
 
 int main(void)
 {
-    Application &app = Application::get();
+    Application &app = Application::Get();
 
-    app.run();
+    app.Run();
 
     return 0;
 }
