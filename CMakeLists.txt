@@ -63,6 +63,7 @@ add_executable(streamline-engine src/main.cpp)
 
 target_sources(streamline-engine PRIVATE
     src/core/application.cpp
+    src/core/monitor.cpp
     src/core/window.cpp
 )
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "monitor.hpp"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
@@ -17,12 +19,19 @@ class Window
         return std::unique_ptr<Window>(new Window(width, height, title));
     }
 
+    operator GLFWwindow *()
+    {
+        return mWindow;
+    }
+
     void SetWindowPosition(int, int);
     void SetWindowSize(int, int);
 
     void SetFullscreen();
     void SetWindowed();
     void SetBorderless();
+
+    void SetMonitor(const Monitor &);
 
     int GetX() const
     {
@@ -61,7 +70,37 @@ class Window
     int mWidth;
     int mHeight;
 
+    GLFWmonitor *mPreferredMonitor;
+
     Window(int width, int height, const char *title);
+
+    GLFWmonitor *GetMonitor()
+    {
+        int windowX, windowY;
+        glfwGetWindowPos(mWindow, &windowX, &windowY);
+
+        int count;
+        GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+        for (int i = 0; i < count; i++)
+        {
+            GLFWmonitor *monitor = monitors[i];
+
+            int monitorX, monitorY;
+            int monitorWidth, monitorHeight;
+            glfwGetMonitorWorkarea(monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+
+            bool overlapX = windowX >= monitorX && windowX < monitorX + monitorWidth;
+            bool overlapY = windowY >= monitorY && windowY < monitorY + monitorHeight;
+
+            if (overlapX && overlapY)
+            {
+                return monitor;
+            }
+        }
+
+        return glfwGetPrimaryMonitor();
+    }
 };
 
 }; // namespace engine
