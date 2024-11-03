@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include <cassert>
 #include <cstring>
 
 using namespace engine;
@@ -20,14 +21,28 @@ Window::Window(int width, int height, const char *title)
 
 void Window::SetWindowPosition(int x, int y)
 {
+    if (!glfwGetWindowMonitor(mWindow))
+    {
+        return;
+    }
+
+    mX = x;
+    mY = y;
+
     glfwSetWindowPos(mWindow, x, y);
-    glfwGetWindowPos(mWindow, &mX, &mY);
 }
 
 void Window::SetWindowSize(int width, int height)
 {
+    if (glfwGetWindowMonitor(mWindow))
+    {
+        return;
+    }
+
+    mWidth = width;
+    mHeight = height;
+
     glfwSetWindowSize(mWindow, width, height);
-    glfwGetWindowSize(mWindow, &mWidth, &mHeight);
 }
 
 void Window::SetFullscreen()
