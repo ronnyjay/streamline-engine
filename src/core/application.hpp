@@ -20,6 +20,11 @@ class Application
 
     void Run();
 
+    Window *const GetTopLevelWindow()
+    {
+        return mWindow.get();
+    }
+
     ~Application();
 
     Application(const Application &other) = delete;

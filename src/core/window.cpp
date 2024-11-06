@@ -4,118 +4,244 @@
 
 using namespace engine;
 
-Window::Window(int width, int height, const char *title)
+std::unique_ptr<Window> Window::create(int width, int height, const char *title)
 {
-    mWindow = glfwCreateWindow(width, height, title, NULL, NULL);
+    if (!glfwInit())
+    {
+        return nullptr;
+    }
 
-    glfwMakeContextCurrent(mWindow);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    GLFWwindow *window = glfwCreateWindow(width, height, title, NULL, NULL);
+
+    if (!window)
+    {
+        glfwTerminate();
+        return nullptr;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    glfwSetFramebufferSizeCallback(window, Window::framebuffer_size_callback);
+    glfwSetWindowMaximizeCallback(window, Window::window_maximize_callback);
+    glfwSetWindowIconifyCallback(window, Window::window_minimize_callback);
+    glfwSetKeyCallback(window, Window::key_callback);
+    glfwSetMouseButtonCallback(window, Window::mouse_button_callback);
+    glfwSetCursorPosCallback(window, Window::cursor_pos_callback);
+    glfwSetScrollCallback(window, Window::scroll_callback);
 
     if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
     {
-        // TODO: Safely terminate
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return nullptr;
     }
 
-    glfwGetWindowPos(mWindow, &mX, &mY);
-    glfwGetWindowSize(mWindow, &mWidth, &mHeight);
+    return std::unique_ptr<Window>(new Window(window));
 }
 
-void Window::SetWindowPosition(int x, int y)
+void Window::move_to(int x, int y)
 {
-    if (!glfwGetWindowMonitor(mWindow))
+    if (glfwGetWindowMonitor(m_window))
     {
         return;
     }
 
-    mX = x;
-    mY = y;
+    m_x = x;
+    m_y = y;
 
-    glfwSetWindowPos(mWindow, x, y);
+    glfwSetWindowPos(m_window, x, y);
 }
 
-void Window::SetWindowSize(int width, int height)
+void Window::resize(int w, int h)
 {
-    if (glfwGetWindowMonitor(mWindow))
+    if (glfwGetWindowMonitor(m_window))
     {
         return;
     }
 
-    mWidth = width;
-    mHeight = height;
+    m_width  = w;
+    m_height = h;
 
-    glfwSetWindowSize(mWindow, width, height);
+    glfwSetWindowSize(m_window, w, h);
 }
 
-void Window::SetFullscreen()
+void Window::set_window_mode(WindowMode m)
 {
-    GLFWmonitor *monitor = mPreferredMonitor;
+    GLFWmonitor  *monitor = nullptr;
 
-    if (!monitor)
+    int           x, y;
+    int           w, h;
+    int           count;
+
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
+
+    for (int i = 0; i < count; i++)
     {
-        monitor = GetMonitor();
+        glfwGetMonitorWorkarea(monitors[i], &x, &y, &w, &h);
+
+        bool overlap_x = (m_x >= x && m_x < x + w);
+        bool overlap_y = (m_y >= y && m_y < y + h);
+
+        if (overlap_x && overlap_y)
+        {
+            monitor = monitors[i];
+            break;
+        }
     }
 
-    int monitorX, monitorY;
-    int monitorWidth, monitorHeight;
-    glfwGetMonitorWorkarea(monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-
-    glfwSetWindowMonitor(mWindow, NULL, monitorX, monitorY, monitorWidth, monitorHeight, GLFW_DONT_CARE);
-    glfwSetWindowMonitor(mWindow, monitor, 0, 0, monitorWidth, monitorHeight, GLFW_DONT_CARE);
-}
-
-void Window::SetWindowed()
-{
-    if (glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
+    if (WindowMode(m) == WindowMode::Fullscreen)
     {
-        glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GL_FALSE);
+        glfwSetWindowMonitor(m_window, nullptr, x, y, w, h, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_window, monitor, 0, 0, w, h, GLFW_DONT_CARE);
     }
 
-    if (!glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
+    else if (WindowMode(m) == WindowMode::Windowed)
     {
-        glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GL_TRUE);
+        if (!glfwGetWindowAttrib(m_window, GLFW_DECORATED))
+        {
+            glfwSetWindowAttrib(m_window, GLFW_DECORATED, GLFW_TRUE);
+        }
+
+        if (glfwGetWindowAttrib(m_window, GLFW_FLOATING))
+        {
+            glfwSetWindowAttrib(m_window, GLFW_FLOATING, GLFW_FALSE);
+        }
+
+        glfwSetWindowMonitor(
+            m_window,
+            nullptr,
+            // Center the window on the primary monitor
+            // Later, track the window's last x, y to restore last position
+            x + (w - m_width) / 2,
+            y + (h - m_height) / 2,
+            m_width,
+            m_height,
+            GLFW_DONT_CARE);
     }
 
-    glfwSetWindowMonitor(mWindow, NULL, mX, mY, mWidth, mHeight, GLFW_DONT_CARE);
-}
-
-void Window::SetBorderless()
-{
-    GLFWmonitor *monitor = mPreferredMonitor;
-
-    if (!monitor)
+    else if (WindowMode(m) == WindowMode::Borderless)
     {
-        monitor = GetMonitor();
-    }
+        if (!glfwGetWindowAttrib(m_window, GLFW_FLOATING))
+        {
+            glfwSetWindowAttrib(m_window, GLFW_FLOATING, GLFW_TRUE);
+        }
 
-    int monitorX, monitorY;
-    int monitorWidth, monitorHeight;
-    glfwGetMonitorWorkarea(monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+        if (glfwGetWindowAttrib(m_window, GLFW_DECORATED))
+        {
+            glfwSetWindowAttrib(m_window, GLFW_DECORATED, GLFW_FALSE);
+        }
 
-    if (glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
-    {
-        glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GL_FALSE);
-    }
-
-    if (!glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
-    {
-        glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GL_TRUE);
-    }
-
-    glfwSetWindowMonitor(mWindow, nullptr, monitorX, monitorY, monitorWidth, monitorHeight, GLFW_DONT_CARE);
-}
-
-void Window::SetMonitor(const Monitor &preferredMonitor)
-{
-    if (auto *monitor = (GLFWmonitor *)const_cast<Monitor &>(preferredMonitor))
-    {
-
-        mPreferredMonitor = monitor;
+        glfwSetWindowMonitor(m_window, nullptr, x, y, w, h, GLFW_DONT_CARE);
     }
 }
 
 Window::~Window()
 {
-    if (mWindow)
+    if (m_window)
     {
-        glfwDestroyWindow(mWindow);
+        glfwDestroyWindow(m_window);
+    }
+
+    glfwTerminate();
+}
+
+void Window::framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+    Window *w   = static_cast<Window *>(glfwGetWindowUserPointer(window));
+
+    w->m_width  = width;
+    w->m_height = height;
+
+    if (w->m_event_callback)
+    {
+        w->m_event_callback(WindowResizeEvent(width, height));
+    }
+}
+
+void Window::window_maximize_callback(GLFWwindow *window, int maximize)
+{
+    if (maximize)
+    {
+        glfwMaximizeWindow(window);
+    }
+    else
+    {
+        glfwRestoreWindow(window);
+    }
+}
+
+void Window::window_minimize_callback(GLFWwindow *window, int minimize)
+{
+    if (minimize)
+    {
+        glfwIconifyWindow(window);
+    }
+    else
+    {
+        glfwRestoreWindow(window);
+    }
+}
+
+void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+
+    if (w->m_event_callback)
+    {
+        if (action == GLFW_RELEASE)
+        {
+            w->m_event_callback(KeyReleaseEvent(key));
+        }
+        else
+        {
+            w->m_event_callback(KeyPressEvent(key, mods, action == GLFW_REPEAT));
+        }
+    }
+}
+
+void Window::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+
+    if (w->m_event_callback)
+    {
+        if (action == GLFW_PRESS)
+        {
+            w->m_event_callback(MouseButtonPressEvent(button));
+        }
+        else
+        {
+            w->m_event_callback(MouseButtonReleaseEvent(button));
+        }
+    }
+}
+
+void Window::cursor_pos_callback(GLFWwindow *window, double x, double y)
+{
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+
+    if (w->m_event_callback)
+    {
+        w->m_event_callback(MouseMoveEvent(x, y));
+    }
+}
+
+void Window::scroll_callback(GLFWwindow *window, double x, double y)
+{
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+
+    if (w->m_event_callback)
+    {
+        w->m_event_callback(MouseScrollEvent(x, y));
     }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "monitor.hpp"
+#include "event.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -11,96 +11,123 @@
 namespace engine
 {
 
+// clang-format off
+enum class WindowMode : int
+{
+    Fullscreen, Windowed, Borderless
+};
+// clang-format on
+
 class Window
 {
   public:
-    static std::unique_ptr<Window> Create(int width, int height, const char *title)
-    {
-        return std::unique_ptr<Window>(new Window(width, height, title));
-    }
+    static std::unique_ptr<Window> create(int width, int height, const char *title);
 
     operator GLFWwindow *()
     {
-        return mWindow;
+        return m_window;
     }
 
-    void SetWindowPosition(int, int);
-    void SetWindowSize(int, int);
+    /**
+     * @brief
+     *
+     * @return int
+     */
+    int x() const;
 
-    void SetFullscreen();
-    void SetWindowed();
-    void SetBorderless();
+    /**
+     * @brief
+     *
+     * @return int
+     */
+    int y() const;
 
-    void SetMonitor(const Monitor &);
+    /**
+     * @brief
+     *
+     * @return int
+     */
+    int width() const;
 
-    int GetX() const
+    /**
+     * @brief
+     *
+     * @return int
+     */
+    int height() const;
+
+    /**
+     * @brief
+     *
+     * @param x
+     * @param y
+     */
+    void resize(int x, int y);
+
+    /**
+     * @brief
+     *
+     * @param w
+     * @param h
+     */
+    void move_to(int w, int h);
+
+    /**
+     * @brief
+     *
+     * @param mode
+     */
+    void set_window_mode(WindowMode mode);
+
+    /**
+     * @brief
+     *
+     * @param instance
+     * @param fn
+     */
+    template <typename T>
+    void set_event_callback(T *instance, void (T::*fn)(Event &&))
     {
-        return mX;
-    }
-
-    int GetY() const
-    {
-        return mY;
-    }
-
-    int GetWidth() const
-    {
-        return mWidth;
-    }
-
-    int GetHeight() const
-    {
-        return mHeight;
+        m_event_callback = std::bind(fn, instance, std::placeholders::_1);
     }
 
     ~Window();
 
-    Window(const Window &other) = delete;
-    Window(const Window &&other) = delete;
+    Window(const Window &other)            = delete;
+    Window(const Window &&other)           = delete;
 
-    Window operator=(const Window &other) = delete;
+    Window operator=(const Window &other)  = delete;
     Window operator=(const Window &&other) = delete;
 
   private:
-    GLFWwindow *mWindow;
+    GLFWwindow   *m_window;
 
-    int mX;
-    int mY;
+    int           m_x;
+    int           m_y;
+    int           m_width;
+    int           m_height;
 
-    int mWidth;
-    int mHeight;
+    EventCallback m_event_callback;
 
-    GLFWmonitor *mPreferredMonitor;
-
-    Window(int width, int height, const char *title);
-
-    GLFWmonitor *GetMonitor()
+    explicit Window(GLFWwindow *window)
+        : m_window(window)
     {
-        int windowX, windowY;
-        glfwGetWindowPos(mWindow, &windowX, &windowY);
+        glfwSetWindowUserPointer(m_window, this);
 
-        int count;
-        GLFWmonitor **monitors = glfwGetMonitors(&count);
-
-        for (int i = 0; i < count; i++)
-        {
-            GLFWmonitor *monitor = monitors[i];
-
-            int monitorX, monitorY;
-            int monitorWidth, monitorHeight;
-            glfwGetMonitorWorkarea(monitor, &monitorX, &monitorY, &monitorWidth, &monitorHeight);
-
-            bool overlapX = windowX >= monitorX && windowX < monitorX + monitorWidth;
-            bool overlapY = windowY >= monitorY && windowY < monitorY + monitorHeight;
-
-            if (overlapX && overlapY)
-            {
-                return monitor;
-            }
-        }
-
-        return glfwGetPrimaryMonitor();
+        glfwGetWindowPos(m_window, &m_x, &m_y);
+        glfwGetWindowSize(m_window, &m_width, &m_height);
     }
+
+    static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+
+    static void window_maximize_callback(GLFWwindow *window, int maximize);
+    static void window_minimize_callback(GLFWwindow *window, int minimize);
+
+    static void scroll_callback(GLFWwindow *window, double x, double y);
+    static void cursor_pos_callback(GLFWwindow *window, double x, double y);
+
+    static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+    static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 };
 
 }; // namespace engine

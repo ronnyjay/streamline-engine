@@ -21,7 +21,7 @@ Application::Application()
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    mWindow = Window::Create(800, 600, "Streamline Engine");
+    mWindow = Window::create(800, 600, "Streamline Engine");
 }
 
 void Application::Run()

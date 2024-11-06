@@ -10,6 +10,9 @@ Monitor::Monitor(GLFWmonitor *monitor) : mMonitor(monitor)
     glfwGetMonitorContentScale(monitor, &ContentScale.X, &ContentScale.Y);
     glfwGetMonitorWorkarea(monitor, &WorkArea.MinX, &WorkArea.MinY, &Width, &Height);
 
+    WorkArea.MaxX = WorkArea.MinX + Width;
+    WorkArea.MaxY = WorkArea.MinY + Height;
+
     int count;
     const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
 

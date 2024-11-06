@@ -13,6 +13,8 @@ namespace engine
 
 struct Monitor
 {
+    Monitor(GLFWmonitor *monitor);
+
     operator GLFWmonitor *()
     {
         return mMonitor;
@@ -40,11 +42,7 @@ struct Monitor
     const std::vector<Resolution> VideoModes;
 
   private:
-    Monitor(GLFWmonitor *monitor);
-
     GLFWmonitor *mMonitor;
-
-    friend class DisplayMetrics;
 };
 
 typedef std::vector<Monitor> MonitorList;

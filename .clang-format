@@ -1,12 +1,12 @@
 ---
 Language: Cpp
-# BasedOnStyle:  LLVM
+BasedOnStyle: Google
 AccessModifierOffset: -2
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
-  Enabled: false
-  AcrossEmptyLines: false
+  Enabled: true
+  AcrossEmptyLines: true
   AcrossComments: false
   AlignCompound: false
   AlignFunctionPointers: false
@@ -19,15 +19,15 @@ AlignConsecutiveBitFields:
   AlignFunctionPointers: false
   PadOperators: false
 AlignConsecutiveDeclarations:
-  Enabled: false
-  AcrossEmptyLines: false
+  Enabled: true
+  AcrossEmptyLines: true
   AcrossComments: false
   AlignCompound: false
   AlignFunctionPointers: false
   PadOperators: false
 AlignConsecutiveMacros:
-  Enabled: true
-  AcrossEmptyLines: true
+  Enabled: false
+  AcrossEmptyLines: false
   AcrossComments: false
   AlignCompound: false
   AlignFunctionPointers: false
@@ -48,18 +48,18 @@ AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortCompoundRequirementOnASingleLine: true
-AllowShortEnumsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
-AllowShortLambdasOnASingleLine: All
+AllowShortLambdasOnASingleLine: None
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: MultiLine
+AlwaysBreakTemplateDeclarations: true
 AttributeMacros:
   - __capability
-BinPackArguments: true
+BinPackArguments: false
 BinPackParameters: true
 BitFieldColonSpacing: Both
 BraceWrapping:
@@ -90,7 +90,7 @@ BreakBeforeConceptDeclarations: Always
 BreakBeforeBraces: Allman
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeColon
+BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeColon
 BreakStringLiterals: true
 ColumnLimit: 120
