@@ -13,6 +13,7 @@ class DisplayManager
      *
      */
     DisplayManager()
+        : mPreferredMonitorIndex(0)
     {
     }
 
@@ -48,6 +49,34 @@ class DisplayManager
         mMonitors.clear();
     }
 
+    /**
+     * @brief
+     *
+     * @param index
+     */
+    bool SetPreferredMonitorIndex(int index)
+    {
+        if (index >= 0 && index < static_cast<int>(mMonitors.size()))
+        {
+            mPreferredMonitorIndex = index;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @brief
+     *
+     * @param index
+     * @return int
+     */
+    int GetPreferredMonitorIndex() const
+    {
+        return mPreferredMonitorIndex;
+    }
+
     //
 
     const MonitorList &MonitorInfo = mMonitors;
@@ -61,7 +90,9 @@ class DisplayManager
     DisplayManager operator=(const DisplayManager &&) = delete;
 
   private:
-    mutable MonitorList mMonitors;
+    MonitorList mMonitors;
+
+    int         mPreferredMonitorIndex;
 };
 
 } // namespace engine
