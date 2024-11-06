@@ -18,7 +18,7 @@ class Application
         return *kInstance;
     }
 
-    void Run();
+    void          Run();
 
     Window *const GetTopLevelWindow()
     {
@@ -27,16 +27,16 @@ class Application
 
     ~Application();
 
-    Application(const Application &other) = delete;
-    Application(const Application &&other) = delete;
+    Application(const Application &other)            = delete;
+    Application(const Application &&other)           = delete;
 
-    Application operator=(const Application &other) = delete;
+    Application operator=(const Application &other)  = delete;
     Application operator=(const Application &&other) = delete;
 
   private:
     Application();
 
-    std::unique_ptr<Window> mWindow;
+    std::unique_ptr<Window>             mWindow;
 
     static std::unique_ptr<Application> kInstance;
 };

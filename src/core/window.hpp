@@ -2,6 +2,8 @@
 
 #include "event.hpp"
 
+#include "math/vec.hpp"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
@@ -25,56 +27,30 @@ class Window
 
     operator GLFWwindow *()
     {
-        return m_window;
+        return mBaseWindow;
     }
 
     /**
      * @brief
      *
-     * @return int
+     * @return Vector2f
      */
-    int x() const
-    {
-        return m_x;
-    }
+    Vector2f GetPositionInScreen() const;
 
     /**
      * @brief
      *
-     * @return int
+     * @return Vector2f
      */
-    int y() const
-    {
-        return m_y;
-    }
+    Vector2f GetSizeInScreen() const;
 
     /**
      * @brief
-     *
-     * @return int
-     */
-    int width() const
-    {
-        return m_width;
-    }
-
-    /**
-     * @brief
-     *
-     * @return int
-     */
-    int height() const
-    {
-        return m_height;
-    }
-
-    /**
-     * @brief
-     *
+     *s
      * @param x
      * @param y
      */
-    void resize(int x, int y);
+    void Resize(int x, int y);
 
     /**
      * @brief
@@ -82,14 +58,14 @@ class Window
      * @param w
      * @param h
      */
-    void move_to(int w, int h);
+    void MoveTo(int w, int h);
 
     /**
      * @brief
      *
      * @param mode
      */
-    void set_window_mode(WindowMode mode);
+    void SetWindowMode(WindowMode mode);
 
     /**
      * @brief
@@ -98,9 +74,9 @@ class Window
      * @param fn
      */
     template <typename T>
-    void set_event_callback(T *instance, void (T::*fn)(Event &&))
+    void SetEventCallback(T *instance, void (T::*fn)(Event &&))
     {
-        m_event_callback = std::bind(fn, instance, std::placeholders::_1);
+        mEventCallback = std::bind(fn, instance, std::placeholders::_1);
     }
 
     ~Window();
@@ -112,34 +88,33 @@ class Window
     Window operator=(const Window &&other) = delete;
 
   private:
-    GLFWwindow   *m_window;
+    GLFWwindow   *mBaseWindow;
 
-    int           m_x;
-    int           m_y;
-    int           m_width;
-    int           m_height;
+    WindowMode    mWindowMode;
 
-    EventCallback m_event_callback;
+    Vector2f      mLastSize;
+    Vector2f      mLastPosition;
+
+    EventCallback mEventCallback;
 
     explicit Window(GLFWwindow *window)
-        : m_window(window)
+        : mBaseWindow(window)
     {
-        glfwSetWindowUserPointer(m_window, this);
-
-        glfwGetWindowPos(m_window, &m_x, &m_y);
-        glfwGetWindowSize(m_window, &m_width, &m_height);
+        glfwGetWindowPos(mBaseWindow, &mLastPosition.x, &mLastPosition.y);
+        glfwGetWindowSize(mBaseWindow, &mLastSize.x, &mLastSize.y);
+        glfwSetWindowUserPointer(mBaseWindow, this);
     }
 
-    static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+    static void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
 
-    static void window_maximize_callback(GLFWwindow *window, int maximize);
-    static void window_minimize_callback(GLFWwindow *window, int minimize);
+    static void MaximizeCallback(GLFWwindow *window, int maximize);
+    static void MinimizeCallback(GLFWwindow *window, int minimize);
 
-    static void scroll_callback(GLFWwindow *window, double x, double y);
-    static void cursor_pos_callback(GLFWwindow *window, double x, double y);
+    static void ScrollCallback(GLFWwindow *window, double x, double y);
+    static void CursorPosCallback(GLFWwindow *window, double x, double y);
 
-    static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
-    static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+    static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 };
 
 }; // namespace engine
