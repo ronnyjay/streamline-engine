@@ -1,5 +1,4 @@
 #include "core/application.hpp"
-#include <thread>
 
 using namespace engine;
 

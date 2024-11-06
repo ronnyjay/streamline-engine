@@ -161,6 +161,8 @@ void Window::SetWindowMode(WindowMode m)
 
         glfwSetWindowMonitor(mBaseWindow, nullptr, x, y, w, h, GLFW_DONT_CARE);
     }
+
+    mWindowMode = m;
 }
 
 Window::~Window()
