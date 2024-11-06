@@ -65,6 +65,13 @@ target_sources(streamline-engine PRIVATE
     src/core/application.cpp
     src/core/monitor.cpp
     src/core/window.cpp
+    src/renderer/framebuffer.cpp
+    src/renderer/mesh.cpp
+    src/renderer/model.cpp
+    src/renderer/renderer.cpp
+    src/renderer/shader.cpp
+    src/renderer/texture.cpp
+    src/subsystem/resource_manager.cpp
 )
 
 target_link_libraries(streamline-engine PUBLIC glfw glm::glm glad stb imgui assimp::assimp)

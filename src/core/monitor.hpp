@@ -22,8 +22,8 @@ struct Monitor
 
     const char *Title;
 
-    int Width;
-    int Height;
+    int         Width;
+    int         Height;
 
     struct
     {

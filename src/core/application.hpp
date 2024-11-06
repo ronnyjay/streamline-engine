@@ -8,15 +8,7 @@ namespace engine
 class Application
 {
   public:
-    static Application &Get()
-    {
-        if (!kInstance)
-        {
-            kInstance = std::unique_ptr<Application>(new Application);
-        }
-
-        return *kInstance;
-    }
+    Application();
 
     void          Run();
 
@@ -34,11 +26,7 @@ class Application
     Application operator=(const Application &&other) = delete;
 
   private:
-    Application();
-
-    std::unique_ptr<Window>             mWindow;
-
-    static std::unique_ptr<Application> kInstance;
+    std::unique_ptr<Window> mWindow;
 };
 
 } // namespace engine

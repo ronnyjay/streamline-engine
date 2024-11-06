@@ -1,12 +1,20 @@
 #include "core/application.hpp"
+#include "core/displaymanager.hpp"
 
 using namespace engine;
 
+//
+
+Application    gApplication;
+DisplayManager gDisplayManager;
+
+//
+
 int main(void)
 {
-    Application &app = Application::Get();
+    gDisplayManager.StartUp();
 
-    app.Run();
+    gApplication.Run();
 
-    return 0;
+    gDisplayManager.ShutDown();
 }
