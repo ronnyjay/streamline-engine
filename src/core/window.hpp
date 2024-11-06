@@ -33,28 +33,40 @@ class Window
      *
      * @return int
      */
-    int x() const;
+    int x() const
+    {
+        return m_x;
+    }
 
     /**
      * @brief
      *
      * @return int
      */
-    int y() const;
+    int y() const
+    {
+        return m_y;
+    }
 
     /**
      * @brief
      *
      * @return int
      */
-    int width() const;
+    int width() const
+    {
+        return m_width;
+    }
 
     /**
      * @brief
      *
      * @return int
      */
-    int height() const;
+    int height() const
+    {
+        return m_height;
+    }
 
     /**
      * @brief
