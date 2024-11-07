@@ -1,5 +1,8 @@
 #include "core/application.hpp"
 
+#include "math/matrix.hpp" // IWYU pragma: keep
+#include "math/vector.hpp" // IWYU pragma: keep
+
 using namespace engine;
 
 //

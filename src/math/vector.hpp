@@ -482,7 +482,7 @@ Vector<3, T> Cross(const Vector<3, T> &a, const Vector<3, T> &b)
     T y = (a.z * b.x) - (a.x * b.z);
     T z = (a.x * b.y) - (a.y * b.x);
 
-    return Vector3<T>(x, y, z);
+    return Vector<3, T>(x, y, z);
 }
 
 typedef Vector<2, int>    Vector2i;
