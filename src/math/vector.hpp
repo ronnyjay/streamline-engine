@@ -322,7 +322,7 @@ typedef Vector4<double> Vector4d;
 template <typename T>
 float Dot(const Vector2<T> &a, const Vector2<T> &b)
 {
-    return static_cast<float>((a.x * b.x) + (a.y + b.y));
+    return static_cast<float>((a.x * b.x) + (a.y * b.y));
 }
 
 /**
