@@ -311,4 +311,64 @@ typedef Vector4<int>    Vector4i;
 typedef Vector4<float>  Vector4f;
 typedef Vector4<double> Vector4d;
 
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param a
+ * @param b
+ * @return float
+ */
+template <typename T>
+float Dot(const Vector2<T> &a, const Vector2<T> &b)
+{
+    return static_cast<float>((a.x * b.x) + (a.y + b.y));
+}
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param a
+ * @param b
+ * @return float
+ */
+template <typename T>
+float Dot(const Vector3<T> &a, const Vector3<T> &b)
+{
+    return static_cast<float>((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
+}
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param a
+ * @param b
+ * @return float
+ */
+template <typename T>
+float Dot(const Vector4<T> &a, const Vector4<T> &b)
+{
+    return static_cast<float>((a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w));
+}
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param a
+ * @param b
+ * @return Vector3<T>
+ */
+template <typename T>
+Vector3<T> Cross(const Vector3<T> &a, const Vector3<T> &b)
+{
+    T x = (a.y * b.z) - (a.z * b.y);
+    T y = (a.z * b.x) - (a.x * b.z);
+    T z = (a.x * b.y) - (a.y * b.x);
+
+    return Vector3<T>(x, y, z);
+}
+
 } // namespace engine
