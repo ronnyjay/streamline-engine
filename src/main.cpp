@@ -1,5 +1,7 @@
 #include "core/application.hpp"
 
+#include <glm/glm.hpp>
+
 using namespace engine;
 
 //

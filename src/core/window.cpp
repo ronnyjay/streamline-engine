@@ -49,18 +49,18 @@ std::unique_ptr<Window> Window::create(int width, int height, const char *title)
     return std::unique_ptr<Window>(new Window(window));
 }
 
-Vector2f Window::GetPositionInScreen() const
+Vector2i Window::GetPositionInScreen() const
 {
-    Vector2f position;
+    Vector2i position;
 
     glfwGetWindowPos(mBaseWindow, &position.x, &position.y);
 
     return position;
 }
 
-Vector2f Window::GetSizeInScreen() const
+Vector2i Window::GetSizeInScreen() const
 {
-    Vector2f size;
+    Vector2i size;
 
     glfwGetWindowSize(mBaseWindow, &size.x, &size.y);
 

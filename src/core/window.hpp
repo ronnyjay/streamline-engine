@@ -2,7 +2,7 @@
 
 #include "event.hpp"
 
-#include "math/vec.hpp"
+#include "math/vector.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -35,14 +35,14 @@ class Window
      *
      * @return Vector2f
      */
-    Vector2f GetPositionInScreen() const;
+    Vector2<int> GetPositionInScreen() const;
 
     /**
      * @brief
      *
      * @return Vector2f
      */
-    Vector2f GetSizeInScreen() const;
+    Vector2<int> GetSizeInScreen() const;
 
     /**
      * @brief
@@ -92,8 +92,8 @@ class Window
 
     WindowMode    mWindowMode;
 
-    Vector2f      mLastSize;
-    Vector2f      mLastPosition;
+    Vector2<int>  mLastSize;
+    Vector2<int>  mLastPosition;
 
     EventCallback mEventCallback;
 
