@@ -1,20 +1,58 @@
 #pragma once
 
 #include <cmath>
+#include <stdexcept>
 
 namespace engine
 {
 
-template <typename T>
-struct Vector2
+template <std::size_t N, typename T>
+class Vector
 {
+  public:
+    /**
+     * @brief
+     *
+     * @param index
+     * @return T&
+     */
+    T &operator[](std::size_t index)
+    {
+        if (index >= N)
+            throw std::out_of_range("Index out of range");
+        return data[index];
+    }
+
+    /**
+     * @brief
+     *
+     * @param index
+     * @return const T&
+     */
+    const T &operator[](std::size_t index) const
+    {
+        if (index >= N)
+            throw std::out_of_range("Index out of range");
+        return data[index];
+    }
+
+  private:
+    std::array<T, N> data;
+};
+
+template <typename T>
+struct Vector<2, T>
+{
+    T x{};
+    T y{};
+
     /**
      * @brief
      *
      * @param x
      * @param y
      */
-    Vector2(T x, T y)
+    Vector(T x, T y)
         : x(x)
         , y(y)
     {
@@ -23,11 +61,11 @@ struct Vector2
     /**
      * @brief
      *
-     * @param scalar
+     * @param s
      */
-    Vector2(T &scalar)
-        : x(scalar)
-        , y(scalar)
+    Vector(T s)
+        : x(s)
+        , y(s)
     {
     }
 
@@ -35,10 +73,7 @@ struct Vector2
      * @brief
      *
      */
-    Vector2() = default;
-
-    T x{};
-    T y{};
+    Vector() = default;
 
     /**
      * @brief
@@ -56,59 +91,92 @@ struct Vector2
     /**
      * @brief
      *
-     * @param other
-     * @return Vector2<T>
+     * @param index
+     * @return T&
      */
-    Vector2<T> operator+(const Vector2<T> &other) const
+    T &operator[](std::size_t index)
     {
-        return Vector2<T>(x + other.x, y + other.y);
+        if (index == 0)
+            return x;
+        if (index == 1)
+            return y;
+        throw std::out_of_range("Index out of range");
+    }
+
+    /**
+     * @brief
+     *
+     * @param index
+     * @return const T&
+     */
+    const T &operator[](std::size_t index) const
+    {
+        if (index == 0)
+            return x;
+        if (index == 1)
+            return y;
+        throw std::out_of_range("Index out of range");
     }
 
     /**
      * @brief
      *
      * @param other
-     * @return Vector2<T>
+     * @return Vector<2, T>
      */
-    Vector2<T> operator-(const Vector2<T> &other) const
+    Vector<2, T> operator+(const Vector<2, T> &other) const
     {
-        return Vector2<T>(x - other.x, y - other.y);
+        return Vector<2, T>(x + other.x, y + other.y);
     }
 
     /**
      * @brief
      *
      * @param other
-     * @return Vector2<T>
+     * @return Vector<2, T>
      */
-    Vector2<T> operator*(const Vector2<T> &other) const
+    Vector<2, T> operator-(const Vector<2, T> &other) const
     {
-        return Vector2<T>(x * other.x, y * other.y);
+        return Vector<2, T>(x - other.x, y - other.y);
     }
 
     /**
      * @brief
      *
-     * @param scalar
-     * @return Vector2<T>
+     * @param other
+     * @return Vector<2, T>
      */
-    Vector2<T> operator*(const T &scalar) const
+    Vector<2, T> operator*(const Vector<2, T> &other) const
     {
-        return Vector2<T>(x * scalar, y * scalar);
+        return Vector<2, T>(x * other.x, y * other.y);
+    }
+
+    /**
+     * @brief
+     *
+     * @param s
+     * @return Vector<2, T>
+     */
+    Vector<2, T> operator*(T s) const
+    {
+        return Vector<2, T>(x * s, y * s);
     }
 };
 
 template <typename T>
-struct Vector3
+struct Vector<3, T>
 {
+    T x{};
+    T y{};
+    T z{};
+
     /**
      * @brief
      *
      * @param x
      * @param y
-     * @param z
      */
-    Vector3(T x, T y, T z)
+    Vector(T x, T y, T z)
         : x(x)
         , y(y)
         , z(z)
@@ -118,12 +186,12 @@ struct Vector3
     /**
      * @brief
      *
-     * @param scalar
+     * @param s
      */
-    Vector3(T &scalar)
-        : x(scalar)
-        , y(scalar)
-        , z(scalar)
+    Vector(T s)
+        : x(s)
+        , y(s)
+        , z(s)
     {
     }
 
@@ -131,11 +199,7 @@ struct Vector3
      * @brief
      *
      */
-    Vector3() = default;
-
-    T x{};
-    T y{};
-    T z{};
+    Vector() = default;
 
     /**
      * @brief
@@ -154,60 +218,97 @@ struct Vector3
     /**
      * @brief
      *
-     * @param other
-     * @return Vector2<T>
+     * @param index
+     * @return T&
      */
-    Vector3<T> operator+(const Vector3<T> &other) const
+    T &operator[](std::size_t index)
     {
-        return Vector3<T>(x + other.x, y + other.y, z + other.z);
+        if (index == 0)
+            return x;
+        if (index == 1)
+            return y;
+        if (index == 2)
+            return z;
+        throw std::out_of_range("Index out of range");
+    }
+
+    /**
+     * @brief
+     *
+     * @param index
+     * @return const T&
+     */
+    const T &operator[](std::size_t index) const
+    {
+        if (index == 0)
+            return x;
+        if (index == 1)
+            return y;
+        if (index == 2)
+            return z;
+        throw std::out_of_range("Index out of range");
     }
 
     /**
      * @brief
      *
      * @param other
-     * @return Vector2<T>
+     * @return Vector<3, T>
      */
-    Vector3<T> operator-(const Vector3<T> &other) const
+    Vector<3, T> operator+(const Vector<3, T> &other) const
     {
-        return Vector3<T>(x - other.x, y - other.y, z - other.z);
+        return Vector<3, T>(x + other.x, y + other.y, z + other.z);
     }
 
     /**
      * @brief
      *
      * @param other
-     * @return Vector2<T>
+     * @return Vector<3, T>
      */
-    Vector3<T> operator*(const Vector3<T> &other) const
+    Vector<3, T> operator-(const Vector<3, T> &other) const
     {
-        return Vector3<T>(x * other.x, y * other.y, z * other.z);
+        return Vector<3, T>(x - other.x, y - other.y, z - other.z);
     }
 
     /**
      * @brief
      *
-     * @param scalar
-     * @return Vector3<T>
+     * @param other
+     * @return Vector<3, T>
      */
-    Vector3<T> operator*(const T &scalar) const
+    Vector<3, T> operator*(const Vector<3, T> &other) const
     {
-        return Vector3<T>(x * scalar, y * scalar, z * scalar);
+        return Vector<3, T>(x * other.x, y * other.y, z * other.z);
+    }
+
+    /**
+     * @brief
+     *
+     * @param s
+     * @return Vector<3, T>
+     */
+    Vector<3, T> operator*(T s) const
+    {
+        return Vector<3, T>(x * s, y * s, z * s);
     }
 };
 
 template <typename T>
-struct Vector4
+struct Vector<4, T>
 {
+    T x{};
+    T y{};
+    T z{};
+    T w{};
+
     /**
      * @brief
      *
      * @param x
      * @param y
-     * @param z
-     * @param w
      */
-    Vector4(T x, T y, T z, T w)
+    Vector(T x, T y, T z, T w)
         : x(x)
         , y(y)
         , z(z)
@@ -218,13 +319,13 @@ struct Vector4
     /**
      * @brief
      *
-     * @param scalar
+     * @param s
      */
-    Vector4(T scalar)
-        : x(scalar)
-        , y(scalar)
-        , z(scalar)
-        , w(scalar)
+    Vector(T s)
+        : x(s)
+        , y(s)
+        , z(s)
+        , w(s)
     {
     }
 
@@ -232,12 +333,7 @@ struct Vector4
      * @brief
      *
      */
-    Vector4() = default;
-
-    T x{};
-    T y{};
-    T z{};
-    T w{};
+    Vector() = default;
 
     /**
      * @brief
@@ -257,70 +353,88 @@ struct Vector4
     /**
      * @brief
      *
-     * @param other
-     * @return Vector2<T>
+     * @param index
+     * @return T&
      */
-    Vector4<T> operator+(const Vector4<T> &other) const
+    T &operator[](std::size_t index)
     {
-        return Vector4<T>(x + other.x, y + other.y, z + other.z, w * other.w);
+        if (index == 0)
+            return x;
+        if (index == 1)
+            return y;
+        if (index == 2)
+            return z;
+        if (index == 3)
+            return w;
+        throw std::out_of_range("Index out of range");
+    }
+
+    /**
+     * @brief
+     *
+     * @param index
+     * @return const T&
+     */
+    const T &operator[](std::size_t index) const
+    {
+        if (index == 0)
+            return x;
+        if (index == 1)
+            return y;
+        if (index == 2)
+            return z;
+        if (index == 3)
+            return w;
+        throw std::out_of_range("Index out of range");
     }
 
     /**
      * @brief
      *
      * @param other
-     * @return Vector2<T>
+     * @return Vector<4, T>
      */
-    Vector4<T> operator-(const Vector4<T> &other) const
+    Vector<4, T> operator+(const Vector<4, T> &other) const
     {
-        return Vector4<T>(x - other.x, y - other.y, z - other.z, w - other.w);
+        return Vector<4, T>(x + other.x, y + other.y, z + other.z, w * other.w);
     }
 
     /**
      * @brief
      *
      * @param other
-     * @return Vector2<T>
+     * @return Vector<4, T>
      */
-    Vector4<T> operator*(const Vector4<T> &other) const
+    Vector<4, T> operator-(const Vector<4, T> &other) const
     {
-        return Vector4<T>(x * other.x, y * other.y, z * other.z, w * other.w);
+        return Vector<4, T>(x - other.x, y - other.y, z - other.z, w - other.w);
     }
 
     /**
      * @brief
      *
-     * @param scalar
-     * @return Vector4<T>
+     * @param other
+     * @return Vector<4, T>
      */
-    Vector4<T> operator*(const T &scalar) const
+    Vector<4, T> operator*(const Vector<4, T> &other) const
     {
-        return Vector4<T>(x * scalar, y * scalar, z * scalar, w * scalar);
+        return Vector<4, T>(x * other.x, y * other.y, z * other.z, w * other.w);
+    }
+
+    /**
+     * @brief
+     *
+     * @param s
+     * @return Vector<4, T>
+     */
+    Vector<4, T> operator*(T s) const
+    {
+        return Vector<4, T>(x * s, y * s, z * s, w * s);
     }
 };
 
-typedef Vector2<int>    Vector2i;
-typedef Vector2<float>  Vector2f;
-typedef Vector2<double> Vector2d;
-
-typedef Vector3<int>    Vector3i;
-typedef Vector3<float>  Vector3f;
-typedef Vector3<double> Vector3d;
-
-typedef Vector4<int>    Vector4i;
-typedef Vector4<float>  Vector4f;
-typedef Vector4<double> Vector4d;
-
-/**
- * @brief
- *
- * @tparam T
- * @param a
- * @param b
- * @return float
- */
 template <typename T>
-float Dot(const Vector2<T> &a, const Vector2<T> &b)
+float Dot(const Vector<2, T> &a, const Vector<2, T> &b)
 {
     return static_cast<float>((a.x * b.x) + (a.y * b.y));
 }
@@ -334,7 +448,7 @@ float Dot(const Vector2<T> &a, const Vector2<T> &b)
  * @return float
  */
 template <typename T>
-float Dot(const Vector3<T> &a, const Vector3<T> &b)
+float Dot(const Vector<3, T> &a, const Vector<3, T> &b)
 {
     return static_cast<float>((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
 }
@@ -348,7 +462,7 @@ float Dot(const Vector3<T> &a, const Vector3<T> &b)
  * @return float
  */
 template <typename T>
-float Dot(const Vector4<T> &a, const Vector4<T> &b)
+float Dot(const Vector<4, T> &a, const Vector<4, T> &b)
 {
     return static_cast<float>((a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w));
 }
@@ -362,7 +476,7 @@ float Dot(const Vector4<T> &a, const Vector4<T> &b)
  * @return Vector3<T>
  */
 template <typename T>
-Vector3<T> Cross(const Vector3<T> &a, const Vector3<T> &b)
+Vector<3, T> Cross(const Vector<3, T> &a, const Vector<3, T> &b)
 {
     T x = (a.y * b.z) - (a.z * b.y);
     T y = (a.z * b.x) - (a.x * b.z);
@@ -370,5 +484,17 @@ Vector3<T> Cross(const Vector3<T> &a, const Vector3<T> &b)
 
     return Vector3<T>(x, y, z);
 }
+
+typedef Vector<2, int>    Vector2i;
+typedef Vector<2, float>  Vector2f;
+typedef Vector<2, double> Vector2d;
+
+typedef Vector<3, int>    Vector3i;
+typedef Vector<3, float>  Vector3f;
+typedef Vector<3, double> Vector3d;
+
+typedef Vector<4, int>    Vector4i;
+typedef Vector<4, float>  Vector4f;
+typedef Vector<4, double> Vector4d;
 
 } // namespace engine
