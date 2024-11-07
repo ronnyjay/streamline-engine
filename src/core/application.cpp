@@ -4,21 +4,21 @@ using namespace engine;
 
 Application::Application()
 {
-    mWindow = Window::create(800, 600, "Streamline Engine");
+    m_window = Window::create(800, 600, "Streamline Engine");
 }
 
 void Application::Run()
 {
-    while (!glfwWindowShouldClose(*mWindow))
+    while (!glfwWindowShouldClose(*m_window))
     {
         glfwPollEvents();
 
-        if (glfwGetKey(*mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(*m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(*mWindow, GL_TRUE);
+            glfwSetWindowShouldClose(*m_window, GL_TRUE);
         }
 
-        glfwSwapBuffers(*mWindow);
+        glfwSwapBuffers(*m_window);
     }
 }
 
