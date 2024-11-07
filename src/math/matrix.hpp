@@ -164,4 +164,61 @@ typedef Matrix<4, 4, float> Mat4;
 typedef Matrix<3, 3, float> Mat3;
 typedef Matrix<2, 2, float> Mat2;
 
+namespace math
+{
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param fov
+ * @param aspectratio
+ * @param near
+ * @param far
+ * @return Matrix<4, 4, T>
+ */
+template <typename T = float>
+inline Matrix<4, 4, T> Perspective(float fov, float aspect, float near, float far)
+{
+    Matrix<4, 4, T> proj;
+
+    proj[0][0] = 1 / (aspect * tan(fov / 2));
+    proj[1][1] = 1 / tan(fov / 2);
+    proj[2][2] = -((far + near) / (far - near));
+    proj[2][3] = -((2 * far * near) / (far - near));
+    proj[3][2] = -1;
+
+    return proj;
+}
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param left
+ * @param right
+ * @param top
+ * @param bottom
+ * @param near
+ * @param far
+ * @return Matrix<4, 4, T>
+ */
+template <typename T = float>
+inline Matrix<4, 4, T> Orthographic(float left, float right, float top, float bottom, float near, float far)
+{
+    Matrix<4, 4, T> proj;
+
+    proj[0][0] = 2 / (right - left);
+    proj[0][3] = -((right + left) / (right - left));
+    proj[1][1] = 2 / (top - bottom);
+    proj[1][3] = -((top + bottom) / (top - bottom));
+    proj[2][2] = -(2 / (far - near));
+    proj[2][3] = -((far + near) / (far - near));
+    proj[3][3] = 1;
+
+    return proj;
+}
+
+}; // namespace math
+
 } // namespace engine
