@@ -35,14 +35,14 @@ class Window
      *
      * @return Vector2f
      */
-    Vector2<int> GetPositionInScreen() const;
+    Vector2i GetPositionInScreen() const;
 
     /**
      * @brief
      *
      * @return Vector2f
      */
-    Vector2<int> GetSizeInScreen() const;
+    Vector2i GetSizeInScreen() const;
 
     /**
      * @brief
@@ -92,8 +92,8 @@ class Window
 
     WindowMode    mWindowMode;
 
-    Vector2<int>  mLastSize;
-    Vector2<int>  mLastPosition;
+    Vector2i      mLastSize;
+    Vector2i      mLastPosition;
 
     EventCallback mEventCallback;
 
