@@ -37,14 +37,36 @@ void benchmark_glm()
     );
     // clang-format on
 
+    // clang-format off
+    glm::mat4 matrix_a = glm::mat4(
+        1.0f, 5.0f, 9.0f, 13.0f,
+        2.0f, 6.0f, 10.0f, 14.0f,
+        3.0f, 7.0f, 11.0f, 15.0f,
+        4.0f, 8.0f, 12.0f, 16.0f
+    );
+    // clang-format on
+
+    glm::mat4 result = matrix * matrix_a;
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            printf("%f ", result[i][j]);
+            if (j == 3)
+                printf("\n");
+        }
+    }
+    printf("\n");
+
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000000; i++)
     {
-        glm::vec4 result = matrix * vector;
+        result = matrix * matrix_a;
     }
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "glm multiplication took: " << duration.count() << " ms." << std::endl;
+    std::cout << "glm multiplication took: " << duration.count() << " ms." << std::endl << std::endl;
 }
 
 void benchmark_slm()
@@ -60,10 +82,32 @@ void benchmark_slm()
     );
     // clang-format on
 
+    // clang-format off
+    Matrix<4, 4, float> matrix_b = slm::mat4(
+        1.0f, 5.0f, 9.0f, 13.0f,
+        2.0f, 6.0f, 10.0f, 14.0f,
+        3.0f, 7.0f, 11.0f, 15.0f,
+        4.0f, 8.0f, 12.0f, 16.0f
+    );
+    // clang-format on
+
+    slm::mat4 result = matrix * matrix_b;
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            printf("%f ", result[i][j]);
+            if (j == 3)
+                printf("\n");
+        }
+    }
+    printf("\n");
+
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000000; i++)
     {
-        slm::vec4 result = matrix * vector;
+        result = matrix * matrix_b;
     }
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

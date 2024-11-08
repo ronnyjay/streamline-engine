@@ -113,13 +113,76 @@ class Matrix
         return m;
     }
 
+#if defined(__AVX__) || defined(__FMA__)
+
+    // /**
+    //  * @brief Standard matrix multiplication
+    //  *
+    //  * @return Matrix<M, P, T>
+    //  */
+    // template <
+    //     std::size_t X = M, std::size_t Y = N, typename U = T,
+    //     typename = std::enable_if_t<
+    //         !((X == 4 && Y == 4 && std::is_same<U, float>::value) ||
+    //           (X == 3 && Y == 3 && std::is_same<U, float>::value) ||
+    //           (X == 2 && Y == 2 && std::is_same<U, float>::value))>,
+    //     std::size_t P>
+    // Matrix<M, P, T> operator*(const Matrix<N, P, T> &other) const
+    // {
+    // }
+
     /**
-     * @brief
+     * @brief SIMD multiplication for 4x4 matrices
      *
-     * @tparam P
      * @param other
-     * @return Matrix<N, N, T>
+     * @return Matrix<4, 4, T>
      */
+    template <typename U = T, std::enable_if_t<M == 4 && N == 4 && std::is_same<U, float>::value, int> = 0>
+    Matrix<4, 4, T> operator*(const Matrix<4, 4, T> &other) const
+    {
+        Matrix<4, 4, T> result;
+
+        // clang-format off
+        union { __m128 simd_vector; float  coefficients[4]; };
+
+        __m128 simd_matrix_columns[4];
+        simd_matrix_columns[0] = _mm_setr_ps(data[0][0], data[0][1], data[0][2], data[0][3]);
+        simd_matrix_columns[1] = _mm_setr_ps(data[1][0], data[1][1], data[1][2], data[1][3]);
+        simd_matrix_columns[2] = _mm_setr_ps(data[2][0], data[2][1], data[2][2], data[2][3]);
+        simd_matrix_columns[3] = _mm_setr_ps(data[3][0], data[3][1], data[3][2], data[3][3]);
+
+        for (size_t i = 0; i < 4; i++)
+        {
+            coefficients[0] = other[i][0];
+            coefficients[1] = other[i][1];
+            coefficients[2] = other[i][2];
+            coefficients[3] = other[i][3];
+
+            _mm_setr_ps( coefficients[0], coefficients[1], coefficients[2], coefficients[3]);
+
+            __m128 simd_result = _mm_fmadd_ps(_mm_set1_ps(coefficients[0]), simd_matrix_columns[0],
+            _mm_fmadd_ps(_mm_set1_ps(coefficients[1]), simd_matrix_columns[1],
+            _mm_fmadd_ps(_mm_set1_ps(coefficients[2]), simd_matrix_columns[2],
+                    _mm_mul_ps(_mm_set1_ps(coefficients[3]), simd_matrix_columns[3])
+                    )
+                )
+            );
+
+            float simd_results[4];
+            _mm_store_ps(simd_results, simd_result);
+
+            result[i][0] = simd_results[0];
+            result[i][1] = simd_results[1];
+            result[i][2] = simd_results[2];
+            result[i][3] = simd_results[3];
+        }
+        // clang-format on
+
+        return result;
+    }
+
+#else
+
     template <std::size_t P>
     Matrix<M, P, T> operator*(const Matrix<N, P, T> &other) const
     {
@@ -136,6 +199,8 @@ class Matrix
         }
         return m;
     }
+
+#endif
 
     /**
      * @brief
