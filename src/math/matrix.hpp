@@ -164,8 +164,43 @@ typedef Matrix<4, 4, float> Mat4;
 typedef Matrix<3, 3, float> Mat3;
 typedef Matrix<2, 2, float> Mat2;
 
-namespace math
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param v
+ * @return Matrix<4, 4, T>
+ */
+template <typename T = float>
+inline Matrix<4, 4, T> Translate(const Vector<3, T> &v)
 {
+}
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param m
+ * @return Matrix<4, 4, T>
+ */
+template <typename T = float>
+inline Matrix<4, 4, T> Inverse(const Matrix<4, 4, T> &m)
+{
+}
+
+/**
+ * @brief
+ *
+ * @tparam T
+ * @param m
+ * @param angle
+ * @param axis
+ * @return Matrix<4, 4, T>
+ */
+template <typename T = float>
+inline Matrix<4, 4, T> Rotate(const Matrix<4, 4, T> &m, T angle, const Vector<3, T> &axis)
+{
+}
 
 /**
  * @brief
@@ -185,8 +220,8 @@ inline Matrix<4, 4, T> Perspective(float fov, float aspect, float near, float fa
     proj[0][0] = 1 / (aspect * tan(fov / 2));
     proj[1][1] = 1 / tan(fov / 2);
     proj[2][2] = -((far + near) / (far - near));
-    proj[2][3] = -((2 * far * near) / (far - near));
-    proj[3][2] = -1;
+    proj[3][2] = -((2 * far * near) / (far - near));
+    proj[2][3] = -1;
 
     return proj;
 }
@@ -218,7 +253,5 @@ inline Matrix<4, 4, T> Orthographic(float left, float right, float top, float bo
 
     return proj;
 }
-
-}; // namespace math
 
 } // namespace engine
