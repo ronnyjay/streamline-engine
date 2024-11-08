@@ -80,7 +80,7 @@ struct Vector<2, T>
      *
      * @return float
      */
-    float Length() const
+    float length() const
     {
         float x2 = static_cast<float>(x * x);
         float y2 = static_cast<float>(y * y);
@@ -206,7 +206,7 @@ struct Vector<3, T>
      *
      * @return float
      */
-    float Length() const
+    float length() const
     {
         float x2 = static_cast<float>(x * x);
         float y2 = static_cast<float>(y * y);
@@ -340,7 +340,7 @@ struct Vector<4, T>
      *
      * @return float
      */
-    float Length() const
+    float length() const
     {
         float x2 = static_cast<float>(x * x);
         float y2 = static_cast<float>(y * y);
@@ -433,8 +433,10 @@ struct Vector<4, T>
     }
 };
 
+namespace slm
+{
 template <typename T>
-float Dot(const Vector<2, T> &a, const Vector<2, T> &b)
+float dot(const Vector<2, T> &a, const Vector<2, T> &b)
 {
     return static_cast<float>((a.x * b.x) + (a.y * b.y));
 }
@@ -448,7 +450,7 @@ float Dot(const Vector<2, T> &a, const Vector<2, T> &b)
  * @return float
  */
 template <typename T>
-float Dot(const Vector<3, T> &a, const Vector<3, T> &b)
+float dot(const Vector<3, T> &a, const Vector<3, T> &b)
 {
     return static_cast<float>((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
 }
@@ -462,7 +464,7 @@ float Dot(const Vector<3, T> &a, const Vector<3, T> &b)
  * @return float
  */
 template <typename T>
-float Dot(const Vector<4, T> &a, const Vector<4, T> &b)
+float dot(const Vector<4, T> &a, const Vector<4, T> &b)
 {
     return static_cast<float>((a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w));
 }
@@ -476,7 +478,7 @@ float Dot(const Vector<4, T> &a, const Vector<4, T> &b)
  * @return Vector3<T>
  */
 template <typename T>
-Vector<3, T> Cross(const Vector<3, T> &a, const Vector<3, T> &b)
+Vector<3, T> cross(const Vector<3, T> &a, const Vector<3, T> &b)
 {
     T x = (a.y * b.z) - (a.z * b.y);
     T y = (a.z * b.x) - (a.x * b.z);
@@ -484,6 +486,7 @@ Vector<3, T> Cross(const Vector<3, T> &a, const Vector<3, T> &b)
 
     return Vector<3, T>(x, y, z);
 }
+} // namespace slm
 
 typedef Vector<2, int>    Vector2i;
 typedef Vector<2, float>  Vector2f;

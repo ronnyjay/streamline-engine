@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace engine::math
+namespace engine::slm
 {
 
 /**
@@ -11,7 +11,7 @@ namespace engine::math
  * @param degrees
  * @return float
  */
-static float ToRadians(float degrees)
+static float radians(float degrees)
 {
     return degrees * (M_PI / 180);
 }
@@ -22,9 +22,9 @@ static float ToRadians(float degrees)
  * @param radians
  * @return float
  */
-static float ToDegrees(float radians)
+static float degrees(float radians)
 {
     return radians * (180 * M_1_PI);
 }
 
-}; // namespace engine::math
+}; // namespace engine::slm

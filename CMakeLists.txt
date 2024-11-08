@@ -35,6 +35,8 @@ add_compile_options(
     -Wno-unused-but-set-variable
     -Wno-unused
     -g
+    -mfma
+    -march=native
 )
 
 

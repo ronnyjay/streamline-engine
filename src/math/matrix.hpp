@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xmmintrin.h> // SSE intrinsics
+
 #include "vector.hpp"
 
 namespace engine
@@ -28,6 +30,19 @@ class Matrix
             {
                 if (i == j)
                     data[i][j] = s;
+            }
+        }
+    }
+
+    template <typename... Args, typename = std::enable_if<sizeof...(Args) == M * N>>
+    Matrix(Args... args)
+    {
+        T values[] = {args...};
+        for (std::size_t i = 0; i < M; i++)
+        {
+            for (std::size_t j = 0; j < N; j++)
+            {
+                data[i][j] = values[i * N + j];
             }
         }
     }
@@ -158,12 +173,14 @@ class Matrix
 
   private:
     std::array<Vector<N, T>, M> data;
-};
+}; // namespace engine
 
 typedef Matrix<4, 4, float> Mat4;
 typedef Matrix<3, 3, float> Mat3;
 typedef Matrix<2, 2, float> Mat2;
 
+namespace slm
+{
 /**
  * @brief
  *
@@ -172,7 +189,7 @@ typedef Matrix<2, 2, float> Mat2;
  * @return Matrix<4, 4, T>
  */
 template <typename T = float>
-inline Matrix<4, 4, T> Translate(const Vector<3, T> &v)
+inline Matrix<4, 4, T> translate(const Vector<3, T> &v)
 {
 }
 
@@ -184,7 +201,7 @@ inline Matrix<4, 4, T> Translate(const Vector<3, T> &v)
  * @return Matrix<4, 4, T>
  */
 template <typename T = float>
-inline Matrix<4, 4, T> Inverse(const Matrix<4, 4, T> &m)
+inline Matrix<4, 4, T> inverse(const Matrix<4, 4, T> &m)
 {
 }
 
@@ -198,7 +215,7 @@ inline Matrix<4, 4, T> Inverse(const Matrix<4, 4, T> &m)
  * @return Matrix<4, 4, T>
  */
 template <typename T = float>
-inline Matrix<4, 4, T> Rotate(const Matrix<4, 4, T> &m, T angle, const Vector<3, T> &axis)
+inline Matrix<4, 4, T> rotate(const Matrix<4, 4, T> &m, T angle, const Vector<3, T> &axis)
 {
 }
 
@@ -213,7 +230,7 @@ inline Matrix<4, 4, T> Rotate(const Matrix<4, 4, T> &m, T angle, const Vector<3,
  * @return Matrix<4, 4, T>
  */
 template <typename T = float>
-inline Matrix<4, 4, T> Perspective(float fov, float aspect, float near, float far)
+inline Matrix<4, 4, T> perspective(float fov, float aspect, float near, float far)
 {
     Matrix<4, 4, T> proj;
 
@@ -239,7 +256,7 @@ inline Matrix<4, 4, T> Perspective(float fov, float aspect, float near, float fa
  * @return Matrix<4, 4, T>
  */
 template <typename T = float>
-inline Matrix<4, 4, T> Orthographic(float left, float right, float top, float bottom, float near, float far)
+inline Matrix<4, 4, T> orthographic(float left, float right, float top, float bottom, float near, float far)
 {
     Matrix<4, 4, T> proj;
 
@@ -253,5 +270,7 @@ inline Matrix<4, 4, T> Orthographic(float left, float right, float top, float bo
 
     return proj;
 }
+
+} // namespace slm
 
 } // namespace engine
