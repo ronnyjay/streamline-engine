@@ -29,7 +29,7 @@ class Application
      */
     Window *const GetWindow()
     {
-        return mWindow.get();
+        return mWindow;
     }
 
     /**
@@ -39,7 +39,7 @@ class Application
      */
     Renderer *const GetRenderer()
     {
-        return mRenderer.get();
+        return mRenderer;
     }
 
     /**
@@ -49,21 +49,23 @@ class Application
      */
     DisplayManager *const GetDisplayManager()
     {
-        return mDisplayManager.get();
+        return mDisplayManager;
     }
 
     ~Application();
 
-    Application(const Application &other)            = delete;
-    Application(const Application &&other)           = delete;
+    Application(const Application &other) = delete;
+    Application(const Application &&other) = delete;
 
-    Application operator=(const Application &other)  = delete;
+    Application operator=(const Application &other) = delete;
     Application operator=(const Application &&other) = delete;
 
   private:
-    std::unique_ptr<Window>         mWindow;
-    std::unique_ptr<Renderer>       mRenderer;
-    std::unique_ptr<DisplayManager> mDisplayManager;
+    Window         *mWindow;
+    Renderer       *mRenderer;
+    DisplayManager *mDisplayManager;
+
+    void            OnEvent(Event &&e);
 };
 
 } // namespace engine

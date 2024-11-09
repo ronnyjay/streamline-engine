@@ -4,7 +4,7 @@
 
 using namespace engine;
 
-std::unique_ptr<Window> Window::create(int width, int height, const char *title)
+Window *Window::create(int width, int height, const char *title)
 {
     if (!glfwInit())
     {
@@ -46,7 +46,7 @@ std::unique_ptr<Window> Window::create(int width, int height, const char *title)
         return nullptr;
     }
 
-    return std::unique_ptr<Window>(new Window(window));
+    return new Window(window);
 }
 
 Vector2i Window::GetPositionInScreen() const
@@ -170,6 +170,7 @@ Window::~Window()
     if (mBaseWindow)
     {
         glfwDestroyWindow(mBaseWindow);
+        mBaseWindow = nullptr;
     }
 
     glfwTerminate();

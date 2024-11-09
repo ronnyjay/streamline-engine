@@ -116,32 +116,33 @@ void benchmark_slm()
 
 int main(void)
 {
-    glm::mat4 glm_rot = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 10.0f, 1.0f));
-    slm::mat4 slm_rot = slm::translate(slm::mat4(1.0f), slm::vec3(1.0f, 10.0f, 1.0f));
-    // glm::mat4 glm_rot(1.0f);
-    // slm::mat4 slm_rot(1.0f);
 
-    printf("%f\n%f\n", glm::radians(45.0f), slm::radians(45.0f));
+    // glm::mat4 glm_rot = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 10.0f, 1.0f));
+    // slm::mat4 slm_rot = slm::translate(slm::mat4(1.0f), slm::vec3(1.0f, 10.0f, 1.0f));
+    // // glm::mat4 glm_rot(1.0f);
+    // // slm::mat4 slm_rot(1.0f);
 
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            printf("%f ", glm_rot[i][j]);
-            if (j == 3)
-                printf("\n");
-        }
-    }
-    printf("\n");
+    // printf("%f\n%f\n", glm::radians(45.0f), slm::radians(45.0f));
 
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            printf("%f ", slm_rot[i][j]);
-            if (j == 3)
-                printf("\n");
-        }
-    }
-    printf("\n");
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     for (int j = 0; j < 4; j++)
+    //     {
+    //         printf("%f ", glm_rot[i][j]);
+    //         if (j == 3)
+    //             printf("\n");
+    //     }
+    // }
+    // printf("\n");
+
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     for (int j = 0; j < 4; j++)
+    //     {
+    //         printf("%f ", slm_rot[i][j]);
+    //         if (j == 3)
+    //             printf("\n");
+    //     }
+    // }
+    // printf("\n");
 }

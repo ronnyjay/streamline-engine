@@ -83,10 +83,10 @@ class DisplayManager
 
     //
 
-    DisplayManager(const DisplayManager &)            = delete;
-    DisplayManager(const DisplayManager &&)           = delete;
+    DisplayManager(const DisplayManager &) = delete;
+    DisplayManager(const DisplayManager &&) = delete;
 
-    DisplayManager operator=(const DisplayManager &)  = delete;
+    DisplayManager operator=(const DisplayManager &) = delete;
     DisplayManager operator=(const DisplayManager &&) = delete;
 
   private:

@@ -23,7 +23,7 @@ enum class WindowMode : int
 class Window
 {
   public:
-    static std::unique_ptr<Window> create(int width, int height, const char *title);
+    static Window *create(int width, int height, const char *title);
 
     operator GLFWwindow *()
     {
@@ -76,15 +76,18 @@ class Window
     template <typename T>
     void SetEventCallback(T *instance, void (T::*fn)(Event &&))
     {
-        mEventCallback = std::bind(fn, instance, std::placeholders::_1);
+        mEventCallback = [instance, fn](Event &&event)
+        {
+            (instance->*fn)(std::move(event));
+        };
     }
 
     ~Window();
 
-    Window(const Window &other)            = delete;
-    Window(const Window &&other)           = delete;
+    Window(const Window &other) = delete;
+    Window(const Window &&other) = delete;
 
-    Window operator=(const Window &other)  = delete;
+    Window operator=(const Window &other) = delete;
     Window operator=(const Window &&other) = delete;
 
   private:

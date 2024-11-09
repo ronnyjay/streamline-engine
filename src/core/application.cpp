@@ -5,6 +5,11 @@ using namespace engine;
 Application::Application()
 {
     mWindow = Window::create(800, 600, "Streamline Engine");
+
+    mRenderer = new Renderer();
+    mDisplayManager = new DisplayManager();
+
+    mWindow->SetEventCallback(this, &Application::OnEvent);
 }
 
 void Application::Run()
@@ -22,7 +27,32 @@ void Application::Run()
     }
 }
 
+void Application::OnEvent(Event &&e)
+{
+    EventDispatcher dispatcher(e);
+
+    // Dispatch events here
+}
+
 Application::~Application()
 {
+    if (mWindow)
+    {
+        delete mWindow;
+        mWindow = nullptr;
+    }
+
+    if (mRenderer)
+    {
+        delete mRenderer;
+        mRenderer = nullptr;
+    }
+
+    if (mDisplayManager)
+    {
+        delete mDisplayManager;
+        mDisplayManager = nullptr;
+    }
+
     glfwTerminate();
 }
