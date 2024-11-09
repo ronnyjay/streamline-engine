@@ -20,16 +20,16 @@ class Application
      * @brief
      *
      */
-    void Run();
+    void run();
 
     /**
      * @brief
      *
      * @return Window* const
      */
-    Window *const GetWindow()
+    Window *const window()
     {
-        return mWindow;
+        return m_window;
     }
 
     /**
@@ -37,9 +37,9 @@ class Application
      *
      * @return Renderer* const
      */
-    Renderer *const GetRenderer()
+    Renderer *const renderer()
     {
-        return mRenderer;
+        return m_renderer;
     }
 
     /**
@@ -47,9 +47,9 @@ class Application
      *
      * @return DisplayManager* const
      */
-    DisplayManager *const GetDisplayManager()
+    DisplayManager *const display_manager()
     {
-        return mDisplayManager;
+        return m_display_manager;
     }
 
     ~Application();
@@ -61,13 +61,13 @@ class Application
     Application operator=(const Application &&other) = delete;
 
   private:
-    Window         *mWindow;
-    Renderer       *mRenderer;
-    DisplayManager *mDisplayManager;
+    Window         *m_window;
+    Renderer       *m_renderer;
+    DisplayManager *m_display_manager;
 
-    void            OnEvent(Event &&e);
+    void            on_event(Event &&e);
 
-    bool            OnWindowResize(WindowResizeEvent &e);
+    bool            on_window_resize(WindowResizeEvent &e);
 };
 
 } // namespace engine

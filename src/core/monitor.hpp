@@ -17,32 +17,32 @@ struct Monitor
 
     operator GLFWmonitor *()
     {
-        return mMonitor;
+        return monitor;
     }
 
-    const char *Title;
+    const char *title;
 
-    int         Width;
-    int         Height;
-
-    struct
-    {
-        int MinX;
-        int MinY;
-        int MaxX;
-        int MaxY;
-    } WorkArea;
+    int         width;
+    int         height;
 
     struct
     {
-        float X;
-        float Y;
-    } ContentScale;
+        int min_x;
+        int min_y;
+        int max_x;
+        int max_y;
+    } work_area;
 
-    const std::vector<Resolution> VideoModes;
+    struct
+    {
+        float x;
+        float y;
+    } content_scale;
+
+    const std::vector<Resolution> video_modes;
 
   private:
-    GLFWmonitor *mMonitor;
+    GLFWmonitor *monitor;
 };
 
 typedef std::vector<Monitor> MonitorList;

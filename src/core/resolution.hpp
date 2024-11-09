@@ -5,24 +5,26 @@ namespace engine
 
 struct Resolution
 {
-    Resolution(int width, int height) : Width(width), Height(height)
+    Resolution(int width, int height)
+        : width(width)
+        , height(height)
     {
     }
 
-    int Width;
-    int Height;
+    int  width;
+    int  height;
 
     bool operator<(const Resolution &other)
     {
-        if (Width != other.Width)
-            return Width < other.Width;
+        if (width != other.width)
+            return width < other.width;
 
-        return Height < other.Height;
+        return height < other.height;
     }
 
     bool operator==(const Resolution &other)
     {
-        return Width == other.Width && Height == other.Height;
+        return width == other.width && height == other.height;
     }
 };
 

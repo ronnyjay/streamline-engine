@@ -11,5 +11,5 @@ Application gApplication;
 int main(void)
 {
 
-    gApplication.Run();
+    gApplication.run();
 }

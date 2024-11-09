@@ -4,60 +4,60 @@ using namespace engine;
 
 Application::Application()
 {
-    mWindow = Window::create(800, 600, "Streamline Engine");
+    m_window = Window::create(800, 600, "Streamline Engine");
 
-    mRenderer = new Renderer();
-    mDisplayManager = new DisplayManager();
+    m_renderer = new Renderer();
+    m_display_manager = new DisplayManager(m_window);
 
-    mWindow->SetEventCallback(this, &Application::OnEvent);
+    m_window->set_event_callback(this, &Application::on_event);
 }
 
-void Application::Run()
+void Application::run()
 {
-    while (mWindow->IsOpen())
+    while (m_window->is_open())
     {
         glfwPollEvents();
 
-        if (glfwGetKey(*mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(*m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            mWindow->RequestClose();
+            m_window->close();
         }
 
-        mWindow->SwapBuffers();
+        m_window->swap_buffers();
     }
 }
 
-void Application::OnEvent(Event &&e)
+void Application::on_event(Event &&e)
 {
     EventDispatcher dispatcher(e);
 
-    dispatcher.Dispatch<WindowResizeEvent>(this, &Application::OnWindowResize);
+    dispatcher.Dispatch<WindowResizeEvent>(this, &Application::on_window_resize);
 }
 
-bool Application::OnWindowResize(WindowResizeEvent &e)
+bool Application::on_window_resize(WindowResizeEvent &e)
 {
-    mRenderer->OnViewportResize(e.width, e.height);
+    m_renderer->OnViewportResize(e.width, e.height);
 
     return true;
 }
 
 Application::~Application()
 {
-    if (mDisplayManager)
+    if (m_display_manager)
     {
-        delete mDisplayManager;
-        mDisplayManager = nullptr;
+        delete m_display_manager;
+        m_display_manager = nullptr;
     }
 
-    if (mRenderer)
+    if (m_renderer)
     {
-        delete mRenderer;
-        mRenderer = nullptr;
+        delete m_renderer;
+        m_renderer = nullptr;
     }
 
-    if (mWindow)
+    if (m_window)
     {
-        delete mWindow;
-        mWindow = nullptr;
+        delete m_window;
+        m_window = nullptr;
     }
 }

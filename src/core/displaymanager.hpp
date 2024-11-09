@@ -1,9 +1,17 @@
 #pragma once
 
 #include "monitor.hpp"
+#include "window.hpp"
 
 namespace engine
 {
+
+enum class DisplayMode
+{
+    Windowed,
+    ExclusiveFullscreen,
+    BorderlessFullscreen,
+};
 
 class DisplayManager
 {
@@ -12,17 +20,17 @@ class DisplayManager
      * @brief
      *
      */
-    DisplayManager()
-        : mPreferredMonitorIndex(0)
+    DisplayManager(Window *window)
+        : m_preferred_monitor_index(0)
     {
         int           count;
         GLFWmonitor **monitors = glfwGetMonitors(&count);
 
         for (int i = 0; i < count; i++)
         {
-            mMonitors.emplace_back(Monitor(monitors[i]));
+            m_monitors.emplace_back(Monitor(monitors[i]));
         }
-    }
+    } // namespace engine
 
     /**
      * @brief
@@ -35,13 +43,23 @@ class DisplayManager
     /**
      * @brief
      *
+     * @return const MonitorList&
+     */
+    const MonitorList &monitors() const
+    {
+        return m_monitors;
+    }
+
+    /**
+     * @brief
+     *
      * @param index
      */
-    bool SetPreferredMonitorIndex(int index)
+    bool set_preferred_monitor_index(int index)
     {
-        if (index >= 0 && index < static_cast<int>(mMonitors.size()))
+        if (index >= 0 && index < static_cast<int>(m_monitors.size()))
         {
-            mPreferredMonitorIndex = index;
+            m_preferred_monitor_index = index;
 
             return true;
         }
@@ -55,16 +73,10 @@ class DisplayManager
      * @param index
      * @return int
      */
-    int GetPreferredMonitorIndex() const
+    int get_preferred_monitor_index() const
     {
-        return mPreferredMonitorIndex;
+        return m_preferred_monitor_index;
     }
-
-    //
-
-    const MonitorList &MonitorInfo = mMonitors;
-
-    //
 
     DisplayManager(const DisplayManager &) = delete;
     DisplayManager(const DisplayManager &&) = delete;
@@ -73,9 +85,16 @@ class DisplayManager
     DisplayManager operator=(const DisplayManager &&) = delete;
 
   private:
-    MonitorList mMonitors;
+    Window     *m_window_handle;
 
-    int         mPreferredMonitorIndex;
+    MonitorList m_monitors;
+
+    // refresh rates
+    // resolutions per display
+
+    // display mode
+
+    int m_preferred_monitor_index;
 };
 
 } // namespace engine

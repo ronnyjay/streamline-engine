@@ -25,28 +25,20 @@ class Window
 
     operator GLFWwindow *()
     {
-        return mBaseWindow;
+        return m_window;
     }
 
     /**
      * @brief
      *
      */
-    void RequestClose();
+    void close();
 
     /**
      * @brief
      *
      */
-    void SwapBuffers();
-
-    /**
-     * @brief
-     *
-     * @return true
-     * @return false
-     */
-    bool IsOpen() const;
+    void swap_buffers();
 
     /**
      * @brief
@@ -54,7 +46,7 @@ class Window
      * @return true
      * @return false
      */
-    bool IsFocused() const;
+    bool is_open() const;
 
     /**
      * @brief
@@ -62,7 +54,7 @@ class Window
      * @return true
      * @return false
      */
-    bool IsDecorated() const;
+    bool is_focused() const;
 
     /**
      * @brief
@@ -70,7 +62,7 @@ class Window
      * @return true
      * @return false
      */
-    bool IsFloating() const;
+    bool is_decorated() const;
 
     /**
      * @brief
@@ -78,21 +70,29 @@ class Window
      * @return true
      * @return false
      */
-    bool IsResizable() const;
+    bool is_floating() const;
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool is_resizable() const;
 
     /**
      * @brief
      *
      * @return Vector2f
      */
-    Vector2i GetPositionInScreen() const;
+    Vector2i get_position_in_screen() const;
 
     /**
      * @brief
      *
      * @return Vector2f
      */
-    Vector2i GetSizeInScreen() const;
+    Vector2i get_size_in_screen() const;
 
     /**
      * @brief
@@ -100,7 +100,7 @@ class Window
      * @param x
      * @param y
      */
-    void Resize(int x, int y);
+    void resize(int x, int y);
 
     /**
      * @brief
@@ -108,14 +108,14 @@ class Window
      * @param w
      * @param h
      */
-    void MoveTo(int w, int h);
+    void move_to(int w, int h);
 
     /**
      * @brief
      *
      * @param mode
      */
-    void SetWindowMode(WindowMode mode);
+    void set_window_mode(WindowMode mode);
 
     /**
      * @brief
@@ -124,9 +124,9 @@ class Window
      * @param fn
      */
     template <typename T>
-    void SetEventCallback(T *instance, void (T::*fn)(Event &&))
+    void set_event_callback(T *instance, void (T::*fn)(Event &&))
     {
-        mEventCallback = [instance, fn](Event &&event)
+        m_event_callback = [instance, fn](Event &&event)
         {
             (instance->*fn)(std::move(event));
         };
@@ -141,21 +141,21 @@ class Window
     Window operator=(const Window &&other) = delete;
 
   private:
-    GLFWwindow   *mBaseWindow;
+    GLFWwindow   *m_window;
 
-    WindowMode    mWindowMode;
+    WindowMode    m_mode;
 
-    Vector2i      mLastSize;
-    Vector2i      mLastPosition;
+    Vector2i      m_last_size;
+    Vector2i      m_last_position;
 
-    EventCallback mEventCallback;
+    EventCallback m_event_callback;
 
     explicit Window(GLFWwindow *window)
-        : mBaseWindow(window)
+        : m_window(window)
     {
-        glfwGetWindowPos(mBaseWindow, &mLastPosition.x, &mLastPosition.y);
-        glfwGetWindowSize(mBaseWindow, &mLastSize.x, &mLastSize.y);
-        glfwSetWindowUserPointer(mBaseWindow, this);
+        glfwGetWindowPos(m_window, &m_last_position.x, &m_last_position.y);
+        glfwGetWindowSize(m_window, &m_last_size.x, &m_last_size.y);
+        glfwSetWindowUserPointer(m_window, this);
     }
 
     static void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
