@@ -4,8 +4,6 @@
 #include <immintrin.h>
 #endif
 
-#include <xmmintrin.h> // SSE intrinsics
-
 #include "vector.hpp"
 
 namespace engine
@@ -420,8 +418,15 @@ namespace slm
  * @return Matrix<4, 4, T>
  */
 template <typename T = float>
-inline Matrix<4, 4, T> translate(const Vector<3, T> &v)
+inline Matrix<4, 4, T> translate(const Matrix<4, 4, T> &m, const Vector<3, T> &v)
 {
+    Matrix<4, 4, T> translation(1.0f);
+    translation[3][0] = v.x;
+    translation[3][1] = v.y;
+    translation[3][2] = v.z;
+    translation[3][3] = 1.0f;
+
+    return m * translation;
 }
 
 /**
