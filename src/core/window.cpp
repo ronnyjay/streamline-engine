@@ -49,6 +49,41 @@ Window *Window::create(int width, int height, const char *title)
     return new Window(window);
 }
 
+void Window::RequestClose()
+{
+    glfwSetWindowShouldClose(mBaseWindow, GLFW_TRUE);
+}
+
+void Window::SwapBuffers()
+{
+    glfwSwapBuffers(mBaseWindow);
+}
+
+bool Window::IsOpen() const
+{
+    return !glfwWindowShouldClose(mBaseWindow);
+}
+
+bool Window::IsFocused() const
+{
+    return glfwGetWindowAttrib(mBaseWindow, GLFW_FOCUSED);
+}
+
+bool Window::IsDecorated() const
+{
+    return glfwGetWindowAttrib(mBaseWindow, GLFW_DECORATED);
+}
+
+bool Window::IsFloating() const
+{
+    return glfwGetWindowAttrib(mBaseWindow, GLFW_FLOATING);
+}
+
+bool Window::IsResizable() const
+{
+    return glfwGetWindowAttrib(mBaseWindow, GLFW_RESIZABLE);
+}
+
 Vector2i Window::GetPositionInScreen() const
 {
     Vector2i position;

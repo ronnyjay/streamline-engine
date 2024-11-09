@@ -117,6 +117,8 @@ void benchmark_slm()
 int main(void)
 {
 
+    gApplication.Run();
+
     // glm::mat4 glm_rot = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 10.0f, 1.0f));
     // slm::mat4 slm_rot = slm::translate(slm::mat4(1.0f), slm::vec3(1.0f, 10.0f, 1.0f));
     // // glm::mat4 glm_rot(1.0f);

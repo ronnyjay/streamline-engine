@@ -8,8 +8,6 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
-#include <memory>
-
 namespace engine
 {
 
@@ -29,6 +27,58 @@ class Window
     {
         return mBaseWindow;
     }
+
+    /**
+     * @brief
+     *
+     */
+    void RequestClose();
+
+    /**
+     * @brief
+     *
+     */
+    void SwapBuffers();
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool IsOpen() const;
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool IsFocused() const;
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool IsDecorated() const;
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool IsFloating() const;
+
+    /**
+     * @brief
+     *
+     * @return true
+     * @return false
+     */
+    bool IsResizable() const;
 
     /**
      * @brief

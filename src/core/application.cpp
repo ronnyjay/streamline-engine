@@ -14,16 +14,16 @@ Application::Application()
 
 void Application::Run()
 {
-    while (!glfwWindowShouldClose(*mWindow))
+    while (mWindow->IsOpen())
     {
         glfwPollEvents();
 
         if (glfwGetKey(*mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(*mWindow, GL_TRUE);
+            mWindow->RequestClose();
         }
 
-        glfwSwapBuffers(*mWindow);
+        mWindow->SwapBuffers();
     }
 }
 
@@ -36,10 +36,11 @@ void Application::OnEvent(Event &&e)
 
 Application::~Application()
 {
-    if (mWindow)
+
+    if (mDisplayManager)
     {
-        delete mWindow;
-        mWindow = nullptr;
+        delete mDisplayManager;
+        mDisplayManager = nullptr;
     }
 
     if (mRenderer)
@@ -48,11 +49,9 @@ Application::~Application()
         mRenderer = nullptr;
     }
 
-    if (mDisplayManager)
+    if (mWindow)
     {
-        delete mDisplayManager;
-        mDisplayManager = nullptr;
+        delete mWindow;
+        mWindow = nullptr;
     }
-
-    glfwTerminate();
 }
