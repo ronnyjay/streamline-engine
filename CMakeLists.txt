@@ -39,8 +39,7 @@ add_compile_options(
     -march=native
 )
 
-
-include_directories(src extern extern/stb extern/glad extern/imgui extern/imgui/backends)
+include_directories(extern extern/stb extern/glad extern/imgui extern/imgui/backends include)
 
 add_library(glad STATIC
     extern/glad/gl.c

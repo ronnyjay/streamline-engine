@@ -1,10 +1,10 @@
-#include "resource_manager.hpp"
+#include <subsystem/resource_manager.hpp>
 
-#include "renderer/model.hpp"
-#include "renderer/shader.hpp"
-#include "renderer/texture.hpp"
+#include <renderer/model.hpp>
+#include <renderer/shader.hpp>
+#include <renderer/texture.hpp>
 
-#include "core/exception.hpp"
+#include <core/exception.hpp>
 
 using namespace engine;
 
