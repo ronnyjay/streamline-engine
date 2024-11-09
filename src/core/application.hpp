@@ -66,6 +66,8 @@ class Application
     DisplayManager *mDisplayManager;
 
     void            OnEvent(Event &&e);
+
+    bool            OnWindowResize(WindowResizeEvent &e);
 };
 
 } // namespace engine

@@ -15,22 +15,6 @@ class DisplayManager
     DisplayManager()
         : mPreferredMonitorIndex(0)
     {
-    }
-
-    /**
-     * @brief
-     *
-     */
-    ~DisplayManager()
-    {
-    }
-
-    /**
-     * @brief
-     *
-     */
-    void StartUp()
-    {
         int           count;
         GLFWmonitor **monitors = glfwGetMonitors(&count);
 
@@ -44,9 +28,8 @@ class DisplayManager
      * @brief
      *
      */
-    void ShutDown()
+    ~DisplayManager()
     {
-        mMonitors.clear();
     }
 
     /**

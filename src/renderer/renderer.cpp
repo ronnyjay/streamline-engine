@@ -2,29 +2,29 @@
 
 using namespace engine;
 
-void Renderer::on_viewport_resize(int width, int height)
+void Renderer::OnViewportResize(int width, int height)
 {
-    m_framebuffer.resize(width, height);
+    mFramebuffer.resize(width, height);
 }
 
-void Renderer::render(int width, int height)
+void Renderer::Render(int width, int height)
 {
-    m_framebuffer.bind();
+    mFramebuffer.bind();
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, m_framebuffer.width(), m_framebuffer.height());
+    glViewport(0, 0, mFramebuffer.width(), mFramebuffer.height());
 
     // Render scene
     // ...
 
-    m_framebuffer.unbind();
+    mFramebuffer.unbind();
 
     glDisable(GL_DEPTH_TEST);
     glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, width, height);
 
-    m_framebuffer.render();
+    mFramebuffer.render();
 }

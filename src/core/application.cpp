@@ -31,12 +31,18 @@ void Application::OnEvent(Event &&e)
 {
     EventDispatcher dispatcher(e);
 
-    // Dispatch events here
+    dispatcher.Dispatch<WindowResizeEvent>(this, &Application::OnWindowResize);
+}
+
+bool Application::OnWindowResize(WindowResizeEvent &e)
+{
+    mRenderer->OnViewportResize(e.width, e.height);
+
+    return true;
 }
 
 Application::~Application()
 {
-
     if (mDisplayManager)
     {
         delete mDisplayManager;
