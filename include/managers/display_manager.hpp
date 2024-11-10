@@ -1,100 +1,78 @@
 #pragma once
 
-#include "monitor.hpp"
-#include "window.hpp"
+#include "core/display_mode.hpp"
+#include "core/monitor.hpp"
+#include "core/singleton.hpp"
+#include "core/window.hpp"
+#include <cassert>
 
 namespace engine
 {
 
-enum class DisplayMode
-{
-    Windowed,
-    ExclusiveFullscreen,
-    BorderlessFullscreen,
-};
-
-class DisplayManager
+class DisplayManager : public Singleton<DisplayManager>
 {
   public:
-    /**
-     * @brief
-     *
-     */
-    DisplayManager(Window *window)
-        : m_preferred_monitor_index(0)
-    {
-        int           count;
-        GLFWmonitor **monitors = glfwGetMonitors(&count);
-
-        for (int i = 0; i < count; i++)
-        {
-            m_monitors.emplace_back(Monitor(monitors[i]));
-        }
-    } // namespace engine
+    void Init() override;
+    void DeInit() override {};
+    void OnEvent(Event &e) override {};
 
     /**
      * @brief
      *
+     * @param window
      */
-    ~DisplayManager()
+    void AttachWindow(Window *const window)
     {
+        if (window != nullptr)
+            mWindow = window;
     }
 
     /**
      * @brief
      *
-     * @return const MonitorList&
+     * @param mode
      */
-    const MonitorList &monitors() const
+    void SetDisplayMode(WindowMode mode);
+
+    /**
+     * @brief
+     *
+     * @return const MonitorList
+     */
+    const MonitorList MonitorInfo() const
     {
-        return m_monitors;
+        return mMonitors;
     }
 
     /**
      * @brief
      *
-     * @param index
-     */
-    bool set_preferred_monitor_index(int index)
-    {
-        if (index >= 0 && index < static_cast<int>(m_monitors.size()))
-        {
-            m_preferred_monitor_index = index;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @brief
-     *
-     * @param index
      * @return int
      */
-    int get_preferred_monitor_index() const
+    int GetPreferredMonitorIndex() const
     {
-        return m_preferred_monitor_index;
+        return mPreferredMonitorIndex;
     }
 
-    DisplayManager(const DisplayManager &) = delete;
-    DisplayManager(const DisplayManager &&) = delete;
-
-    DisplayManager operator=(const DisplayManager &) = delete;
-    DisplayManager operator=(const DisplayManager &&) = delete;
+    /**
+     * @brief
+     *
+     * @param index
+     */
+    void SetPreferredMonitorIndex(int index)
+    {
+        if (index >= 0 && index < (int)mMonitors.size())
+        {
+            mPreferredMonitorIndex = index;
+        }
+    }
 
   private:
-    Window     *m_window_handle;
+    Window     *mWindow;
 
-    MonitorList m_monitors;
+    MonitorList mMonitors;
 
-    // refresh rates
-    // resolutions per display
-
-    // display mode
-
-    int m_preferred_monitor_index;
+    int         mPreferredMonitorIndex;
 };
 
 } // namespace engine

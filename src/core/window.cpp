@@ -1,10 +1,10 @@
-#include <core/window.hpp>
 #include <cassert>
+#include <core/window.hpp>
 #include <cstring>
 
 using namespace engine;
 
-Window *Window::create(int width, int height, const char *title)
+Window *Window::Create(int width, int height, const char *title)
 {
     if (!glfwInit())
     {
@@ -49,107 +49,106 @@ Window *Window::create(int width, int height, const char *title)
     return new Window(window);
 }
 
-void Window::close()
+void Window::Close()
 {
-    glfwSetWindowShouldClose(m_base_window, GLFW_TRUE);
+    glfwSetWindowShouldClose(mWindow, GLFW_TRUE);
 }
 
-void Window::swap_buffers()
+void Window::SwapBuffers()
 {
-    glfwSwapBuffers(m_base_window);
+    glfwSwapBuffers(mWindow);
 }
 
-bool Window::is_open() const
+bool Window::IsOpen() const
 {
-    return !glfwWindowShouldClose(m_base_window);
+    return !glfwWindowShouldClose(mWindow);
 }
 
-bool Window::is_focused() const
+bool Window::IsFocused() const
 {
-    return glfwGetWindowAttrib(m_base_window, GLFW_FOCUSED);
+    return glfwGetWindowAttrib(mWindow, GLFW_FOCUSED);
 }
 
-bool Window::is_decorated() const
+bool Window::IsDecorated() const
 {
-    return glfwGetWindowAttrib(m_base_window, GLFW_DECORATED);
+    return glfwGetWindowAttrib(mWindow, GLFW_DECORATED);
 }
 
-bool Window::is_floating() const
+bool Window::IsFloating() const
 {
-    return glfwGetWindowAttrib(m_base_window, GLFW_FLOATING);
+    return glfwGetWindowAttrib(mWindow, GLFW_FLOATING);
 }
 
-bool Window::is_resizable() const
+bool Window::IsResizable() const
 {
-    return glfwGetWindowAttrib(m_base_window, GLFW_RESIZABLE);
+    return glfwGetWindowAttrib(mWindow, GLFW_RESIZABLE);
 }
 
-Vector2i Window::get_position_in_screen() const
+Vector2i Window::GetPositionInScreen() const
 {
     Vector2i position;
 
-    glfwGetWindowPos(m_base_window, &position.x, &position.y);
+    glfwGetWindowPos(mWindow, &position.x, &position.y);
 
     return position;
 }
 
-Vector2i Window::get_size_in_screen() const
+Vector2i Window::GetSizeInScreen() const
 {
     Vector2i size;
 
-    glfwGetWindowSize(m_base_window, &size.x, &size.y);
+    glfwGetWindowSize(mWindow, &size.x, &size.y);
 
     return size;
 }
 
-void Window::move_to(int x, int y)
+void Window::MoveTo(int x, int y)
 {
-    if (glfwGetWindowMonitor(m_base_window))
+    if (glfwGetWindowMonitor(mWindow))
     {
         return;
     }
 
-    m_last_position.x = x;
-    m_last_position.y = y;
+    mLastPos.x = x;
+    mLastPos.y = y;
 
-    glfwSetWindowPos(m_base_window, x, y);
+    glfwSetWindowPos(mWindow, x, y);
 }
 
-void Window::resize(int w, int h)
+void Window::Resize(int w, int h)
 {
-    if (glfwGetWindowMonitor(m_base_window))
+    if (glfwGetWindowMonitor(mWindow))
     {
         return;
     }
 
-    m_last_size.x = w;
-    m_last_size.y = h;
+    mLastSize.x = w;
+    mLastSize.y = h;
 
-    glfwSetWindowSize(m_base_window, w, h);
+    glfwSetWindowSize(mWindow, w, h);
 }
 
-void Window::set_window_mode(WindowMode m)
+void Window::SetWindowMode(WindowMode m)
 {
-    if (m_window_mode == WindowMode::Windowed)
+    if (mWindowMode == WindowMode::Windowed)
     {
-        glfwGetWindowPos(m_base_window, &m_last_position.x, &m_last_position.y);
-        glfwGetWindowSize(m_base_window, &m_last_size.x, &m_last_size.y);
+        glfwGetWindowPos(mWindow, &mLastPos.x, &mLastPos.y);
+        glfwGetWindowSize(mWindow, &mLastSize.x, &mLastSize.y);
     }
 
     if (m == WindowMode::Windowed)
     {
-        if (!glfwGetWindowAttrib(m_base_window, GLFW_DECORATED))
+        if (!glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(m_base_window, GLFW_DECORATED, GLFW_TRUE);
+            glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GLFW_TRUE);
         }
 
-        if (glfwGetWindowAttrib(m_base_window, GLFW_FLOATING))
+        if (glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(m_base_window, GLFW_FLOATING, GLFW_FALSE);
+            glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GLFW_FALSE);
         }
 
-        glfwSetWindowMonitor(
-            m_base_window, nullptr, m_last_position.x, m_last_position.y, m_last_size.x, m_last_size.y, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(mWindow, nullptr, mLastPos.x, mLastPos.y, mLastSize.x, mLastSize.y, GLFW_DONT_CARE);
 
         return;
     }
@@ -166,8 +165,8 @@ void Window::set_window_mode(WindowMode m)
     {
         glfwGetMonitorWorkarea(monitors[i], &x, &y, &w, &h);
 
-        bool overlap_x = (m_last_position.x >= x && m_last_position.x < x + w);
-        bool overlap_y = (m_last_position.y >= y && m_last_position.y < y + h);
+        bool overlap_x = (mLastPos.x >= x && mLastPos.x < x + w);
+        bool overlap_y = (mLastPos.y >= y && mLastPos.y < y + h);
 
         if (overlap_x && overlap_y)
         {
@@ -178,34 +177,33 @@ void Window::set_window_mode(WindowMode m)
 
     if (WindowMode(m) == WindowMode::Fullscreen)
     {
-        glfwSetWindowMonitor(m_base_window, nullptr, x, y, w, h, GLFW_DONT_CARE);
-        glfwSetWindowMonitor(m_base_window, monitor, 0, 0, w, h, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(mWindow, monitor, 0, 0, w, h, GLFW_DONT_CARE);
     }
 
-    else if (WindowMode(m) == WindowMode::Borderless)
+    else if (WindowMode(m) == WindowMode::FullscreenBorderless)
     {
-        if (!glfwGetWindowAttrib(m_base_window, GLFW_FLOATING))
+        if (!glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
         {
-            glfwSetWindowAttrib(m_base_window, GLFW_FLOATING, GLFW_TRUE);
+            glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GLFW_TRUE);
         }
 
-        if (glfwGetWindowAttrib(m_base_window, GLFW_DECORATED))
+        if (glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
         {
-            glfwSetWindowAttrib(m_base_window, GLFW_DECORATED, GLFW_FALSE);
+            glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GLFW_FALSE);
         }
 
-        glfwSetWindowMonitor(m_base_window, nullptr, x, y, w, h, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(mWindow, nullptr, x, y, w, h, GLFW_DONT_CARE);
     }
 
-    m_window_mode = m;
+    mWindowMode = m;
 }
 
 Window::~Window()
 {
-    if (m_base_window)
+    if (mWindow)
     {
-        glfwDestroyWindow(m_base_window);
-        m_base_window = nullptr;
+        glfwDestroyWindow(mWindow);
+        mWindow = nullptr;
     }
 
     glfwTerminate();
@@ -215,9 +213,9 @@ void Window::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
-    if (w->m_event_callback)
+    if (w->mEventCallback)
     {
-        w->m_event_callback(WindowResizeEvent(width, height));
+        w->mEventCallback(WindowResizeEvent(width, height));
     }
 }
 
@@ -249,15 +247,15 @@ void Window::KeyCallback(GLFWwindow *window, int key, int scancode, int action, 
 {
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
-    if (w->m_event_callback)
+    if (w->mEventCallback)
     {
         if (action == GLFW_RELEASE)
         {
-            w->m_event_callback(KeyReleaseEvent(key));
+            w->mEventCallback(KeyReleaseEvent(key));
         }
         else
         {
-            w->m_event_callback(KeyPressEvent(key, mods, action == GLFW_REPEAT));
+            w->mEventCallback(KeyPressEvent(key, mods, action == GLFW_REPEAT));
         }
     }
 }
@@ -266,15 +264,15 @@ void Window::MouseButtonCallback(GLFWwindow *window, int button, int action, int
 {
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
-    if (w->m_event_callback)
+    if (w->mEventCallback)
     {
         if (action == GLFW_PRESS)
         {
-            w->m_event_callback(MouseButtonPressEvent(button));
+            w->mEventCallback(MouseButtonPressEvent(button));
         }
         else
         {
-            w->m_event_callback(MouseButtonReleaseEvent(button));
+            w->mEventCallback(MouseButtonReleaseEvent(button));
         }
     }
 }
@@ -283,9 +281,9 @@ void Window::CursorPosCallback(GLFWwindow *window, double x, double y)
 {
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
-    if (w->m_event_callback)
+    if (w->mEventCallback)
     {
-        w->m_event_callback(MouseMoveEvent(x, y));
+        w->mEventCallback(MouseMoveEvent(x, y));
     }
 }
 
@@ -293,8 +291,8 @@ void Window::ScrollCallback(GLFWwindow *window, double x, double y)
 {
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
-    if (w->m_event_callback)
+    if (w->mEventCallback)
     {
-        w->m_event_callback(MouseScrollEvent(x, y));
+        w->mEventCallback(MouseScrollEvent(x, y));
     }
 }

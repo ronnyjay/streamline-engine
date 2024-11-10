@@ -71,3 +71,9 @@ Application - Singleton
         - load/save layout
             - textures
             - types (button, dropdown, etc)
+
+## Plan
+
+*Window*:
+
+- 

@@ -1,7 +1,11 @@
 #pragma once
 
-#include "displaymanager.hpp"
+#include "managers/audio_manager.hpp"    // IWYU pragma: keep
+#include "managers/display_manager.hpp"  // IWYU pragma: keep
+#include "managers/resource_manager.hpp" // IWYU pragma: keep
+
 #include "renderer/renderer.hpp"
+
 #include "window.hpp"
 
 namespace engine
@@ -20,16 +24,16 @@ class Application
      * @brief
      *
      */
-    void run();
+    void Run();
 
     /**
      * @brief
      *
      * @return Window* const
      */
-    Window *const window()
+    Window *const GetWindow()
     {
-        return m_window;
+        return mWindow;
     }
 
     /**
@@ -37,19 +41,19 @@ class Application
      *
      * @return Renderer* const
      */
-    Renderer *const renderer()
+    Renderer *const GetRenderer()
     {
-        return m_renderer;
+        return mRenderer;
     }
 
     /**
-     * @brief
+     * @brief Retrieves a pointer to the DisplayManager
      *
-     * @return DisplayManager* const
+     * @return DisplayManager*
      */
-    DisplayManager *const display_manager()
+    DisplayManager *GetDisplayManager()
     {
-        return m_display_manager;
+        return mDisplayManager.get();
     }
 
     ~Application();
@@ -61,13 +65,14 @@ class Application
     Application operator=(const Application &&other) = delete;
 
   private:
-    Window         *m_window;
-    Renderer       *m_renderer;
-    DisplayManager *m_display_manager;
+    Window                         *mWindow;
+    Renderer                       *mRenderer;
 
-    void            on_event(Event &&e);
+    std::unique_ptr<DisplayManager> mDisplayManager;
 
-    bool            on_window_resize(WindowResizeEvent &e);
+    void                            OnEvent(Event &&e);
+
+    bool                            OnWindowResize(WindowResizeEvent &e);
 };
 
 } // namespace engine

@@ -4,7 +4,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
-#include "subsystem/resource_manager.hpp"
+#include "managers/resource_manager.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

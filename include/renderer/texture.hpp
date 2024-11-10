@@ -1,6 +1,6 @@
 #pragma once
 
-#include "subsystem/resource_manager.hpp"
+#include "managers/resource_manager.hpp"
 
 #include <glad/gl.h>
 

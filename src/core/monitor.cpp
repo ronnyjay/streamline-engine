@@ -1,34 +1,34 @@
-#include <core/monitor.hpp>
 #include <algorithm>
+#include <core/monitor.hpp>
 
 using namespace engine;
 
 Monitor::Monitor(GLFWmonitor *monitor)
-    : monitor(monitor)
+    : mMonitor(monitor)
 {
-    title = glfwGetMonitorName(monitor);
+    Title = glfwGetMonitorName(monitor);
 
-    glfwGetMonitorContentScale(monitor, &content_scale.x, &content_scale.y);
-    glfwGetMonitorWorkarea(monitor, &work_area.min_x, &work_area.min_y, &width, &height);
+    glfwGetMonitorContentScale(monitor, &ContentScale.X, &ContentScale.Y);
+    glfwGetMonitorWorkarea(monitor, &WorkArea.MinX, &WorkArea.MinY, &Width, &Height);
 
-    work_area.max_x = work_area.min_x + width;
-    work_area.max_y = work_area.min_y + height;
+    WorkArea.MaxX = WorkArea.MaxY + Width;
+    WorkArea.MaxY = WorkArea.MinY + Height;
 
     int                count;
     const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
 
     for (int i = 0; i < count; i++)
     {
-        const_cast<std::vector<Resolution> &>(video_modes).emplace_back(Resolution{modes[i].width, modes[i].height});
+        const_cast<std::vector<Resolution> &>(VideoModes).emplace_back(Resolution{modes[i].width, modes[i].height});
     }
 
     // GLFWvidmode contains duplicate dimensions per refresh rates.
     // This could be something configured by the developer,
     // but discard for now.
-    const_cast<std::vector<Resolution> &>(video_modes)
+    const_cast<std::vector<Resolution> &>(VideoModes)
         .erase(
             std::unique(
-                const_cast<std::vector<Resolution> &>(video_modes).begin(),
-                const_cast<std::vector<Resolution> &>(video_modes).end()),
-            const_cast<std::vector<Resolution> &>(video_modes).end());
+                const_cast<std::vector<Resolution> &>(VideoModes).begin(),
+                const_cast<std::vector<Resolution> &>(VideoModes).end()),
+            const_cast<std::vector<Resolution> &>(VideoModes).end());
 }
