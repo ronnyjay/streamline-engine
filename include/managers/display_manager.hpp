@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/display_mode.hpp"
 #include "core/monitor.hpp"
 #include "core/singleton.hpp"
+#include "core/video.hpp"
 #include "core/window.hpp"
 #include <cassert>
 

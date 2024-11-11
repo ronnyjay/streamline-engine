@@ -1,7 +1,7 @@
 #pragma once
 
-#include "display_mode.hpp"
 #include "event.hpp"
+#include "video.hpp"
 
 #include "math/vector.hpp"
 

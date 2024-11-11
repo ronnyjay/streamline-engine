@@ -4,8 +4,6 @@
 #include "managers/display_manager.hpp"  // IWYU pragma: keep
 #include "managers/resource_manager.hpp" // IWYU pragma: keep
 
-#include "renderer/renderer.hpp"
-
 #include "window.hpp"
 
 namespace engine
@@ -37,16 +35,6 @@ class Application
     }
 
     /**
-     * @brief
-     *
-     * @return Renderer* const
-     */
-    Renderer *const GetRenderer()
-    {
-        return mRenderer;
-    }
-
-    /**
      * @brief Retrieves a pointer to the DisplayManager
      *
      * @return DisplayManager*
@@ -66,7 +54,6 @@ class Application
 
   private:
     Window                         *mWindow;
-    Renderer                       *mRenderer;
 
     std::unique_ptr<DisplayManager> mDisplayManager;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "resolution.hpp"
+#include "video.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -39,7 +39,8 @@ struct Monitor
         float Y;
     } ContentScale;
 
-    const std::vector<Resolution> VideoModes;
+    std::vector<Resolution>  Resolutions;
+    std::vector<RefreshRate> RefreshRates;
 
   private:
     GLFWmonitor *mMonitor;

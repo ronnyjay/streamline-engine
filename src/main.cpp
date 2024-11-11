@@ -10,6 +10,5 @@ Application gApplication;
 
 int main(void)
 {
-    gApplication.GetDisplayManager()->SetDisplayMode(WindowMode::FullscreenBorderless);
     gApplication.Run();
 }

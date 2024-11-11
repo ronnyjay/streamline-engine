@@ -19,16 +19,12 @@ Monitor::Monitor(GLFWmonitor *monitor)
 
     for (int i = 0; i < count; i++)
     {
-        const_cast<std::vector<Resolution> &>(VideoModes).emplace_back(Resolution{modes[i].width, modes[i].height});
+        Resolutions.emplace_back(Resolution{modes[i].width, modes[i].height});
+        RefreshRates.emplace_back(RefreshRate{modes[i].refreshRate});
     }
 
     // GLFWvidmode contains duplicate dimensions per refresh rates.
-    // This could be something configured by the developer,
-    // but discard for now.
-    const_cast<std::vector<Resolution> &>(VideoModes)
-        .erase(
-            std::unique(
-                const_cast<std::vector<Resolution> &>(VideoModes).begin(),
-                const_cast<std::vector<Resolution> &>(VideoModes).end()),
-            const_cast<std::vector<Resolution> &>(VideoModes).end());
+    // Store both seperately and erase duplicates in each respective container
+    Resolutions.erase(std::unique(Resolutions.begin(), Resolutions.end()), Resolutions.end());
+    RefreshRates.erase(std::unique(RefreshRates.begin(), RefreshRates.end()), RefreshRates.end());
 }

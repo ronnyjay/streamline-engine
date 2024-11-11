@@ -19,7 +19,10 @@ Window *Window::Create(int width, int height, const char *title)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    // Leave on for normal window behavior
+    // Disabling allows for repositioning with i3, sway
+    // Must be done before window is created
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     GLFWwindow *window = glfwCreateWindow(width, height, title, NULL, NULL);
 
@@ -182,14 +185,14 @@ void Window::SetWindowMode(WindowMode m)
 
     else if (WindowMode(m) == WindowMode::FullscreenBorderless)
     {
-        if (!glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
-        {
-            glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GLFW_TRUE);
-        }
-
         if (glfwGetWindowAttrib(mWindow, GLFW_DECORATED))
         {
             glfwSetWindowAttrib(mWindow, GLFW_DECORATED, GLFW_FALSE);
+        }
+
+        if (!glfwGetWindowAttrib(mWindow, GLFW_FLOATING))
+        {
+            glfwSetWindowAttrib(mWindow, GLFW_FLOATING, GLFW_TRUE);
         }
 
         glfwSetWindowMonitor(mWindow, nullptr, x, y, w, h, GLFW_DONT_CARE);
