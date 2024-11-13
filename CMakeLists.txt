@@ -66,6 +66,7 @@ target_sources(streamline-engine PRIVATE
     src/core/application.cpp
     src/core/monitor.cpp
     src/core/window.cpp
+    src/managers/debug_manager.cpp
     src/managers/display_manager.cpp
     src/managers/resource_manager.cpp
     src/renderer/framebuffer.cpp
