@@ -4,6 +4,10 @@
 #include <immintrin.h>
 #endif
 
+#if defined(__aarch64__) || defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 #include "vector.hpp"
 
 namespace engine
@@ -334,6 +338,111 @@ class Matrix
         return Vector<4, T>(simd_results[0], simd_results[1], simd_results[2], simd_results[3]);
     }
 
+#elif defined(__aarch64__) || defined(__ARM_NEON)
+    /**
+     * @brief Performs naive multiplication between two MxN matrices
+     *
+     * @return Matrix<M, P, T>
+     */
+    template <
+        std::size_t X = M, std::size_t Y = N, typename U = T,
+        typename = std::enable_if_t<
+            !((X == 4 && Y == 4 && std::is_same<U, float>::value) ||
+              (X == 3 && Y == 3 && std::is_same<U, float>::value) ||
+              (X == 2 && Y == 2 && std::is_same<U, float>::value))>,
+        std::size_t P>
+    Matrix<M, P, T> operator*(const Matrix<N, P, T> &other) const
+    {
+    }
+
+    /**
+     * @brief Perfoms naive multiplication between and MxN matrix and and N-component vector
+     *
+     * @param other
+     * @return Vector<M, T>
+     */
+    template <
+        std::size_t X = M, std::size_t Y = N, typename U = T,
+        typename = std::enable_if_t<
+            !((X == 4 && Y == 4 && std::is_same<U, float>::value) ||
+              (X == 3 && Y == 3 && std::is_same<U, float>::value) ||
+              (X == 2 && Y == 2 && std::is_same<U, float>::value))>>
+    Vector<M, T> operator*(const Vector<N, T> &other)
+    {
+        Vector<M, T> v;
+        for (size_t i = 0; i < M; i++)
+        {
+            for (size_t j = 0; j < N; j++)
+            {
+                v[i] += data[i][j] * other[j];
+            }
+        }
+        return v;
+    }
+
+    /**
+     * @brief Performs SIMD-optimized multiplication between two 4x4 matrices
+     *
+     * @param other
+     * @return Matrix<4, 4, T>
+     */
+    template <typename U = T, std::enable_if_t<M == 4 && N == 4 && std::is_same<U, float>::value, int> = 0>
+    Matrix<4, 4, T> operator*(const Matrix<4, 4, T> &other) const
+    {
+        Matrix<4, 4, T> result;
+
+        float32x4_t     simd_matrix_columns[4];
+
+        float           column0[4] = {data[0][0], data[0][1], data[0][2], data[0][3]};
+        float           column1[4] = {data[1][0], data[1][1], data[1][2], data[1][3]};
+        float           column2[4] = {data[2][0], data[2][1], data[2][2], data[2][3]};
+        float           column3[4] = {data[3][0], data[3][1], data[3][2], data[3][3]};
+
+        simd_matrix_columns[0] = vld1q_f32(column0);
+        simd_matrix_columns[1] = vld1q_f32(column1);
+        simd_matrix_columns[2] = vld1q_f32(column2);
+        simd_matrix_columns[3] = vld1q_f32(column3);
+
+        float32x4_t simd_result;
+
+        simd_result = vmulq_n_f32(simd_matrix_columns[0], other[0][0]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[1], other[0][1]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[2], other[0][2]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[3], other[0][3]);
+        result[0][0] = vgetq_lane_f32(simd_result, 0);
+        result[0][1] = vgetq_lane_f32(simd_result, 1);
+        result[0][2] = vgetq_lane_f32(simd_result, 2);
+        result[0][3] = vgetq_lane_f32(simd_result, 3);
+
+        simd_result = vmulq_n_f32(simd_matrix_columns[0], other[1][0]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[1], other[1][1]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[2], other[1][2]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[3], other[1][3]);
+        result[1][0] = vgetq_lane_f32(simd_result, 0);
+        result[1][1] = vgetq_lane_f32(simd_result, 1);
+        result[1][2] = vgetq_lane_f32(simd_result, 2);
+        result[1][3] = vgetq_lane_f32(simd_result, 3);
+
+        simd_result = vmulq_n_f32(simd_matrix_columns[0], other[2][0]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[1], other[2][1]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[2], other[2][2]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[3], other[2][3]);
+        result[2][0] = vgetq_lane_f32(simd_result, 0);
+        result[2][1] = vgetq_lane_f32(simd_result, 1);
+        result[2][2] = vgetq_lane_f32(simd_result, 2);
+        result[2][3] = vgetq_lane_f32(simd_result, 3);
+
+        simd_result = vmulq_n_f32(simd_matrix_columns[0], other[3][0]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[1], other[3][1]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[2], other[3][2]);
+        simd_result = vmlaq_n_f32(simd_result, simd_matrix_columns[3], other[3][3]);
+        result[3][0] = vgetq_lane_f32(simd_result, 0);
+        result[3][1] = vgetq_lane_f32(simd_result, 1);
+        result[3][2] = vgetq_lane_f32(simd_result, 2);
+        result[3][3] = vgetq_lane_f32(simd_result, 3);
+
+        return result;
+    }
 #else
 
     /**
