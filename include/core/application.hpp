@@ -1,6 +1,7 @@
 #pragma once
 
 #include "managers/audio_manager.hpp"    // IWYU pragma: keep
+#include "managers/debug_manager.hpp"
 #include "managers/display_manager.hpp"  // IWYU pragma: keep
 #include "managers/resource_manager.hpp" // IWYU pragma: keep
 
@@ -55,6 +56,7 @@ class Application
   private:
     Window                         *mWindow;
 
+    std::unique_ptr<DebugManager>   mDebugManager;
     std::unique_ptr<DisplayManager> mDisplayManager;
 
     void                            OnEvent(Event &&e);

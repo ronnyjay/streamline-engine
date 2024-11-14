@@ -6,7 +6,10 @@ Application::Application()
 {
     mWindow = Window::Create(800, 600, "Streamline Engine");
 
+    mDebugManager = std::make_unique<DebugManager>();
     mDisplayManager = std::make_unique<DisplayManager>();
+
+    DebugManager::GetInstancePtr()->Init();
 
     DisplayManager::GetInstancePtr()->Init();
     DisplayManager::GetInstancePtr()->AttachWindow(mWindow);
@@ -25,6 +28,13 @@ void Application::Run()
             mWindow->Close();
         }
 
+        glClearColor(0.10f, 0.10f, 0.10f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // render debug
+        mDebugManager.get()->Draw();
+
+        // swap buffers
         mWindow->SwapBuffers();
     }
 }
