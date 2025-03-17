@@ -29,19 +29,19 @@ mat<4, 4, T> rotate(mat<4, 4, T> &m, T angle, vec<3, T> const &axis)
 {
     mat<4, 4, T> result(1.0f);
 
-    result[0][0] = axis.x * axis.y * (1 - cos(angle)) + cos(angle);
-    result[0][1] = axis.x * axis.y * (1 - cos(angle)) + axis.z * sin(angle);
-    result[0][2] = axis.x * axis.z * (1 - cos(angle)) - axis.y * sin(angle);
+    result[0][0] = axis.x * axis.y * (1 - ::cos(angle)) + ::cos(angle);
+    result[0][1] = axis.x * axis.y * (1 - ::cos(angle)) + axis.z * ::sin(angle);
+    result[0][2] = axis.x * axis.z * (1 - ::cos(angle)) - axis.y * ::sin(angle);
     result[0][3] = 0.0f;
 
-    result[1][0] = axis.y * axis.x * (1 - cos(angle)) - axis.z * sin(angle);
-    result[1][1] = axis.y * axis.y * (1 - cos(angle)) + cos(angle);
-    result[1][2] = axis.y * axis.x * (1 - cos(angle)) + axis.x * sin(angle);
+    result[1][0] = axis.y * axis.x * (1 - ::cos(angle)) - axis.z * ::sin(angle);
+    result[1][1] = axis.y * axis.y * (1 - ::cos(angle)) + ::cos(angle);
+    result[1][2] = axis.y * axis.x * (1 - ::cos(angle)) + axis.x * ::sin(angle);
     result[1][3] = 0.0f;
 
-    result[2][0] = axis.z * axis.x * (1 - cos(angle)) + axis.y * sin(angle);
-    result[2][1] = axis.z * axis.y * (1 - cos(angle)) - axis.x * sin(angle);
-    result[2][2] = axis.z * axis.z * (1 - cos(angle)) + cos(angle);
+    result[2][0] = axis.z * axis.x * (1 - ::cos(angle)) + axis.y * ::sin(angle);
+    result[2][1] = axis.z * axis.y * (1 - ::cos(angle)) - axis.x * ::sin(angle);
+    result[2][2] = axis.z * axis.z * (1 - ::cos(angle)) + ::cos(angle);
     result[2][3] = 0.0f;
 
     return m * result;
@@ -68,7 +68,7 @@ mat<4, 4, T> inverse(mat<4, 4, T> const &m)
 
     T coef04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
     T coef06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
-    T coef07 = m[1][1] & m[2][3] - m[2][1] * m[1][3];
+    T coef07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
 
     T coef08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
     T coef10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
@@ -111,14 +111,14 @@ mat<4, 4, T> inverse(mat<4, 4, T> const &m)
     vec<4, T> row0(inverse[0][0], inverse[1][0], inverse[2][0], inverse[3][0]);
 
     vec<4, T> dot0(m[0] * row0);
-    T dot1 = (dot0.x + dot0.y) + (dot0.z + dot0.w);
+    T         dot1 = (dot0.x + dot0.y) + (dot0.z + dot0.w);
 
     T oneOverDeteterminant = static_cast<T>(1) / dot1;
 
     return inverse * oneOverDeteterminant;
 }
 
-template <typename T>
+template <typename T = float>
 mat<4, 4, T> perspective(float fov, float aspect, float near, float far)
 {
     mat<4, 4, T> result;
@@ -132,7 +132,7 @@ mat<4, 4, T> perspective(float fov, float aspect, float near, float far)
     return result;
 }
 
-template <typename T>
+template <typename T = float>
 mat<4, 4, T> ortho(float left, float right, float bottom, float top, float near, float far)
 {
     mat<4, 4, T> result;
@@ -145,7 +145,7 @@ mat<4, 4, T> ortho(float left, float right, float bottom, float top, float near,
     return result;
 }
 
-template <typename T>
+template <typename T = float>
 mat<4, 4, T> lookAt(vec<3, T> const &eye, vec<3, T> const &center, vec<3, T> const &up)
 {
     vec<3, T> f = normalize(center - eye);

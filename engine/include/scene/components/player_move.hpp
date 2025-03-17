@@ -3,9 +3,9 @@
 namespace engine
 {
 
-struct player_move
+struct Move
 {
-    float dummy = 3.0f;
+    float speed = 10.0f;
 };
 
 } // namespace engine

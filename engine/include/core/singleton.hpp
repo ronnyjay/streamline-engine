@@ -12,8 +12,7 @@
 namespace engine
 {
 
-template <typename T>
-inline std::string demangle()
+template <typename T> inline std::string demangle()
 {
 #if defined(__GNUC__) || defined(__clang__)
     int         status    = 0;
@@ -32,11 +31,10 @@ inline std::string demangle()
 #endif
 }
 
-template <typename T>
-class singleton
+template <typename T> class Singleton
 {
   public:
-    singleton()
+    Singleton()
     {
         STREAMLINE_ASSERT(!m_instance, std::string("Instance of singleton previously created: ") + demangle<T>());
         m_instance = static_cast<T *>(this);
@@ -48,7 +46,7 @@ class singleton
         return *m_instance;
     }
 
-    virtual ~singleton()
+    virtual ~Singleton()
     {
         STREAMLINE_ASSERT(m_instance, std::string("Instance of singleton previously deleted: ") + demangle<T>());
         m_instance = nullptr;
@@ -59,13 +57,12 @@ class singleton
     static T *m_instance;
 
     /** @brief Private copy constructor; forbidden. */
-    singleton(singleton const &) = delete;
+    Singleton(Singleton const &) = delete;
 
     /** @brief Private copy assignment operator; forbidden.  */
-    singleton &operator=(singleton const &) = delete;
+    Singleton &operator=(Singleton const &) = delete;
 };
 
-template <typename T>
-T *singleton<T>::m_instance = nullptr;
+template <typename T> T *Singleton<T>::m_instance = nullptr;
 
 } // namespace engine

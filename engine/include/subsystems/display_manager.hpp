@@ -5,7 +5,7 @@
 namespace engine
 {
 
-struct display_manager : public singleton<display_manager>
+struct display_manager : public Singleton<display_manager>
 {
 };
 

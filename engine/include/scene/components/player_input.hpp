@@ -1,11 +1,32 @@
 #pragma once
 
+#include "core/input.hpp"
+
+#include <unordered_map>
+
 namespace engine
 {
 
-struct player_input
+enum class PlayerAction
 {
-    float dummy = 1.0f;
+    MoveForward,
+    MoveBack,
+
+    MoveLeft,
+    MoveRight,
+
+    MoveUp,
+    MoveDown
+};
+
+struct PlayerInput
+{
+    void bindAction(PlayerAction action, Key key)
+    {
+        keyBinds[action] = key;
+    }
+
+    std::unordered_map<PlayerAction, Key> keyBinds;
 };
 
 } // namespace engine

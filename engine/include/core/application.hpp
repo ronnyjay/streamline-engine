@@ -11,37 +11,51 @@
 namespace engine
 {
 
-class application
+class Application
 {
-    window *m_window                     = nullptr;
-    renderer *m_renderer                 = nullptr;
-    input_manager *m_input_manager       = nullptr;
-    resource_manager *m_resource_manager = nullptr;
+    Window          *m_window           = nullptr;
+    Renderer        *m_renderer         = nullptr;
+    SceneManager    *m_scene_manager    = nullptr;
+    InputManager    *m_input_manager    = nullptr;
+    ResourceManager *m_resource_manager = nullptr;
+    scene           *m_scene;
 
   public:
-    application(int width = 800, int height = 600, const char *title = "Untitled Window");
+    Application(int width = 800, int height = 600, const char *title = "Untitled Window");
 
-    resource_manager *const getResourceManager() const noexcept
+    ResourceManager *const getResourceManager() const noexcept
     {
         return m_resource_manager;
     }
 
-    renderer *const getRenderer() const noexcept
+    InputManager *const getInputManager() const noexcept
+    {
+        return m_input_manager;
+    }
+
+    SceneManager *const getSceneManager() const noexcept
+    {
+        return m_scene_manager;
+    }
+
+    Renderer *const getRenderer() const noexcept
     {
         return m_renderer;
     }
 
-    window *const getWindow() const noexcept
+    Window *const getWindow() const noexcept
     {
         return m_window;
     }
 
     void run();
 
-    ~application()
+    ~Application()
     {
         if (m_resource_manager)
             delete m_resource_manager;
+        if (m_scene_manager)
+            delete m_scene_manager;
         if (m_input_manager)
             delete m_input_manager;
         if (m_renderer)
@@ -50,11 +64,11 @@ class application
             delete m_window;
     }
 
-    application(application const &)  = delete;
-    application(application const &&) = delete;
+    Application(Application const &)  = delete;
+    Application(Application const &&) = delete;
 
-    application operator=(application const &)  = delete;
-    application operator=(application const &&) = delete;
+    Application operator=(Application const &)  = delete;
+    Application operator=(Application const &&) = delete;
 
   private:
     void onEvent(event &&e);

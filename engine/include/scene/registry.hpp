@@ -28,20 +28,17 @@ class registry
         pool.remove(entity);
     }
 
-    template <typename T, typename... Args>
-    T &emplace(const std::uint32_t entity, Args &&...args)
+    template <typename T, typename... Args> T &emplace(const std::uint32_t entity, Args &&...args)
     {
         return pool.get<T>()->emplace(entity, std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    T &get(const std::uint32_t entity)
+    template <typename T> T &get(const std::uint32_t entity)
     {
         return pool.get<T>()->get(entity);
     }
 
-    template <typename T>
-    T *try_get(const std::uint32_t entity)
+    template <typename T> T *try_get(const std::uint32_t entity)
     {
         component_storage<T> *storage = pool.get<T>();
         if (storage->search(entity) == sparse_set::null)
@@ -51,26 +48,22 @@ class registry
         return &storage->get(entity);
     }
 
-    template <typename T>
-    void remove(const std::uint32_t entity)
+    template <typename T> void remove(const std::uint32_t entity)
     {
         pool.get<T>()->remove(entity);
     }
 
-    template <typename T>
-    basic_view<T> view()
+    template <typename T> basic_view<T> view()
     {
         return basic_view<T>(*(pool.get<T>()));
     }
 
-    template <typename... Ts, std::enable_if_t<(sizeof...(Ts) > 1), int> = 0>
-    multi_view<Ts...> view()
+    template <typename... Ts, std::enable_if_t<(sizeof...(Ts) > 1), int> = 0> multi_view<Ts...> view()
     {
         return multi_view<Ts...>(pool);
     }
 
-    template <typename... Ts>
-    bool any_of(uint32_t const entity)
+    template <typename... Ts> bool any_of(uint32_t const entity)
     {
         STREAMLINE_ASSERT(sizeof...(Ts) > 0);
 
@@ -85,8 +78,7 @@ class registry
         return entities.search(entity) != sparse_set::null;
     }
 
-    template <typename... Ts>
-    bool all_of(uint32_t const entity)
+    template <typename... Ts> bool all_of(uint32_t const entity)
     {
         STREAMLINE_ASSERT(sizeof...(Ts) > 0);
 

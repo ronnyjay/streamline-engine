@@ -99,7 +99,7 @@ class sparse_set
 
         if (!sparse[page])
         {
-            sparse[page] = std::make_shared<std::vector<uint32_t>>(page_size, max_size);
+            sparse[page] = std::make_shared<std::vector<uint32_t>>(page_size, null);
         }
 
         return (*(sparse[page]))[fast_mod(pos, page_size)];
@@ -114,7 +114,7 @@ class sparse_set
         }
 
         auto &elem = assure_at_least(entity);
-        auto pos   = size();
+        auto  pos  = size();
 
         if (!(search(entity) == null))
         {

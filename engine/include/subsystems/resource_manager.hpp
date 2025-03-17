@@ -13,36 +13,36 @@
 namespace engine
 {
 
-struct resource_manager : public singleton<resource_manager>
+struct ResourceManager : public Singleton<ResourceManager>
 {
     inline static const std::string_view DEFAULT_TEXTURE_DIR = "../assets/textures/default";
 
-    std::shared_ptr<shader> getShader(const std::string id)
+    std::shared_ptr<Shader> getShader(const std::string &id, const std::string &vPath, const std::string &fPath)
     {
         auto [it, insert] = shaders.emplace(id, nullptr);
 
         if (insert)
         {
-            auto loadable = std::make_shared<shader>();
+            auto loadable = std::make_shared<Shader>(vPath, fPath);
 
             it->second = loadable;
         }
 
-        return std::dynamic_pointer_cast<shader>(it->second);
+        return std::dynamic_pointer_cast<Shader>(it->second);
     }
 
-    std::shared_ptr<model> getModel(const std::string &path)
+    std::shared_ptr<Model> getModel(const std::string &path)
     {
         auto [it, insert] = models.emplace(path, nullptr);
 
         if (insert)
         {
-            auto loadable = std::make_shared<model>(path);
+            auto loadable = std::make_shared<Model>(path);
 
             it->second = loadable;
         }
 
-        return std::dynamic_pointer_cast<model>(it->second);
+        return std::dynamic_pointer_cast<Model>(it->second);
     }
 
     std::shared_ptr<texture> getTexture(const std::string &path)
@@ -60,8 +60,8 @@ struct resource_manager : public singleton<resource_manager>
     }
 
   private:
-    std::map<std::string, std::shared_ptr<shader>>  shaders;
-    std::map<std::string, std::shared_ptr<model>>   models;
+    std::map<std::string, std::shared_ptr<Shader>>  shaders;
+    std::map<std::string, std::shared_ptr<Model>>   models;
     std::map<std::string, std::shared_ptr<texture>> textures;
 };
 

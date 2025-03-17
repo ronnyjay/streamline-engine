@@ -144,8 +144,7 @@ class event_dispatcher
     {
     }
 
-    template <typename T, typename F>
-    bool dispatch(const F &&fn)
+    template <typename T, typename F> bool dispatch(const F &&fn)
     {
         if (e.get_type() == T::get_static_type())
         {
@@ -155,8 +154,7 @@ class event_dispatcher
         return false;
     }
 
-    template <typename T, typename F, typename C>
-    bool dispatch(C *instance, const F &fn)
+    template <typename T, typename F, typename C> bool dispatch(C *instance, const F &fn)
     {
         if (e.get_type() == T::get_static_type())
         {
@@ -170,6 +168,6 @@ class event_dispatcher
     event &e;
 };
 
-typedef std::function<void(event &&)> event_callback;
+typedef std::function<void(event &&)> EventCallback;
 
 } // namespace engine

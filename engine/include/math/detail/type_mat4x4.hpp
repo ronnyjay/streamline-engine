@@ -121,7 +121,7 @@ struct mat<4, 4, T>
         typename mat<4, 4, T>::col_type const &b2 = m[2];
         typename mat<4, 4, T>::col_type const &b3 = m[3];
 
-        typename mat<4, 4, T>::col_type tmp0 = a0 * b0.x;
+        typename mat<4, 4, T>::col_type        tmp0 = a0 * b0.x;
         tmp0 += a1 * b0.y;
         tmp0 += a2 * b0.z;
         tmp0 += a3 * b0.w;
@@ -193,6 +193,12 @@ mat<4, 4, T> operator-(mat<4, 4, T> const &m1, mat<4, 4, T> const &m2)
 }
 
 template <typename T>
+mat<4, 4, T> operator*(mat<4, 4, T> const &m, T s)
+{
+    return mat<4, 4, T>(m[0] * s, m[1] * s, m[2] * s, m[3] * s);
+}
+
+template <typename T>
 mat<4, 4, T> operator*(mat<4, 4, T> const &m1, mat<4, 4, T> const &m2)
 {
     // treats the columns of B as linear combinations of the columns
@@ -209,7 +215,7 @@ mat<4, 4, T> operator*(mat<4, 4, T> const &m1, mat<4, 4, T> const &m2)
     typename mat<4, 4, T>::col_type const &b2 = m2[2];
     typename mat<4, 4, T>::col_type const &b3 = m2[3];
 
-    typename mat<4, 4, T>::col_type tmp0 = a0 * b0.x;
+    typename mat<4, 4, T>::col_type        tmp0 = a0 * b0.x;
     tmp0 += a1 * b0.y;
     tmp0 += a2 * b0.z;
     tmp0 += a3 * b0.w;

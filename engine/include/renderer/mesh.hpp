@@ -27,15 +27,15 @@ struct mesh
          const std::vector<std::shared_ptr<texture>> &textures);
 
     std::vector<vertex>                   vertices;
-    std::vector<uint>                     indices;
+    std::vector<unsigned int>             indices;
     std::vector<std::shared_ptr<texture>> textures;
 
-    void draw(const std::shared_ptr<shader> &s);
+    void                                  draw(const std::shared_ptr<Shader> &s);
 
   private:
-    uint vao;
-    uint vbo;
-    uint ebo;
+    unsigned int vao;
+    unsigned int vbo;
+    unsigned int ebo;
 };
 
 } // namespace engine

@@ -2,12 +2,13 @@
 
 using namespace engine;
 
-mesh::mesh(const std::vector<vertex> &vertices, const std::vector<uint> &indices,
+mesh::mesh(const std::vector<vertex> &vertices, const std::vector<unsigned int> &indices,
            const std::vector<std::shared_ptr<texture>> &textures)
     : vertices(vertices)
     , indices(indices)
     , textures(textures)
 {
+
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -43,15 +44,15 @@ mesh::mesh(const std::vector<vertex> &vertices, const std::vector<uint> &indices
     glBindVertexArray(0);
 }
 
-void mesh::draw(const std::shared_ptr<shader> &s)
+void mesh::draw(const std::shared_ptr<Shader> &s)
 {
     unsigned int diffuseNr  = 1;
     unsigned int specularNr = 1;
     unsigned int normalNr   = 1;
     unsigned int heightNr   = 1;
 
-    std::string texNumber;
-    std::string texType;
+    std::string  texNumber;
+    std::string  texType;
 
     for (unsigned int i = 0; i < textures.size(); i++)
     {
@@ -82,7 +83,7 @@ void mesh::draw(const std::shared_ptr<shader> &s)
     }
 
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, static_cast<uint>(indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     glActiveTexture(GL_TEXTURE0);

@@ -14,29 +14,30 @@
 namespace engine
 {
 
-enum class window_mode
+enum class WindowMode
 {
-    windowed,
-    fullscreen,
-    windowed_fullscreen
+    Windowed,
+    Fullscreen,
+    WindowedFullscreen
 };
 
-class window
+class Window
 {
-    GLFWwindow *m_glfwWindow;
-
-    ivec2 m_lastSize;
-    ivec2 m_lastPos;
-
-    struct cursor_flags
+    struct WindowFlags
     {
-        bool entered;
-        bool visible;
-    } m_cursorFlags;
+        bool mouseEntered = true;
+        bool mouseVisible = true;
+    };
 
-    window_mode m_windowMode;
+    GLFWwindow   *m_glfwWindow;
 
-    event_callback m_eventCallback;
+    ivec2         m_lastSize;
+    ivec2         m_lastPos;
+
+    WindowMode    m_windowMode;
+    WindowFlags   m_windowFlags;
+
+    EventCallback m_eventCallback;
 
   public:
     /**
@@ -46,13 +47,13 @@ class window
      * @param height
      * @param title
      */
-    window(int width, int height, const char *title);
+    Window(int width, int height, const char *title);
 
     /**
      * @brief
      *
      */
-    ~window()
+    ~Window()
     {
         if (m_glfwWindow)
             glfwDestroyWindow(m_glfwWindow);
@@ -60,11 +61,11 @@ class window
         glfwTerminate();
     }
 
-    window(window const &)  = delete;
-    window(window const &&) = delete;
+    Window(Window const &)            = delete;
+    Window(Window const &&)           = delete;
 
-    window operator=(window const &)  = delete;
-    window operator=(window const &&) = delete;
+    Window operator=(Window const &)  = delete;
+    Window operator=(Window const &&) = delete;
 
     /**
      * @brief
@@ -157,7 +158,7 @@ class window
      *
      * @param mode
      */
-    void setWindowMode(window_mode mode);
+    void setWindowMode(WindowMode mode);
 
     /**
      * @brief
@@ -166,23 +167,22 @@ class window
      * @param instance
      * @param fn
      */
-    template <typename T>
-    void setEventCallback(T *instance, void (T::*fn)(event &&e))
+    template <typename T> void setEventCallback(T *instance, void (T::*fn)(event &&e))
     {
         m_eventCallback = [instance, fn](event &&event) { (instance->*fn)(std::move(event)); };
     }
 
   private:
-    static void framebuffer_callback(GLFWwindow *window, int width, int height);
+    static void framebufferCallback(GLFWwindow *window, int width, int height);
 
-    static void maximize_callback(GLFWwindow *window, int maximize);
-    static void minimize_callback(GLFWwindow *window, int minimize);
+    static void maximizeCallback(GLFWwindow *window, int maximize);
+    static void minimizeCallback(GLFWwindow *window, int minimize);
 
-    static void cursor_callback(GLFWwindow *window, double x, double y);
-    static void scroll_callback(GLFWwindow *window, double x, double y);
+    static void cursorCallback(GLFWwindow *window, double x, double y);
+    static void scrollCallback(GLFWwindow *window, double x, double y);
 
-    static void mouse_callback(GLFWwindow *window, int button, int action, int mods);
-    static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void mouseCallback(GLFWwindow *window, int button, int action, int mods);
+    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 };
 
 } // namespace engine

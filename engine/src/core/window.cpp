@@ -2,8 +2,8 @@
 
 using namespace engine;
 
-window::window(int width, int height, const char *title)
-    : m_windowMode(window_mode::windowed)
+Window::Window(int width, int height, const char *title)
+    : m_windowMode(WindowMode::Windowed)
 {
     STREAMLINE_ASSERT(glfwInit(), "Failed to initialize GLFW");
 
@@ -25,13 +25,13 @@ window::window(int width, int height, const char *title)
         STREAMLINE_ASSERT(false, "Failed to create GLFW window");
     }
 
-    glfwSetFramebufferSizeCallback(m_glfwWindow, window::framebuffer_callback);
-    glfwSetWindowMaximizeCallback(m_glfwWindow, window::maximize_callback);
-    glfwSetWindowIconifyCallback(m_glfwWindow, window::minimize_callback);
-    glfwSetKeyCallback(m_glfwWindow, window::key_callback);
-    glfwSetMouseButtonCallback(m_glfwWindow, window::mouse_callback);
-    glfwSetCursorPosCallback(m_glfwWindow, window::cursor_callback);
-    glfwSetScrollCallback(m_glfwWindow, window::scroll_callback);
+    glfwSetFramebufferSizeCallback(m_glfwWindow, Window::framebufferCallback);
+    glfwSetWindowMaximizeCallback(m_glfwWindow, Window::maximizeCallback);
+    glfwSetWindowIconifyCallback(m_glfwWindow, Window::minimizeCallback);
+    glfwSetKeyCallback(m_glfwWindow, Window::keyCallback);
+    glfwSetMouseButtonCallback(m_glfwWindow, Window::mouseCallback);
+    glfwSetCursorPosCallback(m_glfwWindow, Window::cursorCallback);
+    glfwSetScrollCallback(m_glfwWindow, Window::scrollCallback);
 
     glfwGetWindowPos(m_glfwWindow, &m_lastPos.x, &m_lastPos.y);
     glfwGetWindowSize(m_glfwWindow, &m_lastSize.x, &m_lastSize.y);
@@ -48,41 +48,41 @@ window::window(int width, int height, const char *title)
     glfwSetWindowUserPointer(m_glfwWindow, this);
 }
 
-bool window::isOpen() const
+bool Window::isOpen() const
 {
     return !glfwWindowShouldClose(m_glfwWindow);
 }
 
-bool window::isVisible() const
+bool Window::isVisible() const
 {
     return glfwGetWindowAttrib(m_glfwWindow, GLFW_VISIBLE);
 }
 
-void window::show()
+void Window::show()
 {
     glfwShowWindow(m_glfwWindow);
 }
 
-void window::hide()
+void Window::hide()
 {
     glfwHideWindow(m_glfwWindow);
 }
 
-void window::swapBuffers()
+void Window::swapBuffers()
 {
     glfwSwapBuffers(m_glfwWindow);
 }
 
-void window::pollEvents()
+void Window::pollEvents()
 {
     glfwPollEvents();
 }
 
-void window::toggleCursor()
+void Window::toggleCursor()
 {
-    m_cursorFlags.visible = !m_cursorFlags.visible;
+    m_windowFlags.mouseVisible = !m_windowFlags.mouseVisible;
 
-    if (m_cursorFlags.visible)
+    if (m_windowFlags.mouseVisible)
     {
         glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
@@ -91,20 +91,20 @@ void window::toggleCursor()
         glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
-    m_cursorFlags.entered = true;
+    m_windowFlags.mouseEntered = true;
 }
 
-const ivec2 &window::getPositionInScreen() const
+const ivec2 &Window::getPositionInScreen() const
 {
     return m_lastPos;
 }
 
-const ivec2 &window::getSizeInScreen() const
+const ivec2 &Window::getSizeInScreen() const
 {
     return m_lastSize;
 }
 
-void window::moveTo(int x, int y)
+void Window::moveTo(int x, int y)
 {
     // window fullscreen; do not move.
     if (glfwGetWindowMonitor(m_glfwWindow))
@@ -113,7 +113,7 @@ void window::moveTo(int x, int y)
     }
 
     // store last position for windowed mode
-    if (m_windowMode == window_mode::windowed)
+    if (m_windowMode == WindowMode::Windowed)
     {
         m_lastPos.x = x;
         m_lastPos.y = y;
@@ -122,7 +122,7 @@ void window::moveTo(int x, int y)
     glfwSetWindowPos(m_glfwWindow, x, y);
 }
 
-void window::resize(int x, int y)
+void Window::resize(int x, int y)
 {
     // window fullscreen; do not resize.
     if (glfwGetWindowMonitor(m_glfwWindow))
@@ -131,7 +131,7 @@ void window::resize(int x, int y)
     }
 
     // store last size for windowed mode
-    if (m_windowMode == window_mode::windowed)
+    if (m_windowMode == WindowMode::Windowed)
     {
         m_lastSize.x = x;
         m_lastSize.y = y;
@@ -140,9 +140,9 @@ void window::resize(int x, int y)
     glfwSetWindowSize(m_glfwWindow, x, y);
 }
 
-void window::setWindowMode(window_mode mode)
+void Window::setWindowMode(WindowMode mode)
 {
-    if (m_windowMode == window_mode::windowed)
+    if (m_windowMode == WindowMode::Windowed)
     {
         glfwGetWindowPos(m_glfwWindow, &m_lastPos.x, &m_lastPos.y);
         glfwGetWindowSize(m_glfwWindow, &m_lastSize.x, &m_lastSize.y);
@@ -150,7 +150,7 @@ void window::setWindowMode(window_mode mode)
 
     m_windowMode = mode;
 
-    if (mode == window_mode::windowed)
+    if (mode == WindowMode::Windowed)
     {
 
         if (!glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
@@ -168,11 +168,11 @@ void window::setWindowMode(window_mode mode)
         return;
     }
 
-    GLFWmonitor *monitor = nullptr;
+    GLFWmonitor  *monitor = nullptr;
 
-    int x, y;
-    int w, h;
-    int count;
+    int           x, y;
+    int           w, h;
+    int           count;
 
     GLFWmonitor **monitors = glfwGetMonitors(&count);
 
@@ -190,12 +190,12 @@ void window::setWindowMode(window_mode mode)
         }
     }
 
-    if (mode == window_mode::fullscreen)
+    if (mode == WindowMode::Fullscreen)
     {
         glfwSetWindowMonitor(m_glfwWindow, monitor, 0, 0, w, h, GLFW_DONT_CARE);
     }
 
-    if (mode == window_mode::windowed_fullscreen)
+    if (mode == WindowMode::WindowedFullscreen)
     {
         if (glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
         {
@@ -211,17 +211,17 @@ void window::setWindowMode(window_mode mode)
     }
 }
 
-void window::framebuffer_callback(GLFWwindow *glfwWindow, int width, int height)
+void Window::framebufferCallback(GLFWwindow *glfwWindow, int width, int height)
 {
-    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfwWindow));
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (w->m_eventCallback)
+    if (window->m_eventCallback)
     {
-        w->m_eventCallback(window_resize_event(width, height));
+        window->m_eventCallback(window_resize_event(width, height));
     }
 }
 
-void window::maximize_callback(GLFWwindow *glfwWindow, int maximize)
+void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
 {
     if (maximize)
     {
@@ -233,7 +233,7 @@ void window::maximize_callback(GLFWwindow *glfwWindow, int maximize)
     }
 }
 
-void window::minimize_callback(GLFWwindow *glfwWindow, int minimize)
+void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
 {
     if (minimize)
     {
@@ -245,77 +245,77 @@ void window::minimize_callback(GLFWwindow *glfwWindow, int minimize)
     }
 }
 
-void window::key_callback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
+void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
 {
-    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfwWindow));
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
     /** TODO: convert key code to engine key  */
 
-    if (w->m_eventCallback)
+    if (window->m_eventCallback)
     {
         if (action == GLFW_RELEASE)
         {
-            w->m_eventCallback(key_release_event(key));
+            window->m_eventCallback(key_release_event(key));
         }
         else
         {
-            w->m_eventCallback(key_press_event(key, mods, action == GLFW_REPEAT));
+            window->m_eventCallback(key_press_event(key, mods, action == GLFW_REPEAT));
         }
     }
 }
 
-void window::mouse_callback(GLFWwindow *glfwWindow, int button, int action, int mods)
+void Window::mouseCallback(GLFWwindow *glfwWindow, int button, int action, int mods)
 {
-    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfwWindow));
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (w->m_eventCallback)
+    if (window->m_eventCallback)
     {
         if (action == GLFW_PRESS)
         {
-            w->m_eventCallback(mouse_button_press_event(button));
+            window->m_eventCallback(mouse_button_press_event(button));
         }
         else
         {
-            w->m_eventCallback(mouse_button_release_event(button));
+            window->m_eventCallback(mouse_button_release_event(button));
         }
     }
 }
 
-void window::cursor_callback(GLFWwindow *glfwWindow, double xposIn, double yposIn)
+void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn)
 {
-    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfwWindow));
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (w->m_eventCallback)
+    if (window->m_eventCallback)
     {
-        auto size = w->getSizeInScreen();
+        auto         size  = window->getSizeInScreen();
 
         static float lastX = size.x / 2.0f;
         static float lastY = size.y / 2.0f;
 
-        if (w->m_cursorFlags.entered)
+        if (window->m_windowFlags.mouseEntered)
         {
-            lastX = xposIn;
-            lastY = yposIn;
+            lastX                              = xposIn;
+            lastY                              = yposIn;
 
-            w->m_cursorFlags.entered = false;
+            window->m_windowFlags.mouseEntered = false;
         }
 
-        float xPos = static_cast<float>(xposIn);
-        float yPos = static_cast<float>(yposIn);
+        float xPos    = static_cast<float>(xposIn);
+        float yPos    = static_cast<float>(yposIn);
 
         float xOffset = xPos - lastX;
         float yOffset = lastY - yPos;
 
-        w->m_eventCallback(mouse_move_event(xOffset, yOffset));
+        window->m_eventCallback(mouse_move_event(xOffset, yOffset));
     }
 }
 
-void window::scroll_callback(GLFWwindow *glfwWindow, double xoffset, double yoffset)
+void Window::scrollCallback(GLFWwindow *glfwWindow, double xoffset, double yoffset)
 {
-    window *w = static_cast<window *>(glfwGetWindowUserPointer(glfwWindow));
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (w->m_eventCallback)
+    if (window->m_eventCallback)
     {
-        w->m_eventCallback(mouse_scroll_event(xoffset, yoffset));
+        window->m_eventCallback(mouse_scroll_event(xoffset, yoffset));
     }
 }

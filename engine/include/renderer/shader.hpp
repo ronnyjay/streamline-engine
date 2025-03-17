@@ -18,12 +18,9 @@
 namespace engine
 {
 
-struct shader
+struct Shader
 {
-    shader()
-    {
-        ID = glCreateProgram();
-    }
+    Shader(const std::string &vertexPath, const std::string &fragmentPath);
 
     void bind()
     {
@@ -34,11 +31,6 @@ struct shader
     {
         glUseProgram(0);
     }
-
-    bool compile();
-
-    bool addVertexShader(const std::string &path);
-    bool addFragmentShader(const std::string &path);
 
     void setInt(const std::string &name, int value)
     {
@@ -81,13 +73,13 @@ struct shader
     }
 
   private:
-    uint32_t ID;
-
-    /**  @brief */
-    bool checkCompileErrors(uint32_t shaderID, const std::string_view type);
+    unsigned int ID;
 
     /** @brief */
-    bool compile(const std::string_view vertexSrc, const std::string_view fragementSrc);
+    bool compile(const char *vertexSrc, const char *fragmentSrc);
+
+    /**  @brief */
+    bool checkCompileErrors(unsigned int shader, const char *type);
 };
 
 } // namespace engine

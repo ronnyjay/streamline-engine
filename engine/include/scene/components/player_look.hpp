@@ -3,9 +3,9 @@
 namespace engine
 {
 
-struct player_look
+struct Look
 {
-    float dummy = 2.0f;
+    float sensitivity = 0.125f;
 };
 
 } // namespace engine

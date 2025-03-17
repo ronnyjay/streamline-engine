@@ -7,8 +7,53 @@
 namespace engine
 {
 
-struct scene_manager : public singleton<scene_manager>
+struct SceneManager : public Singleton<SceneManager>
 {
+  private:
+    uint32_t m_currentScene = 0;
+
+  public:
+    std::shared_ptr<scene> createScene()
+    {
+        return m_scenes.emplace_back(std::make_shared<scene>());
+    }
+
+    void nextScene()
+    {
+        if (m_currentScene == m_scenes.size() - 1)
+        {
+            m_currentScene = 0;
+        }
+        else
+        {
+            ++m_currentScene;
+        }
+    }
+
+    void prevScene()
+    {
+        if (m_currentScene == 0)
+        {
+            m_currentScene = m_scenes.size() - 1;
+        }
+        else
+        {
+            --m_currentScene;
+        }
+    }
+
+    std::shared_ptr<scene> currentScene()
+    {
+        if (!m_scenes.size())
+        {
+            return nullptr;
+        }
+
+        return m_scenes[m_currentScene];
+    }
+
+  private:
+    std::vector<std::shared_ptr<scene>> m_scenes;
 };
 
 } // namespace engine

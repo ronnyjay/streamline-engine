@@ -7,12 +7,14 @@
 namespace engine
 {
 
-class renderer
+class Renderer
 {
   public:
-    renderer()
+    Renderer()
     {
         glDepthFunc(GL_LESS);
+
+        setViewport(0, 0, 800, 600);
     }
 
     void clear()

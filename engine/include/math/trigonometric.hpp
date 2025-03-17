@@ -19,40 +19,34 @@ static float degrees(float radians)
     return radians * (180 * M_1_PI);
 }
 
-template <typename T>
-vec<2, T> sin(vec<2, T> const &v)
+template <typename T> vec<2, T> sin(vec<2, T> const &v)
 {
-    return vec<2, T>(sin(v.x), sin(v.y));
+    return vec<2, T>(::sin(v.x), ::sin(v.y));
 }
 
-template <typename T>
-vec<2, T> cos(vec<2, T> const &v)
+template <typename T> vec<2, T> cos(vec<2, T> const &v)
 {
-    return vec<2, T>(cos(v.x), cos(v.y));
+    return vec<2, T>(::cos(v.x), ::cos(v.y));
 }
 
-template <typename T>
-vec<3, T> sin(vec<3, T> const &v)
+template <typename T> vec<3, T> sin(vec<3, T> const &v)
 {
-    return vec<3, T>(sin(v.x), sin(v.y), sin(v.z));
+    return vec<3, T>(::sin(v.x), ::sin(v.y), ::sin(v.z));
 }
 
-template <typename T>
-vec<3, T> cos(vec<3, T> const &v)
+template <typename T> vec<3, T> cos(vec<3, T> const &v)
 {
-    return vec<3, T>(cos(v.x), cos(v.y), cos(v.z));
+    return vec<3, T>(::cos(v.x), ::cos(v.y), ::cos(v.z));
 }
 
-template <typename T>
-vec<4, T> sin(vec<4, T> const &v)
+template <typename T> vec<4, T> sin(vec<4, T> const &v)
 {
-    return vec<4, T>(sin(v.x), sin(v.y), sin(v.z), sin(v.w));
+    return vec<4, T>(::sin(v.x), ::sin(v.y), ::sin(v.z), ::sin(v.w));
 }
 
-template <typename T>
-vec<4, T> cos(vec<4, T> const &v)
+template <typename T> vec<4, T> cos(vec<4, T> const &v)
 {
-    return vec<4, T>(cos(v.x), cos(v.y), cos(v.z), cos(v.w));
+    return vec<4, T>(::cos(v.x), ::cos(v.y), ::cos(v.z), ::cos(v.w));
 }
 
 } // namespace engine

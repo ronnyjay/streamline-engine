@@ -1,21 +1,45 @@
 #include "scene/scene.hpp"
 
+#include "subsystems/resource_manager.hpp"
+
 using namespace engine;
 
 void scene::tick(double dt)
 {
-    auto view = m_registry.view<player_input, player_look, player_move>();
-
-    for (const auto &entity : view)
-    {
-        auto [input, look, move] = view.get(entity);
-
-        std::cout << input.dummy << std::endl;
-        std::cout << look.dummy << std::endl;
-        std::cout << move.dummy << std::endl;
-    }
+    m_playerInputSystem.update(dt);
+    m_controllerSystem.update(dt);
+    m_cameraSystem.update(dt);
 }
 
 void scene::draw()
 {
+    Camera *activeCamera = nullptr;
+
+    auto cameras = m_registry.view<Camera>();
+    for (const auto &entity : cameras)
+    {
+        auto &camera = cameras.get(entity);
+
+        if (camera.b_isPrimary)
+        {
+            activeCamera = &camera;
+        }
+    }
+
+    STREAMLINE_ASSERT(activeCamera != nullptr);
+
+    auto renderables = m_registry.view<Renderable, Transform>();
+
+    for (const auto &entity : renderables)
+    {
+        auto [renderable, transform] = renderables.get(entity);
+
+        m_shader.get()->bind();
+
+        m_shader.get()->setMat4("projection", mat4(1.0f));
+        m_shader.get()->setMat4("view", mat4(1.0f));
+        m_shader.get()->setMat4("model", mat4(1.0f));
+
+        renderable.model.get()->draw(m_shader);
+    }
 }

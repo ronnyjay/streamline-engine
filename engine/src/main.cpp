@@ -4,17 +4,9 @@ using namespace engine;
 
 int main(void)
 {
-    application app;
+    Application app;
 
-    scene s;
-
-    entity_type e = s.create();
-
-    s.emplace<player_input>(e);
-    s.emplace<player_look>(e);
-    s.emplace<player_move>(e);
-
-    s.tick(0);
+    auto s = app.getSceneManager()->createScene();
 
     app.run();
 

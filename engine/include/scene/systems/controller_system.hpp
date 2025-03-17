@@ -1,10 +1,22 @@
 #pragma once
 
+#include "component_system.hpp"
+
 namespace engine
 {
 
-struct controller_system
+struct ControllerSystem : public component_system
 {
+    ControllerSystem(scene *const scene)
+        : component_system(scene)
+    {
+    }
+
+    void update([[maybe_unused]] double dt) override;
+
+  private:
+    void updatePlayerPositions([[maybe_unused]] double dt);
+    void updatePlayerRotations([[maybe_unused]] double dt);
 };
 
 } // namespace engine
