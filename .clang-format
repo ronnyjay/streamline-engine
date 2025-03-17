@@ -20,7 +20,7 @@ AlignConsecutiveBitFields:
   PadOperators: false
 AlignConsecutiveDeclarations:
   Enabled: true
-  AcrossEmptyLines: false
+  AcrossEmptyLines: true
   AcrossComments: false
   AlignCompound: false
   AlignFunctionPointers: false

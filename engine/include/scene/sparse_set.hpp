@@ -27,7 +27,7 @@ class sparse_set
     std::vector<uint32_t> packed;
 
   public:
-    using iterator       = typename std::vector<uint32_t>::const_iterator;
+    using iterator = typename std::vector<uint32_t>::const_iterator;
     using const_iterator = typename std::vector<uint32_t>::const_iterator;
 
     // clang-format off
@@ -63,7 +63,7 @@ class sparse_set
   public:
     [[nodiscard]] auto &search(uint32_t const entity) const noexcept
     {
-        auto pos  = entity_to_pos(entity);
+        auto pos = entity_to_pos(entity);
         auto page = pos_to_page(pos);
 
         if (!(page < sparse.size()))
@@ -89,7 +89,7 @@ class sparse_set
   private:
     [[nodiscard]] auto &assure_at_least(uint32_t const entity)
     {
-        auto pos  = entity_to_pos(entity);
+        auto pos = entity_to_pos(entity);
         auto page = pos_to_page(pos);
 
         if (!(page < sparse.size()))
@@ -114,7 +114,7 @@ class sparse_set
         }
 
         auto &elem = assure_at_least(entity);
-        auto  pos  = size();
+        auto  pos = size();
 
         if (!(search(entity) == null))
         {

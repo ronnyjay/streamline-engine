@@ -36,22 +36,37 @@ struct quat
 template <typename T = float>
 inline mat<4, 4, T> toMat4(const quat<T> &q)
 {
-    mat<4, 4, T> result(1.0f);
+    mat<4, 4, T> result(T(1));
 
-    result[0][0] = 1 - 2 * q.y * q.y - 2 * q.z * q.z;
-    result[0][1] = 2 * q.x * q.y + 2 * q.z * q.w;
-    result[0][2] = 2 * q.x * q.z - 2 * q.y * q.w;
-    result[0][3] = 0.0f;
+    T            xx = q.x * q.x;
+    T            yy = q.y * q.y;
+    T            zz = q.z * q.z;
+    T            xy = q.x * q.y;
+    T            xz = q.x * q.z;
+    T            yz = q.y * q.z;
+    T            wx = q.w * q.x;
+    T            wy = q.w * q.y;
+    T            wz = q.w * q.z;
 
-    result[1][0] = 2 * q.x * q.y + 2 * q.z * q.w;
-    result[1][1] = 1 - 2 * q.x * q.x - 2 * q.z * q.z;
-    result[1][2] = 2 * q.y * q.y - 2 * q.x * q.w;
-    result[1][3] = 0.0f;
+    result[0][0] = 1 - 2 * (yy + zz);
+    result[1][0] = 2 * (xy - wz);
+    result[2][0] = 2 * (xz + wy);
+    result[3][0] = 0;
 
-    result[2][0] = 2 * q.x * q.z - 2 * q.y * q.w;
-    result[2][1] = 2 * q.y * q.z + 2 * q.x * q.w;
-    result[2][2] = 1 - 2 * q.x * q.x - 2 * q.y * q.y;
-    result[2][3] = 0.0f;
+    result[0][1] = 2 * (xy + wz);
+    result[1][1] = 1 - 2 * (xx + zz);
+    result[2][1] = 2 * (yz - wx);
+    result[3][1] = 0;
+
+    result[0][2] = 2 * (xz - wy);
+    result[1][2] = 2 * (yz + wx);
+    result[2][2] = 1 - 2 * (xx + yy);
+    result[3][2] = 0;
+
+    result[0][3] = 0;
+    result[1][3] = 0;
+    result[2][3] = 0;
+    result[3][3] = 1;
 
     return result;
 }
