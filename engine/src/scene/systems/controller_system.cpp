@@ -11,7 +11,7 @@ void ControllerSystem::update(double dt)
 
 void ControllerSystem::updatePlayerPositions(double dt)
 {
-    auto view = m_scene->m_registry.view<PlayerController, Move, Transform>();
+    auto view = m_scene->m_registry.view<PlayerController, PlayerMove, Transform>();
 
     for (const auto &entity : view)
     {
@@ -86,7 +86,7 @@ void ControllerSystem::updatePlayerPositions(double dt)
 
 void ControllerSystem::updatePlayerRotations(double dt)
 {
-    auto view = m_scene->m_registry.view<PlayerController, Look, Transform>();
+    auto view = m_scene->m_registry.view<PlayerController, PlayerLook, Transform>();
 
     for (const auto &entity : view)
     {
@@ -108,7 +108,7 @@ void ControllerSystem::updatePlayerRotations(double dt)
             transform.rotation.x += controller.pitchInput * look.sensitivity;
         }
 
-        controller.yawInput   = 0.0f;
+        controller.yawInput = 0.0f;
         controller.pitchInput = 0.0f;
     }
 }

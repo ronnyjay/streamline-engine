@@ -3,7 +3,7 @@
 namespace engine
 {
 
-struct Move
+struct PlayerMove
 {
     float speed = 10.0f;
 };

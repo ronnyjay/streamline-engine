@@ -28,10 +28,10 @@ void Application::run()
     double lastTime;
     double elapsedTime;
 
-    double renderTimeStep = 1.0 / 60.0;
+    double renderTimeStep = 1.0 / 240.0;
     double renderAccumulator = 0.0;
 
-    double simulationTimeStep = 1.0 / 60.0;
+    double simulationTimeStep = 1.0 / 240.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();

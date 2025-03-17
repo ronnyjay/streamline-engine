@@ -1,5 +1,7 @@
 #include "subsystems/input_manager.hpp"
 
+#include "core/logger.hpp"
+
 using namespace engine;
 
 void InputManager::onEvent(event &e)

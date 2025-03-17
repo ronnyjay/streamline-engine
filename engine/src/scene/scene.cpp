@@ -1,7 +1,5 @@
 #include "scene/scene.hpp"
 
-#include "subsystems/resource_manager.hpp"
-
 using namespace engine;
 
 void scene::tick(double dt)
@@ -26,18 +24,17 @@ void scene::draw()
         }
     }
 
-    STREAMLINE_ASSERT(activeCamera != nullptr);
+    STREAMLINE_ASSERT(activeCamera != nullptr, "No primary camera found, perhaps try creating one...");
 
     auto renderables = m_registry.view<Renderable, Transform>();
-
     for (const auto &entity : renderables)
     {
         auto [renderable, transform] = renderables.get(entity);
 
         m_shader.get()->bind();
 
-        m_shader.get()->setMat4("projection", mat4(1.0f));
-        m_shader.get()->setMat4("view", mat4(1.0f));
+        m_shader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
+        m_shader.get()->setMat4("view", activeCamera->getViewMatrix());
         m_shader.get()->setMat4("model", mat4(1.0f));
 
         renderable.model.get()->draw(m_shader);

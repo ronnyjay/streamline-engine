@@ -37,7 +37,7 @@ struct scene
                                                             "../assets/shaders/model.fs");
     }
 
-    void draw() const;
+    void draw();
 
     void tick(double dt);
 

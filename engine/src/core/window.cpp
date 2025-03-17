@@ -168,11 +168,11 @@ void Window::setWindowMode(WindowMode mode)
         return;
     }
 
-    GLFWmonitor  *monitor = nullptr;
+    GLFWmonitor *monitor = nullptr;
 
-    int           x, y;
-    int           w, h;
-    int           count;
+    int x, y;
+    int w, h;
+    int count;
 
     GLFWmonitor **monitors = glfwGetMonitors(&count);
 
@@ -287,24 +287,27 @@ void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn
 
     if (window->m_eventCallback)
     {
-        auto         size  = window->getSizeInScreen();
+        auto size = window->getSizeInScreen();
 
         static float lastX = size.x / 2.0f;
         static float lastY = size.y / 2.0f;
 
         if (window->m_windowFlags.mouseEntered)
         {
-            lastX                              = xposIn;
-            lastY                              = yposIn;
+            lastX = xposIn;
+            lastY = yposIn;
 
             window->m_windowFlags.mouseEntered = false;
         }
 
-        float xPos    = static_cast<float>(xposIn);
-        float yPos    = static_cast<float>(yposIn);
+        float xPos = static_cast<float>(xposIn);
+        float yPos = static_cast<float>(yposIn);
 
         float xOffset = xPos - lastX;
         float yOffset = lastY - yPos;
+
+        lastX = xPos;
+        lastY = yPos;
 
         window->m_eventCallback(mouse_move_event(xOffset, yOffset));
     }

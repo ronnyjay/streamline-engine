@@ -3,7 +3,7 @@
 namespace engine
 {
 
-struct Look
+struct PlayerLook
 {
     float sensitivity = 0.125f;
 };

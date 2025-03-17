@@ -7,5 +7,6 @@ void Renderer::begin(const std::shared_ptr<scene> &s)
 {
     // Draw for now
     // Add framebuffer later
+    clear();
     s.get()->draw();
 }
