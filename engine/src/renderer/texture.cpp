@@ -5,12 +5,12 @@
 
 using namespace engine;
 
-texture::texture(const std::string_view path)
+Texture::Texture(const std::string_view path)
     : type(texture_type::NONE)
 {
-    int nrChannels      = 0;
-    int imageFormat     = 0;
-    int internalFormat  = 0;
+    int            nrChannels = 0;
+    int            imageFormat = 0;
+    int            internalFormat = 0;
     unsigned char *data = stbi_load(path.data(), &width, &height, &nrChannels, 0);
 
     STREAMLINE_ASSERT(data != nullptr, std::string("failed to load image data:") + path.data());
@@ -19,18 +19,18 @@ texture::texture(const std::string_view path)
     {
     case 1:
         internalFormat = GL_RED;
-        imageFormat    = GL_RED;
-        format         = texture_format::RED;
+        imageFormat = GL_RED;
+        format = texture_format::RED;
         break;
     case 3:
         internalFormat = GL_RGB;
-        imageFormat    = GL_RGB;
-        format         = texture_format::RGB;
+        imageFormat = GL_RGB;
+        format = texture_format::RGB;
         break;
     case 4:
         internalFormat = GL_RGBA;
-        imageFormat    = GL_RGBA;
-        format         = texture_format::RGBA;
+        imageFormat = GL_RGBA;
+        format = texture_format::RGBA;
         break;
     default:
         break;

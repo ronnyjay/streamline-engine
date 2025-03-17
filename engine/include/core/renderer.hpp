@@ -4,17 +4,25 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+#include "core/window.hpp"
+#include "renderer/framebuffer.hpp"
+
 namespace engine
 {
+
+class Window;
+
+struct scene;
 
 class Renderer
 {
   public:
-    Renderer()
+    Renderer(uint32_t width, uint32_t height)
+        : m_framebuffer(width, height)
     {
         glDepthFunc(GL_LESS);
 
-        setViewport(0, 0, 800, 600);
+        setViewport(0, 0, width, height);
     }
 
     void clear()
@@ -48,6 +56,11 @@ class Renderer
     {
         glClearColor(r, g, b, a);
     }
+
+    void begin(const std::shared_ptr<scene> &s);
+
+  private:
+    Framebuffer m_framebuffer;
 };
 
 } // namespace engine

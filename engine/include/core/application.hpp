@@ -13,29 +13,28 @@ namespace engine
 
 class Application
 {
-    Window          *m_window           = nullptr;
-    Renderer        *m_renderer         = nullptr;
-    SceneManager    *m_scene_manager    = nullptr;
-    InputManager    *m_input_manager    = nullptr;
-    ResourceManager *m_resource_manager = nullptr;
-    scene           *m_scene;
+    Window          *m_window = nullptr;
+    Renderer        *m_renderer = nullptr;
+    SceneManager    *m_sceneManager = nullptr;
+    InputManager    *m_inputManager = nullptr;
+    ResourceManager *m_resourceManager = nullptr;
 
   public:
     Application(int width = 800, int height = 600, const char *title = "Untitled Window");
 
     ResourceManager *const getResourceManager() const noexcept
     {
-        return m_resource_manager;
+        return m_resourceManager;
     }
 
     InputManager *const getInputManager() const noexcept
     {
-        return m_input_manager;
+        return m_inputManager;
     }
 
     SceneManager *const getSceneManager() const noexcept
     {
-        return m_scene_manager;
+        return m_sceneManager;
     }
 
     Renderer *const getRenderer() const noexcept
@@ -52,22 +51,22 @@ class Application
 
     ~Application()
     {
-        if (m_resource_manager)
-            delete m_resource_manager;
-        if (m_scene_manager)
-            delete m_scene_manager;
-        if (m_input_manager)
-            delete m_input_manager;
+        if (m_resourceManager)
+            delete m_resourceManager;
+        if (m_sceneManager)
+            delete m_sceneManager;
+        if (m_inputManager)
+            delete m_inputManager;
         if (m_renderer)
             delete m_renderer;
         if (m_window)
             delete m_window;
     }
 
-    Application(Application const &)  = delete;
+    Application(Application const &) = delete;
     Application(Application const &&) = delete;
 
-    Application operator=(Application const &)  = delete;
+    Application operator=(Application const &) = delete;
     Application operator=(Application const &&) = delete;
 
   private:

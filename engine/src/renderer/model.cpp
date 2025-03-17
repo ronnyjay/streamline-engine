@@ -10,8 +10,8 @@ Model::Model(const std::string &path)
 {
     Assimp::Importer importer;
 
-    const aiScene   *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-                                                         aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
+                                                       aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -40,7 +40,7 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
     std::vector<vertex>                   vertices;
     std::vector<uint>                     indices;
-    std::vector<std::shared_ptr<texture>> textures;
+    std::vector<std::shared_ptr<Texture>> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
@@ -55,26 +55,26 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         if (mesh->HasNormals())
         {
-            vector.x      = mesh->mNormals[i].x;
-            vector.y      = mesh->mNormals[i].y;
-            vector.z      = mesh->mNormals[i].z;
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
             vertex.normal = vector;
         }
 
         if (mesh->mTextureCoords[0])
         {
-            vector.x         = mesh->mTextureCoords[0][i].x;
-            vector.y         = mesh->mTextureCoords[0][i].y;
+            vector.x = mesh->mTextureCoords[0][i].x;
+            vector.y = mesh->mTextureCoords[0][i].y;
             vertex.texCoords = vector.xy(); /// TODO: remove swizzle operator in favor of assignment to vec2
 
-            vector.x       = mesh->mTangents[i].x;
-            vector.y       = mesh->mTangents[i].y;
-            vector.z       = mesh->mTangents[i].z;
+            vector.x = mesh->mTangents[i].x;
+            vector.y = mesh->mTangents[i].y;
+            vector.z = mesh->mTangents[i].z;
             vertex.tangent = vector;
 
-            vector.x         = mesh->mBitangents[i].x;
-            vector.y         = mesh->mBitangents[i].y;
-            vector.z         = mesh->mBitangents[i].z;
+            vector.x = mesh->mBitangents[i].x;
+            vector.y = mesh->mBitangents[i].y;
+            vector.z = mesh->mBitangents[i].z;
             vertex.bitangent = vector;
         }
         else
@@ -97,21 +97,21 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
     }
 
     // Process Materials
-    aiMaterial                           *material = scene->mMaterials[mesh->mMaterialIndex];
+    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-    std::vector<std::shared_ptr<texture>> diffuseMaps =
+    std::vector<std::shared_ptr<Texture>> diffuseMaps =
         loadMaterialTextures(material, aiTextureType_DIFFUSE, texture_type::DIFFUSE);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-    std::vector<std::shared_ptr<texture>> specularMaps =
+    std::vector<std::shared_ptr<Texture>> specularMaps =
         loadMaterialTextures(material, aiTextureType_SPECULAR, texture_type::SPECULAR);
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-    std::vector<std::shared_ptr<texture>> normalMaps =
+    std::vector<std::shared_ptr<Texture>> normalMaps =
         loadMaterialTextures(material, aiTextureType_HEIGHT, texture_type::NORMAL);
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-    std::vector<std::shared_ptr<texture>> heightMaps =
+    std::vector<std::shared_ptr<Texture>> heightMaps =
         loadMaterialTextures(material, aiTextureType_AMBIENT, texture_type::HEIGHT);
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
@@ -119,10 +119,10 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
     meshes.emplace_back(engine::mesh(vertices, indices, textures));
 }
 
-std::vector<std::shared_ptr<texture>> Model::loadMaterialTextures(aiMaterial *material, aiTextureType type,
+std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial *material, aiTextureType type,
                                                                   texture_type typeName)
 {
-    std::vector<std::shared_ptr<texture>> textures;
+    std::vector<std::shared_ptr<Texture>> textures;
 
     for (unsigned int i = 0; i < std::max(material->GetTextureCount(type), 1u); i++)
     {
@@ -159,8 +159,8 @@ std::vector<std::shared_ptr<texture>> Model::loadMaterialTextures(aiMaterial *ma
         std::filesystem::path texture_path = std::string(directory.C_Str());
         texture_path.append(path.C_Str());
 
-        std::shared_ptr<texture> t = ResourceManager::getInstance().getTexture(texture_path);
-        t->type                    = typeName;
+        std::shared_ptr<Texture> t = ResourceManager::getInstance().getTexture(texture_path);
+        t->type = typeName;
 
         textures.push_back(t);
     }

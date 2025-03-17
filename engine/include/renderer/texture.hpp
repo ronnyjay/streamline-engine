@@ -13,9 +13,10 @@ enum class texture_format { NONE, RED, RGB, RGBA };
 enum class texture_type   { NONE, DIFFUSE, SPECULAR, NORMAL, HEIGHT };
 // clang-format on
 
-struct texture
+struct Texture
 {
-    texture(const std::string_view path);
+
+    Texture(const std::string_view path);
 
     texture_format format;
     texture_type   type;

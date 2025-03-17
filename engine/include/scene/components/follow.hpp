@@ -5,7 +5,7 @@
 namespace engine
 {
 
-struct Follow
+struct AttachTo
 {
     entity_type target;
 };

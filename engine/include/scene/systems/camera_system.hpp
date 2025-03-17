@@ -1,7 +1,5 @@
 #pragma once
 
-#include "math/mat4x4.hpp"
-
 #include "component_system.hpp"
 
 namespace engine

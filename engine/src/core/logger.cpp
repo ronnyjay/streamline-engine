@@ -4,7 +4,7 @@
 
 using namespace engine;
 
-void logger::info(std::string_view fmt, ...)
+void Logger::info(std::string_view fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -14,7 +14,7 @@ void logger::info(std::string_view fmt, ...)
     va_end(args);
 }
 
-void logger::warn(std::string_view fmt, ...)
+void Logger::warn(std::string_view fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -24,7 +24,7 @@ void logger::warn(std::string_view fmt, ...)
     va_end(args);
 }
 
-void logger::fail(std::string_view fmt, ...)
+void Logger::fail(std::string_view fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

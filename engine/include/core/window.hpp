@@ -29,13 +29,13 @@ class Window
         bool mouseVisible = true;
     };
 
-    GLFWwindow   *m_glfwWindow;
+    GLFWwindow *m_glfwWindow;
 
-    ivec2         m_lastSize;
-    ivec2         m_lastPos;
+    ivec2 m_lastSize;
+    ivec2 m_lastPos;
 
-    WindowMode    m_windowMode;
-    WindowFlags   m_windowFlags;
+    WindowMode  m_windowMode;
+    WindowFlags m_windowFlags;
 
     EventCallback m_eventCallback;
 
@@ -61,10 +61,10 @@ class Window
         glfwTerminate();
     }
 
-    Window(Window const &)            = delete;
-    Window(Window const &&)           = delete;
+    Window(Window const &) = delete;
+    Window(Window const &&) = delete;
 
-    Window operator=(Window const &)  = delete;
+    Window operator=(Window const &) = delete;
     Window operator=(Window const &&) = delete;
 
     /**
@@ -167,7 +167,8 @@ class Window
      * @param instance
      * @param fn
      */
-    template <typename T> void setEventCallback(T *instance, void (T::*fn)(event &&e))
+    template <typename T>
+    void setEventCallback(T *instance, void (T::*fn)(event &&e))
     {
         m_eventCallback = [instance, fn](event &&event) { (instance->*fn)(std::move(event)); };
     }

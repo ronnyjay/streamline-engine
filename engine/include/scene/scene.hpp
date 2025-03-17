@@ -37,16 +37,17 @@ struct scene
                                                             "../assets/shaders/model.fs");
     }
 
-    void                      draw();
+    void draw() const;
 
-    void                      tick(double dt);
+    void tick(double dt);
 
     [[nodiscard]] entity_type create() const
     {
         return m_registry.create();
     }
 
-    template <typename T, typename... Args> T &emplace(const entity_type e, Args &&...args)
+    template <typename T, typename... Args>
+    T &emplace(const entity_type e, Args &&...args)
     {
         return m_registry.emplace<T>(e, std::forward<Args>(args)...);
     }

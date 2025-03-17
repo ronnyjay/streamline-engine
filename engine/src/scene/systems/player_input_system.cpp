@@ -50,8 +50,8 @@ void PlayerInputSystem::updatePlayerControllers(double dt)
         }
 
         // clang-format off
-        controller.yawInput   += InputManager::getInstance().getMouseOffsetX();
-        controller.pitchInput += InputManager::getInstance().getMouseOffsetY();
+        controller.yawInput   += InputManager::getInstance().getMousePosOffsetX();
+        controller.pitchInput += InputManager::getInstance().getMousePosOffsetY();
         // clang-format on
     }
 }
@@ -95,8 +95,8 @@ void PlayerInputSystem::updateCameraControllers(double dt)
         }
 
         // clang-format off
-        controller.yawInput   += InputManager::getInstance().getMouseOffsetX();
-        controller.pitchInput += InputManager::getInstance().getMouseOffsetY();
+        controller.yawInput   += InputManager::getInstance().getMousePosOffsetX();
+        controller.pitchInput += InputManager::getInstance().getMousePosOffsetX();
         // clang-format on
     }
 }

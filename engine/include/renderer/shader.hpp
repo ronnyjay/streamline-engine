@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
-#include <string_view>
 
 #include "math/mat2x2.hpp" // IWYU pragma: keep
 #include "math/mat3x3.hpp" // IWYU pragma: keep

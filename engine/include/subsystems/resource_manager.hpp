@@ -45,24 +45,24 @@ struct ResourceManager : public Singleton<ResourceManager>
         return std::dynamic_pointer_cast<Model>(it->second);
     }
 
-    std::shared_ptr<texture> getTexture(const std::string &path)
+    std::shared_ptr<Texture> getTexture(const std::string &path)
     {
         auto [it, insert] = textures.emplace(path, nullptr);
 
         if (insert)
         {
-            auto loadable = std::make_shared<texture>(path);
+            auto loadable = std::make_shared<Texture>(path);
 
             it->second = loadable;
         }
 
-        return std::dynamic_pointer_cast<texture>(it->second);
+        return std::dynamic_pointer_cast<Texture>(it->second);
     }
 
   private:
     std::map<std::string, std::shared_ptr<Shader>>  shaders;
     std::map<std::string, std::shared_ptr<Model>>   models;
-    std::map<std::string, std::shared_ptr<texture>> textures;
+    std::map<std::string, std::shared_ptr<Texture>> textures;
 };
 
 } // namespace engine

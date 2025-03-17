@@ -14,7 +14,7 @@
 namespace engine
 {
 
-class logger : public Singleton<logger>
+class Logger : public Singleton<Logger>
 {
     static constexpr std::string_view info_prefix = BWHT "[" BGRN "  OK  " BWHT "] " COLOR_RESET;
     static constexpr std::string_view warn_prefix = BWHT "[" BYEL " WARN " BWHT "] " COLOR_RESET;
