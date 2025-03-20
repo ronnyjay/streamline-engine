@@ -9,13 +9,16 @@ namespace engine
 
 struct InputManager : public Singleton<InputManager>
 {
-    void onEvent(event &e);
+    bool   captureKeyInput   = true;
+    bool   captureMouseInput = true;
+
+    void   onEvent(event &e);
 
     double getMousePosOffsetX() noexcept;
     double getMousePosOffsetY() noexcept;
 
-    bool isKeyPressed(Key key) const noexcept;
-    bool isMouseButtonPressed(mouse_button btn) const noexcept;
+    bool   isKeyPressed(Key key) const noexcept;
+    bool   isMouseButtonPressed(MouseButton btn) const noexcept;
 
   private:
     bool onKeyPress(key_press_event &e);
@@ -27,11 +30,12 @@ struct InputManager : public Singleton<InputManager>
     bool onMouseMove(mouse_move_event &e);
     bool onMouseScroll(mouse_scroll_event &e);
 
-    std::tuple<double, double> m_mouseScrollOffset;
-    std::tuple<double, double> m_mousePositionOffset;
+  private:
+    std::tuple<double, double>              m_mouseScrollOffset;
+    std::tuple<double, double>              m_mousePositionOffset;
 
-    std::unordered_map<Key, action>          m_keyStates;
-    std::unordered_map<mouse_button, action> m_mouseButtonStates;
+    std::unordered_map<Key, action>         m_keyStates;
+    std::unordered_map<MouseButton, action> m_mouseButtonStates;
 };
 
 } // namespace engine

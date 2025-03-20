@@ -69,6 +69,8 @@ target_sources(engine PRIVATE ${ENGINE_SOURCES})
 
 target_include_directories(engine PRIVATE
     ${CMAKE_SOURCE_DIR}/../vendor/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/imgui/backends
 )
 
 target_include_directories(imgui PRIVATE

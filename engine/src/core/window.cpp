@@ -58,6 +58,11 @@ bool Window::isVisible() const
     return glfwGetWindowAttrib(m_glfwWindow, GLFW_VISIBLE);
 }
 
+bool Window::shouldShowCursor() const
+{
+    return m_windowFlags.mouseVisible;
+}
+
 void Window::show()
 {
     glfwShowWindow(m_glfwWindow);
@@ -76,6 +81,18 @@ void Window::swapBuffers()
 void Window::pollEvents()
 {
     glfwPollEvents();
+}
+
+void Window::showCursor()
+{
+    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    m_windowFlags.mouseEntered = true;
+}
+
+void Window::hideCursor()
+{
+    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    m_windowFlags.mouseEntered = true;
 }
 
 void Window::toggleCursor()
@@ -168,11 +185,11 @@ void Window::setWindowMode(WindowMode mode)
         return;
     }
 
-    GLFWmonitor *monitor = nullptr;
+    GLFWmonitor  *monitor = nullptr;
 
-    int x, y;
-    int w, h;
-    int count;
+    int           x, y;
+    int           w, h;
+    int           count;
 
     GLFWmonitor **monitors = glfwGetMonitors(&count);
 
@@ -287,7 +304,7 @@ void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn
 
     if (window->m_eventCallback)
     {
-        auto size = window->getSizeInScreen();
+        auto         size = window->getSizeInScreen();
 
         static float lastX = size.x / 2.0f;
         static float lastY = size.y / 2.0f;

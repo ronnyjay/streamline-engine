@@ -120,7 +120,17 @@ enum class Key
     RightSuper     = 347
 };
 
-enum class mouse_button
+enum class Modifier
+{
+    Shift    = 0x0001,
+    Control  = 0x0002,
+    Alt      = 0x0004,
+    Super    = 0x0008,
+    CapsLock = 0x0010,
+    NumLock  = 0x0020
+};
+
+enum class MouseButton
 {
     // Left
     MouseButton1 = 0,

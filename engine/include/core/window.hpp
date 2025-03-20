@@ -29,13 +29,13 @@ class Window
         bool mouseVisible = true;
     };
 
-    GLFWwindow *m_glfwWindow;
+    GLFWwindow   *m_glfwWindow;
 
-    ivec2 m_lastSize;
-    ivec2 m_lastPos;
+    ivec2         m_lastSize;
+    ivec2         m_lastPos;
 
-    WindowMode  m_windowMode;
-    WindowFlags m_windowFlags;
+    WindowMode    m_windowMode;
+    WindowFlags   m_windowFlags;
 
     EventCallback m_eventCallback;
 
@@ -61,10 +61,10 @@ class Window
         glfwTerminate();
     }
 
-    Window(Window const &) = delete;
+    Window(Window const &)  = delete;
     Window(Window const &&) = delete;
 
-    Window operator=(Window const &) = delete;
+    Window operator=(Window const &)  = delete;
     Window operator=(Window const &&) = delete;
 
     /**
@@ -96,6 +96,14 @@ class Window
     /**
      * @brief
      *
+     * @return true
+     * @return false
+     */
+    bool shouldShowCursor() const;
+
+    /**
+     * @brief
+     *
      */
     void show();
 
@@ -116,6 +124,18 @@ class Window
      *
      */
     void pollEvents();
+
+    /**
+     * @brief
+     *
+     */
+    void showCursor();
+
+    /**
+     * @brief
+     *
+     */
+    void hideCursor();
 
     /**
      * @brief

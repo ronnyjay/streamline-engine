@@ -64,8 +64,8 @@ struct key_press_event : public event
     {
     }
 
-    const int key;
-    const int mods;
+    const int  key;
+    const int  mods;
 
     const bool repeat;
 
@@ -136,15 +136,16 @@ struct mouse_scroll_event : public event
     EVENT_TYPE(MOUSE_BUTTON_SCROLLED)
 };
 
-class event_dispatcher
+class EventDispatcher
 {
   public:
-    event_dispatcher(event &event)
+    EventDispatcher(event &event)
         : e(event)
     {
     }
 
-    template <typename T, typename F> bool dispatch(const F &&fn)
+    template <typename T, typename F>
+    bool dispatch(const F &&fn)
     {
         if (e.get_type() == T::get_static_type())
         {
@@ -154,7 +155,8 @@ class event_dispatcher
         return false;
     }
 
-    template <typename T, typename F, typename C> bool dispatch(C *instance, const F &fn)
+    template <typename T, typename F, typename C>
+    bool dispatch(C *instance, const F &fn)
     {
         if (e.get_type() == T::get_static_type())
         {

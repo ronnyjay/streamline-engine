@@ -6,16 +6,22 @@ using namespace engine;
 
 void InputManager::onEvent(event &e)
 {
-    event_dispatcher dispatcher(e);
+    EventDispatcher dispatcher(e);
 
-    dispatcher.dispatch<key_press_event>(this, &InputManager::onKeyPress);
-    dispatcher.dispatch<key_release_event>(this, &InputManager::onKeyRelease);
+    if (captureKeyInput)
+    {
+        dispatcher.dispatch<key_press_event>(this, &InputManager::onKeyPress);
+        dispatcher.dispatch<key_release_event>(this, &InputManager::onKeyRelease);
+    }
 
-    dispatcher.dispatch<mouse_button_press_event>(this, &InputManager::onMouseButtonPress);
-    dispatcher.dispatch<mouse_button_release_event>(this, &InputManager::onMouseButtonRelease);
+    if (captureMouseInput)
+    {
+        dispatcher.dispatch<mouse_move_event>(this, &InputManager::onMouseMove);
+        dispatcher.dispatch<mouse_scroll_event>(this, &InputManager::onMouseScroll);
 
-    dispatcher.dispatch<mouse_move_event>(this, &InputManager::onMouseMove);
-    dispatcher.dispatch<mouse_scroll_event>(this, &InputManager::onMouseScroll);
+        dispatcher.dispatch<mouse_button_press_event>(this, &InputManager::onMouseButtonPress);
+        dispatcher.dispatch<mouse_button_release_event>(this, &InputManager::onMouseButtonRelease);
+    }
 }
 
 bool InputManager::isKeyPressed(Key key) const noexcept
@@ -30,7 +36,7 @@ bool InputManager::isKeyPressed(Key key) const noexcept
     return false;
 }
 
-bool InputManager::isMouseButtonPressed(mouse_button btn) const noexcept
+bool InputManager::isMouseButtonPressed(MouseButton btn) const noexcept
 {
     if (m_mouseButtonStates.find(btn) != m_mouseButtonStates.end())
     {
@@ -44,14 +50,14 @@ bool InputManager::isMouseButtonPressed(mouse_button btn) const noexcept
 
 double InputManager::getMousePosOffsetX() noexcept
 {
-    auto offset = std::get<0>(m_mousePositionOffset);
+    auto offset                        = std::get<0>(m_mousePositionOffset);
     std::get<0>(m_mousePositionOffset) = 0.0;
     return offset;
 }
 
 double InputManager::getMousePosOffsetY() noexcept
 {
-    auto offset = std::get<1>(m_mousePositionOffset);
+    auto offset                        = std::get<1>(m_mousePositionOffset);
     std::get<1>(m_mousePositionOffset) = 0.0;
     return offset;
 }
@@ -70,13 +76,13 @@ inline bool InputManager::onKeyRelease(key_release_event &e)
 
 inline bool InputManager::onMouseButtonPress(mouse_button_press_event &e)
 {
-    m_mouseButtonStates[mouse_button(e.button)] = action::Press;
+    m_mouseButtonStates[MouseButton(e.button)] = action::Press;
     return true;
 }
 
 inline bool InputManager::onMouseButtonRelease(mouse_button_release_event &e)
 {
-    m_mouseButtonStates[mouse_button(e.button)] = action::Release;
+    m_mouseButtonStates[MouseButton(e.button)] = action::Release;
     return true;
 }
 

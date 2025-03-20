@@ -6,13 +6,12 @@ using namespace engine;
 
 Application::Application(int width, int height, const char *title)
 {
-    // clang-format off
-    m_window           = new Window(width, height, title); 
-    m_renderer         = new Renderer(width, height);
-    m_sceneManager     = new SceneManager;
-    m_inputManager     = new InputManager;
-    m_resourceManager  = new ResourceManager;
-    // clang-format on
+    m_window          = new Window(width, height, title);
+    m_renderer        = new Renderer(width, height);
+    m_debugWindow     = new DebugWindow;
+    m_sceneManager    = new SceneManager;
+    m_inputManager    = new InputManager;
+    m_resourceManager = new ResourceManager;
 
     m_window->setEventCallback(this, &Application::onEvent);
 }
@@ -28,10 +27,10 @@ void Application::run()
     double lastTime;
     double elapsedTime;
 
-    double renderTimeStep = 1.0 / 240.0;
+    double renderTimeStep    = 1.0 / 240.0;
     double renderAccumulator = 0.0;
 
-    double simulationTimeStep = 1.0 / 240.0;
+    double simulationTimeStep    = 1.0 / 240.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();
@@ -39,6 +38,8 @@ void Application::run()
     while (m_window->isOpen())
     {
         elapsedTime = (currentTime = glfwGetTime()) - lastTime;
+
+        m_window->pollEvents();
 
         simulationAccumulator += elapsedTime;
         while (simulationAccumulator >= simulationTimeStep)
@@ -54,7 +55,8 @@ void Application::run()
             renderAccumulator -= renderTimeStep;
         }
 
-        m_window->pollEvents();
+        m_debugWindow->draw();
+
         m_window->swapBuffers();
 
         lastTime = currentTime;
@@ -63,12 +65,59 @@ void Application::run()
 
 void Application::onEvent(event &&e)
 {
-    m_inputManager->onEvent(e);
+    EventDispatcher dispatcher(e);
+
+    dispatcher.dispatch<key_press_event>(this, &Application::onKeyPress);
+
+    if (!e.b_isHandled)
+    {
+        m_inputManager->onEvent(e);
+    }
 }
 
 bool Application::onKeyPress(key_press_event &e)
 {
-    return true;
+    if (Key(e.key) == Key::GraveAccent)
+    {
+        if (Modifier(e.mods) == Modifier::Shift)
+        {
+            m_window->toggleCursor();
+        }
+        else
+        {
+            if (m_debugWindow->showDebugMetrics)
+            {
+                m_debugWindow->showDebugMetrics = false;
+            }
+            else
+            {
+                m_debugWindow->showDebugWindow = !m_debugWindow->showDebugWindow;
+
+                if (m_debugWindow->showDebugWindow)
+                {
+                    m_inputManager->captureMouseInput = false;
+
+                    if (!m_window->shouldShowCursor())
+                    {
+                        m_window->showCursor();
+                    }
+                }
+                else
+                {
+                    m_inputManager->captureMouseInput = true;
+
+                    if (!m_window->shouldShowCursor())
+                    {
+                        m_window->hideCursor();
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 bool Application::onWindowResize(window_resize_event &e)

@@ -1,6 +1,8 @@
 #pragma once
 
+#include "core/debug.hpp"                  // IWYU pragma: keep
 #include "core/renderer.hpp"               // IWYU pragma: keep
+#include "core/singleton.hpp"              // IWYU pragma: keep
 #include "core/window.hpp"                 // IWYU pragma: keep
 
 #include "subsystems/display_manager.hpp"  // IWYU pragma: keep
@@ -11,12 +13,13 @@
 namespace engine
 {
 
-class Application
+class Application : public Singleton<Application>
 {
-    Window          *m_window = nullptr;
-    Renderer        *m_renderer = nullptr;
-    SceneManager    *m_sceneManager = nullptr;
-    InputManager    *m_inputManager = nullptr;
+    Window          *m_window          = nullptr;
+    Renderer        *m_renderer        = nullptr;
+    DebugWindow     *m_debugWindow     = nullptr;
+    SceneManager    *m_sceneManager    = nullptr;
+    InputManager    *m_inputManager    = nullptr;
     ResourceManager *m_resourceManager = nullptr;
 
   public:
@@ -63,15 +66,14 @@ class Application
             delete m_window;
     }
 
-    Application(Application const &) = delete;
+    Application(Application const &)  = delete;
     Application(Application const &&) = delete;
 
-    Application operator=(Application const &) = delete;
-    Application operator=(Application const &&) = delete;
+    Application &operator=(Application const &)  = delete;
+    Application &operator=(Application const &&) = delete;
 
   private:
     void onEvent(event &&e);
-
     bool onKeyPress(key_press_event &e);
     bool onWindowResize(window_resize_event &e);
 };
