@@ -18,8 +18,10 @@ struct Transform
 
     const vec3 getFront() const
     {
-        return vec3(::cos(radians(rotation.y)) * ::cos(radians(rotation.x)), ::sin(radians(rotation.x)),
-                    ::sin(radians(rotation.y)) * ::cos(radians(rotation.x)));
+        // 90 degrees added to yaw to ensure -Z forward axis
+        // We only add this here (and not the rotation vector) to ensure that models are not rotated unnecessarily
+        return vec3(::cos(radians(rotation.y + 90.0f)) * ::cos(radians(rotation.x)), ::sin(radians(rotation.x)),
+                    ::sin(radians(rotation.y + 90.0f)) * ::cos(radians(rotation.x)));
     }
 
     const vec3 getRight() const
@@ -34,8 +36,7 @@ struct Transform
 
     const mat4 getTransform() const
     {
-        return translate(mat4(1.0f), translation) * toMat4(quat(vec3(rotation.z, -rotation.y, rotation.x))) *
-               engine::scale(mat4(1.0f), scale);
+        return translate(mat4(1.0f), translation) * toMat4(quat(rotation)) * engine::scale(mat4(1.0f), scale);
     }
 };
 

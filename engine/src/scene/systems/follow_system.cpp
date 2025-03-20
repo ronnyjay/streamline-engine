@@ -18,11 +18,21 @@ void FollowSystem::update(double dt)
             if (!follow.b_ignorePitchRotation)
             {
                 transform.rotation.x = target->rotation.x * follow.pitchDamping;
+
+                if (follow.b_invertPitchRotation)
+                {
+                    transform.rotation.x = -transform.rotation.x;
+                }
             }
 
             if (!follow.b_ignoreYawRotation)
             {
                 transform.rotation.y = target->rotation.y * follow.yawDamping;
+
+                if (follow.b_invertYawRotation)
+                {
+                    transform.rotation.y = -transform.rotation.y;
+                }
             }
         }
     }

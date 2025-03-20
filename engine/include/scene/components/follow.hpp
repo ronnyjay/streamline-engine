@@ -21,6 +21,8 @@ struct Follow
     float       yawDamping = 1.0f;
     float       pitchDamping = 1.0f;
 
+    bool        b_invertYawRotation = false;
+    bool        b_invertPitchRotation = false;
     bool        b_ignoreYawRotation = false;
     bool        b_ignorePitchRotation = false;
 };
