@@ -56,6 +56,12 @@ struct scene
         return m_registry.emplace<T>(e, std::forward<Args>(args)...);
     }
 
+    template <typename T>
+    T &get(const entity_type entity)
+    {
+        return m_registry.get<T>(entity);
+    }
+
   private:
     registry                m_registry;
     CameraSystem            m_cameraSystem;

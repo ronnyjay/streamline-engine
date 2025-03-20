@@ -12,14 +12,14 @@ struct Follow
         : target(target)
         , offset(offset)
     {
-        static int unique_id = 1;
-        id = unique_id++;
     }
 
-    int         id;
     entity_type target;
 
     vec3        offset;
+
+    float       yawDamping = 1.0f;
+    float       pitchDamping = 1.0f;
 
     bool        b_ignoreYawRotation = false;
     bool        b_ignorePitchRotation = false;

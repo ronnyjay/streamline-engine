@@ -12,9 +12,9 @@ namespace engine
 
 struct Transform
 {
-    vec3 translation{0.0f, 0.0f, 0.0f};
-    vec3 rotation{0.0f, 0.0f, 0.0f};
-    vec3 scale{1.0f, 1.0f, 1.0f};
+    vec3       translation{0.0f, 0.0f, 0.0f};
+    vec3       rotation{0.0f, 0.0f, 0.0f};
+    vec3       scale{1.0f, 1.0f, 1.0f};
 
     const vec3 getFront() const
     {
@@ -34,7 +34,8 @@ struct Transform
 
     const mat4 getTransform() const
     {
-        return translate(mat4(1.0f), translation) * toMat4(quat(rotation)) * engine::scale(mat4(1.0f), scale);
+        return translate(mat4(1.0f), translation) * toMat4(quat(vec3(rotation.z, -rotation.y, rotation.x))) *
+               engine::scale(mat4(1.0f), scale);
     }
 };
 
