@@ -1,4 +1,5 @@
 build
 .cache
 .vscode
+imgui.ini
 .DS_Store

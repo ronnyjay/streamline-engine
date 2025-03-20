@@ -53,6 +53,16 @@ add_library(stb STATIC
     ${CMAKE_SOURCE_DIR}/../vendor/stb/stb_image.cpp    
 )
 
+add_library(imgui STATIC
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/imgui_demo.cpp
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/backends/imgui_impl_opengl3.cpp
+    ${CMAKE_SOURCE_DIR}/../vendor/imgui/backends/imgui_impl_glfw.cpp
+)
+
 add_executable(engine src/main.cpp)
 
 target_sources(engine PRIVATE ${ENGINE_SOURCES})
@@ -61,6 +71,13 @@ target_include_directories(engine PRIVATE
     ${CMAKE_SOURCE_DIR}/../vendor/
 )
 
-target_link_libraries(engine PRIVATE glfw glm::glm glad stb assimp::assimp)
+target_include_directories(imgui PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/imgui/backends
+)
+
+target_link_libraries(imgui PRIVATE glfw)
+
+target_link_libraries(engine PRIVATE glfw glm::glm glad imgui stb assimp::assimp)
 
 add_subdirectory(test)
