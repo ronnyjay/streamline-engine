@@ -16,48 +16,44 @@ struct Camera
 {
     friend struct CameraSystem;
 
-    static constexpr float PERSPECTIVE_NEAR_CLIP = +0.1f;
-    static constexpr float PERSPECTIVE_FAR_CLIP = +1000.0f;
-    static constexpr float PERSPECTIVE_ZOOM = +90.0f;
-
+    static constexpr float PERSPECTIVE_NEAR_CLIP  = +0.1f;
+    static constexpr float PERSPECTIVE_FAR_CLIP   = +1000.0f;
+    static constexpr float PERSPECTIVE_ZOOM       = +90.0f;
     static constexpr float ORTHOGRAPHIC_NEAR_CLIP = -1.0f;
-    static constexpr float ORTHOGRAPHIC_FAR_CLIP = +1000.0f;
-    static constexpr float ORTHOGRAPHIC_ZOOM = +1.0f;
-
-    static constexpr float DEFAULT_ASPECT_RATIO = 4.0f / 3.0f;
+    static constexpr float ORTHOGRAPHIC_FAR_CLIP  = +1000.0f;
+    static constexpr float ORTHOGRAPHIC_ZOOM      = +1.0f;
 
   private:
     Projection m_projection;
 
-    float m_perspNear;
-    float m_perspFar;
-    float m_perspZoom;
+    float      m_perspNear;
+    float      m_perspFar;
+    float      m_perspZoom;
 
-    float m_orthoNear;
-    float m_orthoFar;
-    float m_orthoZoom;
+    float      m_orthoNear;
+    float      m_orthoFar;
+    float      m_orthoZoom;
 
-    float m_aspectRatio;
+    float      m_aspectRatio;
 
-    mat4 m_viewMatrix;
-    mat4 m_projectionMatrix;
+    mat4       m_viewMatrix;
+    mat4       m_projectionMatrix;
 
   public:
     Camera(Projection proj = Projection::Perspective)
         : m_projection(proj)
     {
-        m_perspNear = PERSPECTIVE_NEAR_CLIP;
-        m_perspFar = PERSPECTIVE_FAR_CLIP;
-        m_perspZoom = PERSPECTIVE_ZOOM;
-        m_orthoNear = ORTHOGRAPHIC_NEAR_CLIP;
-        m_orthoFar = ORTHOGRAPHIC_FAR_CLIP;
-        m_orthoZoom = ORTHOGRAPHIC_ZOOM;
-        m_aspectRatio = DEFAULT_ASPECT_RATIO;
+        m_perspNear   = PERSPECTIVE_NEAR_CLIP;
+        m_perspFar    = PERSPECTIVE_FAR_CLIP;
+        m_perspZoom   = PERSPECTIVE_ZOOM;
+        m_orthoNear   = ORTHOGRAPHIC_NEAR_CLIP;
+        m_orthoFar    = ORTHOGRAPHIC_FAR_CLIP;
+        m_orthoZoom   = ORTHOGRAPHIC_ZOOM;
+        m_aspectRatio = 4.0f / 3.0f;
     }
 
-    // todo: change primary to false, add constructor
-    bool b_isPrimary = true;
-    bool b_lockAspectRatio = false;
+    bool        b_isPrimary       = false;
+    bool        b_lockAspectRatio = false;
 
     mat4 const &getProjectionMatrix()
     {
