@@ -14,7 +14,7 @@ void InputManager::onEvent(event &e)
         dispatcher.dispatch<key_release_event>(this, &InputManager::onKeyRelease);
     }
 
-    if (captureMouseInput)
+    if (b_captureMouseInput)
     {
         dispatcher.dispatch<mouse_move_event>(this, &InputManager::onMouseMove);
         dispatcher.dispatch<mouse_scroll_event>(this, &InputManager::onMouseScroll);

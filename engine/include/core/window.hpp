@@ -30,16 +30,14 @@ class Window
     };
 
     GLFWwindow   *m_glfwWindow;
-
     ivec2         m_lastSize;
     ivec2         m_lastPos;
-
     WindowMode    m_windowMode;
-    WindowFlags   m_windowFlags;
-
     EventCallback m_eventCallback;
 
   public:
+    WindowFlags flags;
+
     /**
      * @brief
      *
@@ -96,14 +94,6 @@ class Window
     /**
      * @brief
      *
-     * @return true
-     * @return false
-     */
-    bool shouldShowCursor() const;
-
-    /**
-     * @brief
-     *
      */
     void show();
 
@@ -112,18 +102,6 @@ class Window
      *
      */
     void hide();
-
-    /**
-     * @brief
-     *
-     */
-    void swapBuffers();
-
-    /**
-     * @brief
-     *
-     */
-    void pollEvents();
 
     /**
      * @brief
@@ -141,7 +119,13 @@ class Window
      * @brief
      *
      */
-    void toggleCursor();
+    void swapBuffers();
+
+    /**
+     * @brief
+     *
+     */
+    void pollEvents();
 
     /**
      * @brief

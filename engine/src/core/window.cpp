@@ -58,11 +58,6 @@ bool Window::isVisible() const
     return glfwGetWindowAttrib(m_glfwWindow, GLFW_VISIBLE);
 }
 
-bool Window::shouldShowCursor() const
-{
-    return m_windowFlags.mouseVisible;
-}
-
 void Window::show()
 {
     glfwShowWindow(m_glfwWindow);
@@ -73,6 +68,16 @@ void Window::hide()
     glfwHideWindow(m_glfwWindow);
 }
 
+void Window::showCursor()
+{
+    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+void Window::hideCursor()
+{
+    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
 void Window::swapBuffers()
 {
     glfwSwapBuffers(m_glfwWindow);
@@ -81,34 +86,6 @@ void Window::swapBuffers()
 void Window::pollEvents()
 {
     glfwPollEvents();
-}
-
-void Window::showCursor()
-{
-    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    m_windowFlags.mouseEntered = true;
-}
-
-void Window::hideCursor()
-{
-    glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    m_windowFlags.mouseEntered = true;
-}
-
-void Window::toggleCursor()
-{
-    m_windowFlags.mouseVisible = !m_windowFlags.mouseVisible;
-
-    if (m_windowFlags.mouseVisible)
-    {
-        glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-    else
-    {
-        glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
-
-    m_windowFlags.mouseEntered = true;
 }
 
 const ivec2 &Window::getPositionInScreen() const
@@ -266,8 +243,6 @@ void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int acti
 {
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
-    /** TODO: convert key code to engine key  */
-
     if (window->m_eventCallback)
     {
         if (action == GLFW_RELEASE)
@@ -309,12 +284,12 @@ void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn
         static float lastX = size.x / 2.0f;
         static float lastY = size.y / 2.0f;
 
-        if (window->m_windowFlags.mouseEntered)
+        if (window->flags.mouseEntered)
         {
             lastX = xposIn;
             lastY = yposIn;
 
-            window->m_windowFlags.mouseEntered = false;
+            window->flags.mouseEntered = false;
         }
 
         float xPos = static_cast<float>(xposIn);

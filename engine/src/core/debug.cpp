@@ -23,20 +23,20 @@ DebugWindow::DebugWindow()
 
 void DebugWindow::draw()
 {
-    if (showDebugWindow)
+    if (b_showWindow)
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (ImGui::Begin("Streamline Engine Debugger", &showDebugWindow))
+        if (ImGui::Begin("Streamline Engine Debugger", &b_showWindow))
         {
             if (ImGui::Button("Show metrics"))
             {
-                showDebugMetrics = true;
+                b_showMetrics = true;
             }
 
-            if (showDebugMetrics)
+            if (b_showMetrics)
             {
                 ImGui::ShowMetricsWindow();
             }

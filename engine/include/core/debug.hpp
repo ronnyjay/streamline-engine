@@ -8,8 +8,8 @@ namespace engine
 
 struct DebugWindow : public Singleton<DebugWindow>
 {
-    bool showDebugWindow  = false;
-    bool showDebugMetrics = false;
+    bool b_showWindow  = false;
+    bool b_showMetrics = false;
 
     DebugWindow();
 

@@ -9,8 +9,8 @@ namespace engine
 
 struct InputManager : public Singleton<InputManager>
 {
-    bool   captureKeyInput   = true;
-    bool   captureMouseInput = true;
+    bool   captureKeyInput     = true;
+    bool   b_captureMouseInput = true;
 
     void   onEvent(event &e);
 

@@ -39,8 +39,6 @@ void Application::run()
     {
         elapsedTime = (currentTime = glfwGetTime()) - lastTime;
 
-        m_window->pollEvents();
-
         simulationAccumulator += elapsedTime;
         while (simulationAccumulator >= simulationTimeStep)
         {
@@ -57,6 +55,7 @@ void Application::run()
 
         m_debugWindow->draw();
 
+        m_window->pollEvents();
         m_window->swapBuffers();
 
         lastTime = currentTime;
@@ -81,36 +80,49 @@ bool Application::onKeyPress(key_press_event &e)
     {
         if (Modifier(e.mods) == Modifier::Shift)
         {
-            m_window->toggleCursor();
-        }
-        else
-        {
-            if (m_debugWindow->showDebugMetrics)
+            m_window->flags.mouseVisible = !m_window->flags.mouseVisible;
+
+            if (m_window->flags.mouseVisible)
             {
-                m_debugWindow->showDebugMetrics = false;
+                m_window->showCursor();
             }
             else
             {
-                m_debugWindow->showDebugWindow = !m_debugWindow->showDebugWindow;
+                m_window->hideCursor();
+            }
 
-                if (m_debugWindow->showDebugWindow)
+            m_window->flags.mouseEntered = true;
+        }
+        else
+        {
+            if (m_debugWindow->b_showMetrics)
+            {
+                m_debugWindow->b_showMetrics = false;
+            }
+            else
+            {
+                m_debugWindow->b_showWindow = !m_debugWindow->b_showWindow;
+
+                if (m_debugWindow->b_showWindow)
                 {
-                    m_inputManager->captureMouseInput = false;
+                    m_inputManager->b_captureMouseInput = false;
 
-                    if (!m_window->shouldShowCursor())
+                    if (!m_window->flags.mouseVisible)
                     {
                         m_window->showCursor();
                     }
                 }
                 else
                 {
-                    m_inputManager->captureMouseInput = true;
+                    m_inputManager->b_captureMouseInput = true;
 
-                    if (!m_window->shouldShowCursor())
+                    if (!m_window->flags.mouseVisible)
                     {
                         m_window->hideCursor();
                     }
                 }
+
+                m_window->flags.mouseEntered = true;
             }
         }
 
