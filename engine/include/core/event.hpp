@@ -1,12 +1,13 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
 
 namespace engine
 {
 
 // clang-format off
-enum class event_type
+enum class event_type : std::uint8_t
 {
     NONE,
     WINDOW_RESIZED,
@@ -38,7 +39,7 @@ struct event
         return event_type::NONE;
     }
 
-    virtual event_type get_type() const = 0;
+    [[nodiscard]] virtual event_type get_type() const = 0;
 };
 
 struct window_resize_event : public event
@@ -49,8 +50,8 @@ struct window_resize_event : public event
     {
     }
 
-    const int width;
-    const int height;
+    int width;
+    int height;
 
     EVENT_TYPE(WINDOW_RESIZED)
 };
@@ -64,46 +65,45 @@ struct key_press_event : public event
     {
     }
 
-    const int  key;
-    const int  mods;
-
-    const bool repeat;
+    int  key;
+    int  mods;
+    bool repeat;
 
     EVENT_TYPE(KEY_PRESSED)
 };
 
 struct key_release_event : public event
 {
-    key_release_event(int key)
+    explicit key_release_event(int key)
         : key(key)
     {
     }
 
-    const int key;
+    int key;
 
     EVENT_TYPE(KEY_RELEASED)
 };
 
 struct mouse_button_press_event : public event
 {
-    mouse_button_press_event(int button)
+    explicit mouse_button_press_event(int button)
         : button(button)
     {
     }
 
-    const int button;
+    int button;
 
     EVENT_TYPE(MOUSE_BUTTON_PRESSED)
 };
 
 struct mouse_button_release_event : public event
 {
-    mouse_button_release_event(int button)
+    explicit mouse_button_release_event(int button)
         : button(button)
     {
     }
 
-    const int button;
+    int button;
 
     EVENT_TYPE(MOUSE_BUTTON_RELEASED)
 };
@@ -116,8 +116,8 @@ struct mouse_move_event : public event
     {
     }
 
-    const double xpos;
-    const double ypos;
+    double xpos;
+    double ypos;
 
     EVENT_TYPE(MOUSE_BUTTON_MOVED)
 };
@@ -130,8 +130,8 @@ struct mouse_scroll_event : public event
     {
     }
 
-    const double xoffset;
-    const double yoffset;
+    double xoffset;
+    double yoffset;
 
     EVENT_TYPE(MOUSE_BUTTON_SCROLLED)
 };
@@ -139,37 +139,37 @@ struct mouse_scroll_event : public event
 class EventDispatcher
 {
   public:
-    EventDispatcher(event &event)
-        : e(event)
+    explicit EventDispatcher(event &event)
+        : event(event)
     {
     }
 
     template <typename T, typename F>
-    bool dispatch(const F &&fn)
+    bool dispatch(const F &&func)
     {
-        if (e.get_type() == T::get_static_type())
+        if (event.get_type() == T::get_static_type())
         {
-            e.b_isHandled |= fn(static_cast<T &>(e));
+            event.b_isHandled |= func(static_cast<T &>(event));
             return true;
         }
         return false;
     }
 
     template <typename T, typename F, typename C>
-    bool dispatch(C *instance, const F &fn)
+    bool dispatch(C *instance, const F &func)
     {
-        if (e.get_type() == T::get_static_type())
+        if (event.get_type() == T::get_static_type())
         {
-            e.b_isHandled |= (instance->*fn)(static_cast<T &>(e));
+            event.b_isHandled |= (instance->*func)(static_cast<T &>(event));
             return true;
         }
         return false;
     }
 
   private:
-    event &e;
+    event &event;
 };
 
-typedef std::function<void(event &&)> EventCallback;
+using EventCallback = std::function<void(event &&)>;
 
 } // namespace engine

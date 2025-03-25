@@ -1,10 +1,19 @@
 #pragma once
 
 #include "singleton.hpp"
-#include "window.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace engine
 {
+
+struct DebugPanel
+{
+    virtual ~DebugPanel() = default;
+
+    virtual void draw() = 0;
+};
 
 struct DebugWindow : public Singleton<DebugWindow>
 {
@@ -16,6 +25,9 @@ struct DebugWindow : public Singleton<DebugWindow>
     void draw();
 
     ~DebugWindow();
+
+  private:
+    std::vector<std::unique_ptr<DebugPanel>> m_debugPanels;
 };
 
 } // namespace engine

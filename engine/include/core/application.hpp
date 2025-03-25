@@ -9,43 +9,49 @@
 #include "subsystems/input_manager.hpp"    // IWYU pragma: keep
 #include "subsystems/resource_manager.hpp" // IWYU pragma: keep
 #include "subsystems/scene_manager.hpp"    // IWYU pragma: keep
+#include <cstdint>
 
 namespace engine
 {
 
 class Application : public Singleton<Application>
 {
-    Window          *m_window          = nullptr;
-    Renderer        *m_renderer        = nullptr;
-    DebugWindow     *m_debugWindow     = nullptr;
-    SceneManager    *m_sceneManager    = nullptr;
-    InputManager    *m_inputManager    = nullptr;
-    ResourceManager *m_resourceManager = nullptr;
+    // clang-format off
+    static constexpr uint32_t WINDOW_WIDTH      = 800;
+    static constexpr uint32_t WINDOW_HEIGHT     = 600;
+
+    Window                   *m_window          = nullptr;
+    Renderer                 *m_renderer        = nullptr;
+    DebugWindow              *m_debugWindow     = nullptr;
+    SceneManager             *m_sceneManager    = nullptr;
+    InputManager             *m_inputManager    = nullptr;
+    ResourceManager          *m_resourceManager = nullptr;
+    // clang-format on
 
   public:
-    Application(int width = 800, int height = 600, const char *title = "Untitled Window");
+    explicit Application(int width = WINDOW_WIDTH, int height = WINDOW_HEIGHT, const char *title = "Streamline Engine");
 
-    ResourceManager *const getResourceManager() const noexcept
+    [[nodiscard]] ResourceManager *getResourceManager() const noexcept
     {
         return m_resourceManager;
     }
 
-    InputManager *const getInputManager() const noexcept
+    [[nodiscard]] InputManager *getInputManager() const noexcept
     {
         return m_inputManager;
     }
 
-    SceneManager *const getSceneManager() const noexcept
+    [[nodiscard]] SceneManager *getSceneManager() const noexcept
     {
         return m_sceneManager;
     }
 
-    Renderer *const getRenderer() const noexcept
+    [[nodiscard]] Renderer *getRenderer() const noexcept
     {
         return m_renderer;
     }
 
-    Window *const getWindow() const noexcept
+    [[nodiscard]] Window *getWindow() const noexcept
     {
         return m_window;
     }
@@ -54,16 +60,11 @@ class Application : public Singleton<Application>
 
     ~Application()
     {
-        if (m_resourceManager)
-            delete m_resourceManager;
-        if (m_sceneManager)
-            delete m_sceneManager;
-        if (m_inputManager)
-            delete m_inputManager;
-        if (m_renderer)
-            delete m_renderer;
-        if (m_window)
-            delete m_window;
+        delete m_resourceManager;
+        delete m_sceneManager;
+        delete m_inputManager;
+        delete m_renderer;
+        delete m_window;
     }
 
     Application(Application const &)  = delete;
@@ -73,9 +74,9 @@ class Application : public Singleton<Application>
     Application &operator=(Application const &&) = delete;
 
   private:
-    void onEvent(event &&e);
-    bool onKeyPress(key_press_event &e);
-    bool onWindowResize(window_resize_event &e);
+    void onEvent(event &&event);
+    bool onKeyPress(key_press_event &event);
+    bool onWindowResize(window_resize_event &event);
 };
 
 } // namespace engine
