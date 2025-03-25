@@ -1,4 +1,5 @@
 #include "core/window.hpp"
+#include <GLFW/glfw3.h>
 
 using namespace engine;
 
@@ -68,6 +69,11 @@ void Window::hide()
     glfwHideWindow(m_glfwWindow);
 }
 
+void Window::close()
+{
+    glfwSetWindowShouldClose(m_glfwWindow, GLFW_TRUE);
+}
+
 void Window::showCursor()
 {
     glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -96,6 +102,11 @@ const ivec2 &Window::getPositionInScreen() const
 const ivec2 &Window::getSizeInScreen() const
 {
     return m_lastSize;
+}
+
+WindowMode Window::getWindowMode() const
+{
+    return m_windowMode;
 }
 
 void Window::moveTo(int x, int y)

@@ -107,6 +107,12 @@ class Window
      * @brief
      *
      */
+    void close();
+
+    /**
+     * @brief
+     *
+     */
     void showCursor();
 
     /**
@@ -140,6 +146,13 @@ class Window
      * @return ivec2
      */
     const ivec2 &getSizeInScreen() const;
+
+    /**
+     * @brief
+     *
+     * @return WindowMode
+     */
+    WindowMode getWindowMode() const;
 
     /**
      * @brief

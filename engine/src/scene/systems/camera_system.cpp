@@ -1,5 +1,4 @@
 #include "scene/systems/camera_system.hpp"
-#include "core/logger.hpp"
 #include "scene/scene.hpp"
 
 #include <cstdint>

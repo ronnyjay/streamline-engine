@@ -1,6 +1,8 @@
 #include "core/debug.hpp"
 #include "core/application.hpp"
+#include "core/window.hpp"
 
+#include <assimp/types.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -44,9 +46,13 @@ void DebugWindow::draw()
             drawVideoSettings();
             drawSceneSettings();
 
-            ImGui::End();
+            if (ImGui::Button("Exit"))
+            {
+                Application::getInstance().getWindow()->close();
+            }
         }
 
+        ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -62,6 +68,41 @@ void DebugWindow::drawVideoSettings()
 {
     if (ImGui::TreeNode("Video"))
     {
+        WindowMode windowMode = Application::getInstance().getWindow()->getWindowMode();
+
+        if (windowMode == WindowMode::Windowed)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        // Monitor select
+
+        if (windowMode == WindowMode::Windowed)
+        {
+            ImGui::EndDisabled();
+        }
+
+        if (windowMode == WindowMode::WindowedFullscreen)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        // Resolution select
+
+        if (windowMode == WindowMode::WindowedFullscreen)
+        {
+            ImGui::EndDisabled();
+        }
+
+        if (ImGui::Combo("Display Mode", (int *)&windowMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
+        {
+            Application::getInstance().getWindow()->setWindowMode(windowMode);
+        }
+
+        // Frame Rate Limit
+
+        // Vertical Sync
+
         ImGui::TreePop();
     }
 }
