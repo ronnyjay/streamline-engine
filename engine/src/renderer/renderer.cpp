@@ -7,6 +7,8 @@ using namespace engine;
 
 void Renderer::begin(const std::shared_ptr<scene> &s)
 {
+    int width, height;
+    glfwGetFramebufferSize(Application::getInstance().getWindow()->operator GLFWwindow *(), &width, &height);
 
     m_framebuffer.bind();
     glEnable(GL_DEPTH_TEST);
@@ -20,11 +22,8 @@ void Renderer::begin(const std::shared_ptr<scene> &s)
     }
 
     s.get()->draw();
+
     m_framebuffer.unbind();
-
-    int width, height;
-    glfwGetFramebufferSize(Application::getInstance().getWindow()->operator GLFWwindow *(), &width, &height);
-
     glDisable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

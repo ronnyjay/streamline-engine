@@ -1,6 +1,5 @@
 #include "core/application.hpp"
 
-#include <bit>
 #include <cstdlib>
 
 using namespace engine;

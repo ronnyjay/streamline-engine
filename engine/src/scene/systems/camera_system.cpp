@@ -84,13 +84,4 @@ void CameraSystem::updateAspectRatios(uint32_t width, uint32_t height)
 
     updateProjections();
     updateViews();
-
-    auto transform_view = m_scene->m_registry.view<Camera, Transform>();
-
-    for (const auto &entity : transform_view)
-    {
-        auto [camera, transform] = transform_view.get(entity);
-
-        Logger::info("Yaw: %.2f", transform.rotation.y);
-    }
 }
