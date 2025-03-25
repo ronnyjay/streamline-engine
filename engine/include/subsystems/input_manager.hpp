@@ -12,7 +12,7 @@ struct InputManager : public Singleton<InputManager>
     bool   captureKeyInput     = true;
     bool   b_captureMouseInput = true;
 
-    void   onEvent(event &e);
+    void   onEvent(Event &e);
 
     double getMousePosOffsetX() noexcept;
     double getMousePosOffsetY() noexcept;
@@ -21,14 +21,14 @@ struct InputManager : public Singleton<InputManager>
     bool   isMouseButtonPressed(MouseButton btn) const noexcept;
 
   private:
-    bool onKeyPress(key_press_event &e);
-    bool onKeyRelease(key_release_event &e);
+    bool onKeyPress(KeyPressEvent &e);
+    bool onKeyRelease(KeyReleaseEvent &e);
 
-    bool onMouseButtonPress(mouse_button_press_event &e);
-    bool onMouseButtonRelease(mouse_button_release_event &e);
+    bool onMouseButtonPress(MouseButtonPressEvent &e);
+    bool onMouseButtonRelease(MouseButtonReleaseEvent &e);
 
-    bool onMouseMove(mouse_move_event &e);
-    bool onMouseScroll(mouse_scroll_event &e);
+    bool onMouseMove(MouseMoveEvent &e);
+    bool onMouseScroll(MouseScrollEvent &e);
 
   private:
     std::tuple<double, double>              m_mouseScrollOffset;

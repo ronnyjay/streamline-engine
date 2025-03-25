@@ -211,7 +211,7 @@ void Window::framebufferCallback(GLFWwindow *glfwWindow, int width, int height)
 
     if (window->m_eventCallback)
     {
-        window->m_eventCallback(window_resize_event(width, height));
+        window->m_eventCallback(WindowResizeEvent(width, height));
     }
 }
 
@@ -247,11 +247,11 @@ void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int acti
     {
         if (action == GLFW_RELEASE)
         {
-            window->m_eventCallback(key_release_event(key));
+            window->m_eventCallback(KeyReleaseEvent(key));
         }
         else
         {
-            window->m_eventCallback(key_press_event(key, mods, action == GLFW_REPEAT));
+            window->m_eventCallback(KeyPressEvent(key, mods, action == GLFW_REPEAT));
         }
     }
 }
@@ -264,11 +264,11 @@ void Window::mouseCallback(GLFWwindow *glfwWindow, int button, int action, int m
     {
         if (action == GLFW_PRESS)
         {
-            window->m_eventCallback(mouse_button_press_event(button));
+            window->m_eventCallback(MouseButtonPressEvent(button));
         }
         else
         {
-            window->m_eventCallback(mouse_button_release_event(button));
+            window->m_eventCallback(MouseButtonReleaseEvent(button));
         }
     }
 }
@@ -301,7 +301,7 @@ void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn
         lastX = xPos;
         lastY = yPos;
 
-        window->m_eventCallback(mouse_move_event(xOffset, yOffset));
+        window->m_eventCallback(MouseMoveEvent(xOffset, yOffset));
     }
 }
 
@@ -311,6 +311,6 @@ void Window::scrollCallback(GLFWwindow *glfwWindow, double xoffset, double yoffs
 
     if (window->m_eventCallback)
     {
-        window->m_eventCallback(mouse_scroll_event(xoffset, yoffset));
+        window->m_eventCallback(MouseScrollEvent(xoffset, yoffset));
     }
 }

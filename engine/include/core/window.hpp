@@ -172,9 +172,9 @@ class Window
      * @param fn
      */
     template <typename T>
-    void setEventCallback(T *instance, void (T::*fn)(event &&e))
+    void setEventCallback(T *instance, void (T::*fn)(Event &&e))
     {
-        m_eventCallback = [instance, fn](event &&event) { (instance->*fn)(std::move(event)); };
+        m_eventCallback = [instance, fn](Event &&event) { (instance->*fn)(std::move(event)); };
     }
 
   private:

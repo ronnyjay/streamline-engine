@@ -4,23 +4,23 @@
 
 using namespace engine;
 
-void InputManager::onEvent(event &e)
+void InputManager::onEvent(Event &e)
 {
     EventDispatcher dispatcher(e);
 
     if (captureKeyInput)
     {
-        dispatcher.dispatch<key_press_event>(this, &InputManager::onKeyPress);
-        dispatcher.dispatch<key_release_event>(this, &InputManager::onKeyRelease);
+        dispatcher.dispatch<KeyPressEvent>(this, &InputManager::onKeyPress);
+        dispatcher.dispatch<KeyReleaseEvent>(this, &InputManager::onKeyRelease);
     }
 
     if (b_captureMouseInput)
     {
-        dispatcher.dispatch<mouse_move_event>(this, &InputManager::onMouseMove);
-        dispatcher.dispatch<mouse_scroll_event>(this, &InputManager::onMouseScroll);
+        dispatcher.dispatch<MouseMoveEvent>(this, &InputManager::onMouseMove);
+        dispatcher.dispatch<MouseScrollEvent>(this, &InputManager::onMouseScroll);
 
-        dispatcher.dispatch<mouse_button_press_event>(this, &InputManager::onMouseButtonPress);
-        dispatcher.dispatch<mouse_button_release_event>(this, &InputManager::onMouseButtonRelease);
+        dispatcher.dispatch<MouseButtonPressEvent>(this, &InputManager::onMouseButtonPress);
+        dispatcher.dispatch<MouseButtonReleaseEvent>(this, &InputManager::onMouseButtonRelease);
     }
 }
 
@@ -62,38 +62,38 @@ double InputManager::getMousePosOffsetY() noexcept
     return offset;
 }
 
-inline bool InputManager::onKeyPress(key_press_event &e)
+inline bool InputManager::onKeyPress(KeyPressEvent &e)
 {
     m_keyStates[Key(e.key)] = action::Press;
     return true;
 }
 
-inline bool InputManager::onKeyRelease(key_release_event &e)
+inline bool InputManager::onKeyRelease(KeyReleaseEvent &e)
 {
     m_keyStates[Key(e.key)] = action::Release;
     return true;
 }
 
-inline bool InputManager::onMouseButtonPress(mouse_button_press_event &e)
+inline bool InputManager::onMouseButtonPress(MouseButtonPressEvent &e)
 {
     m_mouseButtonStates[MouseButton(e.button)] = action::Press;
     return true;
 }
 
-inline bool InputManager::onMouseButtonRelease(mouse_button_release_event &e)
+inline bool InputManager::onMouseButtonRelease(MouseButtonReleaseEvent &e)
 {
     m_mouseButtonStates[MouseButton(e.button)] = action::Release;
     return true;
 }
 
-inline bool InputManager::onMouseMove(mouse_move_event &e)
+inline bool InputManager::onMouseMove(MouseMoveEvent &e)
 {
     std::get<0>(m_mousePositionOffset) = e.xpos;
     std::get<1>(m_mousePositionOffset) = e.ypos;
     return true;
 }
 
-inline bool InputManager::onMouseScroll(mouse_scroll_event &e)
+inline bool InputManager::onMouseScroll(MouseScrollEvent &e)
 {
     std::get<0>(m_mouseScrollOffset) = e.xoffset;
     std::get<1>(m_mouseScrollOffset) = e.yoffset;

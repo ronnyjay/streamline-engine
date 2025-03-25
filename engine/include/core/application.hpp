@@ -74,9 +74,9 @@ class Application : public Singleton<Application>
     Application &operator=(Application const &&) = delete;
 
   private:
-    void onEvent(event &&event);
-    bool onKeyPress(key_press_event &event);
-    bool onWindowResize(window_resize_event &event);
+    void onEvent(Event &&event);
+    bool onKeyPress(KeyPressEvent &event);
+    bool onWindowResize(WindowResizeEvent &event);
 };
 
 } // namespace engine

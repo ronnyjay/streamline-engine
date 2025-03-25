@@ -62,11 +62,11 @@ void Application::run()
     }
 }
 
-void Application::onEvent(event &&e)
+void Application::onEvent(Event &&e)
 {
     EventDispatcher dispatcher(e);
 
-    dispatcher.dispatch<key_press_event>(this, &Application::onKeyPress);
+    dispatcher.dispatch<KeyPressEvent>(this, &Application::onKeyPress);
 
     if (!e.b_isHandled)
     {
@@ -74,7 +74,7 @@ void Application::onEvent(event &&e)
     }
 }
 
-bool Application::onKeyPress(key_press_event &e)
+bool Application::onKeyPress(KeyPressEvent &e)
 {
     if (Key(e.key) == Key::GraveAccent)
     {
@@ -132,7 +132,7 @@ bool Application::onKeyPress(key_press_event &e)
     return false;
 }
 
-bool Application::onWindowResize(window_resize_event &e)
+bool Application::onWindowResize(WindowResizeEvent &e)
 {
     return true;
 }

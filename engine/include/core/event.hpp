@@ -7,7 +7,7 @@ namespace engine
 {
 
 // clang-format off
-enum class event_type : std::uint8_t
+enum class EventType : std::uint8_t
 {
     NONE,
     WINDOW_RESIZED,
@@ -17,34 +17,34 @@ enum class event_type : std::uint8_t
 // clang-format on
 
 #define EVENT_TYPE(type)                                                                                               \
-    static event_type get_static_type()                                                                                \
+    static EventType getStaticType()                                                                                   \
     {                                                                                                                  \
-        return event_type::type;                                                                                       \
+        return EventType::type;                                                                                        \
     }                                                                                                                  \
-    virtual event_type get_type() const override                                                                       \
+    virtual EventType getType() const override                                                                         \
     {                                                                                                                  \
-        return get_static_type();                                                                                      \
+        return getStaticType();                                                                                        \
     }
 
-struct event
+struct Event
 {
-    virtual ~event() = default;
+    virtual ~Event() = default;
 
     //
     bool b_isHandled = false;
     //
 
-    static event_type get_static_type()
+    static EventType getStaticType()
     {
-        return event_type::NONE;
+        return EventType::NONE;
     }
 
-    [[nodiscard]] virtual event_type get_type() const = 0;
+    [[nodiscard]] virtual EventType getType() const = 0;
 };
 
-struct window_resize_event : public event
+struct WindowResizeEvent : public Event
 {
-    window_resize_event(int width, int height)
+    WindowResizeEvent(int width, int height)
         : width(width)
         , height(height)
     {
@@ -56,9 +56,9 @@ struct window_resize_event : public event
     EVENT_TYPE(WINDOW_RESIZED)
 };
 
-struct key_press_event : public event
+struct KeyPressEvent : public Event
 {
-    key_press_event(int key, int mods, bool repeat)
+    KeyPressEvent(int key, int mods, bool repeat)
         : key(key)
         , mods(mods)
         , repeat(repeat)
@@ -72,9 +72,9 @@ struct key_press_event : public event
     EVENT_TYPE(KEY_PRESSED)
 };
 
-struct key_release_event : public event
+struct KeyReleaseEvent : public Event
 {
-    explicit key_release_event(int key)
+    explicit KeyReleaseEvent(int key)
         : key(key)
     {
     }
@@ -84,9 +84,9 @@ struct key_release_event : public event
     EVENT_TYPE(KEY_RELEASED)
 };
 
-struct mouse_button_press_event : public event
+struct MouseButtonPressEvent : public Event
 {
-    explicit mouse_button_press_event(int button)
+    explicit MouseButtonPressEvent(int button)
         : button(button)
     {
     }
@@ -96,9 +96,9 @@ struct mouse_button_press_event : public event
     EVENT_TYPE(MOUSE_BUTTON_PRESSED)
 };
 
-struct mouse_button_release_event : public event
+struct MouseButtonReleaseEvent : public Event
 {
-    explicit mouse_button_release_event(int button)
+    explicit MouseButtonReleaseEvent(int button)
         : button(button)
     {
     }
@@ -108,9 +108,9 @@ struct mouse_button_release_event : public event
     EVENT_TYPE(MOUSE_BUTTON_RELEASED)
 };
 
-struct mouse_move_event : public event
+struct MouseMoveEvent : public Event
 {
-    mouse_move_event(double xpos, double ypos)
+    MouseMoveEvent(double xpos, double ypos)
         : xpos(xpos)
         , ypos(ypos)
     {
@@ -122,9 +122,9 @@ struct mouse_move_event : public event
     EVENT_TYPE(MOUSE_BUTTON_MOVED)
 };
 
-struct mouse_scroll_event : public event
+struct MouseScrollEvent : public Event
 {
-    mouse_scroll_event(double xoffset, double yoffset)
+    MouseScrollEvent(double xoffset, double yoffset)
         : xoffset(xoffset)
         , yoffset(yoffset)
     {
@@ -139,7 +139,7 @@ struct mouse_scroll_event : public event
 class EventDispatcher
 {
   public:
-    explicit EventDispatcher(event &event)
+    explicit EventDispatcher(Event &event)
         : event(event)
     {
     }
@@ -147,7 +147,7 @@ class EventDispatcher
     template <typename T, typename F>
     bool dispatch(const F &&func)
     {
-        if (event.get_type() == T::get_static_type())
+        if (event.getType() == T::getStaticType())
         {
             event.b_isHandled |= func(static_cast<T &>(event));
             return true;
@@ -158,7 +158,7 @@ class EventDispatcher
     template <typename T, typename F, typename C>
     bool dispatch(C *instance, const F &func)
     {
-        if (event.get_type() == T::get_static_type())
+        if (event.getType() == T::getStaticType())
         {
             event.b_isHandled |= (instance->*func)(static_cast<T &>(event));
             return true;
@@ -167,9 +167,9 @@ class EventDispatcher
     }
 
   private:
-    event &event;
+    Event &event;
 };
 
-using EventCallback = std::function<void(event &&)>;
+using EventCallback = std::function<void(Event &&)>;
 
 } // namespace engine
