@@ -1,5 +1,8 @@
 #include "scene/systems/camera_system.hpp"
+#include "core/logger.hpp"
 #include "scene/scene.hpp"
+
+#include <cstdint>
 
 using namespace engine;
 
@@ -62,5 +65,32 @@ void CameraSystem::updateViews()
         }
         break;
         }
+    }
+}
+
+void CameraSystem::updateAspectRatios(uint32_t width, uint32_t height)
+{
+    auto view = m_scene->m_registry.view<Camera>();
+
+    for (const auto &entity : view)
+    {
+        auto &camera = view.get(entity);
+
+        if (!camera.b_lockAspectRatio)
+        {
+            camera.setAspectRatio(width, height);
+        }
+    }
+
+    updateProjections();
+    updateViews();
+
+    auto transform_view = m_scene->m_registry.view<Camera, Transform>();
+
+    for (const auto &entity : transform_view)
+    {
+        auto [camera, transform] = transform_view.get(entity);
+
+        Logger::info("Yaw: %.2f", transform.rotation.y);
     }
 }

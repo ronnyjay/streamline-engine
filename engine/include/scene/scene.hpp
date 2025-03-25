@@ -62,6 +62,11 @@ struct scene
         return m_registry.get<T>(entity);
     }
 
+    void onWindowResize(uint32_t width, uint32_t height)
+    {
+        m_cameraSystem.updateAspectRatios(width, height);
+    }
+
   private:
     registry                m_registry;
     CameraSystem            m_cameraSystem;

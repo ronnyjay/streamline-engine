@@ -27,7 +27,7 @@ void FollowSystem::update(double dt)
 
             if (!follow.b_ignoreYawRotation)
             {
-                transform.rotation.y = target->rotation.y * follow.yawDamping;
+                transform.rotation.y = (target->rotation.y) * follow.yawDamping;
 
                 if (follow.b_invertYawRotation)
                 {

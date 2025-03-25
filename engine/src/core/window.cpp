@@ -213,10 +213,14 @@ void Window::framebufferCallback(GLFWwindow *glfwWindow, int width, int height)
     {
         window->m_eventCallback(WindowResizeEvent(width, height));
     }
+
+    window->flags.mouseEntered = true;
 }
 
 void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
 {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+
     if (maximize)
     {
         glfwMaximizeWindow(glfwWindow);
@@ -225,10 +229,14 @@ void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
     {
         glfwRestoreWindow(glfwWindow);
     }
+
+    window->flags.mouseEntered = true;
 }
 
 void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
 {
+    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+
     if (minimize)
     {
         glfwIconifyWindow(glfwWindow);
@@ -237,6 +245,8 @@ void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
     {
         glfwRestoreWindow(glfwWindow);
     }
+
+    window->flags.mouseEntered = true;
 }
 
 void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)

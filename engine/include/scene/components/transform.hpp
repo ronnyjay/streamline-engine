@@ -1,11 +1,9 @@
 #pragma once
 
 #include "math/geometric.hpp"
-#include "math/mat4x4.hpp"
 #include "math/quaternion.hpp"
 #include "math/transformation.hpp"
 #include "math/trigonometric.hpp"
-#include "math/vec3.hpp"
 
 namespace engine
 {

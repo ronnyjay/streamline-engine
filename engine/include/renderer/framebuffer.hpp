@@ -13,10 +13,20 @@ struct Framebuffer
     Framebuffer(uint32_t width, uint32_t height);
     ~Framebuffer();
 
-    void draw();
+    void     draw();
 
-    void bind();
-    void unbind();
+    void     bind();
+    void     unbind();
+
+    uint32_t width() const
+    {
+        return m_width;
+    }
+
+    uint32_t height() const
+    {
+        return m_height;
+    }
 
     void resize(uint32_t width, uint32_t height);
 
@@ -27,6 +37,9 @@ struct Framebuffer
     unsigned int            m_FBO;
     unsigned int            m_TEX;
     std::shared_ptr<Shader> m_SHP;
+
+    unsigned int            m_width;
+    unsigned int            m_height;
 };
 
 } // namespace engine

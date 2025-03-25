@@ -14,9 +14,17 @@ class Window;
 
 struct scene;
 
+struct RenderFlags
+{
+    bool b_showWireframes = false;
+    bool b_showCollisions = false;
+};
+
 class Renderer
 {
   public:
+    RenderFlags flags;
+
     Renderer(uint32_t width, uint32_t height)
         : m_framebuffer(width, height)
     {
@@ -55,6 +63,11 @@ class Renderer
     void setClearColor(float r, float g, float b, float a)
     {
         glClearColor(r, g, b, a);
+    }
+
+    void onWindowResize(uint32_t width, uint32_t height)
+    {
+        m_framebuffer.resize(width, height);
     }
 
     void begin(const std::shared_ptr<scene> &s);

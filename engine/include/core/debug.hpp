@@ -2,18 +2,8 @@
 
 #include "singleton.hpp"
 
-#include <memory>
-#include <vector>
-
 namespace engine
 {
-
-struct DebugPanel
-{
-    virtual ~DebugPanel() = default;
-
-    virtual void draw() = 0;
-};
 
 struct DebugWindow : public Singleton<DebugWindow>
 {
@@ -27,7 +17,8 @@ struct DebugWindow : public Singleton<DebugWindow>
     ~DebugWindow();
 
   private:
-    std::vector<std::unique_ptr<DebugPanel>> m_debugPanels;
+    void drawVideoSettings();
+    void drawSceneSettings();
 };
 
 } // namespace engine

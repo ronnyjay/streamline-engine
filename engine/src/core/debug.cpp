@@ -41,6 +41,9 @@ void DebugWindow::draw()
                 ImGui::ShowMetricsWindow();
             }
 
+            drawVideoSettings();
+            drawSceneSettings();
+
             ImGui::End();
         }
 
@@ -53,4 +56,20 @@ DebugWindow::~DebugWindow()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+}
+
+void DebugWindow::drawVideoSettings()
+{
+    if (ImGui::TreeNode("Video"))
+    {
+        ImGui::TreePop();
+    }
+}
+
+void DebugWindow::drawSceneSettings()
+{
+    if (ImGui::TreeNode("Scene"))
+    {
+        ImGui::TreePop();
+    }
 }

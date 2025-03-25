@@ -1,5 +1,6 @@
 #include "core/application.hpp"
 
+#include <bit>
 #include <cstdlib>
 
 using namespace engine;
@@ -66,6 +67,7 @@ void Application::onEvent(Event &&e)
 {
     EventDispatcher dispatcher(e);
 
+    dispatcher.dispatch<WindowResizeEvent>(this, &Application::onWindowResize);
     dispatcher.dispatch<KeyPressEvent>(this, &Application::onKeyPress);
 
     if (!e.b_isHandled)
@@ -134,5 +136,9 @@ bool Application::onKeyPress(KeyPressEvent &e)
 
 bool Application::onWindowResize(WindowResizeEvent &e)
 {
+    m_sceneManager->currentScene()->onWindowResize(e.width, e.height);
+
+    m_renderer->onWindowResize(e.width, e.height);
+
     return true;
 }
