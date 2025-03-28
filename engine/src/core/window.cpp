@@ -252,6 +252,8 @@ void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
     {
         glfwRestoreWindow(glfwWindow);
     }
+
+    window->flags.b_mouseEntered = true;
 }
 
 void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
@@ -266,6 +268,8 @@ void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
     {
         glfwRestoreWindow(glfwWindow);
     }
+
+    window->flags.b_mouseEntered = true;
 }
 
 void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
