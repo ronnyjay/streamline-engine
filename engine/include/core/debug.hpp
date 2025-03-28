@@ -38,6 +38,12 @@ struct DebugWindow : public Singleton<DebugWindow>
     ~DebugWindow();
 
   private:
+    struct VideoSettings
+    {
+        bool b_verticalSync = true;
+    } m_videoSettings;
+
+    void drawDebugSettings();
     void drawVideoSettings();
     void drawSceneSettings();
 };

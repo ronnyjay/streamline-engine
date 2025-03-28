@@ -1,5 +1,6 @@
 #include "core/debug.hpp"
 #include "core/application.hpp"
+#include "core/renderer.hpp"
 #include "core/window.hpp"
 
 #include <assimp/types.h>
@@ -43,6 +44,7 @@ void DebugWindow::draw()
                 ImGui::ShowMetricsWindow();
             }
 
+            drawDebugSettings();
             drawVideoSettings();
             drawSceneSettings();
 
@@ -62,6 +64,26 @@ DebugWindow::~DebugWindow()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+}
+
+void DebugWindow::drawDebugSettings()
+{
+    if (ImGui::TreeNode("Debug"))
+    {
+        bool showWireframes = Application::getInstance().getRenderer()->flags.b_showWireframes;
+        if (ImGui::Checkbox("Show wireframes", &showWireframes))
+        {
+            Application::getInstance().getRenderer()->flags.b_showWireframes = showWireframes;
+        }
+
+        bool showCollisions = Application::getInstance().getRenderer()->flags.b_showCollisions;
+        if (ImGui::Checkbox("Show collisions", &showCollisions))
+        {
+            Application::getInstance().getRenderer()->flags.b_showCollisions = showCollisions;
+        }
+
+        ImGui::TreePop();
+    }
 }
 
 void DebugWindow::drawVideoSettings()
@@ -102,6 +124,10 @@ void DebugWindow::drawVideoSettings()
         // Frame Rate Limit
 
         // Vertical Sync
+        if (ImGui::Checkbox("Vertical Sync", &m_videoSettings.b_verticalSync))
+        {
+            Application::getInstance().getRenderer()->enableVsync(m_videoSettings.b_verticalSync);
+        }
 
         ImGui::TreePop();
     }
