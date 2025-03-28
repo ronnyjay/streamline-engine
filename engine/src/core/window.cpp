@@ -1,4 +1,5 @@
 #include "core/window.hpp"
+#include "core/logger.hpp"
 
 #include <tuple>
 
@@ -27,6 +28,8 @@ Window::Window(int width, int height, const char *title)
         STREAMLINE_ASSERT(false, "Failed to create GLFW window");
     }
 
+    glfwSetWindowUserPointer(m_glfwWindow, this);
+
     glfwSetFramebufferSizeCallback(m_glfwWindow, Window::framebufferCallback);
     glfwSetWindowMaximizeCallback(m_glfwWindow, Window::maximizeCallback);
     glfwSetWindowIconifyCallback(m_glfwWindow, Window::minimizeCallback);
@@ -47,7 +50,7 @@ Window::Window(int width, int height, const char *title)
         STREAMLINE_ASSERT(false, "Failed to initialize GLAD");
     }
 
-    glfwSetWindowUserPointer(m_glfwWindow, this);
+    Logger::info("Initialized GLFW Window");
 }
 
 bool Window::isOpen() const
