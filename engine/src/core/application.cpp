@@ -1,4 +1,6 @@
 #include "core/application.hpp"
+#include "subsystems/display_manager.hpp"
+#include "subsystems/settings_manager.hpp"
 
 #include <cstdlib>
 
@@ -11,6 +13,8 @@ Application::Application(int width, int height, const char *title)
     m_debugWindow     = new DebugWindow;
     m_sceneManager    = new SceneManager;
     m_inputManager    = new InputManager;
+    m_displayManager  = new DisplayManager;
+    m_settingsManager = new SettingsManager;
     m_resourceManager = new ResourceManager;
 
     m_window->setEventCallback(this, &Application::onEvent);
@@ -27,9 +31,8 @@ void Application::run()
     double lastTime;
     double elapsedTime;
 
-    double renderTimeStep    = 1.0 / 240.0;
-    double renderAccumulator = 0.0;
-
+    double renderTimeStep        = 1.0 / 240.0;
+    double renderAccumulator     = 0.0;
     double simulationTimeStep    = 1.0 / 240.0;
     double simulationAccumulator = 0.0;
 
@@ -81,9 +84,9 @@ bool Application::onKeyPress(KeyPressEvent &e)
     {
         if (Modifier(e.mods) == Modifier::Shift)
         {
-            m_window->flags.mouseVisible = !m_window->flags.mouseVisible;
+            m_window->flags.b_mouseVisible = !m_window->flags.b_mouseVisible;
 
-            if (m_window->flags.mouseVisible)
+            if (m_window->flags.b_mouseVisible)
             {
                 m_window->showCursor();
             }
@@ -92,7 +95,7 @@ bool Application::onKeyPress(KeyPressEvent &e)
                 m_window->hideCursor();
             }
 
-            m_window->flags.mouseEntered = true;
+            m_window->flags.b_mouseEntered = true;
         }
         else
         {
@@ -108,7 +111,7 @@ bool Application::onKeyPress(KeyPressEvent &e)
                 {
                     m_inputManager->b_captureMouseInput = false;
 
-                    if (!m_window->flags.mouseVisible)
+                    if (!m_window->flags.b_mouseVisible)
                     {
                         m_window->showCursor();
                     }
@@ -117,13 +120,13 @@ bool Application::onKeyPress(KeyPressEvent &e)
                 {
                     m_inputManager->b_captureMouseInput = true;
 
-                    if (!m_window->flags.mouseVisible)
+                    if (!m_window->flags.b_mouseVisible)
                     {
                         m_window->hideCursor();
                     }
                 }
 
-                m_window->flags.mouseEntered = true;
+                m_window->flags.b_mouseEntered = true;
             }
         }
 

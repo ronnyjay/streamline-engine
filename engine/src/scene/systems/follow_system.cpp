@@ -1,4 +1,3 @@
-#include "scene/systems/follow_system.hpp"
 #include "scene/scene.hpp"
 
 using namespace engine;

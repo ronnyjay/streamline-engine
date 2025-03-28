@@ -7,6 +7,8 @@
 #include "components/controller.hpp"       // IWYU pragma: keep
 #include "components/follow.hpp"           // IWYU pragma: keep
 #include "components/identifier.hpp"       // IWYU pragma: keep
+#include "components/light.hpp"            // IWYU pragma: keep
+#include "components/look_at.hpp"          // IWYU pragma: keep
 #include "components/player_input.hpp"     // IWYU pragma: keep
 #include "components/player_look.hpp"      // IWYU pragma: keep
 #include "components/player_move.hpp"      // IWYU pragma: keep
@@ -16,6 +18,7 @@
 #include "systems/camera_system.hpp"       // IWYU pragma: keep
 #include "systems/controller_system.hpp"   // IWYU pragma: keep
 #include "systems/follow_system.hpp"       // IWYU pragma: keep
+#include "systems/lighting_system.hpp"     // IWYU pragma: keep
 #include "systems/player_input_system.hpp" // IWYU pragma: keep
 
 #include "subsystems/resource_manager.hpp"
@@ -27,6 +30,7 @@ struct scene
 {
     friend struct PlayerInputSystem;
     friend struct ControllerSystem;
+    friend struct LightingSystem;
     friend struct FollowSystem;
     friend struct CameraSystem;
 

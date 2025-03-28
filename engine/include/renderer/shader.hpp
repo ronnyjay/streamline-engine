@@ -19,6 +19,7 @@ namespace engine
 
 struct Shader
 {
+
     Shader(const std::string &vertexPath, const std::string &fragmentPath);
 
     void bind()
@@ -30,6 +31,10 @@ struct Shader
     {
         glUseProgram(0);
     }
+
+    // clang-format off
+    static constexpr size_t MAX_LIGHT_COUNT = 10;
+    // clang-format on
 
     void setInt(const std::string &name, int value)
     {

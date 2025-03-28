@@ -4,13 +4,10 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
-#include "core/window.hpp"
 #include "renderer/framebuffer.hpp"
 
 namespace engine
 {
-
-class Window;
 
 struct scene;
 

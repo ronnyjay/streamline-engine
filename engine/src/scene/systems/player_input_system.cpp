@@ -1,9 +1,6 @@
-#include "scene/systems/player_input_system.hpp"
 #include "scene/scene.hpp"
 
 #include "subsystems/input_manager.hpp"
-
-#include "core/logger.hpp"
 
 using namespace engine;
 

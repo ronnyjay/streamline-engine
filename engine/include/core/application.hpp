@@ -9,7 +9,7 @@
 #include "subsystems/input_manager.hpp"    // IWYU pragma: keep
 #include "subsystems/resource_manager.hpp" // IWYU pragma: keep
 #include "subsystems/scene_manager.hpp"    // IWYU pragma: keep
-#include <cstdint>
+#include "subsystems/settings_manager.hpp" // IWYU pragma: keep
 
 namespace engine
 {
@@ -17,23 +17,32 @@ namespace engine
 class Application : public Singleton<Application>
 {
     // clang-format off
-    static constexpr uint32_t WINDOW_WIDTH      = 800;
-    static constexpr uint32_t WINDOW_HEIGHT     = 600;
-
     Window                   *m_window          = nullptr;
     Renderer                 *m_renderer        = nullptr;
     DebugWindow              *m_debugWindow     = nullptr;
     SceneManager             *m_sceneManager    = nullptr;
     InputManager             *m_inputManager    = nullptr;
+    DisplayManager           *m_displayManager  = nullptr;
+    SettingsManager          *m_settingsManager = nullptr;
     ResourceManager          *m_resourceManager = nullptr;
     // clang-format on
 
   public:
-    explicit Application(int width = WINDOW_WIDTH, int height = WINDOW_HEIGHT, const char *title = "Streamline Engine");
+    explicit Application(int width = 800, int height = 600, const char *title = "Streamline Engine");
+
+    [[nodiscard]] SettingsManager *getSettingsManager() const noexcept
+    {
+        return m_settingsManager;
+    }
 
     [[nodiscard]] ResourceManager *getResourceManager() const noexcept
     {
         return m_resourceManager;
+    }
+
+    [[nodiscard]] DisplayManager *getDisplayManager() const noexcept
+    {
+        return m_displayManager;
     }
 
     [[nodiscard]] InputManager *getInputManager() const noexcept
@@ -61,6 +70,8 @@ class Application : public Singleton<Application>
     ~Application()
     {
         delete m_resourceManager;
+        delete m_settingsManager;
+        delete m_displayManager;
         delete m_sceneManager;
         delete m_inputManager;
         delete m_renderer;

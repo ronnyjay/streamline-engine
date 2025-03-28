@@ -21,36 +21,27 @@ enum class WindowMode
     WindowedFullscreen
 };
 
-class Window
+class Window : public Singleton<Window>
 {
     struct WindowFlags
     {
-        bool mouseEntered = true;
-        bool mouseVisible = true;
+        bool b_mouseEntered = true;
+        bool b_mouseVisible = true;
     };
 
     GLFWwindow   *m_glfwWindow;
+
     ivec2         m_lastSize;
     ivec2         m_lastPos;
+
     WindowMode    m_windowMode;
+
     EventCallback m_eventCallback;
 
   public:
-    WindowFlags flags;
 
-    /**
-     * @brief
-     *
-     * @param width
-     * @param height
-     * @param title
-     */
     Window(int width, int height, const char *title);
 
-    /**
-     * @brief
-     *
-     */
     ~Window()
     {
         if (m_glfwWindow)
@@ -59,131 +50,42 @@ class Window
         glfwTerminate();
     }
 
+    WindowFlags flags;
+
     Window(Window const &)  = delete;
     Window(Window const &&) = delete;
 
     Window operator=(Window const &)  = delete;
     Window operator=(Window const &&) = delete;
 
-    /**
-     * @brief
-     *
-     * @return GLFWwindow *
-     */
     operator GLFWwindow *()
     {
         return m_glfwWindow;
     }
 
-    /**
-     * @brief
-     *
-     * @return true
-     * @return false
-     */
+    bool isVisible() const;
     bool isOpen() const;
 
-    /**
-     * @brief
-     *
-     * @return true
-     * @return false
-     */
-    bool isVisible() const;
-
-    /**
-     * @brief
-     *
-     */
     void show();
-
-    /**
-     * @brief
-     *
-     */
     void hide();
 
-    /**
-     * @brief
-     *
-     */
     void close();
 
-    /**
-     * @brief
-     *
-     */
     void showCursor();
-
-    /**
-     * @brief
-     *
-     */
     void hideCursor();
 
-    /**
-     * @brief
-     *
-     */
+    void pollEvents();
     void swapBuffers();
 
-    /**
-     * @brief
-     *
-     */
-    void pollEvents();
+    std::tuple<int, int> getPositionInScreen() const;
+    std::tuple<int, int> getSizeInScreen() const;
 
-    /**
-     * @brief
-     *
-     * @return ivec2
-     */
-    const ivec2 &getPositionInScreen() const;
-
-    /**
-     * @brief
-     *
-     * @return ivec2
-     */
-    const ivec2 &getSizeInScreen() const;
-
-    /**
-     * @brief
-     *
-     * @return WindowMode
-     */
-    WindowMode getWindowMode() const;
-
-    /**
-     * @brief
-     *
-     * @param x
-     * @param y
-     */
     void moveTo(int x, int y);
-
-    /**
-     * @brief
-     *
-     * @param x
-     * @param y
-     */
     void resize(int x, int y);
 
-    /**
-     * @brief
-     *
-     * @param mode
-     */
+    WindowMode getWindowMode() const;
     void setWindowMode(WindowMode mode);
 
-    /**
-     * @brief
-     *
-     * @tparam T
-     * @param instance
-     * @param fn
-     */
     template <typename T>
     void setEventCallback(T *instance, void (T::*fn)(Event &&e))
     {

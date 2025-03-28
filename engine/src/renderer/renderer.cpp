@@ -1,14 +1,13 @@
 #include "core/renderer.hpp"
-#include "core/application.hpp"
+#include "core/window.hpp"
+
 #include "scene/scene.hpp"
-#include <GLFW/glfw3.h>
 
 using namespace engine;
 
 void Renderer::begin(const std::shared_ptr<scene> &s)
 {
-    int width, height;
-    glfwGetFramebufferSize(Application::getInstance().getWindow()->operator GLFWwindow *(), &width, &height);
+    auto [width, height] = Window::getInstance().getSizeInScreen();
 
     m_framebuffer.bind();
     glEnable(GL_DEPTH_TEST);

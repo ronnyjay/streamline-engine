@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../entity.hpp"
-#include "math/vec3.hpp"
+#include "scene/entity.hpp"
+
+#include "math/vec3.hpp" // IWYU pragma: keep
 
 namespace engine
 {
@@ -18,12 +19,12 @@ struct Follow
 
     vec3        offset;
 
-    float       yawDamping = 1.0f;
+    float       yawDamping   = 1.0f;
     float       pitchDamping = 1.0f;
 
-    bool        b_invertYawRotation = false;
+    bool        b_invertYawRotation   = false;
     bool        b_invertPitchRotation = false;
-    bool        b_ignoreYawRotation = false;
+    bool        b_ignoreYawRotation   = false;
     bool        b_ignorePitchRotation = false;
 };
 

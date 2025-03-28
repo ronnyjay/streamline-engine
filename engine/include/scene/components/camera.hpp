@@ -52,8 +52,13 @@ struct Camera
         m_aspectRatio = 4.0f / 3.0f;
     }
 
-    bool        b_isPrimary       = false;
-    bool        b_lockAspectRatio = false;
+    bool       b_isPrimary       = false;
+    bool       b_lockAspectRatio = false;
+
+    Projection getProjection() const
+    {
+        return m_projection;
+    }
 
     mat4 const &getProjectionMatrix()
     {
@@ -63,11 +68,6 @@ struct Camera
     mat4 const &getViewMatrix()
     {
         return m_viewMatrix;
-    }
-
-    Projection getProjection() const
-    {
-        return m_projection;
     }
 
     float getZoom() const

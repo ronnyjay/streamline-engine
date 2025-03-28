@@ -38,7 +38,7 @@ class multi_view
 {
     component_storage_pool &storage;
 
-    const sparse_set entities;
+    const sparse_set        entities;
 
   public:
     using iterator       = typename std::vector<std::uint32_t>::const_iterator;
@@ -75,6 +75,11 @@ class multi_view
     std::tuple<Ts &...> get(const std::uint32_t entity)
     {
         return std::tuple<Ts &...>{storage.get<Ts>()->get(entity)...};
+    }
+
+    size_t size() const
+    {
+        return entities.size();
     }
 };
 

@@ -1,7 +1,4 @@
-#include "scene/systems/camera_system.hpp"
 #include "scene/scene.hpp"
-
-#include <cstdint>
 
 using namespace engine;
 
@@ -50,8 +47,19 @@ void CameraSystem::updateViews()
         {
         case Projection::Perspective:
         {
-            camera.m_viewMatrix =
-                lookAt(transform.translation, transform.translation + transform.getFront(), transform.getUp());
+            if (auto *look = m_scene->m_registry.try_get<LookAt>(entity))
+            {
+                if (auto *target = m_scene->m_registry.try_get<Transform>(look->target))
+                {
+                    camera.m_viewMatrix =
+                        lookAt(transform.translation, target->translation + transform.getFront(), transform.getUp());
+                }
+            }
+            else
+            {
+                camera.m_viewMatrix =
+                    lookAt(transform.translation, transform.translation + transform.getFront(), transform.getUp());
+            }
         }
         break;
         case Projection::Orthographic:

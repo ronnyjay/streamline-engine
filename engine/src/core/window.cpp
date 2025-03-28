@@ -1,5 +1,6 @@
 #include "core/window.hpp"
-#include <GLFW/glfw3.h>
+
+#include <tuple>
 
 using namespace engine;
 
@@ -8,8 +9,8 @@ Window::Window(int width, int height, const char *title)
 {
     STREAMLINE_ASSERT(glfwInit(), "Failed to initialize GLFW");
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -94,14 +95,22 @@ void Window::pollEvents()
     glfwPollEvents();
 }
 
-const ivec2 &Window::getPositionInScreen() const
+std::tuple<int, int> Window::getPositionInScreen() const
 {
-    return m_lastPos;
+    int xpos;
+    int ypos;
+    glfwGetWindowPos(m_glfwWindow, &xpos, &ypos);
+
+    return std::make_tuple(xpos, ypos);
 }
 
-const ivec2 &Window::getSizeInScreen() const
+std::tuple<int, int> Window::getSizeInScreen() const
 {
-    return m_lastSize;
+    int width;
+    int height;
+    glfwGetWindowSize(m_glfwWindow, &width, &height);
+
+    return std::make_tuple(width, height);
 }
 
 WindowMode Window::getWindowMode() const
@@ -111,7 +120,7 @@ WindowMode Window::getWindowMode() const
 
 void Window::moveTo(int x, int y)
 {
-    // window fullscreen; do not move.
+    // window fullscreen - do not move.
     if (glfwGetWindowMonitor(m_glfwWindow))
     {
         return;
@@ -225,7 +234,7 @@ void Window::framebufferCallback(GLFWwindow *glfwWindow, int width, int height)
         window->m_eventCallback(WindowResizeEvent(width, height));
     }
 
-    window->flags.mouseEntered = true;
+    window->flags.b_mouseEntered = true;
 }
 
 void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
@@ -240,8 +249,6 @@ void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
     {
         glfwRestoreWindow(glfwWindow);
     }
-
-    window->flags.mouseEntered = true;
 }
 
 void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
@@ -256,8 +263,6 @@ void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
     {
         glfwRestoreWindow(glfwWindow);
     }
-
-    window->flags.mouseEntered = true;
 }
 
 void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
@@ -300,17 +305,17 @@ void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn
 
     if (window->m_eventCallback)
     {
-        auto         size = window->getSizeInScreen();
+        auto [width, height] = window->getSizeInScreen();
 
-        static float lastX = size.x / 2.0f;
-        static float lastY = size.y / 2.0f;
+        static float lastX = width / 2.0f;
+        static float lastY = height / 2.0f;
 
-        if (window->flags.mouseEntered)
+        if (window->flags.b_mouseEntered)
         {
             lastX = xposIn;
             lastY = yposIn;
 
-            window->flags.mouseEntered = false;
+            window->flags.b_mouseEntered = false;
         }
 
         float xPos = static_cast<float>(xposIn);

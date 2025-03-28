@@ -1,4 +1,3 @@
-#include "scene/systems/controller_system.hpp"
 #include "scene/scene.hpp"
 
 using namespace engine;
@@ -108,7 +107,7 @@ void ControllerSystem::updatePlayerRotations(double dt)
             transform.rotation.x += controller.pitchInput * look.sensitivity;
         }
 
-        controller.yawInput = 0.0f;
+        controller.yawInput   = 0.0f;
         controller.pitchInput = 0.0f;
     }
 }
