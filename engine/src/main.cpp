@@ -21,7 +21,7 @@ int main(void)
     s->emplace<Transform>(e3);
     s->emplace<Transform>(e4);
 
-    s->emplace<Renderable>(e1, "../assets/objects/car/car.obj");
+    s->emplace<Renderable>(e1, "../assets/objects/cube/cube.obj");
     s->emplace<Renderable>(e4, "../assets/objects/plane/plane.obj");
 
     s->emplace<Follow>(e1, e2);
