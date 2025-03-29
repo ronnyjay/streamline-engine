@@ -29,7 +29,7 @@ Use your distribution's package manager to install the necessary dependencies. T
 
 For windows users, it is recommended to use [MSYS2](https://www.msys2.org/) to install the necessary dependencies. Instructions for installation and setup can be found at the link above. Additonally, the following guide can be used as a reference for integrating MSYS2 with Visual Studio Code: [Using GCC with MinGW](https://code.visualstudio.com/docs/cpp/config-mingw).
 
-The following commands have been provided for your convenience (it can be somewhat of tedious to find the correct packages):
+The following commands have been provided for your convenience (it can be somewhat tedious to find the correct packages):
 
 - `pacman -S mingw-w64-ucrt-x86_64-glfw`
 - `pacman -S mingw-w64-ucrt-x86_64-assimp`
