@@ -10,8 +10,8 @@ Model::Model(const std::string &path)
 {
     Assimp::Importer importer;
 
-    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-                                                       aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene   *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
+                                                         aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -55,26 +55,26 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         if (mesh->HasNormals())
         {
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
+            vector.x      = mesh->mNormals[i].x;
+            vector.y      = mesh->mNormals[i].y;
+            vector.z      = mesh->mNormals[i].z;
             vertex.normal = vector;
         }
 
         if (mesh->mTextureCoords[0])
         {
-            vector.x = mesh->mTextureCoords[0][i].x;
-            vector.y = mesh->mTextureCoords[0][i].y;
+            vector.x         = mesh->mTextureCoords[0][i].x;
+            vector.y         = mesh->mTextureCoords[0][i].y;
             vertex.texCoords = vector.xy(); /// TODO: remove swizzle operator in favor of assignment to vec2
 
-            vector.x = mesh->mTangents[i].x;
-            vector.y = mesh->mTangents[i].y;
-            vector.z = mesh->mTangents[i].z;
+            vector.x       = mesh->mTangents[i].x;
+            vector.y       = mesh->mTangents[i].y;
+            vector.z       = mesh->mTangents[i].z;
             vertex.tangent = vector;
 
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
+            vector.x         = mesh->mBitangents[i].x;
+            vector.y         = mesh->mBitangents[i].y;
+            vector.z         = mesh->mBitangents[i].z;
             vertex.bitangent = vector;
         }
         else
@@ -97,7 +97,7 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
     }
 
     // Process Materials
-    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+    aiMaterial                           *material = scene->mMaterials[mesh->mMaterialIndex];
 
     std::vector<std::shared_ptr<Texture>> diffuseMaps =
         loadMaterialTextures(material, aiTextureType_DIFFUSE, texture_type::DIFFUSE);
@@ -160,7 +160,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial *ma
         texture_path.append(path.C_Str());
 
         std::shared_ptr<Texture> t = ResourceManager::getInstance().getTexture(texture_path);
-        t->type = typeName;
+        t->type                    = typeName;
 
         textures.push_back(t);
     }

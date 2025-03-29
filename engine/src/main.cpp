@@ -1,4 +1,7 @@
 #include "engine.hpp" // IWYU pragma: keep
+#include "scene/components/controller.hpp"
+#include "scene/components/look_at.hpp"
+#include "scene/components/orbit.hpp"
 
 using namespace engine;
 
@@ -18,7 +21,7 @@ int main(void)
     s->emplace<Transform>(e3);
     s->emplace<Transform>(e4);
 
-    s->emplace<Renderable>(e1, "../assets/objects/cube/cube.obj");
+    s->emplace<Renderable>(e1, "../assets/objects/car/car.obj");
     s->emplace<Renderable>(e4, "../assets/objects/plane/plane.obj");
 
     s->emplace<Follow>(e1, e2);
@@ -30,13 +33,15 @@ int main(void)
     s->emplace<PlayerLook>(e2);
 
     s->emplace<Camera>(e3);
+    s->emplace<LookAt>(e3, e1);
+    s->emplace<Orbit>(e3);
 
     auto &f1 = s->get<Follow>(e1);
     auto &f3 = s->get<Follow>(e3);
     auto &c3 = s->get<Camera>(e3);
 
     f1.b_ignorePitchRotation = true;
-    f1.b_ignoreYawRotation   = false;
+    f1.b_ignoreYawRotation   = true;
     f1.b_invertPitchRotation = true;
     f1.b_invertYawRotation   = true;
 

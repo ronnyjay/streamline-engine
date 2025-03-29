@@ -6,7 +6,7 @@ namespace engine
 
 struct Resolution
 {
-    Resolution(int width, int height)
+    explicit Resolution(int width, int height)
         : width(width)
         , height(height)
     {

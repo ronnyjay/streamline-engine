@@ -40,7 +40,9 @@ struct DebugWindow : public Singleton<DebugWindow>
   private:
     struct VideoSettings
     {
-        bool b_verticalSync = true;
+        bool b_verticalSync  = true;
+        int  monitorIndex    = 0;
+        int  resolutionIndex = 0;
     } m_videoSettings;
 
     void drawDebugSettings();

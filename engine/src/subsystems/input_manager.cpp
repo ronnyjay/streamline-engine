@@ -6,7 +6,7 @@ void InputManager::onEvent(Event &e)
 {
     EventDispatcher dispatcher(e);
 
-    if (captureKeyInput)
+    if (b_captureKeyInput)
     {
         dispatcher.dispatch<KeyPressEvent>(this, &InputManager::onKeyPress);
         dispatcher.dispatch<KeyReleaseEvent>(this, &InputManager::onKeyRelease);

@@ -101,6 +101,22 @@ struct vec<4, T>
     {
     }
 
+    vec(vec<2, T> const &v, T z, T w)
+        : x(v.x)
+        , y(v.y)
+        , z(z)
+        , w(w)
+    {
+    }
+
+    vec(vec<3, T> const &v, T w)
+        : x(v.x)
+        , y(v.y)
+        , z(v.z)
+        , w(w)
+    {
+    }
+
     vec(T scalar)
         : x(scalar)
         , y(scalar)

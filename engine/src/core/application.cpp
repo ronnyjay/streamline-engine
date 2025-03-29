@@ -42,6 +42,8 @@ void Application::run()
     {
         elapsedTime = (currentTime = glfwGetTime()) - lastTime;
 
+        m_window->pollEvents();
+
         simulationAccumulator += elapsedTime;
         while (simulationAccumulator >= simulationTimeStep)
         {
@@ -58,7 +60,6 @@ void Application::run()
 
         m_debugWindow->draw();
 
-        m_window->pollEvents();
         m_window->swapBuffers();
 
         lastTime = currentTime;
@@ -140,7 +141,7 @@ bool Application::onWindowResize(WindowResizeEvent &e)
 {
     m_sceneManager->currentScene()->onWindowResize(e.width, e.height);
 
-    m_renderer->onWindowResize(e.width, e.height);
+    // m_renderer->onWindowResize(e.width, e.height);
 
     return true;
 }

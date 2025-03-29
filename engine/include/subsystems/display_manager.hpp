@@ -1,34 +1,25 @@
 #pragma once
 
-#include "core/logger.hpp"
 #include "core/monitor.hpp"
 #include "core/singleton.hpp"
+
+#include <memory>
 
 namespace engine
 {
 
 struct DisplayManager : public Singleton<DisplayManager>
 {
-    DisplayManager()
+    DisplayManager();
+
+    // clang-format off
+    Monitor *const getPrimaryMonitor() const;
+    Monitor *const getCurrentMonitor() const;
+    // clang-format on
+
+    std::vector<std::unique_ptr<Monitor>> const &getMonitors() const
     {
-        Logger::info("Detecting displays");
-
-        int           count;
-        GLFWmonitor **monitors = glfwGetMonitors(&count);
-
-        for (int i = 0; i < count; i++)
-        {
-            std::unique_ptr<Monitor> monitor = std::make_unique<Monitor>(monitors[i]);
-            Logger::info("Found display: %s", monitor.get()->title);
-            m_monitors.emplace_back(std::move(monitor));
-        }
-    }
-
-    Monitor *primaryMonitor;
-    Monitor *currentMonitor;
-
-    void     detectCurrentDisplay()
-    {
+        return m_monitors;
     }
 
   private:

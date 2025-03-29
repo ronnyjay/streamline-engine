@@ -1,6 +1,7 @@
 #include "core/window.hpp"
 #include "core/logger.hpp"
 
+#include <GLFW/glfw3.h>
 #include <tuple>
 
 using namespace engine;
@@ -18,6 +19,7 @@ Window::Window(int width, int height, const char *title)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+    // TODO: Change to GL_TRUE! GL_FALSE for testing (i3/sway)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     m_glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL);

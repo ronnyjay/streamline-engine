@@ -238,4 +238,24 @@ mat<4, 4, T> operator*(mat<4, 4, T> const &m1, mat<4, 4, T> const &m2)
     return mat<4, 4, T>(tmp0, tmp1, tmp2, tmp3);
 }
 
+template <typename T>
+vec<4, T> operator*(mat<4, 4, T> const &m1, vec<4, T> const &v)
+{
+    // treats the columns of B as linear combinations of the columns
+    // of A, performing column major order multiplication.
+    //
+    // in row major order, this is the result of BA instead of AB.
+
+    typename mat<4, 4, T>::col_type const &a0   = m1[0];
+    typename mat<4, 4, T>::col_type const &a1   = m1[1];
+    typename mat<4, 4, T>::col_type const &a2   = m1[2];
+    typename mat<4, 4, T>::col_type const &a3   = m1[3];
+    typename mat<4, 4, T>::col_type        tmp0 = a0 * v.x;
+    tmp0 += a1 * v.y;
+    tmp0 += a2 * v.z;
+    tmp0 += a3 * v.w;
+
+    return tmp0;
+}
+
 } // namespace engine

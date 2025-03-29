@@ -9,6 +9,7 @@
 #include "components/identifier.hpp"       // IWYU pragma: keep
 #include "components/light.hpp"            // IWYU pragma: keep
 #include "components/look_at.hpp"          // IWYU pragma: keep
+#include "components/orbit.hpp"            // IWYU pragma: keep
 #include "components/player_input.hpp"     // IWYU pragma: keep
 #include "components/player_look.hpp"      // IWYU pragma: keep
 #include "components/player_move.hpp"      // IWYU pragma: keep

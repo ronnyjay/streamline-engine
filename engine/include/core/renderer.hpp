@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/singleton.hpp"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
@@ -17,7 +18,7 @@ struct RenderFlags
     bool b_showCollisions = false;
 };
 
-class Renderer
+class Renderer : public Singleton<Renderer>
 {
   public:
     RenderFlags flags;

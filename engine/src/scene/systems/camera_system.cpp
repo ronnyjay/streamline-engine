@@ -51,8 +51,11 @@ void CameraSystem::updateViews()
             {
                 if (auto *target = m_scene->m_registry.try_get<Transform>(look->target))
                 {
-                    camera.m_viewMatrix =
-                        lookAt(transform.translation, target->translation + transform.getFront(), transform.getUp());
+                    camera.m_viewMatrix = lookAt(transform.translation, target->translation, transform.getUp());
+                }
+                else
+                {
+                    // TODO: Assert?
                 }
             }
             else

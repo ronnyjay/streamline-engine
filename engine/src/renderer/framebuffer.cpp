@@ -95,6 +95,8 @@ void Framebuffer::resize(uint32_t width, uint32_t height)
         return;
     }
 
+    Logger::info("Resizing framebuffer: %dx%d", width, height);
+
     m_width  = width;
     m_height = height;
 
