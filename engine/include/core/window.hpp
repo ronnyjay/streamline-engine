@@ -30,16 +30,12 @@ class Window : public Singleton<Window>
     };
 
     GLFWwindow   *m_glfwWindow;
-
     ivec2         m_lastSize;
     ivec2         m_lastPos;
-
     WindowMode    m_windowMode;
-
     EventCallback m_eventCallback;
 
   public:
-
     Window(int width, int height, const char *title);
 
     ~Window()
@@ -63,28 +59,28 @@ class Window : public Singleton<Window>
         return m_glfwWindow;
     }
 
-    bool isVisible() const;
-    bool isOpen() const;
+    bool                 isVisible() const;
+    bool                 isOpen() const;
 
-    void show();
-    void hide();
+    void                 show();
+    void                 hide();
 
-    void close();
+    void                 close();
 
-    void showCursor();
-    void hideCursor();
+    void                 showCursor();
+    void                 hideCursor();
 
-    void pollEvents();
-    void swapBuffers();
+    void                 pollEvents();
+    void                 swapBuffers();
 
     std::tuple<int, int> getPositionInScreen() const;
     std::tuple<int, int> getSizeInScreen() const;
 
-    void moveTo(int x, int y);
-    void resize(int x, int y);
+    void                 moveTo(int x, int y);
+    void                 resize(int x, int y);
 
-    WindowMode getWindowMode() const;
-    void setWindowMode(WindowMode mode);
+    WindowMode           getWindowMode() const;
+    void                 setWindowMode(WindowMode mode);
 
     template <typename T>
     void setEventCallback(T *instance, void (T::*fn)(Event &&e))

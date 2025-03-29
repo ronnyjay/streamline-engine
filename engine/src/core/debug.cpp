@@ -5,6 +5,7 @@
 #include "core/window.hpp"
 #include "subsystems/display_manager.hpp"
 
+#include <cstddef>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -123,6 +124,22 @@ void DebugWindow::drawVideoSettings()
         }
 
         Monitor *currentMonitor = DisplayManager::getInstance().getCurrentMonitor();
+
+        if (windowMode == WindowMode::Windowed)
+        {
+            auto [width, height] = Window::getInstance().getSizeInScreen();
+
+            for (size_t i = 0; i < currentMonitor->resolutions.size(); i++)
+            {
+                Resolution res = currentMonitor->resolutions[i];
+
+                if (width == res.width && height == res.height)
+                {
+                    m_videoSettings.resolutionIndex = i;
+                    break;
+                }
+            }
+        }
 
         if (ImGui::Combo(
                 "Resolution", &m_videoSettings.resolutionIndex,

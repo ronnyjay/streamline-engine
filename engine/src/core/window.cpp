@@ -171,7 +171,6 @@ void Window::setWindowMode(WindowMode mode)
 
     if (mode == WindowMode::Windowed)
     {
-
         if (!glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
         {
             glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_TRUE);
