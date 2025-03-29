@@ -19,7 +19,7 @@ After cloning, use: `git submodule update --init --recursive` to clone the neces
 
 **Linux**
 
-Use your distribution's package manager to install the necessary dependencies. The examples list below use [pacman](https://wiki.archlinux.org/title/Pacman) (Arch Linux):
+Use your distribution's package manager to install the necessary dependencies. The examples listed below use [pacman](https://wiki.archlinux.org/title/Pacman) (Arch Linux):
 
 - `sudo pacman -S glfw`
 - `sudo pacman -S assimp`
