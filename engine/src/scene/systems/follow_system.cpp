@@ -23,7 +23,7 @@ void FollowSystem::update(double dt)
             // It is possible that this would best fit into the camera system
             if (auto *orbit = m_scene->m_registry.try_get<Orbit>(entity))
             {
-                vec3 offset      = vec3(0.0f, 0.0f, -orbit->distance); // negate distance to ensure forward direction
+                vec3 offset      = vec3(0.0f, 0.0f, -orbit->distance);
                 mat4 pitchMatrix = rotate(mat4(1.0f), radians(-transform.rotation.x), vec3(1.0f, 0.0f, 0.0f));
                 mat4 yawMatrix   = rotate(mat4(1.0f), radians(-transform.rotation.y), vec3(0.0f, 1.0f, 0.0f));
                 offset           = (yawMatrix * pitchMatrix * vec4(offset, 1.0f)).xyz();
@@ -32,7 +32,10 @@ void FollowSystem::update(double dt)
             }
             else
             {
-                transform.translation = target->translation + follow.offset;
+                mat4 yawMatrix = rotate(mat4(1.0f), radians(-target->rotation.y), vec3(0.0f, 1.0f, 0.0f));
+                vec3 offset    = (yawMatrix * vec4(follow.offset, 1.0f)).xyz();
+
+                transform.translation = target->translation + offset;
             }
 
             if (!follow.b_ignorePitchRotation)

@@ -35,8 +35,6 @@ struct CameraController
     float        yawInput           = 0.0f;
     float        pitchInput         = 0.0f;
 
-    bool         b_followEntity     = true;
-
     bool         b_moveForward      = false;
     bool         b_moveBack         = false;
     bool         b_moveLeft         = false;
