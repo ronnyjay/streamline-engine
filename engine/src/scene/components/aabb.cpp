@@ -52,9 +52,15 @@ AABB::AABB(AABB &&other)
     , m_VBO(other.m_VBO)
     , m_EBO(other.m_EBO)
 {
-    other.m_VAO = 0;
-    other.m_VBO = 0;
-    other.m_EBO = 0;
+    other.m_VAO    = 0;
+    other.m_VBO    = 0;
+    other.m_EBO    = 0;
+
+    m_center       = other.m_center;
+    m_halfExtents  = other.m_halfExtents;
+
+    m_lastScale    = other.m_lastScale;
+    m_lastRotation = other.m_lastRotation;
 }
 
 AABB::~AABB()
