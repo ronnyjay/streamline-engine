@@ -10,7 +10,7 @@
 namespace engine
 {
 
-struct scene;
+struct Scene;
 
 struct RenderFlags
 {
@@ -68,7 +68,7 @@ class Renderer : public Singleton<Renderer>
         m_framebuffer.resize(width, height);
     }
 
-    void begin(const std::shared_ptr<scene> &s);
+    void begin(const std::shared_ptr<Scene> &s);
 
   private:
     Framebuffer m_framebuffer;

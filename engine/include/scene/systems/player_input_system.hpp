@@ -5,10 +5,10 @@
 namespace engine
 {
 
-struct PlayerInputSystem : public component_system
+struct PlayerInputSystem : public ComponentSystem
 {
-    PlayerInputSystem(scene *const scene)
-        : component_system(scene)
+    PlayerInputSystem(Scene *const scene)
+        : ComponentSystem(scene)
     {
     }
 

@@ -3,13 +3,13 @@
 namespace engine
 {
 
-struct scene;
+struct Scene;
 
-struct component_system
+struct ComponentSystem
 {
-    virtual ~component_system() = default;
+    virtual ~ComponentSystem() = default;
 
-    component_system(scene *const scene)
+    ComponentSystem(Scene *const scene)
         : m_scene(scene)
     {
     }
@@ -17,7 +17,7 @@ struct component_system
     virtual void update([[maybe_unused]] double dt) = 0;
 
   protected:
-    scene *const m_scene;
+    Scene *const m_scene;
 };
 
 } // namespace engine

@@ -5,7 +5,7 @@
 
 using namespace engine;
 
-void Renderer::begin(const std::shared_ptr<scene> &s)
+void Renderer::begin(const std::shared_ptr<Scene> &s)
 {
     auto [width, height] = Window::getInstance().getSizeInScreen();
 

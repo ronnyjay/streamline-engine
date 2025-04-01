@@ -13,9 +13,9 @@ struct SceneManager : public Singleton<SceneManager>
     uint32_t m_currentScene = 0;
 
   public:
-    std::shared_ptr<scene> createScene()
+    std::shared_ptr<Scene> createScene()
     {
-        return m_scenes.emplace_back(std::make_shared<scene>());
+        return m_scenes.emplace_back(std::make_shared<Scene>());
     }
 
     void nextScene()
@@ -42,7 +42,7 @@ struct SceneManager : public Singleton<SceneManager>
         }
     }
 
-    std::shared_ptr<scene> currentScene()
+    std::shared_ptr<Scene> currentScene()
     {
         // todo: maybe remove assertion, return nullptr?
         //
@@ -59,7 +59,7 @@ struct SceneManager : public Singleton<SceneManager>
     }
 
   private:
-    std::vector<std::shared_ptr<scene>> m_scenes;
+    std::vector<std::shared_ptr<Scene>> m_scenes;
 };
 
 } // namespace engine

@@ -1,16 +1,19 @@
 #include "scene/scene.hpp"
+#include "scene/components/transform.hpp"
+#include <assimp/types.h>
 
 using namespace engine;
 
-void scene::tick(double dt)
+void Scene::tick(double dt)
 {
     m_playerInputSystem.update(dt);
     m_controllerSystem.update(dt);
+    m_collisionSystem.update(dt);
     m_followSystem.update(dt);
     m_cameraSystem.update(dt);
 }
 
-void scene::draw()
+void Scene::draw()
 {
     Camera *activeCamera = nullptr;
 
@@ -39,5 +42,18 @@ void scene::draw()
         m_shader.get()->setMat4("model", transform.getTransform());
 
         renderable.model.get()->draw(m_shader);
+    }
+
+    auto colliders = m_registry.view<AABB, Transform>();
+    for (const auto &entity : colliders)
+    {
+        auto [collider, transform] = colliders.get(entity);
+
+        m_aabbShader.get()->bind();
+
+        m_aabbShader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
+        m_aabbShader.get()->setMat4("view", activeCamera->getViewMatrix());
+
+        collider.draw();
     }
 }

@@ -5,10 +5,10 @@
 namespace engine
 {
 
-struct LightingSystem : public component_system
+struct LightingSystem : public ComponentSystem
 {
-    LightingSystem(scene *const scene)
-        : component_system(scene)
+    LightingSystem(Scene *const scene)
+        : ComponentSystem(scene)
     {
     }
 

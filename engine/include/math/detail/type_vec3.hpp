@@ -37,9 +37,11 @@
 namespace engine
 {
 
-template <int N, typename T> struct vec;
+template <int N, typename T>
+struct vec;
 
-template <typename T> struct vec<3, T>
+template <typename T>
+struct vec<3, T>
 {
     // clang-format off
     
@@ -100,6 +102,13 @@ template <typename T> struct vec<3, T>
         : x(scalar)
         , y(scalar)
         , z(scalar)
+    {
+    }
+
+    vec(vec<4, T> const &v)
+        : x(v.x)
+        , y(v.y)
+        , z(v.z)
     {
     }
 
@@ -219,47 +228,56 @@ template <typename T> struct vec<3, T>
     }
 };
 
-template <typename T> vec<3, T> operator+(vec<3, T> const &v, T s)
+template <typename T>
+vec<3, T> operator+(vec<3, T> const &v, T s)
 {
     return vec<3, T>(v.x + s, v.y + s, v.z + s);
 }
 
-template <typename T> vec<3, T> operator+(vec<3, T> const &v1, vec<3, T> const &v2)
+template <typename T>
+vec<3, T> operator+(vec<3, T> const &v1, vec<3, T> const &v2)
 {
     return vec<3, T>(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
 
-template <typename T> vec<3, T> operator-(vec<3, T> const &v)
+template <typename T>
+vec<3, T> operator-(vec<3, T> const &v)
 {
     return vec<3, T>(-v.x, -v.y, -v.z);
 }
 
-template <typename T> vec<3, T> operator-(vec<3, T> const &v, T s)
+template <typename T>
+vec<3, T> operator-(vec<3, T> const &v, T s)
 {
     return vec<3, T>(v.x - s, v.y - s, v.z - s);
 }
 
-template <typename T> vec<3, T> operator-(vec<3, T> const &v1, vec<3, T> const &v2)
+template <typename T>
+vec<3, T> operator-(vec<3, T> const &v1, vec<3, T> const &v2)
 {
     return vec<3, T>(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 }
 
-template <typename T> vec<3, T> operator*(vec<3, T> const &v, T s)
+template <typename T>
+vec<3, T> operator*(vec<3, T> const &v, T s)
 {
     return vec<3, T>(v.x * s, v.y * s, v.z * s);
 }
 
-template <typename T> vec<3, T> operator*(vec<3, T> const &v1, vec<3, T> const &v2)
+template <typename T>
+vec<3, T> operator*(vec<3, T> const &v1, vec<3, T> const &v2)
 {
     return vec<3, T>(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 }
 
-template <typename T> vec<3, T> operator/(vec<3, T> const &v, T s)
+template <typename T>
+vec<3, T> operator/(vec<3, T> const &v, T s)
 {
     return vec<3, T>(v.x / s, v.y / s, v.z / s);
 }
 
-template <typename T> vec<3, T> operator/(vec<3, T> const &v1, vec<3, T> const &v2)
+template <typename T>
+vec<3, T> operator/(vec<3, T> const &v1, vec<3, T> const &v2)
 {
     return vec<3, T>(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 }

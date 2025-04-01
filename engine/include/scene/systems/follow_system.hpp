@@ -5,10 +5,10 @@
 namespace engine
 {
 
-struct FollowSystem : public component_system
+struct FollowSystem : public ComponentSystem
 {
-    FollowSystem(scene *const scene)
-        : component_system(scene)
+    FollowSystem(Scene *const scene)
+        : ComponentSystem(scene)
     {
     }
 

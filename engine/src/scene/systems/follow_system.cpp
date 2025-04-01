@@ -1,4 +1,3 @@
-#include "core/logger.hpp"
 #include "math/ext/vector_float4.hpp"
 #include "math/transformation.hpp"
 #include "math/trigonometric.hpp"

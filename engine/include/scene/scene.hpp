@@ -3,6 +3,7 @@
 #include "entity.hpp"                      // IWYU pragma: keep
 #include "registry.hpp"                    // IWYU pragma: keep
 
+#include "components/aabb.hpp"             // IWYU pragma: keep
 #include "components/camera.hpp"           // IWYU pragma: keep
 #include "components/controller.hpp"       // IWYU pragma: keep
 #include "components/follow.hpp"           // IWYU pragma: keep
@@ -17,6 +18,7 @@
 #include "components/transform.hpp"        // IWYU pragma: keep
 
 #include "systems/camera_system.hpp"       // IWYU pragma: keep
+#include "systems/collision_system.hpp"    // IWYU pragma: keep
 #include "systems/controller_system.hpp"   // IWYU pragma: keep
 #include "systems/follow_system.hpp"       // IWYU pragma: keep
 #include "systems/lighting_system.hpp"     // IWYU pragma: keep
@@ -27,23 +29,27 @@
 namespace engine
 {
 
-struct scene
+struct Scene
 {
     friend struct PlayerInputSystem;
     friend struct ControllerSystem;
+    friend struct CollisionSystem;
     friend struct LightingSystem;
     friend struct FollowSystem;
     friend struct CameraSystem;
 
-    scene()
+    Scene()
         : m_cameraSystem(this)
         , m_followSystem(this)
+        , m_collisionSystem(this)
         , m_controllerSystem(this)
         , m_playerInputSystem(this)
 
     {
         m_shader = ResourceManager::getInstance().getShader("Model", "../assets/shaders/model.vs",
                                                             "../assets/shaders/model.fs");
+        m_aabbShader =
+            ResourceManager::getInstance().getShader("AABB", "../assets/shaders/AABB.vs", "../assets/shaders/AABB.fs");
     }
 
     void                      draw();
@@ -76,9 +82,11 @@ struct scene
     registry                m_registry;
     CameraSystem            m_cameraSystem;
     FollowSystem            m_followSystem;
+    CollisionSystem         m_collisionSystem;
     ControllerSystem        m_controllerSystem;
     PlayerInputSystem       m_playerInputSystem;
     std::shared_ptr<Shader> m_shader;
+    std::shared_ptr<Shader> m_aabbShader;
 };
 
 } // namespace engine

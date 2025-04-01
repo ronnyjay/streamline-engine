@@ -17,13 +17,13 @@ struct Model
 
     std::vector<mesh> meshes;
 
-    void draw(const std::shared_ptr<Shader> &s);
+    void              draw(const std::shared_ptr<Shader> &s);
 
   private:
-    const std::filesystem::path path;
+    const std::filesystem::path           path;
 
-    void processNode(aiNode *node, const aiScene *scene);
-    void processMesh(aiMesh *mesh, const aiScene *scene);
+    void                                  processNode(aiNode *node, const aiScene *scene);
+    void                                  processMesh(aiMesh *mesh, const aiScene *scene);
 
     std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial *material, aiTextureType type,
                                                                texture_type typeName);

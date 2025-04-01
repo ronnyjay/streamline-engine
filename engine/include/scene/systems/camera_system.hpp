@@ -8,10 +8,10 @@ namespace engine
 
 struct Camera;
 
-struct CameraSystem : public component_system
+struct CameraSystem : public ComponentSystem
 {
-    CameraSystem(scene *const scene)
-        : component_system(scene)
+    CameraSystem(Scene *const scene)
+        : ComponentSystem(scene)
     {
     }
 
