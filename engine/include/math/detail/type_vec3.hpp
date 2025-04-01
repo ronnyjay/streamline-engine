@@ -98,10 +98,17 @@ struct vec<3, T>
     {
     }
 
-    vec(T scalar)
-        : x(scalar)
-        , y(scalar)
-        , z(scalar)
+    vec(vec<2, T> const &v, T z)
+        : x(v.x)
+        , y(v.y)
+        , z(z)
+    {
+    }
+    
+    vec(vec<3, T> const &v)
+        : x(v.x)
+        , y(v.y)
+        , z(v.z)
     {
     }
 
@@ -111,6 +118,14 @@ struct vec<3, T>
         , z(v.z)
     {
     }
+
+    vec(T scalar)
+        : x(scalar)
+        , y(scalar)
+        , z(scalar)
+    {
+    }
+
 
     size_t length() const
     {

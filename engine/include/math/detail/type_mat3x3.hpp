@@ -198,4 +198,22 @@ mat<3, 3, T> operator*(mat<3, 3, T> const &m1, mat<3, 3, T> const &m2)
     return mat<3, 3, T>(tmp0, tmp1, tmp2);
 }
 
+template <typename T>
+vec<3, T> operator*(mat<3, 3, T> const &m, vec<3, T> const &v)
+{
+    // treats the columns of B as linear combinations of the columns
+    // of A, performing column major order multiplication.
+    //
+    // in row major order, this is the result of BA instead of AB.
+
+    typename mat<3, 3, T>::col_type const &a0   = m[0];
+    typename mat<3, 3, T>::col_type const &a1   = m[1];
+    typename mat<3, 3, T>::col_type const &a2   = m[2];
+    typename mat<3, 3, T>::col_type        tmp0 = a0 * v.x;
+    tmp0 += a1 * v.y;
+    tmp0 += a2 * v.z;
+
+    return tmp0;
+}
+
 } // namespace engine

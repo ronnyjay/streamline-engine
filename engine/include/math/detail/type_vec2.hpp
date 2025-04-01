@@ -101,7 +101,19 @@ struct vec<2, T>
     {
     }
 
-    vec(const vec<2, T> &v)
+    vec(vec<2, T> const &v)
+        : x(v.x)
+        , y(v.y)
+    {
+    }
+
+    vec(vec<3, T> const &v)
+        : x(v.x)
+        , y(v.y)
+    {
+    }
+
+    vec(vec<4, T> const &v)
         : x(v.x)
         , y(v.y)
     {
