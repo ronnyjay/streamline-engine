@@ -1,6 +1,7 @@
 #include "scene/components/aabb.hpp"
 
 #include "math/quaternion.hpp"
+#include "math/component_wise.hpp"
 #include "math/transformation.hpp"
 
 #include <limits>
@@ -20,17 +21,8 @@ AABB::AABB(const std::shared_ptr<Model> &model)
     {
         for (const auto &vertex : mesh.vertices)
         {
-            float xMin  = std::min(m_globalMin.x, vertex.position.x);
-            float yMin  = std::min(m_globalMin.y, vertex.position.y);
-            float zMin  = std::min(m_globalMin.z, vertex.position.z);
-
-            float xMax  = std::max(m_globalMax.x, vertex.position.x);
-            float yMax  = std::max(m_globalMax.y, vertex.position.y);
-            float zMax  = std::max(m_globalMax.z, vertex.position.z);
-
-            m_globalMin = vec3(xMin, yMin, zMin);
-            m_globalMax = vec3(xMax, yMax, zMax);
-
+            m_globalMin = engine::min(m_globalMin, vertex.position);
+            m_globalMax = engine::max(m_globalMax, vertex.position);
             m_vertexData.emplace_back(vertex.position);
         }
     }
@@ -97,16 +89,8 @@ void AABB::rotate(const vec3 &rotation)
     {
         vec3  rotatedVertex = vec3(rotationMatrix * vec4(vertex, 1.0f));
 
-        float xMin          = std::min(m_globalMin.x, rotatedVertex.x);
-        float yMin          = std::min(m_globalMin.y, rotatedVertex.y);
-        float zMin          = std::min(m_globalMin.z, rotatedVertex.z);
-
-        float xMax          = std::max(m_globalMax.x, rotatedVertex.x);
-        float yMax          = std::max(m_globalMax.y, rotatedVertex.y);
-        float zMax          = std::max(m_globalMax.z, rotatedVertex.z);
-
-        m_globalMin         = vec3(xMin, yMin, zMin);
-        m_globalMax         = vec3(xMax, yMax, zMax);
+        m_globalMin = engine::min(m_globalMin, rotatedVertex);
+        m_globalMax = engine::max(m_globalMax, rotatedVertex);
     }
 
     m_localMin     = m_globalMin;
@@ -134,18 +118,10 @@ void AABB::scale(const vec3 &scale)
 
     for (const auto &vertex : m_vertexData)
     {
-        vec3  rotatedVertex = vec3(scalingMatrix * vec4(vertex, 1.0f));
+        vec3  scaledVertex = vec3(scalingMatrix * vec4(vertex, 1.0f));
 
-        float xMin          = std::min(m_globalMin.x, rotatedVertex.x);
-        float yMin          = std::min(m_globalMin.y, rotatedVertex.y);
-        float zMin          = std::min(m_globalMin.z, rotatedVertex.z);
-
-        float xMax          = std::max(m_globalMax.x, rotatedVertex.x);
-        float yMax          = std::max(m_globalMax.y, rotatedVertex.y);
-        float zMax          = std::max(m_globalMax.z, rotatedVertex.z);
-
-        m_globalMin         = vec3(xMin, yMin, zMin);
-        m_globalMax         = vec3(xMax, yMax, zMax);
+        m_globalMin = engine::min(m_globalMin, scaledVertex);
+        m_globalMax = engine::max(m_globalMax, scaledVertex);
     }
 
     m_localMin    = m_globalMin;
