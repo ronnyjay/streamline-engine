@@ -17,23 +17,25 @@ struct Monitor
     Monitor(GLFWmonitor *monitor)
         : monitor(monitor)
     {
+        title = glfwGetMonitorName(monitor);
+
         glfwGetMonitorWorkarea(monitor, &positionX, &positionY, &width, &height);
         glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
 
-        title = glfwGetMonitorName(monitor);
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
         int                count;
         const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
 
         for (int i = 0; i < count; i++)
         {
-            resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
+            if (modes[i].width <= mode->width && modes[i].height <= mode->height)
+            {
+                resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
+            }
         }
-        resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
 
-        resolutionWindowed   = 1;
-        resolutionFullscreen = resolutions.size() - 1;
-        resolutionBorderless = resolutions.size() - 1;
+        resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
     }
 
     bool operator==(const Monitor &other) const
@@ -58,10 +60,6 @@ struct Monitor
     float                   scaleY;
 
     const char             *title;
-
-    int                     resolutionFullscreen;
-    int                     resolutionWindowed;
-    int                     resolutionBorderless;
 
     std::vector<Resolution> resolutions;
 };
