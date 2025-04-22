@@ -7,7 +7,7 @@ namespace engine
 
 struct PhysicsSystem : public ComponentSystem
 {
-    PhysicsSystem(scene *const scene)
+    PhysicsSystem(Scene *const scene)
         : ComponentSystem(scene)
     {
     }

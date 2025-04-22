@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/resolution.hpp"
 #include "core/singleton.hpp"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -61,6 +62,11 @@ class Renderer : public Singleton<Renderer>
     void setClearColor(float r, float g, float b, float a)
     {
         glClearColor(r, g, b, a);
+    }
+
+    void setResolution(Resolution &resolution)
+    {
+        m_framebuffer.resize(resolution.width, resolution.height);
     }
 
     void onWindowResize(uint32_t width, uint32_t height)

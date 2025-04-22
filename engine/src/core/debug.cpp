@@ -2,6 +2,7 @@
 #include "core/application.hpp"
 #include "core/renderer.hpp"
 #include "core/resolution.hpp"
+#include "core/settings.hpp"
 #include "core/window.hpp"
 #include "subsystems/display_manager.hpp"
 
@@ -28,6 +29,8 @@ DebugWindow::DebugWindow()
 
 void DebugWindow::draw()
 {
+    static bool b_windowShown = false;
+
     if (b_showWindow)
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -36,6 +39,8 @@ void DebugWindow::draw()
 
         if (ImGui::Begin("Streamline Engine Debugger", &b_showWindow))
         {
+            b_windowShown = true;
+
             if (ImGui::Button("Show metrics"))
             {
                 b_showMetrics = true;
@@ -59,6 +64,18 @@ void DebugWindow::draw()
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+
+    // TODO: Show popup before discarding changes
+
+    if (b_windowShown && !b_showWindow)
+    {
+        if (UserSettings::getInstance().hasUnsavedChanges())
+        {
+            UserSettings::getInstance().discard();
+        }
+
+        b_windowShown = false;
     }
 }
 
@@ -92,7 +109,7 @@ void DebugWindow::drawVideoSettings()
 {
     if (ImGui::TreeNode("Video"))
     {
-        WindowMode windowMode = Window::getInstance().getWindowMode();
+        WindowMode windowMode = UserSettings::getInstance().getWindowMode();
 
         if (windowMode == WindowMode::Windowed)
         {
@@ -125,19 +142,11 @@ void DebugWindow::drawVideoSettings()
 
         Monitor *currentMonitor = DisplayManager::getInstance().getCurrentMonitor();
 
-        if (windowMode == WindowMode::Windowed)
+        for (size_t i = 0; i < currentMonitor->resolutions.size(); i++)
         {
-            auto [width, height] = Window::getInstance().getSizeInScreen();
-
-            for (size_t i = 0; i < currentMonitor->resolutions.size(); i++)
+            if (UserSettings::getInstance().getResolution() == currentMonitor->resolutions[i])
             {
-                Resolution res = currentMonitor->resolutions[i];
-
-                if (width == res.width && height == res.height)
-                {
-                    m_videoSettings.resolutionIndex = i;
-                    break;
-                }
+                m_videoSettings.resolutionIndex = i;
             }
         }
 
@@ -157,44 +166,12 @@ void DebugWindow::drawVideoSettings()
                 },
                 static_cast<void *>(&currentMonitor->resolutions), currentMonitor->resolutions.size()))
         {
-            Resolution res = currentMonitor->resolutions[m_videoSettings.resolutionIndex];
-
-            if (windowMode == WindowMode::Windowed || windowMode == WindowMode::WindowedFullscreen)
-            {
-                float sizeX = res.width / currentMonitor->scaleX;
-                float sizeY = res.height / currentMonitor->scaleY;
-
-                Window::getInstance().resize(sizeX, sizeY);
-
-                float positionX = (currentMonitor->width - res.width) / 2.0;
-                float positionY = (currentMonitor->height - res.height) / 2.0;
-
-                Window::getInstance().moveTo(positionX, positionY);
-            }
-
-            Renderer::getInstance().onWindowResize(res.width, res.height);
+            UserSettings::getInstance().setResolution(currentMonitor->resolutions[m_videoSettings.resolutionIndex]);
         }
 
         if (ImGui::Combo("Display Mode", (int *)&windowMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
         {
-            Window::getInstance().setWindowMode(windowMode);
-
-            Resolution res = currentMonitor->resolutions[m_videoSettings.resolutionIndex];
-
-            if (windowMode == WindowMode::Windowed || windowMode == WindowMode::WindowedFullscreen)
-            {
-                float sizeX = res.width / currentMonitor->scaleX;
-                float sizeY = res.height / currentMonitor->scaleY;
-
-                Window::getInstance().resize(sizeX, sizeY);
-
-                float positionX = (currentMonitor->width - res.width) / 2.0;
-                float positionY = (currentMonitor->height - res.height) / 2.0;
-
-                Window::getInstance().moveTo(positionX, positionY);
-            }
-
-            Renderer::getInstance().onWindowResize(res.width, res.height);
+            UserSettings::getInstance().setWindowMode(windowMode);
         }
 
         // Frame Rate Limit
@@ -203,6 +180,11 @@ void DebugWindow::drawVideoSettings()
         if (ImGui::Checkbox("Vertical Sync", &m_videoSettings.b_verticalSync))
         {
             Renderer::getInstance().enableVsync(m_videoSettings.b_verticalSync);
+        }
+
+        if (ImGui::Button("Apply"))
+        {
+            UserSettings::getInstance().apply();
         }
 
         ImGui::TreePop();

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "core/debug.hpp"                  // IWYU pragma: keep
+#include "core/event.hpp"
 #include "core/renderer.hpp"               // IWYU pragma: keep
+#include "core/settings.hpp"
 #include "core/singleton.hpp"              // IWYU pragma: keep
 #include "core/window.hpp"                 // IWYU pragma: keep
 
@@ -24,6 +26,7 @@ class Application : public Singleton<Application>
     InputManager             *m_inputManager    = nullptr;
     DisplayManager           *m_displayManager  = nullptr;
     SettingsManager          *m_settingsManager = nullptr;
+    UserSettings             *m_userSettings    = nullptr;
     ResourceManager          *m_resourceManager = nullptr;
     // clang-format on
 
@@ -78,8 +81,8 @@ class Application : public Singleton<Application>
         delete m_window;
     }
 
-    Application(Application const &)  = delete;
-    Application(Application const &&) = delete;
+    Application(Application const &)             = delete;
+    Application(Application const &&)            = delete;
 
     Application &operator=(Application const &)  = delete;
     Application &operator=(Application const &&) = delete;

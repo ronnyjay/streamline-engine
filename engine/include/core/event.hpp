@@ -10,8 +10,8 @@ namespace engine
 enum class EventType : std::uint8_t
 {
     NONE,
-    WINDOW_RESIZED,
     KEY_PRESSED, KEY_RELEASED,
+    WINDOW_RESIZED, WINDOW_MINIMIZED, WINDOW_MAXIMIZED,
     MOUSE_BUTTON_PRESSED, MOUSE_BUTTON_RELEASED, MOUSE_BUTTON_MOVED, MOUSE_BUTTON_SCROLLED
 };
 // clang-format on
@@ -54,6 +54,30 @@ struct WindowResizeEvent : public Event
     int height;
 
     EVENT_TYPE(WINDOW_RESIZED)
+};
+
+struct WindowMaximizeEvent : public Event
+{
+    WindowMaximizeEvent(bool maximized)
+        : maximized(maximized)
+    {
+    }
+
+    bool maximized;
+
+    EVENT_TYPE(WINDOW_MAXIMIZED)
+};
+
+struct WindowMinimizeEvent : public Event
+{
+    WindowMinimizeEvent(bool minimized)
+        : minimized(minimized)
+    {
+    }
+
+    bool minimized;
+
+    EVENT_TYPE(WINDOW_MINIMIZED)
 };
 
 struct KeyPressEvent : public Event

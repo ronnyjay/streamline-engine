@@ -1,4 +1,5 @@
 #include "core/window.hpp"
+#include "core/event.hpp"
 #include "core/logger.hpp"
 
 #include <GLFW/glfw3.h>
@@ -255,6 +256,11 @@ void Window::maximizeCallback(GLFWwindow *glfwWindow, int maximize)
     }
 
     window->flags.b_mouseEntered = true;
+
+    if (window->m_eventCallback)
+    {
+        window->m_eventCallback(WindowMaximizeEvent(maximize));
+    }
 }
 
 void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
@@ -271,6 +277,11 @@ void Window::minimizeCallback(GLFWwindow *glfwWindow, int minimize)
     }
 
     window->flags.b_mouseEntered = true;
+
+    if (window->m_eventCallback)
+    {
+        window->m_eventCallback(WindowMinimizeEvent(minimize));
+    }
 }
 
 void Window::keyCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
@@ -315,25 +326,25 @@ void Window::cursorCallback(GLFWwindow *glfwWindow, double xposIn, double yposIn
     {
         auto [width, height] = window->getSizeInScreen();
 
-        static float lastX = width / 2.0f;
-        static float lastY = height / 2.0f;
+        static float lastX   = width / 2.0f;
+        static float lastY   = height / 2.0f;
 
         if (window->flags.b_mouseEntered)
         {
-            lastX = xposIn;
-            lastY = yposIn;
+            lastX                        = xposIn;
+            lastY                        = yposIn;
 
             window->flags.b_mouseEntered = false;
         }
 
-        float xPos = static_cast<float>(xposIn);
-        float yPos = static_cast<float>(yposIn);
+        float xPos    = static_cast<float>(xposIn);
+        float yPos    = static_cast<float>(yposIn);
 
         float xOffset = xPos - lastX;
         float yOffset = lastY - yPos;
 
-        lastX = xPos;
-        lastY = yPos;
+        lastX         = xPos;
+        lastY         = yPos;
 
         window->m_eventCallback(MouseMoveEvent(xOffset, yOffset));
     }

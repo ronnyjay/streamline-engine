@@ -1,4 +1,7 @@
 #include "core/application.hpp"
+#include "core/event.hpp"
+#include "core/settings.hpp"
+#include "core/window.hpp"
 #include "subsystems/display_manager.hpp"
 #include "subsystems/settings_manager.hpp"
 
@@ -15,6 +18,7 @@ Application::Application(int width, int height, const char *title)
     m_inputManager    = new InputManager;
     m_displayManager  = new DisplayManager;
     m_settingsManager = new SettingsManager;
+    m_userSettings    = new UserSettings;
     m_resourceManager = new ResourceManager;
 
     m_window->setEventCallback(this, &Application::onEvent);
@@ -140,8 +144,6 @@ bool Application::onKeyPress(KeyPressEvent &e)
 bool Application::onWindowResize(WindowResizeEvent &e)
 {
     m_sceneManager->currentScene()->onWindowResize(e.width, e.height);
-
-    // m_renderer->onWindowResize(e.width, e.height);
 
     return true;
 }

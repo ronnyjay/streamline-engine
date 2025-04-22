@@ -48,8 +48,8 @@ class Window : public Singleton<Window>
 
     WindowFlags flags;
 
-    Window(Window const &)  = delete;
-    Window(Window const &&) = delete;
+    Window(Window const &)            = delete;
+    Window(Window const &&)           = delete;
 
     Window operator=(Window const &)  = delete;
     Window operator=(Window const &&) = delete;
