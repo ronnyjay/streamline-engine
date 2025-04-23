@@ -31,12 +31,47 @@ void DebugWindow::draw()
 {
     static bool b_windowShown = false;
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    if (b_showUnsavedChangesPopup)
+    {
+        ImGui::OpenPopup("Unsaved Changes");
+
+        b_showUnsavedChangesPopup = false;
+    }
+
+    if (ImGui::BeginPopupModal("Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("You have made unsaved changes. Would you like to apply? (Pressing ESC will discard)");
+
+        if (ImGui::Button("Apply"))
+        {
+            UserSettings::getInstance().apply();
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Discard"))
+        {
+            UserSettings::getInstance().discard();
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (b_hideUnsavedChangesPopup)
+        {
+            ImGui::CloseCurrentPopup();
+
+            b_hideUnsavedChangesPopup = false;
+        }
+
+        ImGui::EndPopup();
+    }
+
     if (b_showWindow)
     {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
         if (ImGui::Begin("Streamline Engine Debugger", &b_showWindow))
         {
             b_windowShown = true;
@@ -62,17 +97,16 @@ void DebugWindow::draw()
         }
 
         ImGui::End();
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    // TODO: Show popup before discarding changes
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     if (b_windowShown && !b_showWindow)
     {
         if (UserSettings::getInstance().hasUnsavedChanges())
         {
-            UserSettings::getInstance().discard();
+            b_showUnsavedChangesPopup = true;
         }
 
         b_windowShown = false;

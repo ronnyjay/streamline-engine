@@ -5,6 +5,7 @@
 #include "subsystems/display_manager.hpp"
 #include "subsystems/settings_manager.hpp"
 
+#include <cmath>
 #include <cstdlib>
 
 using namespace engine;
@@ -133,6 +134,16 @@ bool Application::onKeyPress(KeyPressEvent &e)
 
                 m_window->flags.b_mouseEntered = true;
             }
+        }
+
+        return true;
+    }
+
+    if (Key(e.key) == Key::Escape)
+    {
+        if (m_debugWindow->hasPopupsOpen())
+        {
+            m_debugWindow->closePopups();
         }
 
         return true;
