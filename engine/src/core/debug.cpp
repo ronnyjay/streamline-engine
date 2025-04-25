@@ -29,46 +29,9 @@ DebugWindow::DebugWindow()
 
 void DebugWindow::draw()
 {
-    static bool b_windowShown = false;
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    if (b_showUnsavedChangesPopup)
-    {
-        ImGui::OpenPopup("Unsaved Changes");
-
-        b_showUnsavedChangesPopup = false;
-    }
-
-    if (ImGui::BeginPopupModal("Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("You have made unsaved changes. Would you like to apply? (Pressing ESC will discard)");
-
-        if (ImGui::Button("Apply"))
-        {
-            UserSettings::getInstance().apply();
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::Button("Discard"))
-        {
-            UserSettings::getInstance().discard();
-            ImGui::CloseCurrentPopup();
-        }
-
-        if (b_hideUnsavedChangesPopup)
-        {
-            ImGui::CloseCurrentPopup();
-
-            b_hideUnsavedChangesPopup = false;
-        }
-
-        ImGui::EndPopup();
-    }
 
     if (b_showWindow)
     {
@@ -106,7 +69,7 @@ void DebugWindow::draw()
     {
         if (UserSettings::getInstance().hasUnsavedChanges())
         {
-            b_showUnsavedChangesPopup = true;
+            UserSettings::getInstance().discard();
         }
 
         b_windowShown = false;
@@ -153,8 +116,10 @@ void DebugWindow::drawVideoSettings()
         std::vector<std::unique_ptr<Monitor>> &monitors =
             const_cast<std::vector<std::unique_ptr<Monitor>> &>(DisplayManager::getInstance().getMonitors());
 
+        int monitorIndex = UserSettings::getInstance().getPrimaryMonitor();
+
         ImGui::Combo(
-            "Monitor", &m_videoSettings.monitorIndex,
+            "Monitor", &monitorIndex,
             [](void *data, int index, const char **text) -> bool
             {
                 auto &vector = *static_cast<std::vector<Monitor *> *>(data);
@@ -174,18 +139,20 @@ void DebugWindow::drawVideoSettings()
             ImGui::EndDisabled();
         }
 
-        Monitor *currentMonitor = DisplayManager::getInstance().getCurrentMonitor();
+        Monitor *currentMonitor  = DisplayManager::getInstance().getCurrentMonitor();
+
+        int      resolutionIndex = -1;
 
         for (size_t i = 0; i < currentMonitor->resolutions.size(); i++)
         {
             if (UserSettings::getInstance().getResolution() == currentMonitor->resolutions[i])
             {
-                m_videoSettings.resolutionIndex = i;
+                resolutionIndex = i;
             }
         }
 
         if (ImGui::Combo(
-                "Resolution", &m_videoSettings.resolutionIndex,
+                "Resolution", &resolutionIndex,
                 [](void *data, int index, const char **text) -> bool
                 {
                     auto &vector = *static_cast<std::vector<Resolution> *>(data);
@@ -200,7 +167,7 @@ void DebugWindow::drawVideoSettings()
                 },
                 static_cast<void *>(&currentMonitor->resolutions), currentMonitor->resolutions.size()))
         {
-            UserSettings::getInstance().setResolution(currentMonitor->resolutions[m_videoSettings.resolutionIndex]);
+            UserSettings::getInstance().setResolution(currentMonitor->resolutions[resolutionIndex]);
         }
 
         if (ImGui::Combo("Display Mode", (int *)&windowMode, DisplayModes, IM_ARRAYSIZE(DisplayModes)))
@@ -211,9 +178,11 @@ void DebugWindow::drawVideoSettings()
         // Frame Rate Limit
         // ...
 
-        if (ImGui::Checkbox("Vertical Sync", &m_videoSettings.b_verticalSync))
+        bool verticalSync = UserSettings::getInstance().getVerticalSync();
+
+        if (ImGui::Checkbox("Vertical Sync", &verticalSync))
         {
-            Renderer::getInstance().enableVsync(m_videoSettings.b_verticalSync);
+            UserSettings::getInstance().setVerticalSync(verticalSync);
         }
 
         if (ImGui::Button("Apply"))

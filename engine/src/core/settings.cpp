@@ -10,8 +10,10 @@ void UserSettings::apply()
 {
     Monitor *currentMonitor = DisplayManager::getInstance().getCurrentMonitor();
 
+    m_currMonitorIndex      = m_nextMonitorIndex;
     m_currWindowMode        = m_nextWindowMode;
     m_currResolution        = m_nextResolution;
+    m_currVerticalSync      = m_nextVerticalSync;
 
     Window::getInstance().setWindowMode(m_currWindowMode);
 
@@ -28,4 +30,12 @@ void UserSettings::apply()
     }
 
     Renderer::getInstance().setResolution(m_currResolution);
+
+    Renderer::getInstance().setVerticalSync(m_currVerticalSync);
+}
+
+bool UserSettings::hasUnsavedChanges() const
+{
+    return ((m_currMonitorIndex != m_nextMonitorIndex) || (m_currWindowMode != m_nextWindowMode) ||
+            (m_currResolution != m_nextResolution) || (m_currVerticalSync != m_nextVerticalSync));
 }

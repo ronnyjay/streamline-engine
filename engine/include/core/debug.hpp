@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/settings.hpp"
-#include "imgui.h"
 #include "singleton.hpp"
 
 namespace engine
@@ -39,40 +37,12 @@ struct DebugWindow : public Singleton<DebugWindow>
 
     ~DebugWindow();
 
-    bool hasPopupsOpen() const
-    {
-        if (ImGui::IsPopupOpen("Unsaved Changes", ImGuiPopupFlags_AnyPopup))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    void closePopups()
-    {
-        if (ImGui::IsPopupOpen("Unsaved Changes", ImGuiPopupFlags_AnyPopup))
-        {
-            UserSettings::getInstance().discard();
-
-            b_hideUnsavedChangesPopup = true;
-        }
-    }
-
   private:
-    bool b_showUnsavedChangesPopup = false;
-    bool b_hideUnsavedChangesPopup = false;
-
-    struct VideoSettings
-    {
-        bool b_verticalSync  = true;
-        int  monitorIndex    = 0;
-        int  resolutionIndex = 0;
-    } m_videoSettings;
-
     void drawDebugSettings();
     void drawVideoSettings();
     void drawSceneSettings();
+
+    bool b_windowShown = false;
 };
 
 } // namespace engine

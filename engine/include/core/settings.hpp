@@ -9,12 +9,27 @@ namespace engine
 
 struct UserSettings : public Singleton<UserSettings>
 {
+
     explicit UserSettings()
-        : m_currWindowMode(WindowMode::Windowed)
+        : m_currMonitorIndex(0)
+        , m_nextMonitorIndex(0)
+        , m_currWindowMode(WindowMode::Windowed)
         , m_nextWindowMode(WindowMode::Windowed)
         , m_currResolution(800, 600)
         , m_nextResolution(800, 600)
+        , m_currVerticalSync(1)
+        , m_nextVerticalSync(1)
     {
+    }
+
+    void setPrimaryMonitor(int monitor)
+    {
+        m_nextMonitorIndex = monitor;
+    }
+
+    int getPrimaryMonitor() const
+    {
+        return m_nextMonitorIndex;
     }
 
     void setWindowMode(WindowMode mode)
@@ -37,6 +52,16 @@ struct UserSettings : public Singleton<UserSettings>
         return m_nextResolution;
     }
 
+    void setVerticalSync(bool vsync)
+    {
+        m_nextVerticalSync = vsync;
+    }
+
+    bool getVerticalSync() const
+    {
+        return m_nextVerticalSync;
+    }
+
     void discard()
     {
         m_nextWindowMode = m_currWindowMode;
@@ -45,16 +70,17 @@ struct UserSettings : public Singleton<UserSettings>
 
     void apply();
 
-    bool hasUnsavedChanges() const
-    {
-        return (m_currWindowMode != m_nextWindowMode) || (m_currResolution != m_nextResolution);
-    }
+    bool hasUnsavedChanges() const;
 
   private:
+    int        m_currMonitorIndex;
+    int        m_nextMonitorIndex;
     WindowMode m_currWindowMode;
     WindowMode m_nextWindowMode;
     Resolution m_currResolution;
     Resolution m_nextResolution;
+    bool       m_currVerticalSync;
+    bool       m_nextVerticalSync;
 };
 
 } // namespace engine

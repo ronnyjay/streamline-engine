@@ -30,7 +30,7 @@ void Application::run()
     m_renderer->setClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     m_renderer->enableDepth(true);
-    m_renderer->enableVsync(true);
+    m_renderer->setVerticalSync(true);
 
     double currentTime;
     double lastTime;
@@ -43,6 +43,12 @@ void Application::run()
 
     lastTime = currentTime = glfwGetTime();
 
+    // TODO: Simulation, Rendering should be moved to seperate threads
+    //
+    // With this setup, rendering is bottlenecked by the speed of the simulation
+    // i.e., If simulating scene at 30FPS, rendering will now also be ~30FPS, which is not desired
+    //
+    // Basically, this whole loop must be reworked at some point
     while (m_window->isOpen())
     {
         elapsedTime = (currentTime = glfwGetTime()) - lastTime;
@@ -134,16 +140,6 @@ bool Application::onKeyPress(KeyPressEvent &e)
 
                 m_window->flags.b_mouseEntered = true;
             }
-        }
-
-        return true;
-    }
-
-    if (Key(e.key) == Key::Escape)
-    {
-        if (m_debugWindow->hasPopupsOpen())
-        {
-            m_debugWindow->closePopups();
         }
 
         return true;
