@@ -37,7 +37,7 @@ class Renderer : public Singleton<Renderer>
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void enableVsync(bool enable)
+    void setVerticalSync(bool enable)
     {
         glfwSwapInterval(static_cast<int>(enable));
     }
