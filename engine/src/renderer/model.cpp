@@ -39,7 +39,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 void Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
     std::vector<vertex>                   vertices;
-    std::vector<uint>                     indices;
+    std::vector<uint32_t>                 indices;
     std::vector<std::shared_ptr<Texture>> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -127,7 +127,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial *ma
     for (unsigned int i = 0; i < std::max(material->GetTextureCount(type), 1u); i++)
     {
         aiString path;
-        aiString directory(this->path.parent_path().c_str());
+        aiString directory(this->path.parent_path().string());
 
         if (material->GetTextureCount(type))
         {
@@ -159,7 +159,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial *ma
         std::filesystem::path texture_path = std::string(directory.C_Str());
         texture_path.append(path.C_Str());
 
-        std::shared_ptr<Texture> t = ResourceManager::getInstance().getTexture(texture_path);
+        std::shared_ptr<Texture> t = ResourceManager::getInstance().getTexture(texture_path.string());
         t->type                    = typeName;
 
         textures.push_back(t);

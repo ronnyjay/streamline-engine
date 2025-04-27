@@ -30,8 +30,7 @@ class Window : public Singleton<Window>
     };
 
     GLFWwindow   *m_glfwWindow;
-    ivec2         m_lastSize;
-    ivec2         m_lastPos;
+
     WindowMode    m_windowMode;
     EventCallback m_eventCallback;
 

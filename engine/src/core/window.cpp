@@ -20,7 +20,6 @@ Window::Window(int width, int height, const char *title)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    // TODO: Change to GL_TRUE! GL_FALSE for testing (i3/sway)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     m_glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL);
@@ -40,9 +39,6 @@ Window::Window(int width, int height, const char *title)
     glfwSetMouseButtonCallback(m_glfwWindow, Window::mouseCallback);
     glfwSetCursorPosCallback(m_glfwWindow, Window::cursorCallback);
     glfwSetScrollCallback(m_glfwWindow, Window::scrollCallback);
-
-    glfwGetWindowPos(m_glfwWindow, &m_lastPos.x, &m_lastPos.y);
-    glfwGetWindowSize(m_glfwWindow, &m_lastSize.x, &m_lastSize.y);
 
     glfwMakeContextCurrent(m_glfwWindow);
 
@@ -132,29 +128,15 @@ void Window::moveTo(int x, int y)
         return;
     }
 
-    // store last position for windowed mode
-    if (m_windowMode == WindowMode::Windowed)
-    {
-        m_lastPos.x = x;
-        m_lastPos.y = y;
-    }
-
     glfwSetWindowPos(m_glfwWindow, x, y);
 }
 
 void Window::resize(int x, int y)
 {
-    // window fullscreen; do not resize.
+    // window fullscreen - do not resize.
     if (glfwGetWindowMonitor(m_glfwWindow))
     {
         return;
-    }
-
-    // store last size for windowed mode
-    if (m_windowMode == WindowMode::Windowed)
-    {
-        m_lastSize.x = x;
-        m_lastSize.y = y;
     }
 
     glfwSetWindowSize(m_glfwWindow, x, y);
@@ -162,71 +144,84 @@ void Window::resize(int x, int y)
 
 void Window::setWindowMode(WindowMode mode)
 {
-    if (m_windowMode == WindowMode::Windowed)
-    {
-        glfwGetWindowPos(m_glfwWindow, &m_lastPos.x, &m_lastPos.y);
-        glfwGetWindowSize(m_glfwWindow, &m_lastSize.x, &m_lastSize.y);
-    }
+    // clang-format off
+    auto [windowX, windowY] = getPositionInScreen();
+    auto [windowWidth, windowHeight] = getSizeInScreen();
 
-    m_windowMode = mode;
-
-    if (mode == WindowMode::Windowed)
-    {
-        if (!glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
-        {
-            glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_TRUE);
-        }
-
-        if (glfwGetWindowAttrib(m_glfwWindow, GLFW_FLOATING))
-        {
-            glfwSetWindowAttrib(m_glfwWindow, GLFW_FLOATING, GLFW_FALSE);
-        }
-
-        glfwSetWindowMonitor(m_glfwWindow, nullptr, m_lastPos.x, m_lastPos.y, m_lastSize.x, m_lastSize.y, 0);
-
-        return;
-    }
-
-    GLFWmonitor  *monitor = nullptr;
-
-    int           x, y;
-    int           w, h;
+    GLFWmonitor  *monitor   = nullptr;
     int           count;
+    GLFWmonitor **monitors  = glfwGetMonitors(&count);
 
-    GLFWmonitor **monitors = glfwGetMonitors(&count);
+    int           monitorX, monitorY;
+    int           monitorWidth, monitorHeight;
 
     for (int i = 0; i < count; i++)
     {
-        glfwGetMonitorWorkarea(monitors[i], &x, &y, &w, &h);
+        glfwGetMonitorWorkarea(monitors[i], &monitorX, &monitorY, &monitorWidth, &monitorHeight);
 
-        bool overlap_x = (m_lastPos.x >= x && m_lastPos.x < x + w);
-        bool overlap_y = (m_lastPos.y >= y && m_lastPos.y < y + h);
+        bool overlapX = (windowX >= monitorX && windowX < monitorX + monitorWidth);
+        bool overlapY = (windowY >= monitorY && windowY < monitorY + monitorHeight);
 
-        if (overlap_x && overlap_y)
+        if (overlapX && overlapY)
         {
             monitor = monitors[i];
             break;
         }
     }
+    // clang-format on
+
+    if (!monitor)
+    {
+        return;
+    }
+
+    uint32_t nextWindowX = 0;
+    uint32_t nextWindowY = 0;
+
+    uint32_t spaceX      = (monitorWidth - windowWidth);
+    uint32_t spaceY      = (monitorHeight - windowHeight);
+
+    if (spaceX > 0 && spaceY > 0)
+    {
+        nextWindowX = spaceX / 2.0f;
+        nextWindowY = spaceY / 2.0f;
+    }
+
+    m_windowMode = mode;
 
     if (mode == WindowMode::Fullscreen)
     {
-        glfwSetWindowMonitor(m_glfwWindow, monitor, 0, 0, w, h, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_glfwWindow, monitor, 0, 0, monitorWidth, monitorHeight, GLFW_DONT_CARE);
     }
-
-    if (mode == WindowMode::WindowedFullscreen)
+    else
     {
-        if (glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
+        if (mode == WindowMode::Windowed)
         {
-            glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_TRUE);
+            if (!glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
+            {
+                glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_TRUE);
+            }
+
+            if (glfwGetWindowAttrib(m_glfwWindow, GLFW_FLOATING))
+            {
+                glfwSetWindowAttrib(m_glfwWindow, GLFW_FLOATING, GLFW_FALSE);
+            }
         }
 
-        if (!glfwGetWindowAttrib(m_glfwWindow, GLFW_FLOATING))
+        if (mode == WindowMode::WindowedFullscreen)
         {
-            glfwSetWindowAttrib(m_glfwWindow, GLFW_FLOATING, GLFW_FALSE);
+            if (glfwGetWindowAttrib(m_glfwWindow, GLFW_DECORATED))
+            {
+                glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_FALSE);
+            }
+
+            if (!glfwGetWindowAttrib(m_glfwWindow, GLFW_FLOATING))
+            {
+                glfwSetWindowAttrib(m_glfwWindow, GLFW_FLOATING, GLFW_TRUE);
+            }
         }
 
-        glfwSetWindowMonitor(m_glfwWindow, nullptr, x, y, w, h, GLFW_DONT_CARE);
+        glfwSetWindowMonitor(m_glfwWindow, nullptr, nextWindowX, nextWindowY, windowWidth, windowHeight, 0);
     }
 }
 

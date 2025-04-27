@@ -29,10 +29,7 @@ struct Monitor
 
         for (int i = 0; i < count; i++)
         {
-            if (modes[i].width <= mode->width && modes[i].height <= mode->height)
-            {
-                resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
-            }
+            resolutions.emplace_back(Resolution(modes[i].width, modes[i].height));
         }
 
         resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());

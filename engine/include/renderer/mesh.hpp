@@ -23,14 +23,14 @@ struct vertex
 
 struct mesh
 {
-    mesh(const std::vector<vertex> &vertices, const std::vector<uint> &indices,
+    mesh(const std::vector<vertex> &vertices, const std::vector<uint32_t> &indices,
          const std::vector<std::shared_ptr<Texture>> &textures);
 
     std::vector<vertex>                   vertices;
     std::vector<unsigned int>             indices;
     std::vector<std::shared_ptr<Texture>> textures;
 
-    void draw(const std::shared_ptr<Shader> &s);
+    void                                  draw(const std::shared_ptr<Shader> &s);
 
   private:
     unsigned int vao;

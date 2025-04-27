@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/resolution.hpp"
+#include "core/singleton.hpp"
 #include "core/window.hpp"
-#include "singleton.hpp"
 
 namespace engine
 {
@@ -81,6 +81,28 @@ struct UserSettings : public Singleton<UserSettings>
     Resolution m_nextResolution;
     bool       m_currVerticalSync;
     bool       m_nextVerticalSync;
+
+    // Utility functions
+
+    bool hasMonitorChanged() const
+    {
+        return m_currMonitorIndex != m_nextMonitorIndex;
+    }
+
+    bool hasWindowModeChanged() const
+    {
+        return m_currWindowMode != m_nextWindowMode;
+    }
+
+    bool hasResolutionChanged() const
+    {
+        return m_currResolution != m_nextResolution;
+    }
+
+    bool hasVerticalSyncChanged() const
+    {
+        return m_currVerticalSync != m_nextVerticalSync;
+    }
 };
 
 } // namespace engine

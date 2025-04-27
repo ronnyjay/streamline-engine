@@ -5,6 +5,7 @@
 #include "subsystems/display_manager.hpp"
 #include "subsystems/settings_manager.hpp"
 
+#include <bits/this_thread_sleep.h>
 #include <cmath>
 #include <cstdlib>
 
@@ -53,8 +54,6 @@ void Application::run()
     {
         elapsedTime = (currentTime = glfwGetTime()) - lastTime;
 
-        m_window->pollEvents();
-
         simulationAccumulator += elapsedTime;
         while (simulationAccumulator >= simulationTimeStep)
         {
@@ -66,12 +65,12 @@ void Application::run()
         while (renderAccumulator >= renderTimeStep)
         {
             m_renderer->begin(m_sceneManager->currentScene());
+            m_debugWindow->draw();
             renderAccumulator -= renderTimeStep;
         }
 
-        m_debugWindow->draw();
-
         m_window->swapBuffers();
+        m_window->pollEvents();
 
         lastTime = currentTime;
     }

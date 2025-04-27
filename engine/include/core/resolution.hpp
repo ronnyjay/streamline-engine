@@ -20,6 +20,11 @@ struct Resolution
         return width == other.width && height == other.height;
     }
 
+    bool operator!=(const Resolution &other) const
+    {
+        return width != other.width || height != other.height;
+    }
+
     bool operator<(const Resolution &other) const
     {
         if (width != other.width)
