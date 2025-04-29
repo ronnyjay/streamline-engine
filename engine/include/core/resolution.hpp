@@ -1,6 +1,9 @@
 #pragma once
 
+#include "math/fraction.hpp"
+
 #include <cstdio>
+
 namespace engine
 {
 
@@ -37,7 +40,8 @@ struct Resolution
 
     const char *c_str() const
     {
-        std::snprintf(format, sizeof(format), "%dx%d", width, height);
+        auto [a, b] = reduce(width, height);
+        std::snprintf(format, sizeof(format), "%dx%d (%d:%d)", width, height, a, b);
         return format;
     }
 
