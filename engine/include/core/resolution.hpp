@@ -40,8 +40,7 @@ struct Resolution
 
     const char *c_str() const
     {
-        auto [a, b] = reduce(width, height);
-        std::snprintf(format, sizeof(format), "%dx%d (%d:%d)", width, height, a, b);
+        std::snprintf(format, sizeof(format), "%dx%d", width, height);
         return format;
     }
 
