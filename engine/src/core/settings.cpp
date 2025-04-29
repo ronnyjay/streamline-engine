@@ -21,25 +21,28 @@ void UserSettings::apply()
         Window::getInstance().setWindowMode(m_nextWindowMode);
     }
 
-    float sizeX     = m_nextResolution.width / currentMonitor->scaleX;
-    float sizeY     = m_nextResolution.height / currentMonitor->scaleY;
-
-    float spaceX    = (currentMonitor->width - sizeX);
-    float spaceY    = (currentMonitor->height - sizeY);
-
-    float positionX = 0;
-    float positionY = 0;
-
-    if (spaceX > 0 && spaceY > 0)
+    if (hasWindowModeChanged() || hasResolutionChanged())
     {
-        positionX = spaceX / 2.0f;
-        positionY = spaceY / 2.0f;
+        float sizeX     = m_nextResolution.width / currentMonitor->scaleX;
+        float sizeY     = m_nextResolution.height / currentMonitor->scaleY;
+
+        float spaceX    = (currentMonitor->width - sizeX);
+        float spaceY    = (currentMonitor->height - sizeY);
+
+        float positionX = 0;
+        float positionY = 0;
+
+        if (spaceX > 0 && spaceY > 0)
+        {
+            positionX = spaceX / 2.0f;
+            positionY = spaceY / 2.0f;
+        }
+
+        Window::getInstance().resize(sizeX, sizeY);
+        Window::getInstance().moveTo(positionX, positionY);
+
+        Renderer::getInstance().setResolution(m_nextResolution);
     }
-
-    Window::getInstance().resize(sizeX, sizeY);
-    Window::getInstance().moveTo(positionX, positionY);
-
-    Renderer::getInstance().setResolution(m_nextResolution);
 
     if (hasVerticalSyncChanged())
     {
