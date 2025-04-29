@@ -5,7 +5,6 @@
 #include "subsystems/display_manager.hpp"
 #include "subsystems/settings_manager.hpp"
 
-#include <bits/this_thread_sleep.h>
 #include <cmath>
 #include <cstdlib>
 
