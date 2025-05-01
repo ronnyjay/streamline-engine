@@ -5,9 +5,6 @@
 namespace engine
 {
 
-/// TODO: Decouple data from OpenGL?
-/// TODO: Remove vertex data?
-/// TODO: Remove rotation, scale?
 struct AABB
 {
     AABB(const std::shared_ptr<Model> &model);
@@ -21,7 +18,7 @@ struct AABB
 
     // clang-format off
     void translate(const vec3 &translation);
-    void rotate(const vec3 &transform);
+    void rotate(const vec3 &rotation);
     void scale(const vec3 &scale);
 
     void draw();
@@ -46,14 +43,14 @@ struct AABB
     vec3 m_lastScale;
     vec3 m_lastRotation;
 
+    void updateVertices();
+
   private:
     unsigned int      m_VAO;
     unsigned int      m_VBO;
     unsigned int      m_EBO;
 
     std::vector<vec3> m_vertexData;
-
-    void              updateVertices();
 };
 
 } // namespace engine

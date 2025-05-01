@@ -1,7 +1,7 @@
 #include "scene/components/aabb.hpp"
 
-#include "math/quaternion.hpp"
 #include "math/component_wise.hpp"
+#include "math/quaternion.hpp"
 #include "math/transformation.hpp"
 
 #include <limits>
@@ -87,10 +87,10 @@ void AABB::rotate(const vec3 &rotation)
 
     for (const auto &vertex : m_vertexData)
     {
-        vec3  rotatedVertex = vec3(rotationMatrix * vec4(vertex, 1.0f));
+        vec3 rotatedVertex = vec3(rotationMatrix * vec4(vertex, 1.0f));
 
-        m_globalMin = engine::min(m_globalMin, rotatedVertex);
-        m_globalMax = engine::max(m_globalMax, rotatedVertex);
+        m_globalMin        = engine::min(m_globalMin, rotatedVertex);
+        m_globalMax        = engine::max(m_globalMax, rotatedVertex);
     }
 
     m_localMin     = m_globalMin;
@@ -118,10 +118,10 @@ void AABB::scale(const vec3 &scale)
 
     for (const auto &vertex : m_vertexData)
     {
-        vec3  scaledVertex = vec3(scalingMatrix * vec4(vertex, 1.0f));
+        vec3 scaledVertex = vec3(scalingMatrix * vec4(vertex, 1.0f));
 
-        m_globalMin = engine::min(m_globalMin, scaledVertex);
-        m_globalMax = engine::max(m_globalMax, scaledVertex);
+        m_globalMin       = engine::min(m_globalMin, scaledVertex);
+        m_globalMax       = engine::max(m_globalMax, scaledVertex);
     }
 
     m_localMin    = m_globalMin;

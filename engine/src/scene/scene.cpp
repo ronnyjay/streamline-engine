@@ -1,4 +1,5 @@
 #include "scene/scene.hpp"
+#include "core/renderer.hpp"
 #include "scene/components/transform.hpp"
 #include <assimp/types.h>
 
@@ -17,7 +18,7 @@ void Scene::draw()
 {
     Camera *activeCamera = nullptr;
 
-    auto    cameras = m_registry.view<Camera>();
+    auto    cameras      = m_registry.view<Camera>();
     for (const auto &entity : cameras)
     {
         auto &camera = cameras.get(entity);
@@ -31,6 +32,7 @@ void Scene::draw()
     STREAMLINE_ASSERT(activeCamera != nullptr, "No primary camera found, perhaps try creating one...");
 
     auto renderables = m_registry.view<Renderable, Transform>();
+
     for (const auto &entity : renderables)
     {
         auto [renderable, transform] = renderables.get(entity);
@@ -44,16 +46,20 @@ void Scene::draw()
         renderable.model.get()->draw(m_shader);
     }
 
-    auto colliders = m_registry.view<AABB, Transform>();
-    for (const auto &entity : colliders)
+    if (Renderer::getInstance().flags.b_showCollisions)
     {
-        auto [collider, transform] = colliders.get(entity);
+        auto colliders = m_registry.view<AABB, Transform>();
 
-        m_aabbShader.get()->bind();
+        for (const auto &entity : colliders)
+        {
+            auto [collider, transform] = colliders.get(entity);
 
-        m_aabbShader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
-        m_aabbShader.get()->setMat4("view", activeCamera->getViewMatrix());
+            m_aabbShader.get()->bind();
 
-        collider.draw();
+            m_aabbShader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
+            m_aabbShader.get()->setMat4("view", activeCamera->getViewMatrix());
+
+            collider.draw();
+        }
     }
 }
