@@ -2,79 +2,79 @@
 
 using namespace engine;
 
-mesh::mesh(const std::vector<vertex> &vertices, const std::vector<unsigned int> &indices,
+Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices,
            const std::vector<std::shared_ptr<Texture>> &textures)
-    : vertices(vertices)
-    , indices(indices)
-    , textures(textures)
+    : m_vertices(vertices)
+    , m_indices(indices)
+    , m_textures(textures)
 {
 
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_EBO);
 
-    glBindVertexArray(vao);
+    glBindVertexArray(m_VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), &vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
     // Vertex Positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
 
     // Vertex Normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void *)offsetof(vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
 
     // Vertex TexCoords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void *)offsetof(vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, texCoords));
 
     // Vertex Tangent
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void *)offsetof(vertex, tangent));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, tangent));
 
     // Vertex Bitangent
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void *)offsetof(vertex, bitangent));
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitangent));
 
     glBindVertexArray(0);
 }
 
-void mesh::draw(const std::shared_ptr<Shader> &s)
+void Mesh::draw(const std::shared_ptr<Shader> &s)
 {
-    unsigned int diffuseNr = 1;
+    unsigned int diffuseNr  = 1;
     unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
+    unsigned int normalNr   = 1;
+    unsigned int heightNr   = 1;
 
-    std::string texNumber;
-    std::string texType;
+    std::string  texNumber;
+    std::string  texType;
 
-    for (unsigned int i = 0; i < textures.size(); i++)
+    for (unsigned int i = 0; i < m_textures.size(); i++)
     {
-        textures[i]->bind(i);
+        m_textures[i]->bind(i);
 
-        switch (textures[i]->type)
+        switch (m_textures[i]->type)
         {
         default:
         case texture_type::DIFFUSE:
-            texType = "TexDiffuse";
+            texType   = "TexDiffuse";
             texNumber = std::to_string(diffuseNr++);
             break;
         case texture_type::SPECULAR:
-            texType = "TexSpecular";
+            texType   = "TexSpecular";
             texNumber = std::to_string(specularNr++);
             break;
         case texture_type::NORMAL:
-            texType = "TexNormal";
+            texType   = "TexNormal";
             texNumber = std::to_string(normalNr++);
             break;
         case texture_type::HEIGHT:
-            texType = "TexHeight";
+            texType   = "TexHeight";
             texNumber = std::to_string(heightNr++);
             break;
         }
@@ -82,8 +82,8 @@ void mesh::draw(const std::shared_ptr<Shader> &s)
         s->setInt(texType + texNumber, i);
     }
 
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(m_VAO);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     glActiveTexture(GL_TEXTURE0);

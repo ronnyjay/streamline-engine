@@ -12,7 +12,7 @@
 namespace engine
 {
 
-struct vertex
+struct Vertex
 {
     vec3 position;
     vec3 normal;
@@ -21,21 +21,27 @@ struct vertex
     vec3 bitangent;
 };
 
-struct mesh
+struct Mesh
 {
-    mesh(const std::vector<vertex> &vertices, const std::vector<uint32_t> &indices,
+    Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          const std::vector<std::shared_ptr<Texture>> &textures);
 
-    std::vector<vertex>                   vertices;
-    std::vector<unsigned int>             indices;
-    std::vector<std::shared_ptr<Texture>> textures;
+    const std::vector<Vertex> &getVertices() const
+    {
+        return m_vertices;
+    }
 
-    void                                  draw(const std::shared_ptr<Shader> &s);
+    void draw(const std::shared_ptr<Shader> &s);
 
   private:
-    unsigned int vao;
-    unsigned int vbo;
-    unsigned int ebo;
+    uint32_t                              m_VAO;
+    uint32_t                              m_VBO;
+    uint32_t                              m_EBO;
+
+    std::vector<Vertex>                   m_vertices;
+    std::vector<uint32_t>                 m_indices;
+
+    std::vector<std::shared_ptr<Texture>> m_textures;
 };
 
 } // namespace engine

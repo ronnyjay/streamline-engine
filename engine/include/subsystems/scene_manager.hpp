@@ -44,15 +44,9 @@ struct SceneManager : public Singleton<SceneManager>
 
     std::shared_ptr<Scene> currentScene()
     {
-        // todo: maybe remove assertion, return nullptr?
-        //
-        // benefits of asserting include making the user aware there is nothing to
-        // simulatate/render, thus they know early-on why they are not seeing anything on screen
-        //
-        // but should this be a requirement?
         if (!m_scenes.size())
         {
-            STREAMLINE_ASSERT(false, "No scenes available. Perhaps try creating one");
+            STREAMLINE_ASSERT(false, "No scenes available,  perhaps try creating one...");
         }
 
         return m_scenes[m_currentScene];

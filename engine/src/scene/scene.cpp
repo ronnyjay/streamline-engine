@@ -41,6 +41,7 @@ void Scene::draw()
 
         m_shader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
         m_shader.get()->setMat4("view", activeCamera->getViewMatrix());
+
         m_shader.get()->setMat4("model", transform.getTransform());
 
         renderable.model.get()->draw(m_shader);

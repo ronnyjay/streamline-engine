@@ -38,18 +38,18 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 
 void Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
-    std::vector<vertex>                   vertices;
+    std::vector<Vertex>                   vertices;
     std::vector<uint32_t>                 indices;
     std::vector<std::shared_ptr<Texture>> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        vertex vertex;
+        Vertex vertex;
         vec3   vector;
 
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z;
+        vector.x        = mesh->mVertices[i].x;
+        vector.y        = mesh->mVertices[i].y;
+        vector.z        = mesh->mVertices[i].z;
 
         vertex.position = vector;
 
@@ -67,10 +67,10 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
             vector.y         = mesh->mTextureCoords[0][i].y;
             vertex.texCoords = vector.xy(); /// TODO: remove swizzle operator in favor of assignment to vec2
 
-            vector.x       = mesh->mTangents[i].x;
-            vector.y       = mesh->mTangents[i].y;
-            vector.z       = mesh->mTangents[i].z;
-            vertex.tangent = vector;
+            vector.x         = mesh->mTangents[i].x;
+            vector.y         = mesh->mTangents[i].y;
+            vector.z         = mesh->mTangents[i].z;
+            vertex.tangent   = vector;
 
             vector.x         = mesh->mBitangents[i].x;
             vector.y         = mesh->mBitangents[i].y;
@@ -116,7 +116,7 @@ void Model::processMesh(aiMesh *mesh, const aiScene *scene)
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // Return a mesh object from extracted data
-    meshes.emplace_back(engine::mesh(vertices, indices, textures));
+    meshes.emplace_back(engine::Mesh(vertices, indices, textures));
 }
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial *material, aiTextureType type,

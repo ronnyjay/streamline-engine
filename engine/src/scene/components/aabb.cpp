@@ -19,10 +19,11 @@ AABB::AABB(const std::shared_ptr<Model> &model)
 
     for (const auto &mesh : model->meshes)
     {
-        for (const auto &vertex : mesh.vertices)
+        for (const auto &vertex : mesh.getVertices())
         {
             m_globalMin = engine::min(m_globalMin, vertex.position);
             m_globalMax = engine::max(m_globalMax, vertex.position);
+
             m_vertexData.emplace_back(vertex.position);
         }
     }

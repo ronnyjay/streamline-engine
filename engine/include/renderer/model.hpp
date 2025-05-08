@@ -15,7 +15,7 @@ struct Model
 {
     Model(const std::string &path);
 
-    std::vector<mesh> meshes;
+    std::vector<Mesh> meshes;
 
     void              draw(const std::shared_ptr<Shader> &s);
 
