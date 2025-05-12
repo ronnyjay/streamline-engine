@@ -2,8 +2,6 @@
 #include "core/event.hpp"
 #include "core/settings.hpp"
 #include "core/window.hpp"
-#include "subsystems/display_manager.hpp"
-#include "subsystems/settings_manager.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -18,7 +16,6 @@ Application::Application(int width, int height, const char *title)
     m_sceneManager    = new SceneManager;
     m_inputManager    = new InputManager;
     m_displayManager  = new DisplayManager;
-    m_settingsManager = new SettingsManager;
     m_userSettings    = new UserSettings;
     m_resourceManager = new ResourceManager;
 

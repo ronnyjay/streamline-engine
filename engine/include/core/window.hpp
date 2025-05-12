@@ -9,8 +9,6 @@
 #include "setup.hpp"     // IWYU pragma: keep
 #include "singleton.hpp" // IWYU pragma: keep
 
-#include "math/vec2.hpp" // IWYU pragma: keep
-
 namespace engine
 {
 

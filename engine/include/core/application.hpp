@@ -11,7 +11,6 @@
 #include "subsystems/input_manager.hpp"    // IWYU pragma: keep
 #include "subsystems/resource_manager.hpp" // IWYU pragma: keep
 #include "subsystems/scene_manager.hpp"    // IWYU pragma: keep
-#include "subsystems/settings_manager.hpp" // IWYU pragma: keep
 
 namespace engine
 {
@@ -25,18 +24,12 @@ class Application : public Singleton<Application>
     SceneManager             *m_sceneManager    = nullptr;
     InputManager             *m_inputManager    = nullptr;
     DisplayManager           *m_displayManager  = nullptr;
-    SettingsManager          *m_settingsManager = nullptr;
     UserSettings             *m_userSettings    = nullptr;
     ResourceManager          *m_resourceManager = nullptr;
     // clang-format on
 
   public:
     explicit Application(int width = 800, int height = 600, const char *title = "Streamline Engine");
-
-    [[nodiscard]] SettingsManager *getSettingsManager() const noexcept
-    {
-        return m_settingsManager;
-    }
 
     [[nodiscard]] ResourceManager *getResourceManager() const noexcept
     {
@@ -73,7 +66,7 @@ class Application : public Singleton<Application>
     ~Application()
     {
         delete m_resourceManager;
-        delete m_settingsManager;
+        delete m_userSettings;
         delete m_displayManager;
         delete m_sceneManager;
         delete m_inputManager;

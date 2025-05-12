@@ -17,7 +17,7 @@ struct Transform
     const vec3 getFront() const
     {
         // 90 degrees added to yaw to ensure -Z forward axis
-        // We only add this here (and not the rotation vector) to ensure that models are not rotated unnecessarily
+        // Add this here (and not to the rotation vector itself) to ensure that models are not rotated unnecessarily
         return vec3(::cos(radians(rotation.y + 90.0f)) * ::cos(radians(rotation.x)), ::sin(radians(rotation.x)),
                     ::sin(radians(rotation.y + 90.0f)) * ::cos(radians(rotation.x)));
     }
