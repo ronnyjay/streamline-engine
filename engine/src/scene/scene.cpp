@@ -16,6 +16,8 @@ void Scene::tick(double dt)
 
 void Scene::draw()
 {
+    Renderer::getInstance().beginFrame();
+
     Camera *activeCamera = nullptr;
 
     auto    cameras      = m_registry.view<Camera>();
@@ -63,4 +65,6 @@ void Scene::draw()
             collider.draw();
         }
     }
+
+    Renderer::getInstance().endFrame();
 }

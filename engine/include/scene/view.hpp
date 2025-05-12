@@ -9,7 +9,7 @@ namespace engine
 template <typename T>
 class basic_view
 {
-    const component_storage<T> &storage;
+    const ComponentStorage<T> &storage;
 
   public:
     using iterator       = typename std::vector<std::uint32_t>::const_iterator;
@@ -22,23 +22,23 @@ class basic_view
     const_iterator end()   const { return storage.begin() + storage.size(); }
     // clang-format on
 
-    explicit basic_view(const component_storage<T> &storage)
+    explicit basic_view(const ComponentStorage<T> &storage)
         : storage(storage)
     {
     }
 
     T &get(const std::uint32_t entity)
     {
-        return (const_cast<component_storage<T> &>(storage)).get(entity);
+        return (const_cast<ComponentStorage<T> &>(storage)).get(entity);
     }
 };
 
 template <typename... Ts>
 class multi_view
 {
-    component_storage_pool &storage;
+    ComponentStoragePool &storage;
 
-    const sparse_set        entities;
+    const SSet            entities;
 
   public:
     using iterator       = typename std::vector<std::uint32_t>::const_iterator;
@@ -57,18 +57,18 @@ class multi_view
         return storage.get<T>()->get(entity);
     }
 
-    explicit multi_view(component_storage_pool &storage)
+    explicit multi_view(ComponentStoragePool &storage)
         : storage(storage)
     {
         STREAMLINE_ASSERT(sizeof...(Ts) > 0);
 
         // extract the first component array
-        const_cast<sparse_set &>(entities) =
-            static_cast<sparse_set &>(*(storage.get<std::tuple_element_t<0, std::tuple<Ts...>>>()));
+        const_cast<SSet &>(entities) =
+            static_cast<SSet &>(*(storage.get<std::tuple_element_t<0, std::tuple<Ts...>>>()));
 
         // perform an intersection on all following sets
-        ((const_cast<sparse_set &>(entities) =
-              const_cast<sparse_set &>(entities).intersect(static_cast<sparse_set &>(*storage.get<Ts>()))),
+        ((const_cast<SSet &>(entities) =
+              const_cast<SSet &>(entities).intersect(static_cast<SSet &>(*storage.get<Ts>()))),
          ...);
     }
 

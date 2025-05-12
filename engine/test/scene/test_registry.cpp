@@ -22,7 +22,7 @@ struct test_component_c
 
 TEST(REGISTRY, TestDestroy)
 {
-    registry r;
+    Registry    r;
 
     entity_type e1 = r.create();
     entity_type e2 = r.create();
@@ -43,7 +43,7 @@ TEST(REGISTRY, TestDestroy)
 
 TEST(REGISTRY, TestAnyOf)
 {
-    registry r;
+    Registry    r;
 
     entity_type e1 = r.create();
     r.emplace<test_component_a>(e1);
@@ -55,7 +55,7 @@ TEST(REGISTRY, TestAnyOf)
 
 TEST(REGISTRY, TestAllOf)
 {
-    registry r;
+    Registry    r;
 
     entity_type e1 = r.create();
     r.emplace<test_component_a>(e1);

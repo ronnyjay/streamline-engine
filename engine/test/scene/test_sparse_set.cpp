@@ -12,7 +12,7 @@ TEST(SPARSE_SET, TestEmplace)
     // index in packed
     const auto index = 0;
 
-    sparse_set set;
+    SSet       set;
     set.emplace(entity);
 
     ASSERT_EQ(set.size(), 1);
@@ -30,7 +30,7 @@ TEST(SPARSE_SET, TestRemove)
     const size_t i1 = 0;
     const size_t i3 = 1;
 
-    sparse_set set;
+    SSet         set;
     set.emplace(e1);
     set.emplace(e2);
     set.emplace(e3);
@@ -44,9 +44,9 @@ TEST(SPARSE_SET, TestRemove)
 
 TEST(SPARSE_SET, TestMaxEmplace)
 {
-    const auto e = sparse_set::null;
+    const auto e = SSet::null;
 
-    sparse_set set;
+    SSet       set;
     set.emplace(e);
 
     ASSERT_EQ(set.size(), 0);

@@ -69,12 +69,8 @@ class Renderer : public Singleton<Renderer>
         m_framebuffer.resize(resolution.width, resolution.height);
     }
 
-    void onWindowResize(uint32_t width, uint32_t height)
-    {
-        m_framebuffer.resize(width, height);
-    }
-
-    void begin(const std::shared_ptr<Scene> &s);
+    void beginFrame();
+    void endFrame();
 
   private:
     Framebuffer m_framebuffer;

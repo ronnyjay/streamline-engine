@@ -5,28 +5,31 @@
 
 using namespace engine;
 
-void Renderer::begin(const std::shared_ptr<Scene> &s)
+void Renderer::beginFrame()
 {
-    auto [width, height] = Window::getInstance().getSizeInScreen();
-
     m_framebuffer.bind();
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, m_framebuffer.width(), m_framebuffer.height());
+
+    setViewport(0, 0, m_framebuffer.width(), m_framebuffer.height());
+    setClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    enableDepth(true);
+    clear();
 
     if (flags.b_showWireframes)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
+}
 
-    s.get()->draw();
+void Renderer::endFrame()
+{
+    auto [windowWidth, windowHeight] = Window::getInstance().getSizeInScreen();
 
     m_framebuffer.unbind();
-    glDisable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, width, height);
+
+    setViewport(0, 0, windowWidth, windowHeight);
+    setClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    enableDepth(false);
+    clear();
 
     if (flags.b_showWireframes)
     {

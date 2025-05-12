@@ -9,16 +9,16 @@
 namespace engine
 {
 
-[[nodiscard]] static size_t fast_mod(const size_t index, const size_t ceil) noexcept;
+[[nodiscard]] static size_t fast_mod(const size_t index, const size_t ceil) noexcept
+{
+    return index >= ceil ? index % ceil : index;
+}
 
-class sparse_set
+class SSet
 {
   protected:
-    /** maximum size of sparse or the maximum value in the set */
-    static constexpr auto max_size = static_cast<uint32_t>(UINT32_MAX);
-
-    /** maximum number of entries per page */
-    static constexpr auto page_size = static_cast<uint8_t>(UINT8_MAX);
+    static constexpr auto MAX_VALUE = static_cast<uint32_t>(UINT32_MAX);
+    static constexpr auto PAGE_SIZE = static_cast<uint16_t>(UINT16_MAX);
 
     /** sparse array of pages containing indices into packed */
     std::vector<std::shared_ptr<std::vector<uint32_t>>> sparse;
@@ -26,8 +26,39 @@ class sparse_set
     /** packed array of elements */
     std::vector<uint32_t> packed;
 
+  private:
+    [[nodiscard]] auto entity_to_pos(uint32_t const entity) const noexcept
+    {
+        return static_cast<size_t>(entity);
+    }
+
+    [[nodiscard]] auto pos_to_page(size_t const pos) const noexcept
+    {
+        return static_cast<size_t>(pos / PAGE_SIZE);
+    }
+
+    [[nodiscard]] auto &assure_at_least(uint32_t const entity)
+    {
+        auto pos  = entity_to_pos(entity);
+        auto page = pos_to_page(pos);
+
+        if (!(page < sparse.size()))
+        {
+            sparse.resize(pos + 1u, nullptr);
+        }
+
+        if (!sparse[page])
+        {
+            sparse[page] = std::make_shared<std::vector<uint32_t>>(PAGE_SIZE, null);
+        }
+
+        return (*(sparse[page]))[fast_mod(pos, PAGE_SIZE)];
+    }
+
   public:
-    using iterator = typename std::vector<uint32_t>::const_iterator;
+    virtual ~SSet()      = default;
+
+    using iterator       = typename std::vector<uint32_t>::const_iterator;
     using const_iterator = typename std::vector<uint32_t>::const_iterator;
 
     // clang-format off
@@ -47,23 +78,9 @@ class sparse_set
         return packed.size();
     }
 
-    virtual ~sparse_set() = default;
-
-  private:
-    [[nodiscard]] auto entity_to_pos(uint32_t const entity) const noexcept
-    {
-        return static_cast<size_t>(entity);
-    }
-
-    [[nodiscard]] auto pos_to_page(size_t const pos) const noexcept
-    {
-        return static_cast<size_t>(pos / page_size);
-    }
-
-  public:
     [[nodiscard]] auto &search(uint32_t const entity) const noexcept
     {
-        auto pos = entity_to_pos(entity);
+        auto pos  = entity_to_pos(entity);
         auto page = pos_to_page(pos);
 
         if (!(page < sparse.size()))
@@ -76,7 +93,7 @@ class sparse_set
             return const_cast<uint32_t &>(null);
         }
 
-        auto &index = (*(sparse[page]))[fast_mod(pos, page_size)];
+        auto &index = (*(sparse[page]))[fast_mod(pos, PAGE_SIZE)];
 
         if (index < size() && packed[index] == entity)
         {
@@ -86,26 +103,6 @@ class sparse_set
         return const_cast<uint32_t &>(null);
     }
 
-  private:
-    [[nodiscard]] auto &assure_at_least(uint32_t const entity)
-    {
-        auto pos = entity_to_pos(entity);
-        auto page = pos_to_page(pos);
-
-        if (!(page < sparse.size()))
-        {
-            sparse.resize(pos + 1u, nullptr);
-        }
-
-        if (!sparse[page])
-        {
-            sparse[page] = std::make_shared<std::vector<uint32_t>>(page_size, null);
-        }
-
-        return (*(sparse[page]))[fast_mod(pos, page_size)];
-    }
-
-  public:
     void emplace(uint32_t const entity)
     {
         if (entity == null)
@@ -114,7 +111,7 @@ class sparse_set
         }
 
         auto &elem = assure_at_least(entity);
-        auto  pos = size();
+        auto  pos  = size();
 
         if (!(search(entity) == null))
         {
@@ -123,7 +120,7 @@ class sparse_set
 
         packed.push_back(entity);
 
-        elem = static_cast<std::uint32_t>(pos);
+        elem = static_cast<uint32_t>(pos);
     }
 
     void remove(uint32_t const entity)
@@ -135,20 +132,20 @@ class sparse_set
             return;
         }
 
-        auto &back = packed.back();
-        auto &last = search(back);
+        auto &back   = packed.back();
+        auto &last   = search(back);
 
         packed[elem] = back;
 
-        last = elem;
-        elem = max_size;
+        last         = elem;
+        elem         = MAX_VALUE;
 
         packed.pop_back();
     }
 
-    auto join(sparse_set const &set)
+    auto join(SSet const &set)
     {
-        sparse_set result;
+        SSet result;
 
         for (size_t i = 0; i < size(); i++)
         {
@@ -163,15 +160,15 @@ class sparse_set
         return result;
     }
 
-    auto intersect(sparse_set const &set)
+    auto intersect(SSet const &set)
     {
-        sparse_set result;
+        SSet result;
 
         if (size() < set.size())
         {
             for (size_t i = 0; i < size(); i++)
             {
-                if (set.search(packed[i]) != max_size)
+                if (set.search(packed[i]) != MAX_VALUE)
                 {
                     result.emplace(packed[i]);
                 }
@@ -181,7 +178,7 @@ class sparse_set
         {
             for (size_t i = 0; i < set.size(); i++)
             {
-                if (search(set.packed[i]) != max_size)
+                if (search(set.packed[i]) != MAX_VALUE)
                 {
                     result.emplace(set.packed[i]);
                 }
@@ -193,10 +190,5 @@ class sparse_set
 
     static constexpr uint32_t null = UINT32_MAX;
 };
-
-[[nodiscard]] static size_t fast_mod(const size_t index, const size_t ceil) noexcept
-{
-    return index >= ceil ? index % ceil : index;
-}
 
 } // namespace engine

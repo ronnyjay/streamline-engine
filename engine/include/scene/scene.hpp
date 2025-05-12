@@ -31,6 +31,7 @@ namespace engine
 
 struct Scene
 {
+    friend struct ComponentSystem;
     friend struct PlayerInputSystem;
     friend struct ControllerSystem;
     friend struct CollisionSystem;
@@ -79,7 +80,7 @@ struct Scene
     }
 
   private:
-    registry                m_registry;
+    Registry                m_registry;
     CameraSystem            m_cameraSystem;
     FollowSystem            m_followSystem;
     CollisionSystem         m_collisionSystem;

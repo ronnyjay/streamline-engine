@@ -36,19 +36,13 @@ void Application::run()
     double lastTime;
     double elapsedTime;
 
-    double renderTimeStep        = 1.0 / 240.0;
+    double renderTimeStep        = 1.0 / 360.0;
     double renderAccumulator     = 0.0;
-    double simulationTimeStep    = 1.0 / 240.0;
+    double simulationTimeStep    = 1.0 / 360.0;
     double simulationAccumulator = 0.0;
 
     lastTime = currentTime = glfwGetTime();
 
-    // TODO: Simulation, Rendering should be moved to seperate threads
-    //
-    // With this setup, rendering is bottlenecked by the speed of the simulation
-    // i.e., If simulating scene at 30FPS, rendering will now also be ~30FPS, which is not desired
-    //
-    // Basically, this whole loop must be reworked at some point
     while (m_window->isOpen())
     {
         elapsedTime = (currentTime = glfwGetTime()) - lastTime;
@@ -63,10 +57,11 @@ void Application::run()
         renderAccumulator += elapsedTime;
         while (renderAccumulator >= renderTimeStep)
         {
-            m_renderer->begin(m_sceneManager->currentScene());
-            m_debugWindow->draw();
+            m_sceneManager->currentScene()->draw();
             renderAccumulator -= renderTimeStep;
         }
+
+        m_debugWindow->draw();
 
         m_window->swapBuffers();
         m_window->pollEvents();
