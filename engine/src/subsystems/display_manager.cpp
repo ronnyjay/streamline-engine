@@ -22,14 +22,14 @@ DisplayManager::DisplayManager()
 
 Monitor *const DisplayManager::getCurrentMonitor() const
 {
-    auto [xpos, ypos] = Window::getInstance().getPositionInScreen();
+    auto [windowX, windowY] = Window::getInstance().getPositionInScreen();
 
     for (size_t i = 0; i < m_monitors.size(); i++)
     {
         std::unique_ptr<Monitor> const &monitor = m_monitors[i];
 
-        bool overlapX = xpos >= monitor->positionX && xpos < monitor->positionX + monitor->width;
-        bool overlapY = ypos >= monitor->positionY && ypos < monitor->positionY + monitor->height;
+        bool overlapX = windowX >= monitor->positionX && windowX < monitor->positionX + monitor->width;
+        bool overlapY = windowY >= monitor->positionY && windowY < monitor->positionY + monitor->height;
 
         if (overlapX && overlapY)
         {
@@ -37,5 +37,5 @@ Monitor *const DisplayManager::getCurrentMonitor() const
         }
     }
 
-    return nullptr;
+    STREAMLINE_ASSERT(false, "Valid display not found");
 }

@@ -19,10 +19,12 @@ struct Monitor
     {
         title = glfwGetMonitorName(monitor);
 
-        glfwGetMonitorWorkarea(monitor, &positionX, &positionY, &width, &height);
+        glfwGetMonitorPos(monitor, &positionX, &positionY);
         glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
 
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+        width                   = mode->width;
+        height                  = mode->height;
 
         int                count;
         const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);

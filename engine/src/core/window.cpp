@@ -138,23 +138,26 @@ void Window::resize(int x, int y)
 
 void Window::setWindowMode(WindowMode mode)
 {
-    // clang-format off
-    auto [windowX, windowY] = getPositionInScreen();
+    auto [windowX, windowY]          = getPositionInScreen();
     auto [windowWidth, windowHeight] = getSizeInScreen();
 
-    GLFWmonitor  *monitor   = nullptr;
+    GLFWmonitor  *monitor            = nullptr;
     int           count;
-    GLFWmonitor **monitors  = glfwGetMonitors(&count);
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
 
     int           monitorX, monitorY;
     int           monitorWidth, monitorHeight;
 
     for (int i = 0; i < count; i++)
     {
-        glfwGetMonitorWorkarea(monitors[i], &monitorX, &monitorY, &monitorWidth, &monitorHeight);
+        glfwGetMonitorPos(monitors[i], &monitorX, &monitorY);
 
-        bool overlapX = (windowX >= monitorX && windowX < monitorX + monitorWidth);
-        bool overlapY = (windowY >= monitorY && windowY < monitorY + monitorHeight);
+        const GLFWvidmode *mode = glfwGetVideoMode(monitors[i]);
+        monitorWidth            = mode->width;
+        monitorHeight           = mode->height;
+
+        bool overlapX           = (windowX >= monitorX && windowX < monitorX + monitorWidth);
+        bool overlapY           = (windowY >= monitorY && windowY < monitorY + monitorHeight);
 
         if (overlapX && overlapY)
         {
@@ -162,12 +165,8 @@ void Window::setWindowMode(WindowMode mode)
             break;
         }
     }
-    // clang-format on
 
-    if (!monitor)
-    {
-        return;
-    }
+    STREAMLINE_ASSERT(monitor != nullptr, "Valid display not found");
 
     uint32_t nextWindowX = 0;
     uint32_t nextWindowY = 0;
