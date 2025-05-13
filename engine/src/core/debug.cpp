@@ -1,9 +1,9 @@
 #include "core/debug.hpp"
 #include "core/application.hpp"
-#include "core/renderer.hpp"
 #include "core/resolution.hpp"
 #include "core/settings.hpp"
 #include "core/window.hpp"
+#include "renderer/renderer.hpp"
 #include "subsystems/display_manager.hpp"
 
 #include <cstddef>

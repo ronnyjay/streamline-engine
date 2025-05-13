@@ -1,8 +1,7 @@
 #include "core/settings.hpp"
 
-#include "core/renderer.hpp"
 #include "core/window.hpp"
-
+#include "renderer/renderer.hpp"
 #include "subsystems/display_manager.hpp"
 
 using namespace engine;

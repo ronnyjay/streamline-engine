@@ -1,11 +1,12 @@
 #pragma once
 
 #include "core/debug.hpp"                  // IWYU pragma: keep
-#include "core/event.hpp"
-#include "core/renderer.hpp"               // IWYU pragma: keep
-#include "core/settings.hpp"
+#include "core/event.hpp"                  // IWYU pragma: keep
+#include "core/settings.hpp"               // IWYU pragma: keep
 #include "core/singleton.hpp"              // IWYU pragma: keep
 #include "core/window.hpp"                 // IWYU pragma: keep
+
+#include "renderer/renderer.hpp"           // IWYU pragma: keep
 
 #include "subsystems/display_manager.hpp"  // IWYU pragma: keep
 #include "subsystems/input_manager.hpp"    // IWYU pragma: keep

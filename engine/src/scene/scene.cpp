@@ -1,7 +1,5 @@
 #include "scene/scene.hpp"
-#include "core/renderer.hpp"
-#include "scene/components/transform.hpp"
-#include <assimp/types.h>
+#include "renderer/renderer.hpp"
 
 using namespace engine;
 

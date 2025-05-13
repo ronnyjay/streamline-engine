@@ -1,7 +1,6 @@
-#include "core/renderer.hpp"
-#include "core/window.hpp"
+#include "renderer/renderer.hpp"
 
-#include "scene/scene.hpp"
+#include "core/window.hpp"
 
 using namespace engine;
 

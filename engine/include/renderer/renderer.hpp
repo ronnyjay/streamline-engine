@@ -1,17 +1,16 @@
 #pragma once
 
+#include "renderer/framebuffer.hpp"
+
 #include "core/resolution.hpp"
 #include "core/singleton.hpp"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
-#include "renderer/framebuffer.hpp"
-
 namespace engine
 {
-
-struct Scene;
 
 struct RenderFlags
 {

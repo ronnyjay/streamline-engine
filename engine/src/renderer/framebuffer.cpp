@@ -1,5 +1,5 @@
 #include "renderer/framebuffer.hpp"
-#include "core/renderer.hpp"
+#include "renderer/renderer.hpp"
 #include "renderer/shader.hpp"
 
 #include "core/logger.hpp"
