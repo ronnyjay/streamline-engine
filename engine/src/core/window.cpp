@@ -133,6 +133,12 @@ void Window::moveTo(int x, int y)
 
 void Window::resize(int x, int y)
 {
+    // window fullscreen - do not resize
+    if (glfwGetWindowMonitor(m_glfwWindow))
+    {
+        return;
+    }
+
     glfwSetWindowSize(m_glfwWindow, x, y);
 }
 
