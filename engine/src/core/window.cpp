@@ -110,7 +110,7 @@ std::tuple<int, int> Window::getSizeInScreen() const
 {
     int width;
     int height;
-    glfwGetWindowSize(m_glfwWindow, &width, &height);
+    glfwGetFramebufferSize(m_glfwWindow, &width, &height);
 
     return std::make_tuple(width, height);
 }
