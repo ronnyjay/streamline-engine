@@ -15,7 +15,7 @@ namespace engine
 struct RenderFlags
 {
     bool b_showWireframes = false;
-    bool b_showCollisions = false;
+    bool b_showCollisions = true;
 };
 
 class Renderer : public Singleton<Renderer>

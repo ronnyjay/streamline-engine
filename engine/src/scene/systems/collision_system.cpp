@@ -10,8 +10,8 @@ void CollisionSystem::update(double dt)
     {
         auto [collider, transform] = view.get(entity);
 
-        collider.scale(transform.scale);
-        collider.rotate(transform.rotation);
+        // collider.scale(transform.scale);
+        // collider.rotate(transform.rotation);
         collider.translate(transform.translation);
     }
 }

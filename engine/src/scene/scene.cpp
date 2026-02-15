@@ -8,6 +8,7 @@ void Scene::tick(double dt)
     m_playerInputSystem.update(dt);
     m_controllerSystem.update(dt);
     m_collisionSystem.update(dt);
+    m_physicsSystem.update(dt);
     m_followSystem.update(dt);
     m_cameraSystem.update(dt);
 }
@@ -49,19 +50,33 @@ void Scene::draw()
 
     if (Renderer::getInstance().flags.b_showCollisions)
     {
-        auto colliders = m_registry.view<AABB, Transform>();
+        auto cuboids = m_registry.view<Cuboid, Transform>();
 
-        for (const auto &entity : colliders)
+        for (const auto &entity : cuboids)
         {
-            auto [collider, transform] = colliders.get(entity);
+            auto [cuboid, transform] = cuboids.get(entity);
+            m_cuboidRenderer.setData(cuboid);
 
             m_aabbShader.get()->bind();
-
             m_aabbShader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
             m_aabbShader.get()->setMat4("view", activeCamera->getViewMatrix());
 
-            collider.draw();
+            m_cuboidRenderer.draw();
         }
+
+        // auto colliders = m_registry.view<AABB, Transform>();
+
+        // for (const auto &entity : colliders)
+        // {
+        //     auto [collider, transform] = colliders.get(entity);
+
+        //     m_aabbShader.get()->bind();
+
+        //     m_aabbShader.get()->setMat4("projection", activeCamera->getProjectionMatrix());
+        //     m_aabbShader.get()->setMat4("view", activeCamera->getViewMatrix());
+
+        //     collider.draw();
+        // }
     }
 
     Renderer::getInstance().endFrame();

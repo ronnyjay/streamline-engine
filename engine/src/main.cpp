@@ -12,45 +12,38 @@ int main(void)
     auto        e2 = s->create();
     auto        e3 = s->create();
     auto        e4 = s->create();
+    auto        e5 = s->create();
 
     s->emplace<Transform>(e1);
     s->emplace<Transform>(e2);
     s->emplace<Transform>(e3);
     s->emplace<Transform>(e4);
+    s->emplace<Transform>(e5);
 
-    s->emplace<Renderable>(e1, "../assets/objects/backpack/backpack.obj");
-    s->emplace<Renderable>(e4, "../assets/objects/plane/plane.obj");
+    s->emplace<PlayerController>(e1);
+    s->emplace<PlayerInput>(e1);
+    s->emplace<PlayerMove>(e1);
+    s->emplace<PlayerLook>(e1);
 
-    s->emplace<Follow>(e1, e2);
-    s->emplace<Follow>(e3, e2);
+    auto model = app.getResourceManager()->getModel("../assets/objects/cube/cube.obj");
+    auto floor = app.getResourceManager()->getModel("../assets/objects/plane/plane.obj");
 
-    s->emplace<PlayerController>(e2);
-    s->emplace<PlayerInput>(e2);
-    s->emplace<PlayerMove>(e2);
-    s->emplace<PlayerLook>(e2);
+    s->emplace<Renderable>(e2, model);
+    s->emplace<AABB>(e2, model);
+    s->emplace<RigidBody>(e2);
 
-    s->emplace<Camera>(e3);
-    s->emplace<LookAt>(e3, e1);
-    s->emplace<Orbit>(e3);
+    s->emplace<Renderable>(e3, floor);
+    s->emplace<AABB>(e3, model);
+    s->emplace<RigidBody>(e3);
 
-    auto &f1                 = s->get<Follow>(e1);
-    auto &f3                 = s->get<Follow>(e3);
-    auto &c3                 = s->get<Camera>(e3);
+    s->emplace<Cuboid>(e2, 1.0, 1.0, 1.0);
+    s->emplace<Cuboid>(e3, 2.0, 2.0, 2.0);
 
-    f1.b_ignorePitchRotation = true;
-    f1.b_ignoreYawRotation   = true;
-    f1.b_invertPitchRotation = true;
-    f1.b_invertYawRotation   = true;
+    auto &body         = s->get<RigidBody>(e3);
+    body.mass          = 0.0f;
 
-    f1.pitchDamping          = 0.0125f;
-    f1.yawDamping            = 0.0125f;
-
-    f3.b_ignorePitchRotation = false;
-    f3.b_ignoreYawRotation   = false;
-
-    f3.offset                = vec3(0.0f, 2.0f, -5.0f);
-
-    c3.b_isPrimary           = true;
+    auto &camera       = s->emplace<Camera>(e1);
+    camera.b_isPrimary = true;
 
     app.run();
 

@@ -5,6 +5,7 @@
 
 #include "components/aabb.hpp"             // IWYU pragma: keep
 #include "components/camera.hpp"           // IWYU pragma: keep
+#include "components/collider.hpp"         // IWYU pragma: keep
 #include "components/controller.hpp"       // IWYU pragma: keep
 #include "components/follow.hpp"           // IWYU pragma: keep
 #include "components/identifier.hpp"       // IWYU pragma: keep
@@ -15,6 +16,7 @@
 #include "components/player_look.hpp"      // IWYU pragma: keep
 #include "components/player_move.hpp"      // IWYU pragma: keep
 #include "components/renderable.hpp"       // IWYU pragma: keep
+#include "components/rigid_body.hpp"       // IWYU pragma: keep
 #include "components/transform.hpp"        // IWYU pragma: keep
 
 #include "systems/camera_system.hpp"       // IWYU pragma: keep
@@ -22,6 +24,7 @@
 #include "systems/controller_system.hpp"   // IWYU pragma: keep
 #include "systems/follow_system.hpp"       // IWYU pragma: keep
 #include "systems/lighting_system.hpp"     // IWYU pragma: keep
+#include "systems/physics_system.hpp"      // IWYU pragma: keep
 #include "systems/player_input_system.hpp" // IWYU pragma: keep
 
 #include "subsystems/resource_manager.hpp"
@@ -35,6 +38,7 @@ struct Scene
     friend struct PlayerInputSystem;
     friend struct ControllerSystem;
     friend struct CollisionSystem;
+    friend struct PhysicsSystem;
     friend struct LightingSystem;
     friend struct FollowSystem;
     friend struct CameraSystem;
@@ -42,6 +46,7 @@ struct Scene
     Scene()
         : m_cameraSystem(this)
         , m_followSystem(this)
+        , m_physicsSystem(this)
         , m_collisionSystem(this)
         , m_controllerSystem(this)
         , m_playerInputSystem(this)
@@ -83,9 +88,11 @@ struct Scene
     Registry                m_registry;
     CameraSystem            m_cameraSystem;
     FollowSystem            m_followSystem;
+    PhysicsSystem           m_physicsSystem;
     CollisionSystem         m_collisionSystem;
     ControllerSystem        m_controllerSystem;
     PlayerInputSystem       m_playerInputSystem;
+    CuboidRenderer          m_cuboidRenderer;
     std::shared_ptr<Shader> m_shader;
     std::shared_ptr<Shader> m_aabbShader;
 };
